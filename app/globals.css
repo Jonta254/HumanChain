@@ -528,17 +528,30 @@ button {
 
 .story-cover {
   color: #fffdf8;
-  background:
-    linear-gradient(135deg, rgba(22, 31, 34, 0.78), rgba(36, 107, 85, 0.64)),
-    url("https://image.pollinations.ai/prompt/premium%20monthly%20magazine%20cover%20illustration%20pencil%20art%20on%20textured%20ivory%20paper%20for%20a%20global%20human%20story%20diverse%20people%20in%20different%20cities%20connected%20by%20warm%20gold%20threads%20phones%20windows%20train%20repair%20shop%20hospital%20near%20future%20HumanChain%20mood%20graphite%20soft%20shading%20subtle%20gold%20accent%20no%20watermark%20no%20text?width=1200&height=1400&seed=2060&nologo=true");
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(135deg, #1d2b2d, #246b55);
+  overflow: hidden;
 }
 
 .story-cover span {
   color: rgba(255, 253, 248, 0.82);
   font-weight: 800;
   font-size: 0.82rem;
+}
+
+.cover-art {
+  margin-bottom: 14px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.cover-art .paper-art {
+  margin: 0;
+  border-color: rgba(255, 253, 248, 0.22);
+  background: #f7efe2;
+}
+
+.cover-art .paper-art-svg {
+  aspect-ratio: 16 / 9;
 }
 
 .story-pages {
@@ -681,16 +694,80 @@ button {
   box-shadow: 0 12px 28px rgba(62, 48, 31, 0.08);
 }
 
-.story-page img {
+.paper-art {
+  position: relative;
+  width: 100%;
+  margin: 0 0 16px;
+  overflow: hidden;
+  border: 1px solid #ded2bf;
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.9), rgba(238, 226, 207, 0.82)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(74, 66, 56, 0.035) 0,
+      rgba(74, 66, 56, 0.035) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+  filter: saturate(0.92) contrast(1.02);
+}
+
+.paper-art-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(32, 35, 40, 0.05) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 50%, rgba(32, 35, 40, 0.04) 0 1px, transparent 1px);
+  background-size: 13px 17px, 19px 23px;
+  mix-blend-mode: multiply;
+}
+
+.paper-art-svg {
+  display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
-  object-fit: cover;
-  margin-bottom: 16px;
-  border-radius: 18px;
-  border: 1px solid #ded2bf;
-  background: #f4ebdc;
-  filter: saturate(0.82) contrast(1.04);
-  box-shadow: inset 0 0 0 1px rgba(255, 253, 248, 0.45);
+}
+
+.sketch-wash {
+  fill: rgba(255, 250, 241, 0.55);
+}
+
+.sketch-line {
+  fill: none;
+  stroke: #4d514d;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  filter: url("#rough-pencil");
+  opacity: 0.86;
+}
+
+.sketch-line.heavy {
+  stroke-width: 4;
+}
+
+.sketch-fill {
+  fill: rgba(77, 81, 77, 0.18);
+  stroke: #4d514d;
+  stroke-width: 2;
+}
+
+.gold-line {
+  fill: none;
+  stroke: #b98218;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+  opacity: 0.9;
+}
+
+.gold-fill,
+.gold-dot {
+  fill: rgba(185, 130, 24, 0.52);
+  stroke: #8f640f;
+  stroke-width: 2;
 }
 
 .story-page .section-kicker {

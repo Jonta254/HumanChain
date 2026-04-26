@@ -62,151 +62,86 @@ const storyImageByPage: Record<
   number,
   {
     alt: string;
-    url: string;
+    art: StoryArtKind;
   }
 > = {
   1: {
     alt: "Realistic hands from different backgrounds holding small objects that matter",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper close up of human hands from different backgrounds holding small meaningful objects coins photo ticket key soft morning light global human story delicate graphite lines subtle gold accent no text",
-      2041,
-    ),
+    art: "hands",
   },
   2: {
     alt: "Futuristic realistic global map of glowing human threads across cities",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper futuristic global human network seen from above warm gold threads connecting cities and tiny human figures holding phones delicate graphite crosshatching subtle gold accent no text",
-      2042,
-    ),
+    art: "world-thread",
   },
   5: {
     alt: "A phone screen glowing in a quiet break room with a human question open",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper phone glowing on a quiet break room table with coffee and folded uniform nearby emotional human question mood delicate graphite shading subtle gold light no readable text",
-      2050,
-    ),
+    art: "phone-table",
   },
   9: {
     alt: "A tired nurse typing an honest sentence into her phone during a late shift",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper tired nurse in a quiet hospital corridor typing an honest message into her phone during a late shift emotional human vulnerability graphite lines subtle blue gray wash no text",
-      2051,
-    ),
+    art: "nurse",
   },
   10: {
     alt: "A small golden thread leaving a phone and joining a world map",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper small golden thread flowing from a phone screen into a subtle hand drawn world map made of human lights warm hopeful no text",
-      2052,
-    ),
+    art: "phone-thread",
   },
   14: {
     alt: "An elderly woman at a kitchen table remembering names",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper elderly woman sitting at a kitchen table with old photographs and a cup of tea remembering names warm lamp emotional global human story no text",
-      2053,
-    ),
+    art: "memory-table",
   },
   18: {
     alt: "A young nurse on a train reading answers on her phone at dawn",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper young nurse on early morning train reading a phone screen soft dawn city window global human story subtle blue gray shading no text",
-      2043,
-    ),
+    art: "train",
   },
   27: {
     alt: "A repair shop counter with a notebook, radio parts, and an unanswered phone",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper small repair shop counter with open radio parts notebook pencil and unanswered phone warm rain outside emotional father story detailed graphite no text",
-      2054,
-    ),
+    art: "repair",
   },
   34: {
     alt: "A fisherman repairing a net beside cold water at sunrise",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper older fisherman repairing a net beside cold water at sunrise quiet hands human dignity global story delicate graphite no text",
-      2044,
-    ),
+    art: "net",
   },
   43: {
     alt: "A private anonymous question floating above a city at night",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper anonymous verified human question represented as a soft glowing blank card above a rainy city at night private emotional subtle gold accent no readable text",
-      2055,
-    ),
+    art: "anonymous",
   },
   51: {
     alt: "A small apartment table with phones, tea, and handwritten notes from different languages",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper small apartment table with phones tea handwritten notes in many languages warm lamp global human connection delicate graphite no readable text",
-      2045,
-    ),
+    art: "notes",
   },
   64: {
     alt: "A caregiver placing an old ocean photograph beside a bed",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper caregiver placing an old ocean photograph beside an elderly parent's bed soft evening light memory tenderness no text",
-      2056,
-    ),
+    art: "bed-photo",
   },
   72: {
     alt: "A global wall of small portraits and voice waves glowing softly",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper futuristic installation wall of small human portraits and voice waveforms glowing softly museum of humanity graphite with subtle gold accents no text",
-      2046,
-    ),
+    art: "voice-wall",
   },
   81: {
     alt: "Two distant countries represented by windows lit in cold and warm cities",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper two distant cities one cold quiet one warm crowded connected by subtle golden thread lit apartment windows loneliness room no text",
-      2057,
-    ),
+    art: "windows",
   },
   93: {
     alt: "People in different countries looking at the same sunrise through windows",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper split scene people in different countries looking at the same sunrise through windows warm human hope global graphite line art no text",
-      2047,
-    ),
+    art: "sunrise-windows",
   },
   106: {
     alt: "A future technology question represented by humans around a soft transparent screen",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper diverse humans standing around a soft transparent screen discussing future technology warm ethical human mood graphite and subtle gold no readable text",
-      2058,
-    ),
+    art: "future-screen",
   },
   118: {
     alt: "A quiet futuristic public square where strangers read human messages",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper near future public square at dusk diverse strangers reading soft glowing human messages on transparent screens calm premium no text",
-      2048,
-    ),
+    art: "public-square",
   },
   129: {
     alt: "A phone with one percent battery glowing in a dark hospital room",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper phone with very low battery glowing beside a hospital bed in dark room generator light emotional quiet no readable text",
-      2059,
-    ),
+    art: "low-battery",
   },
   142: {
     alt: "A beautiful realistic global chain of light crossing oceans and cities",
-    url: storyArtUrl(
-      "premium pencil sketch on warm paper earth from high altitude with subtle warm threads of light crossing oceans and cities human chain hopeful graphite with gold accent no text",
-      2049,
-    ),
+    art: "earth-chain",
   },
 };
-
-function storyArtUrl(prompt: string, seed: number) {
-  const artDirection =
-    "consistent editorial illustration style, pencil art on textured ivory paper, hand drawn graphite, soft shading, premium monthly magazine, no watermark, no text";
-  const encodedPrompt = encodeURIComponent(`${prompt}, ${artDirection}`);
-
-  return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=900&seed=${seed}&nologo=true`;
-}
 
 const globalStoryChapters = [
   [
@@ -413,6 +348,27 @@ const wldActions = [
 ];
 
 type Tab = "home" | "ask" | "chains" | "stories" | "me";
+
+type StoryArtKind =
+  | "hands"
+  | "world-thread"
+  | "phone-table"
+  | "nurse"
+  | "phone-thread"
+  | "memory-table"
+  | "train"
+  | "repair"
+  | "net"
+  | "anonymous"
+  | "notes"
+  | "bed-photo"
+  | "voice-wall"
+  | "windows"
+  | "sunrise-windows"
+  | "future-screen"
+  | "public-square"
+  | "low-battery"
+  | "earth-chain";
 
 type Toast = {
   title: string;
@@ -802,7 +758,7 @@ function StoriesView({
         </section>
         <article className="story-page">
           {current.image ? (
-            <img alt={current.image.alt} src={current.image.url} />
+            <StoryPaperArt alt={current.image.alt} kind={current.image.art} />
           ) : null}
           <span className="section-kicker">The Question That Crossed The World</span>
           <p>{current.text}</p>
@@ -836,6 +792,7 @@ function StoriesView({
     <div className="screen">
       <TopBar title="Human Story" subtitle="A monthly story about being human." />
       <section className="story-cover">
+        <StoryCoverArt />
         <span>April Human Story</span>
         <h2>The Question That Crossed The World</h2>
         <p>
@@ -899,6 +856,237 @@ function StoriesView({
       </section>
     </div>
   );
+}
+
+function StoryCoverArt() {
+  return (
+    <div aria-hidden="true" className="cover-art">
+      <StoryPaperArt alt="Global HumanChain cover art" kind="earth-chain" />
+    </div>
+  );
+}
+
+function StoryPaperArt({
+  alt,
+  kind,
+}: {
+  alt: string;
+  kind: StoryArtKind;
+}) {
+  return (
+    <figure aria-label={alt} className={`paper-art paper-art-${kind}`} role="img">
+      <div className="paper-art-grain" />
+      <svg
+        aria-hidden="true"
+        className="paper-art-svg"
+        viewBox="0 0 360 230"
+      >
+        <defs>
+          <filter id="rough-pencil">
+            <feTurbulence
+              baseFrequency="0.75"
+              numOctaves="2"
+              result="noise"
+              seed="7"
+            />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.55" />
+          </filter>
+        </defs>
+        <rect className="sketch-wash" height="230" rx="18" width="360" />
+        <StoryArtScene kind={kind} />
+      </svg>
+    </figure>
+  );
+}
+
+function StoryArtScene({ kind }: { kind: StoryArtKind }) {
+  const nodes = {
+    hands: (
+      <>
+        <path className="sketch-line heavy" d="M74 128c38-30 77-31 110-8 19 13 34 14 53 7 21-8 39-3 52 10" />
+        <path className="sketch-line" d="M64 151c42 21 85 23 128 9 31-10 68-7 100 9" />
+        <ellipse className="gold-fill" cx="165" cy="127" rx="13" ry="7" />
+        <ellipse className="gold-fill" cx="194" cy="134" rx="11" ry="6" />
+        <ellipse className="sketch-fill" cx="142" cy="139" rx="10" ry="6" />
+        <path className="sketch-line" d="M96 98c22 3 45 9 62 22M268 103c-22 3-45 10-62 24" />
+      </>
+    ),
+    "world-thread": (
+      <>
+        <ellipse className="sketch-line heavy" cx="180" cy="116" rx="104" ry="61" />
+        <path className="sketch-line" d="M85 103c56-23 120-24 190 0M88 130c50 25 121 25 185 0M180 56c-23 42-24 83 0 122M180 56c24 43 24 84 0 122" />
+        <path className="gold-line" d="M78 147c46-42 85-17 113-50 37-43 71-4 93-30" />
+        <circle className="gold-dot" cx="78" cy="147" r="5" />
+        <circle className="gold-dot" cx="191" cy="97" r="5" />
+        <circle className="gold-dot" cx="284" cy="67" r="5" />
+        <path className="sketch-line" d="M122 83l21 8 18-4 14 13M218 139l22-12 26 9" />
+      </>
+    ),
+    "phone-table": (
+      <>
+        <path className="sketch-line heavy" d="M64 163h232M78 163l28-76h150l28 76" />
+        <rect className="sketch-line" height="70" rx="8" width="43" x="157" y="81" />
+        <path className="gold-line" d="M166 105h25M166 119h18" />
+        <path className="sketch-line" d="M100 126h42M106 112c10-8 21-8 31 0M236 121c20 0 30 9 26 22-5 15-29 14-35 2" />
+      </>
+    ),
+    nurse: (
+      <>
+        <path className="sketch-line heavy" d="M171 77c-31 8-47 36-39 76M189 78c31 8 47 37 39 76" />
+        <circle className="sketch-line" cx="180" cy="65" r="25" />
+        <path className="sketch-line" d="M154 111h52M161 99v24M180 90v58" />
+        <rect className="sketch-line" height="43" rx="5" width="30" x="197" y="129" />
+        <path className="gold-line" d="M202 144h19M202 154h14" />
+        <path className="sketch-line" d="M62 181h236M70 126h54M236 126h54" />
+      </>
+    ),
+    "phone-thread": (
+      <>
+        <rect className="sketch-line heavy" height="88" rx="12" width="54" x="70" y="83" />
+        <path className="gold-line" d="M122 116c58-50 111 35 166-21" />
+        <circle className="gold-dot" cx="122" cy="116" r="5" />
+        <circle className="gold-dot" cx="197" cy="124" r="5" />
+        <circle className="gold-dot" cx="288" cy="95" r="5" />
+        <path className="sketch-line" d="M181 70c44 9 78 39 88 79M151 153c34 22 82 26 124 5" />
+      </>
+    ),
+    "memory-table": (
+      <>
+        <path className="sketch-line heavy" d="M71 170h220M111 170l23-88h92l26 88" />
+        <circle className="sketch-line" cx="181" cy="76" r="24" />
+        <path className="sketch-line" d="M142 121h42v30h-42zM204 113h42v34h-42zM153 136l10-8 10 8M216 130l8-7 11 11" />
+        <path className="gold-line" d="M169 104c15-12 33-12 50 0" />
+      </>
+    ),
+    train: (
+      <>
+        <path className="sketch-line heavy" d="M48 160h264M78 66h204v94H78z" />
+        <path className="sketch-line" d="M108 86h48v44h-48zM174 86h80v44h-80zM95 160l-31 38M264 160l31 38" />
+        <circle className="sketch-line" cx="145" cy="145" r="16" />
+        <rect className="sketch-line" height="29" rx="4" width="20" x="174" y="139" />
+        <path className="gold-line" d="M178 151h12" />
+      </>
+    ),
+    repair: (
+      <>
+        <path className="sketch-line heavy" d="M65 164h236M92 164l21-80h136l24 80" />
+        <circle className="sketch-line" cx="155" cy="123" r="24" />
+        <path className="sketch-line" d="M155 99v48M131 123h48M208 109h45M208 124h37M211 139h29" />
+        <rect className="sketch-line" height="37" rx="4" width="29" x="82" y="111" />
+        <path className="gold-line" d="M124 87l-30 59M252 90l-50 57" />
+      </>
+    ),
+    net: (
+      <>
+        <path className="sketch-line heavy" d="M55 166c70-34 171-34 250 0" />
+        <path className="sketch-line" d="M84 79c37 61 93 92 182 83M279 82c-44 57-105 85-190 82" />
+        {Array.from({ length: 7 }).map((_, index) => (
+          <path
+            className="sketch-line"
+            d={`M${91 + index * 26} 83c12 38 12 65 0 86`}
+            key={index}
+          />
+        ))}
+        <circle className="gold-dot" cx="176" cy="135" r="5" />
+      </>
+    ),
+    anonymous: (
+      <>
+        <path className="sketch-line" d="M65 170c62-28 162-28 230 0M81 151h198" />
+        <rect className="sketch-line heavy" height="67" rx="14" width="146" x="107" y="62" />
+        <path className="gold-line" d="M136 94h88M149 109h61" />
+        <path className="sketch-line" d="M92 142l-11-31M269 142l11-31M124 143l7-24M236 143l-7-24" />
+      </>
+    ),
+    notes: (
+      <>
+        <path className="sketch-line heavy" d="M57 165h250M86 165l34-86h128l31 86" />
+        <rect className="sketch-line" height="48" rx="5" width="52" x="109" y="99" />
+        <rect className="sketch-line" height="44" rx="5" width="39" x="179" y="93" />
+        <path className="sketch-line" d="M119 113h29M119 126h21M187 106h20M187 119h16" />
+        <path className="gold-line" d="M223 125c18-15 34-12 44 4" />
+      </>
+    ),
+    "bed-photo": (
+      <>
+        <path className="sketch-line heavy" d="M54 158h252M73 126h99v32H73zM172 103h111v55H172z" />
+        <rect className="sketch-line" height="42" rx="4" width="57" x="201" y="74" />
+        <path className="sketch-line" d="M211 99l12-11 10 9 8-7 9 10" />
+        <path className="gold-line" d="M137 134c25-22 56-26 89-10" />
+      </>
+    ),
+    "voice-wall": (
+      <>
+        <path className="sketch-line heavy" d="M62 61h236v122H62z" />
+        {Array.from({ length: 8 }).map((_, index) => (
+          <circle
+            className="sketch-line"
+            cx={96 + (index % 4) * 55}
+            cy={91 + Math.floor(index / 4) * 49}
+            key={index}
+            r="15"
+          />
+        ))}
+        <path className="gold-line" d="M82 166c20-25 38 21 56-6s35 19 53-8 38 14 62-4" />
+      </>
+    ),
+    windows: (
+      <>
+        <path className="sketch-line heavy" d="M58 75h100v103H58zM202 75h100v103H202z" />
+        <path className="sketch-line" d="M108 75v103M58 126h100M252 75v103M202 126h100" />
+        <path className="gold-line" d="M159 125c16-18 28-18 42 0" />
+        <circle className="gold-dot" cx="108" cy="126" r="4" />
+        <circle className="gold-dot" cx="252" cy="126" r="4" />
+      </>
+    ),
+    "sunrise-windows": (
+      <>
+        <path className="sketch-line heavy" d="M52 166h256M70 77h70v89H70zM146 64h68v102h-68zM220 77h70v89h-70z" />
+        <path className="gold-line" d="M100 119c35-41 117-41 160 0" />
+        <circle className="gold-dot" cx="180" cy="108" r="9" />
+        <path className="sketch-line" d="M90 148c5-16 23-16 29 0M167 148c7-19 26-19 33 0M241 148c5-16 23-16 29 0" />
+      </>
+    ),
+    "future-screen": (
+      <>
+        <rect className="sketch-line heavy" height="77" rx="14" width="147" x="107" y="63" />
+        <path className="gold-line" d="M132 94h99M148 111h67" />
+        <circle className="sketch-line" cx="77" cy="158" r="17" />
+        <circle className="sketch-line" cx="284" cy="158" r="17" />
+        <path className="sketch-line" d="M94 158h63M205 158h62M180 140v45" />
+      </>
+    ),
+    "public-square": (
+      <>
+        <path className="sketch-line heavy" d="M49 168h262M92 168l23-91h130l24 91" />
+        <rect className="sketch-line" height="52" rx="8" width="39" x="143" y="91" />
+        <rect className="sketch-line" height="52" rx="8" width="39" x="199" y="91" />
+        <path className="gold-line" d="M151 114h22M207 114h22" />
+        <circle className="sketch-line" cx="101" cy="151" r="13" />
+        <circle className="sketch-line" cx="279" cy="151" r="13" />
+      </>
+    ),
+    "low-battery": (
+      <>
+        <path className="sketch-line heavy" d="M55 158h250M76 121h110v37H76zM186 98h90v60h-90z" />
+        <rect className="sketch-line" height="48" rx="7" width="30" x="152" y="72" />
+        <path className="gold-line" d="M158 109h18" />
+        <path className="sketch-line" d="M214 124h31M214 138h22" />
+      </>
+    ),
+    "earth-chain": (
+      <>
+        <circle className="sketch-line heavy" cx="180" cy="116" r="78" />
+        <path className="sketch-line" d="M111 93c42-15 83-15 138 2M108 138c42 19 92 21 146 0M180 38c-23 51-23 104 0 156M180 38c24 51 24 104 0 156" />
+        <path className="gold-line" d="M90 128c44-33 68 16 102-27 31-38 54 12 82-12" />
+        <circle className="gold-dot" cx="90" cy="128" r="5" />
+        <circle className="gold-dot" cx="192" cy="101" r="5" />
+        <circle className="gold-dot" cx="274" cy="89" r="5" />
+      </>
+    ),
+  } satisfies Record<StoryArtKind, React.ReactNode>;
+
+  return nodes[kind];
 }
 
 function MeView({
