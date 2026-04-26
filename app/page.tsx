@@ -67,41 +67,144 @@ const storyImageByPage: Record<
 > = {
   1: {
     alt: "Realistic hands from different backgrounds holding small objects that matter",
-    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20documentary%20photo%20close%20up%20of%20human%20hands%20from%20different%20backgrounds%20holding%20small%20meaningful%20objects%20coins%20photo%20ticket%20key%20soft%20morning%20light%20global%20human%20story%20no%20text?width=1200&height=900&seed=2041&nologo=true",
+    url: storyArtUrl(
+      "realistic cinematic art close up of human hands from different backgrounds holding small meaningful objects coins photo ticket key soft morning light global human story no text",
+      2041,
+    ),
   },
   2: {
     alt: "Futuristic realistic global map of glowing human threads across cities",
-    url: "https://image.pollinations.ai/prompt/realistic%20futuristic%20global%20human%20network%20seen%20from%20above%20warm%20gold%20threads%20connecting%20cities%20and%20people%20holding%20phones%20premium%20cinematic%20human%20technology%20no%20text?width=1200&height=900&seed=2042&nologo=true",
+    url: storyArtUrl(
+      "realistic futuristic global human network seen from above warm gold threads connecting cities and people holding phones premium cinematic human technology no text",
+      2042,
+    ),
+  },
+  5: {
+    alt: "A phone screen glowing in a quiet break room with a human question open",
+    url: storyArtUrl(
+      "cinematic realistic art of a phone glowing on a quiet break room table with coffee and folded uniform nearby emotional human question mood no readable text",
+      2050,
+    ),
+  },
+  9: {
+    alt: "A tired nurse typing an honest sentence into her phone during a late shift",
+    url: storyArtUrl(
+      "realistic cinematic art of a tired nurse in a hospital corridor typing an honest message into her phone during a late shift soft blue light emotional human vulnerability no text",
+      2051,
+    ),
+  },
+  10: {
+    alt: "A small golden thread leaving a phone and joining a world map",
+    url: storyArtUrl(
+      "near future cinematic art small golden thread flowing from a phone screen into a subtle world map made of human lights warm premium hopeful no text",
+      2052,
+    ),
+  },
+  14: {
+    alt: "An elderly woman at a kitchen table remembering names",
+    url: storyArtUrl(
+      "realistic cinematic art elderly woman sitting at a kitchen table with old photographs and a cup of tea remembering names warm lamp emotional global human story no text",
+      2053,
+    ),
   },
   18: {
     alt: "A young nurse on a train reading answers on her phone at dawn",
-    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20photo%20young%20nurse%20on%20early%20morning%20train%20reading%20a%20phone%20screen%20soft%20blue%20dawn%20city%20window%20global%20human%20story%20no%20text?width=1200&height=900&seed=2043&nologo=true",
+    url: storyArtUrl(
+      "realistic cinematic art young nurse on early morning train reading a phone screen soft blue dawn city window global human story no text",
+      2043,
+    ),
+  },
+  27: {
+    alt: "A repair shop counter with a notebook, radio parts, and an unanswered phone",
+    url: storyArtUrl(
+      "realistic cinematic art small repair shop counter with open radio parts notebook pencil and unanswered phone warm rain outside emotional father story no text",
+      2054,
+    ),
   },
   34: {
     alt: "A fisherman repairing a net beside cold water at sunrise",
-    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20photo%20older%20fisherman%20repairing%20a%20net%20beside%20cold%20water%20at%20sunrise%20quiet%20hands%20human%20dignity%20global%20story%20no%20text?width=1200&height=900&seed=2044&nologo=true",
+    url: storyArtUrl(
+      "realistic cinematic art older fisherman repairing a net beside cold water at sunrise quiet hands human dignity global story no text",
+      2044,
+    ),
+  },
+  43: {
+    alt: "A private anonymous question floating above a city at night",
+    url: storyArtUrl(
+      "cinematic near future art anonymous verified human question represented as a soft glowing card above a rainy city at night private emotional no readable text",
+      2055,
+    ),
   },
   51: {
     alt: "A small apartment table with phones, tea, and handwritten notes from different languages",
-    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20photo%20small%20apartment%20table%20with%20phones%20tea%20handwritten%20notes%20in%20many%20languages%20warm%20lamp%20global%20human%20connection%20no%20text?width=1200&height=900&seed=2045&nologo=true",
+    url: storyArtUrl(
+      "realistic cinematic art small apartment table with phones tea handwritten notes in many languages warm lamp global human connection no readable text",
+      2045,
+    ),
+  },
+  64: {
+    alt: "A caregiver placing an old ocean photograph beside a bed",
+    url: storyArtUrl(
+      "realistic cinematic art caregiver placing an old ocean photograph beside an elderly parent's bed soft evening light memory tenderness no text",
+      2056,
+    ),
   },
   72: {
     alt: "A global wall of small portraits and voice waves glowing softly",
-    url: "https://image.pollinations.ai/prompt/realistic%20futuristic%20installation%20wall%20of%20small%20human%20portraits%20and%20voice%20waveforms%20glowing%20softly%20museum%20of%20humanity%20premium%20warm%20no%20text?width=1200&height=900&seed=2046&nologo=true",
+    url: storyArtUrl(
+      "realistic futuristic installation wall of small human portraits and voice waveforms glowing softly museum of humanity premium warm no text",
+      2046,
+    ),
+  },
+  81: {
+    alt: "Two distant countries represented by windows lit in cold and warm cities",
+    url: storyArtUrl(
+      "cinematic realistic art two distant cities one cold quiet one warm crowded connected by subtle golden thread lit apartment windows loneliness room no text",
+      2057,
+    ),
   },
   93: {
     alt: "People in different countries looking at the same sunrise through windows",
-    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20split%20scene%20people%20in%20different%20countries%20looking%20at%20the%20same%20sunrise%20through%20windows%20warm%20human%20hope%20global%20no%20text?width=1200&height=900&seed=2047&nologo=true",
+    url: storyArtUrl(
+      "realistic cinematic split scene people in different countries looking at the same sunrise through windows warm human hope global no text",
+      2047,
+    ),
+  },
+  106: {
+    alt: "A future technology question represented by humans around a soft transparent screen",
+    url: storyArtUrl(
+      "realistic near future cinematic art diverse humans standing around a soft transparent screen discussing future technology warm ethical human mood no readable text",
+      2058,
+    ),
   },
   118: {
     alt: "A quiet futuristic public square where strangers read human messages",
-    url: "https://image.pollinations.ai/prompt/realistic%20near%20future%20public%20square%20at%20dusk%20diverse%20strangers%20reading%20soft%20glowing%20human%20messages%20on%20transparent%20screens%20calm%20premium%20no%20text?width=1200&height=900&seed=2048&nologo=true",
+    url: storyArtUrl(
+      "realistic near future public square at dusk diverse strangers reading soft glowing human messages on transparent screens calm premium no text",
+      2048,
+    ),
+  },
+  129: {
+    alt: "A phone with one percent battery glowing in a dark hospital room",
+    url: storyArtUrl(
+      "realistic cinematic art phone with very low battery glowing beside a hospital bed in dark room generator light emotional quiet no readable text",
+      2059,
+    ),
   },
   142: {
     alt: "A beautiful realistic global chain of light crossing oceans and cities",
-    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20earth%20from%20high%20altitude%20with%20subtle%20warm%20threads%20of%20light%20crossing%20oceans%20and%20cities%20human%20chain%20hopeful%20premium%20no%20text?width=1200&height=900&seed=2049&nologo=true",
+    url: storyArtUrl(
+      "realistic cinematic earth from high altitude with subtle warm threads of light crossing oceans and cities human chain hopeful premium no text",
+      2049,
+    ),
   },
 };
+
+function storyArtUrl(prompt: string, seed: number) {
+  const encodedPrompt = encodeURIComponent(prompt);
+
+  return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=900&seed=${seed}&nologo=true`;
+}
 
 const globalStoryChapters = [
   [

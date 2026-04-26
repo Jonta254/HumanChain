@@ -530,7 +530,7 @@ button {
   color: #fffdf8;
   background:
     linear-gradient(135deg, rgba(18, 50, 39, 0.88), rgba(32, 35, 40, 0.7)),
-    url("https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1000&q=80");
+    url("https://image.pollinations.ai/prompt/realistic%20cinematic%20cover%20art%20for%20a%20global%20human%20story%20diverse%20people%20in%20different%20cities%20connected%20by%20warm%20gold%20threads%20phones%20windows%20train%20repair%20shop%20hospital%20near%20future%20premium%20no%20text?width=1200&height=1400&seed=2060&nologo=true");
   background-size: cover;
   background-position: center;
 }
