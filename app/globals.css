@@ -544,14 +544,48 @@ button {
   overflow: hidden;
 }
 
-.cover-art .paper-art {
-  margin: 0;
-  border-color: rgba(255, 253, 248, 0.22);
-  background: #f7efe2;
+.cover-photo {
+  position: relative;
+  min-height: 238px;
+  border: 1px solid rgba(255, 253, 248, 0.24);
+  background:
+    linear-gradient(180deg, rgba(14, 25, 24, 0.08), rgba(14, 25, 24, 0.44)),
+    url("https://image.pollinations.ai/prompt/photorealistic%20cinematic%20magazine%20cover%20for%20a%20human%20life%20story%20a%20single%20person%20standing%20inside%20a%20slightly%20open%20blue%20door%20holding%20a%20glowing%20phone%20warm%20gold%20light%20under%20the%20door%20small%20key%20train%20ticket%20and%20cracked%20cup%20on%20a%20nearby%20table%20emotional%20premium%20realistic%20shallow%20depth%20of%20field%20no%20text%20no%20watermark?width=1200&height=900&seed=4081&nologo=true");
+  background-position: center;
+  background-size: cover;
+  box-shadow: inset 0 -80px 100px rgba(13, 28, 26, 0.32);
 }
 
-.cover-art .paper-art-svg {
-  aspect-ratio: 16 / 9;
+.cover-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 26%, rgba(255, 231, 173, 0.26), transparent 28%),
+    linear-gradient(135deg, rgba(18, 50, 39, 0.1), rgba(32, 35, 40, 0.2));
+}
+
+.cover-photo-mark {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.84);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.cover-photo-mark span {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--gold);
+  border-left-color: transparent;
+  border-radius: 999px;
+  transform: rotate(-24deg);
 }
 
 .story-pages {

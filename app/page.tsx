@@ -927,8 +927,14 @@ function StoriesView({
 
 function StoryCoverArt() {
   return (
-    <div aria-hidden="true" className="cover-art">
-      <StoryPaperArt alt="Global HumanChain cover art" kind="cover-symbol" />
+    <div
+      aria-label="Photorealistic Human Story cover showing a person at a blue door holding a phone"
+      className="cover-art cover-photo"
+      role="img"
+    >
+      <div className="cover-photo-mark">
+        <span />
+      </div>
     </div>
   );
 }
