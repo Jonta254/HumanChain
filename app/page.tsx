@@ -77,6 +77,10 @@ const storyImageByPage: Record<
     alt: "A phone screen glowing in a quiet break room with a human question open",
     art: "phone-table",
   },
+  7: {
+    alt: "Asha sitting alone in a stairwell with ink on her fingers",
+    art: "asha-stairwell",
+  },
   9: {
     alt: "A tired nurse typing an honest sentence into her phone during a late shift",
     art: "nurse",
@@ -88,6 +92,10 @@ const storyImageByPage: Record<
   14: {
     alt: "An elderly woman at a kitchen table remembering names",
     art: "memory-table",
+  },
+  22: {
+    alt: "A dancer sending a kind reply across the world",
+    art: "dancer-reply",
   },
   18: {
     alt: "A young nurse on a train reading answers on her phone at dawn",
@@ -101,9 +109,17 @@ const storyImageByPage: Record<
     alt: "A fisherman repairing a net beside cold water at sunrise",
     art: "net",
   },
+  37: {
+    alt: "Asha walking without headphones beside a cracked wall and small tree",
+    art: "walking-tree",
+  },
   43: {
     alt: "A private anonymous question floating above a city at night",
     art: "anonymous",
+  },
+  48: {
+    alt: "Tomas calling his son outside a repair shop in the rain",
+    art: "tomas-call",
   },
   51: {
     alt: "A small apartment table with phones, tea, and handwritten notes from different languages",
@@ -113,9 +129,17 @@ const storyImageByPage: Record<
     alt: "A caregiver placing an old ocean photograph beside a bed",
     art: "bed-photo",
   },
+  67: {
+    alt: "Kenji asking his father about the sea",
+    art: "kenji-bed",
+  },
   72: {
     alt: "A global wall of small portraits and voice waves glowing softly",
     art: "voice-wall",
+  },
+  76: {
+    alt: "Mila returning to HumanChain after a broken streak",
+    art: "broken-streak",
   },
   81: {
     alt: "Two distant countries represented by windows lit in cold and warm cities",
@@ -124,6 +148,10 @@ const storyImageByPage: Record<
   93: {
     alt: "People in different countries looking at the same sunrise through windows",
     art: "sunrise-windows",
+  },
+  101: {
+    alt: "Four strangers seeing the same monthly story page",
+    art: "four-readers",
   },
   106: {
     alt: "A future technology question represented by humans around a soft transparent screen",
@@ -137,9 +165,17 @@ const storyImageByPage: Record<
     alt: "A phone with one percent battery glowing in a dark hospital room",
     art: "low-battery",
   },
+  136: {
+    alt: "The final Human Verdict as a mirror assembled from many rooms",
+    art: "verdict-mirror",
+  },
   142: {
     alt: "A beautiful realistic global chain of light crossing oceans and cities",
     art: "earth-chain",
+  },
+  149: {
+    alt: "A reader adding their own link to the global chain",
+    art: "add-link",
   },
 };
 
@@ -353,22 +389,31 @@ type StoryArtKind =
   | "hands"
   | "world-thread"
   | "phone-table"
+  | "asha-stairwell"
   | "nurse"
   | "mila-phone"
   | "memory-table"
+  | "dancer-reply"
   | "train"
   | "repair"
   | "net"
+  | "walking-tree"
   | "anonymous"
+  | "tomas-call"
   | "notes"
   | "bed-photo"
+  | "kenji-bed"
   | "voice-wall"
+  | "broken-streak"
   | "windows"
   | "sunrise-windows"
+  | "four-readers"
   | "future-screen"
   | "public-square"
   | "low-battery"
-  | "earth-chain";
+  | "verdict-mirror"
+  | "earth-chain"
+  | "add-link";
 
 type Toast = {
   title: string;
@@ -930,6 +975,15 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="sketch-line" d="M100 126h42M106 112c10-8 21-8 31 0M236 121c20 0 30 9 26 22-5 15-29 14-35 2" />
       </>
     ),
+    "asha-stairwell": (
+      <>
+        <path className="sketch-line heavy" d="M82 184h206M105 153h155M128 123h110M151 93h66" />
+        <path className="sketch-line" d="M182 75c-24 5-38 26-32 53M194 75c24 6 38 27 32 53" />
+        <circle className="sketch-line" cx="188" cy="66" r="22" />
+        <path className="sketch-line heavy" d="M151 151c10-25 24-36 43-35 20 1 33 14 41 36" />
+        <path className="gold-line" d="M111 137h41M234 137h35" />
+      </>
+    ),
     nurse: (
       <>
         <path className="sketch-line heavy" d="M171 77c-31 8-47 36-39 76M189 78c31 8 47 37 39 76" />
@@ -958,6 +1012,16 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <circle className="sketch-line" cx="181" cy="76" r="24" />
         <path className="sketch-line" d="M142 121h42v30h-42zM204 113h42v34h-42zM153 136l10-8 10 8M216 130l8-7 11 11" />
         <path className="gold-line" d="M169 104c15-12 33-12 50 0" />
+      </>
+    ),
+    "dancer-reply": (
+      <>
+        <path className="sketch-line" d="M64 169h232" />
+        <circle className="sketch-line" cx="144" cy="73" r="19" />
+        <path className="sketch-line heavy" d="M143 93c-4 29-19 51-48 66M145 99c21 14 45 18 72 13M132 132c19 22 44 32 76 30" />
+        <rect className="sketch-line" height="43" rx="7" width="75" x="215" y="62" />
+        <path className="gold-line" d="M227 82h45M227 94h31" />
+        <path className="gold-line" d="M209 101c-25 5-45 2-60-9" />
       </>
     ),
     train: (
@@ -992,12 +1056,30 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <circle className="gold-dot" cx="176" cy="135" r="5" />
       </>
     ),
+    "walking-tree": (
+      <>
+        <path className="sketch-line heavy" d="M55 170h250M76 150c50-7 96-3 139 11" />
+        <path className="sketch-line" d="M240 166c-6-38 2-68 26-91M266 75c-26 18-49 23-70 15M266 75c22 9 35 27 42 51" />
+        <circle className="sketch-line" cx="128" cy="82" r="18" />
+        <path className="sketch-line heavy" d="M126 101c-4 24-8 45-20 67M126 118l38 18M119 134l-28 22" />
+        <path className="gold-line" d="M213 144c18-14 35-15 51-3" />
+      </>
+    ),
     anonymous: (
       <>
         <path className="sketch-line" d="M65 170c62-28 162-28 230 0M81 151h198" />
         <rect className="sketch-line heavy" height="67" rx="14" width="146" x="107" y="62" />
         <path className="gold-line" d="M136 94h88M149 109h61" />
         <path className="sketch-line" d="M92 142l-11-31M269 142l11-31M124 143l7-24M236 143l-7-24" />
+      </>
+    ),
+    "tomas-call": (
+      <>
+        <path className="sketch-line heavy" d="M57 169h248M77 169l24-87h103l21 87" />
+        <circle className="sketch-line" cx="250" cy="92" r="21" />
+        <path className="sketch-line heavy" d="M232 168c5-39 18-58 40-58 21 0 34 19 39 58" />
+        <rect className="sketch-line" height="32" rx="5" width="21" x="214" y="113" />
+        <path className="gold-line" d="M116 112h54M116 128h39M236 122c17-11 29-11 42 1" />
       </>
     ),
     notes: (
@@ -1017,6 +1099,15 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="gold-line" d="M137 134c25-22 56-26 89-10" />
       </>
     ),
+    "kenji-bed": (
+      <>
+        <path className="sketch-line heavy" d="M58 160h244M79 119h113v41H79zM192 97h83v63h-83z" />
+        <circle className="sketch-line" cx="132" cy="102" r="16" />
+        <circle className="sketch-line" cx="247" cy="77" r="16" />
+        <path className="sketch-line heavy" d="M231 160c4-32 15-48 33-48s29 16 33 48" />
+        <path className="gold-line" d="M203 115c-26 5-43 1-55-12" />
+      </>
+    ),
     "voice-wall": (
       <>
         <path className="sketch-line heavy" d="M62 61h236v122H62z" />
@@ -1030,6 +1121,16 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
           />
         ))}
         <path className="gold-line" d="M82 166c20-25 38 21 56-6s35 19 53-8 38 14 62-4" />
+      </>
+    ),
+    "broken-streak": (
+      <>
+        <path className="sketch-line heavy" d="M74 88h212v82H74z" />
+        <path className="sketch-line" d="M105 126h38M162 126h38M219 126h38" />
+        <path className="gold-line" d="M104 126c14-22 27-22 40 0M219 126c14-22 27-22 40 0" />
+        <path className="sketch-line heavy" d="M171 99l19 54M203 99l-19 54" />
+        <circle className="gold-dot" cx="124" cy="126" r="5" />
+        <circle className="gold-dot" cx="239" cy="126" r="5" />
       </>
     ),
     windows: (
@@ -1047,6 +1148,15 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="gold-line" d="M100 119c35-41 117-41 160 0" />
         <circle className="gold-dot" cx="180" cy="108" r="9" />
         <path className="sketch-line" d="M90 148c5-16 23-16 29 0M167 148c7-19 26-19 33 0M241 148c5-16 23-16 29 0" />
+      </>
+    ),
+    "four-readers": (
+      <>
+        <path className="sketch-line heavy" d="M68 70h78v92H68zM214 70h78v92h-78zM124 102h112v92H124z" />
+        <circle className="sketch-line" cx="107" cy="138" r="14" />
+        <circle className="sketch-line" cx="253" cy="138" r="14" />
+        <circle className="sketch-line" cx="180" cy="163" r="15" />
+        <path className="gold-line" d="M111 102c32-23 106-23 142 0M143 153h74" />
       </>
     ),
     "future-screen": (
@@ -1076,6 +1186,16 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="sketch-line" d="M214 124h31M214 138h22" />
       </>
     ),
+    "verdict-mirror": (
+      <>
+        <path className="sketch-line heavy" d="M118 58h124v124H118z" />
+        <path className="sketch-line" d="M142 84h76M142 105h56M142 126h74M142 147h46" />
+        <path className="gold-line" d="M97 94c-21 17-28 36-21 57M263 94c21 17 28 36 21 57" />
+        <circle className="sketch-line" cx="77" cy="154" r="16" />
+        <circle className="sketch-line" cx="283" cy="154" r="16" />
+        <circle className="gold-dot" cx="180" cy="182" r="6" />
+      </>
+    ),
     "earth-chain": (
       <>
         <circle className="sketch-line heavy" cx="180" cy="116" r="78" />
@@ -1084,6 +1204,17 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <circle className="gold-dot" cx="90" cy="128" r="5" />
         <circle className="gold-dot" cx="192" cy="101" r="5" />
         <circle className="gold-dot" cx="274" cy="89" r="5" />
+      </>
+    ),
+    "add-link": (
+      <>
+        <rect className="sketch-line heavy" height="86" rx="12" width="58" x="77" y="80" />
+        <path className="sketch-line" d="M96 105h21M96 119h15" />
+        <path className="gold-line" d="M135 126c46-32 74 12 112-21" />
+        <circle className="gold-dot" cx="135" cy="126" r="5" />
+        <circle className="gold-dot" cx="247" cy="105" r="5" />
+        <path className="sketch-line heavy" d="M250 87v38M231 106h38" />
+        <path className="sketch-line" d="M174 158c33 20 72 21 113 4" />
       </>
     ),
   } satisfies Record<StoryArtKind, React.ReactNode>;
