@@ -574,6 +574,15 @@ button {
   cursor: pointer;
 }
 
+.story-pages .paper-art {
+  margin-bottom: 10px;
+  border-radius: 12px;
+}
+
+.story-pages .paper-art-svg {
+  aspect-ratio: 16 / 9;
+}
+
 .story-pages span {
   color: var(--muted);
   font-size: 0.78rem;

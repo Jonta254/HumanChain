@@ -386,6 +386,7 @@ const wldActions = [
 type Tab = "home" | "ask" | "chains" | "stories" | "me";
 
 type StoryArtKind =
+  | "cover-symbol"
   | "hands"
   | "world-thread"
   | "phone-table"
@@ -856,20 +857,33 @@ function StoriesView({
       </section>
       <section className="story-pages">
         {[
-          "The invisible question",
-          "Four strangers",
-          "The world answers",
-          "A verdict forms",
+          {
+            art: "honest-message" as const,
+            title: "The invisible question",
+          },
+          {
+            art: "four-windows" as const,
+            title: "Four strangers",
+          },
+          {
+            art: "world-thread" as const,
+            title: "The world answers",
+          },
+          {
+            art: "verdict-mirror" as const,
+            title: "A verdict forms",
+          },
         ].map((chapter, index) => (
           <article
-            key={chapter}
+            key={chapter.title}
             onClick={() => {
               setPage(index * 25);
               setIsReading(true);
             }}
           >
+            <StoryPaperArt alt={`${chapter.title} symbol`} kind={chapter.art} />
             <span>Chapter {index + 1}</span>
-            <h3>{chapter}</h3>
+            <h3>{chapter.title}</h3>
           </article>
         ))}
       </section>
@@ -906,7 +920,7 @@ function StoriesView({
 function StoryCoverArt() {
   return (
     <div aria-hidden="true" className="cover-art">
-      <StoryPaperArt alt="Global HumanChain cover art" kind="earth-chain" />
+      <StoryPaperArt alt="Global HumanChain cover art" kind="cover-symbol" />
     </div>
   );
 }
@@ -946,6 +960,18 @@ function StoryPaperArt({
 
 function StoryArtScene({ kind }: { kind: StoryArtKind }) {
   const nodes = {
+    "cover-symbol": (
+      <>
+        <circle className="sketch-line heavy" cx="180" cy="112" r="72" />
+        <path className="sketch-line" d="M113 97c41-15 87-15 134 0M112 130c42 18 90 18 136 0M180 40c-22 47-22 97 0 144M180 40c23 47 23 97 0 144" />
+        <path className="gold-line" d="M76 125c41-36 77 17 108-30 31-45 63 14 100-29" />
+        <circle className="gold-dot" cx="76" cy="125" r="5" />
+        <circle className="gold-dot" cx="184" cy="95" r="6" />
+        <circle className="gold-dot" cx="284" cy="66" r="5" />
+        <path className="sketch-line heavy" d="M180 82c0-17 11-28 29-28 18 0 30 11 30 28 0 28-39 24-39 52" />
+        <circle className="gold-dot" cx="200" cy="152" r="6" />
+      </>
+    ),
     hands: (
       <>
         <path className="sketch-line heavy" d="M74 128c38-30 77-31 110-8 19 13 34 14 53 7 21-8 39-3 52 10" />
