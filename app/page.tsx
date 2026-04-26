@@ -58,32 +58,42 @@ const initialLinks = [
   },
 ];
 
-const storyImages = [
+const storyImageByPage: Record<
+  number,
   {
-    alt: "A realistic sunrise over a busy African city street",
-    url: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1200&q=85",
+    alt: string;
+    url: string;
+  }
+> = {
+  1: {
+    alt: "A realistic close-up of a young African woman's hands counting coins in morning light",
+    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20photo%20close%20up%20of%20a%20young%20African%20woman%20counting%20small%20coins%20in%20her%20palm%20at%20dawn%20Nairobi%20morning%20soft%20window%20light%20hopeful%20human%20story%20documentary%20style%20no%20text?width=1200&height=900&seed=1041&nologo=true",
   },
-  {
-    alt: "A futuristic city walkway with light, glass, and human movement",
-    url: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=85",
+  12: {
+    alt: "A futuristic but realistic human network glowing across a night city",
+    url: "https://image.pollinations.ai/prompt/realistic%20futuristic%20city%20at%20night%20with%20subtle%20gold%20threads%20of%20light%20connecting%20people%20on%20phones%20human%20network%20warm%20premium%20documentary%20cinematic%20no%20text?width=1200&height=900&seed=1042&nologo=true",
   },
-  {
-    alt: "People sharing tea and conversation at a small table",
-    url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=85",
+  24: {
+    alt: "A small morning tea stand being prepared before sunrise",
+    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20photo%20small%20Nairobi%20tea%20stand%20being%20prepared%20before%20sunrise%20thermos%20cups%20steam%20street%20market%20hopeful%20documentary%20style%20no%20text?width=1200&height=900&seed=1043&nologo=true",
   },
-  {
-    alt: "Hands working carefully in a small independent business",
-    url: "https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=1200&q=85",
+  52: {
+    alt: "Rainy Nairobi bus stage with people holding tea cups",
+    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20rainy%20Nairobi%20bus%20stage%20people%20sheltering%20and%20holding%20paper%20cups%20of%20tea%20wet%20road%20warm%20street%20lights%20human%20patience%20no%20text?width=1200&height=900&seed=1044&nologo=true",
   },
-  {
-    alt: "A realistic rainy city street glowing at dusk",
-    url: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=85",
+  73: {
+    alt: "A quiet woman reading a glowing phone at night after work",
+    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20photo%20young%20African%20woman%20reading%20a%20glowing%20phone%20at%20night%20after%20work%20soft%20room%20light%20peaceful%20emotional%20human%20story%20no%20text?width=1200&height=900&seed=1045&nologo=true",
   },
-  {
-    alt: "A warm portrait-like scene of community and support",
-    url: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1200&q=85",
+  100: {
+    alt: "A warm small business table with tea, notebook, and saved coins",
+    url: "https://image.pollinations.ai/prompt/realistic%20warm%20cinematic%20photo%20small%20business%20table%20with%20tea%20thermos%20notebook%20saved%20coins%20morning%20light%20African%20entrepreneur%20hopeful%20no%20text?width=1200&height=900&seed=1046&nologo=true",
   },
-];
+  125: {
+    alt: "A blue painted tea stand called Second Morning on a busy city street",
+    url: "https://image.pollinations.ai/prompt/realistic%20cinematic%20photo%20small%20blue%20painted%20tea%20stand%20on%20busy%20Nairobi%20street%20morning%20customers%20warm%20community%20hope%20no%20readable%20text?width=1200&height=900&seed=1047&nologo=true",
+  },
+};
 
 const storyBeats = [
   "Amina counted the coins in her palm and pretended they were enough. Outside, Nairobi was already awake, selling breakfast, calling buses, and asking everyone to be brave before sunrise.",
@@ -240,10 +250,7 @@ const storyBeats = [
 ];
 
 const storyPages = Array.from({ length: 150 }, (_, index) => {
-  const image =
-    index === 0 || index === 1 || (index + 1) % 15 === 0
-      ? storyImages[Math.floor(index / 15) % storyImages.length]
-      : null;
+  const image = storyImageByPage[index + 1] ?? null;
 
   return {
     page: index + 1,
