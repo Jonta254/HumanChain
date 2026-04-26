@@ -78,24 +78,24 @@ const storyImageByPage: Record<
     art: "phone-table",
   },
   7: {
-    alt: "Asha sitting alone in a stairwell with ink on her fingers",
-    art: "asha-stairwell",
+    alt: "A small ink mark beside a stair-shaped path",
+    art: "stair-symbol",
   },
   9: {
-    alt: "A tired nurse typing an honest sentence into her phone during a late shift",
-    art: "nurse",
+    alt: "A glowing phone holding an honest invisible message",
+    art: "honest-message",
   },
   10: {
-    alt: "Mila looking at her phone before sending an honest message",
-    art: "mila-phone",
+    alt: "A phone releasing a thread into the world",
+    art: "phone-thread",
   },
   14: {
     alt: "An elderly woman at a kitchen table remembering names",
     art: "memory-table",
   },
   22: {
-    alt: "A dancer sending a kind reply across the world",
-    art: "dancer-reply",
+    alt: "A kind reply moving across the world like a ribbon",
+    art: "reply-ribbon",
   },
   18: {
     alt: "A young nurse on a train reading answers on her phone at dawn",
@@ -110,16 +110,16 @@ const storyImageByPage: Record<
     art: "net",
   },
   37: {
-    alt: "Asha walking without headphones beside a cracked wall and small tree",
-    art: "walking-tree",
+    alt: "A small tree growing from a cracked wall",
+    art: "cracked-tree",
   },
   43: {
     alt: "A private anonymous question floating above a city at night",
     art: "anonymous",
   },
   48: {
-    alt: "Tomas calling his son outside a repair shop in the rain",
-    art: "tomas-call",
+    alt: "A phone call crossing rain between repair tools",
+    art: "repair-call",
   },
   51: {
     alt: "A small apartment table with phones, tea, and handwritten notes from different languages",
@@ -130,15 +130,15 @@ const storyImageByPage: Record<
     art: "bed-photo",
   },
   67: {
-    alt: "Kenji asking his father about the sea",
-    art: "kenji-bed",
+    alt: "An ocean memory placed beside a quiet bed",
+    art: "ocean-memory",
   },
   72: {
     alt: "A global wall of small portraits and voice waves glowing softly",
     art: "voice-wall",
   },
   76: {
-    alt: "Mila returning to HumanChain after a broken streak",
+    alt: "A broken streak reconnecting",
     art: "broken-streak",
   },
   81: {
@@ -150,8 +150,8 @@ const storyImageByPage: Record<
     art: "sunrise-windows",
   },
   101: {
-    alt: "Four strangers seeing the same monthly story page",
-    art: "four-readers",
+    alt: "Four windows connected by one story page",
+    art: "four-windows",
   },
   106: {
     alt: "A future technology question represented by humans around a soft transparent screen",
@@ -389,25 +389,25 @@ type StoryArtKind =
   | "hands"
   | "world-thread"
   | "phone-table"
-  | "asha-stairwell"
-  | "nurse"
-  | "mila-phone"
+  | "stair-symbol"
+  | "honest-message"
+  | "phone-thread"
   | "memory-table"
-  | "dancer-reply"
+  | "reply-ribbon"
   | "train"
   | "repair"
   | "net"
-  | "walking-tree"
+  | "cracked-tree"
   | "anonymous"
-  | "tomas-call"
+  | "repair-call"
   | "notes"
   | "bed-photo"
-  | "kenji-bed"
+  | "ocean-memory"
   | "voice-wall"
   | "broken-streak"
   | "windows"
   | "sunrise-windows"
-  | "four-readers"
+  | "four-windows"
   | "future-screen"
   | "public-square"
   | "low-battery"
@@ -975,35 +975,33 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="sketch-line" d="M100 126h42M106 112c10-8 21-8 31 0M236 121c20 0 30 9 26 22-5 15-29 14-35 2" />
       </>
     ),
-    "asha-stairwell": (
+    "stair-symbol": (
       <>
-        <path className="sketch-line heavy" d="M82 184h206M105 153h155M128 123h110M151 93h66" />
-        <path className="sketch-line" d="M182 75c-24 5-38 26-32 53M194 75c24 6 38 27 32 53" />
-        <circle className="sketch-line" cx="188" cy="66" r="22" />
-        <path className="sketch-line heavy" d="M151 151c10-25 24-36 43-35 20 1 33 14 41 36" />
-        <path className="gold-line" d="M111 137h41M234 137h35" />
+        <path className="sketch-line heavy" d="M78 174h204M101 145h157M124 116h110M147 87h63" />
+        <path className="gold-line" d="M90 174c34-61 73-92 120-87" />
+        <circle className="gold-dot" cx="210" cy="87" r="7" />
+        <path className="sketch-line" d="M232 88c24 7 41 22 51 46" />
+        <path className="sketch-line" d="M115 69c19 12 42 13 67 2" />
       </>
     ),
-    nurse: (
+    "honest-message": (
       <>
-        <path className="sketch-line heavy" d="M171 77c-31 8-47 36-39 76M189 78c31 8 47 37 39 76" />
-        <circle className="sketch-line" cx="180" cy="65" r="25" />
-        <path className="sketch-line" d="M154 111h52M161 99v24M180 90v58" />
-        <rect className="sketch-line" height="43" rx="5" width="30" x="197" y="129" />
-        <path className="gold-line" d="M202 144h19M202 154h14" />
-        <path className="sketch-line" d="M62 181h236M70 126h54M236 126h54" />
+        <rect className="sketch-line heavy" height="95" rx="14" width="68" x="82" y="68" />
+        <path className="gold-line" d="M96 101h40M96 116h29M96 131h35" />
+        <path className="sketch-line heavy" d="M185 79h96v68h-96z" />
+        <path className="sketch-line" d="M201 104h62M201 121h39" />
+        <path className="gold-line" d="M150 112c24-25 42-27 60-8" />
+        <circle className="gold-dot" cx="150" cy="112" r="5" />
       </>
     ),
-    "mila-phone": (
+    "phone-thread": (
       <>
-        <path className="sketch-line heavy" d="M138 89c8-29 73-29 82 0 8 27-7 54-41 54s-49-27-41-54Z" />
-        <path className="sketch-line" d="M147 103c18 9 43 9 65 0M159 121c12 8 28 8 40 0" />
-        <path className="sketch-line heavy" d="M109 191c11-39 34-58 70-58s59 19 72 58" />
-        <rect className="sketch-line heavy" height="58" rx="7" width="37" x="203" y="123" />
-        <path className="gold-line" d="M210 142h23M210 154h17M210 166h20" />
-        <path className="sketch-line" d="M154 153c14 17 30 22 49 15M118 184c-18-15-25-31-18-49M263 184c18-15 25-31 18-49" />
-        <path className="gold-line" d="M238 143c27-6 45-2 57 11" />
-        <circle className="gold-dot" cx="296" cy="154" r="5" />
+        <rect className="sketch-line heavy" height="88" rx="12" width="54" x="70" y="83" />
+        <path className="gold-line" d="M122 116c58-50 111 35 166-21" />
+        <circle className="gold-dot" cx="122" cy="116" r="5" />
+        <circle className="gold-dot" cx="197" cy="124" r="5" />
+        <circle className="gold-dot" cx="288" cy="95" r="5" />
+        <path className="sketch-line" d="M181 70c44 9 78 39 88 79M151 153c34 22 82 26 124 5" />
       </>
     ),
     "memory-table": (
@@ -1014,14 +1012,14 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="gold-line" d="M169 104c15-12 33-12 50 0" />
       </>
     ),
-    "dancer-reply": (
+    "reply-ribbon": (
       <>
-        <path className="sketch-line" d="M64 169h232" />
-        <circle className="sketch-line" cx="144" cy="73" r="19" />
-        <path className="sketch-line heavy" d="M143 93c-4 29-19 51-48 66M145 99c21 14 45 18 72 13M132 132c19 22 44 32 76 30" />
-        <rect className="sketch-line" height="43" rx="7" width="75" x="215" y="62" />
-        <path className="gold-line" d="M227 82h45M227 94h31" />
-        <path className="gold-line" d="M209 101c-25 5-45 2-60-9" />
+        <rect className="sketch-line heavy" height="56" rx="14" width="108" x="68" y="72" />
+        <rect className="sketch-line heavy" height="56" rx="14" width="108" x="185" y="116" />
+        <path className="sketch-line" d="M92 95h61M92 110h41M209 139h61M209 154h39" />
+        <path className="gold-line" d="M176 108c27 3 42 12 52 28" />
+        <circle className="gold-dot" cx="176" cy="108" r="5" />
+        <circle className="gold-dot" cx="228" cy="136" r="5" />
       </>
     ),
     train: (
@@ -1056,13 +1054,13 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <circle className="gold-dot" cx="176" cy="135" r="5" />
       </>
     ),
-    "walking-tree": (
+    "cracked-tree": (
       <>
-        <path className="sketch-line heavy" d="M55 170h250M76 150c50-7 96-3 139 11" />
-        <path className="sketch-line" d="M240 166c-6-38 2-68 26-91M266 75c-26 18-49 23-70 15M266 75c22 9 35 27 42 51" />
-        <circle className="sketch-line" cx="128" cy="82" r="18" />
-        <path className="sketch-line heavy" d="M126 101c-4 24-8 45-20 67M126 118l38 18M119 134l-28 22" />
-        <path className="gold-line" d="M213 144c18-14 35-15 51-3" />
+        <path className="sketch-line heavy" d="M62 171h236M76 171l45-92h153l23 92" />
+        <path className="sketch-line" d="M164 171l19-38-17-15 23-39M187 133l22 14-12 24" />
+        <path className="gold-line" d="M190 86c2-28 16-45 43-52" />
+        <path className="sketch-line" d="M232 34c-26 16-46 19-61 9M232 34c22 7 35 23 40 47" />
+        <circle className="gold-dot" cx="190" cy="86" r="5" />
       </>
     ),
     anonymous: (
@@ -1073,13 +1071,13 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="sketch-line" d="M92 142l-11-31M269 142l11-31M124 143l7-24M236 143l-7-24" />
       </>
     ),
-    "tomas-call": (
+    "repair-call": (
       <>
-        <path className="sketch-line heavy" d="M57 169h248M77 169l24-87h103l21 87" />
-        <circle className="sketch-line" cx="250" cy="92" r="21" />
-        <path className="sketch-line heavy" d="M232 168c5-39 18-58 40-58 21 0 34 19 39 58" />
-        <rect className="sketch-line" height="32" rx="5" width="21" x="214" y="113" />
-        <path className="gold-line" d="M116 112h54M116 128h39M236 122c17-11 29-11 42 1" />
+        <path className="sketch-line heavy" d="M58 169h244M78 169l26-81h93l21 81" />
+        <path className="sketch-line" d="M113 116h58M113 132h40M128 91l-22 64M187 94l-47 62" />
+        <rect className="sketch-line heavy" height="46" rx="8" width="32" x="238" y="91" />
+        <path className="gold-line" d="M218 116c-21-13-37-12-49 3M270 112c26-8 42 0 50 24" />
+        <circle className="gold-dot" cx="218" cy="116" r="5" />
       </>
     ),
     notes: (
@@ -1099,13 +1097,13 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="gold-line" d="M137 134c25-22 56-26 89-10" />
       </>
     ),
-    "kenji-bed": (
+    "ocean-memory": (
       <>
         <path className="sketch-line heavy" d="M58 160h244M79 119h113v41H79zM192 97h83v63h-83z" />
-        <circle className="sketch-line" cx="132" cy="102" r="16" />
-        <circle className="sketch-line" cx="247" cy="77" r="16" />
-        <path className="sketch-line heavy" d="M231 160c4-32 15-48 33-48s29 16 33 48" />
-        <path className="gold-line" d="M203 115c-26 5-43 1-55-12" />
+        <rect className="sketch-line" height="46" rx="5" width="68" x="206" y="65" />
+        <path className="sketch-line" d="M214 92c17-11 32-11 48 0M214 101c18-8 35-8 52 0" />
+        <path className="gold-line" d="M206 126c-32 0-54-8-68-24" />
+        <circle className="gold-dot" cx="206" cy="126" r="5" />
       </>
     ),
     "voice-wall": (
@@ -1150,13 +1148,13 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="sketch-line" d="M90 148c5-16 23-16 29 0M167 148c7-19 26-19 33 0M241 148c5-16 23-16 29 0" />
       </>
     ),
-    "four-readers": (
+    "four-windows": (
       <>
-        <path className="sketch-line heavy" d="M68 70h78v92H68zM214 70h78v92h-78zM124 102h112v92H124z" />
-        <circle className="sketch-line" cx="107" cy="138" r="14" />
-        <circle className="sketch-line" cx="253" cy="138" r="14" />
-        <circle className="sketch-line" cx="180" cy="163" r="15" />
-        <path className="gold-line" d="M111 102c32-23 106-23 142 0M143 153h74" />
+        <path className="sketch-line heavy" d="M64 69h76v76H64zM220 69h76v76h-76zM110 117h64v76h-64zM186 117h64v76h-64z" />
+        <path className="sketch-line" d="M102 69v76M64 107h76M258 69v76M220 107h76M142 117v76M110 155h64M218 117v76M186 155h64" />
+        <path className="gold-line" d="M102 145c39-31 111-31 156 0" />
+        <circle className="gold-dot" cx="102" cy="145" r="5" />
+        <circle className="gold-dot" cx="258" cy="145" r="5" />
       </>
     ),
     "future-screen": (
