@@ -66,16 +66,16 @@ const storyImageByPage: Record<
   }
 > = {
   1: {
-    alt: "Realistic hands from different backgrounds holding small objects that matter",
-    art: "hands",
+    alt: "A closed door with a small line of light under it",
+    art: "closed-door",
   },
   2: {
-    alt: "Futuristic realistic global map of glowing human threads across cities",
-    art: "world-thread",
+    alt: "A key, train ticket, and cracked cup on a table",
+    art: "key-ticket",
   },
   5: {
-    alt: "A phone screen glowing in a quiet break room with a human question open",
-    art: "phone-table",
+    alt: "A cracked cup repaired with a golden line",
+    art: "repaired-cup",
   },
   7: {
     alt: "A small ink mark beside a stair-shaped path",
@@ -98,16 +98,16 @@ const storyImageByPage: Record<
     art: "reply-ribbon",
   },
   18: {
-    alt: "A young nurse on a train reading answers on her phone at dawn",
-    art: "train",
+    alt: "A small window opening to city air",
+    art: "open-window",
   },
   27: {
     alt: "A repair shop counter with a notebook, radio parts, and an unanswered phone",
     art: "repair",
   },
   34: {
-    alt: "A fisherman repairing a net beside cold water at sunrise",
-    art: "net",
+    alt: "A door opened slightly with a plant outside",
+    art: "plant-door",
   },
   37: {
     alt: "A small tree growing from a cracked wall",
@@ -126,12 +126,12 @@ const storyImageByPage: Record<
     art: "notes",
   },
   64: {
-    alt: "A caregiver placing an old ocean photograph beside a bed",
-    art: "bed-photo",
+    alt: "A cracked cup repaired with a gold line",
+    art: "repaired-cup",
   },
   67: {
-    alt: "An ocean memory placed beside a quiet bed",
-    art: "ocean-memory",
+    alt: "A blue door opening for ten minutes",
+    art: "open-door",
   },
   72: {
     alt: "A global wall of small portraits and voice waves glowing softly",
@@ -150,8 +150,8 @@ const storyImageByPage: Record<
     art: "sunrise-windows",
   },
   101: {
-    alt: "Four windows connected by one story page",
-    art: "four-windows",
+    alt: "A Human Verdict made from many doors",
+    art: "verdict-mirror",
   },
   106: {
     alt: "A future technology question represented by humans around a soft transparent screen",
@@ -170,8 +170,8 @@ const storyImageByPage: Record<
     art: "verdict-mirror",
   },
   142: {
-    alt: "A beautiful realistic global chain of light crossing oceans and cities",
-    art: "earth-chain",
+    alt: "A small opening where light enters",
+    art: "light-opening",
   },
   149: {
     alt: "A reader adding their own link to the global chain",
@@ -181,184 +181,148 @@ const storyImageByPage: Record<
 
 const globalStoryChapters = [
   [
-    "MONTHLY HUMAN STORY: The Question That Crossed The World. This month's chain begins with one question sent to verified humans everywhere: What are you carrying that no one can see?",
-    "Mila in Manila keeps a train ticket in her pocket because it reminds her she once chose movement over fear. Tomas in Lisbon counts rent money twice. Asha in Mumbai washes ink from her fingers. Kenji in Tokyo sits beside his sleeping father.",
-    "They do not know one another. They are four ordinary humans carrying private weather through public streets, smiling when work requires it, answering messages with fewer truths than they feel.",
-    "The HumanChain prompt travels quietly through phones in buses, kitchens, hospitals, markets, offices, and bedrooms where people are trying not to fall apart.",
-    "Mila almost skips it. Patients are waiting, her mother needs money, and her body has learned to call exhaustion normal. Still, the question stays under her thumb like a pulse.",
-    "Tomas reads it behind the counter of his repair shop. A broken radio lies open in front of him, wires exposed like a confession. Near the register, a photo of his son curls at the edge.",
-    "Asha reads it in a stairwell because the design studio has no quiet room. She is twenty-seven, ambitious, and afraid ambition is slowly replacing her softness.",
-    "Kenji reads it at 2:13 a.m. His father is asleep, the apartment smells faintly of medicine, and the city outside looks too clean to admit anyone inside it needs help.",
-    "Human message: everyone is carrying something. The first kindness is remembering that the visible person is never the whole person.",
-    "Mila types first: I am carrying everyone else's emergencies and pretending I have none of my own. She stares at the sentence until honesty becomes heavier than shame.",
+    "MONTHLY HUMAN STORY: The Door That Waited. Every city has a door people pass without seeing. This one was blue, scratched near the handle, and locked from the inside.",
+    "Inside lived Mara, a woman who had once been easy to love because she was always useful. She remembered birthdays, sent money, answered calls, and never let anyone hear the tired part of her voice.",
+    "Then her father died, her work changed, and her body began refusing the life her pride had accepted. One Tuesday, Mara stopped opening the blue door.",
+    "At first, people called. Then they messaged. Then they became careful. Careful people say things like take your time when they are also beginning to leave.",
+    "Mara kept three objects on the table: a key she did not use, a train ticket she never refunded, and a cup with a crack through the middle.",
+    "The key was for the door. The ticket was for the city she had planned to leave. The cup was from her father, who believed broken things should be tested before they were thrown away.",
+    "For twelve days, Mara lived in small circles: bed, sink, table, window, door. Outside, the world kept performing its loud confidence.",
+    "On the thirteenth day, a child pushed a folded paper under the blue door. It said only: I watered your plant because it looked lonely too.",
+    "Human message: sometimes life returns as a small kindness that does not ask you to explain yourself.",
+    "Mara did not open the door. But she moved the plant closer to the light.",
   ],
   [
-    "She presses send. A thin golden thread joins her words to the living map.",
-    "In Lisbon, Tomas answers with a photograph of his hands. They are rough from screws, solder, and years of fixing objects while his own life waits in pieces.",
-    "He writes: I am carrying a silence between me and my son. I do not know how to repair it because it does not have parts I can order.",
-    "Asha does not post yet. She reads. A farmer in Peru is carrying rain that will not come. A student in Cairo is carrying the pressure to become the family's proof.",
-    "A grandmother in Warsaw writes that she is carrying the names of people who no longer have anyone to say them. Her answer receives no dramatic words, only many quiet saves.",
-    "Kenji records a voice note instead of typing. He says: I am carrying my father's fear and my own resentment about being needed.",
-    "He almost deletes the resentment part. Then he imagines thousands of humans deleting the real sentence and sending the acceptable one.",
-    "The app translates his voice into languages he cannot read. His truth becomes available without becoming less his.",
-    "Mila hears the voice note on her break. She sits beside a vending machine and thinks of her own mother, who loves through requests because requests are the language survival taught her.",
-    "Human message: honesty does not need to be perfect to be useful. Sometimes the sentence you almost delete is the one another human needs.",
+    "The next morning, another paper arrived. This one had a drawing of a sun wearing shoes. Under it, the child wrote: today the sun is trying.",
+    "Mara laughed once. The sound surprised her. It had been living somewhere behind the grief, waiting for a foolish enough reason.",
+    "She found a pencil and wrote back: tell the sun I respect the effort.",
+    "The reply disappeared under the door within minutes. For the first time in weeks, the hallway became a place with a heartbeat.",
+    "The child was named Lio. Mara learned this from the third note, which included a serious complaint about carrots.",
+    "Lio did not ask what was wrong. This made him better company than most adults.",
+    "On day four, he wrote: my grandmother says people become quiet when their hearts are carrying furniture.",
+    "Mara stared at that sentence for a long time. It was ridiculous. It was exact.",
+    "She opened HumanChain and saved it as a private link: hearts can carry furniture.",
+    "Human message: a child can sometimes name your pain because they have not yet learned to make language polite.",
   ],
   [
-    "Mila taps I felt this. It is a small action, but Kenji sees it thirty seconds later in Tokyo and breathes differently.",
-    "By evening, the question has reached ninety-one countries. Human Pulse shows stress, hope, grief, ambition, and love moving like weather across the map.",
-    "Asha finally answers: I am carrying the fear that if I slow down, I will discover I am not special.",
-    "The sentence embarrasses her because it sounds vain until she sees how many people save it.",
-    "A dancer in Brazil replies: wanting to matter is not vanity. It is a human asking not to vanish.",
-    "A shopkeeper in Morocco replies: special is not the opposite of ordinary. Sometimes ordinary done with care becomes special after many days.",
-    "Asha places her phone face down. The stairwell is still ugly. Her lunch is still cold. But the world has complicated her shame, and that is a beginning.",
-    "Tomas pays 1 WLD to tip the grandmother in Warsaw. He does not know why that answer touched him, only that names deserve witnesses.",
-    "Her reply arrives an hour later: Mateusz. He loved apricots. Tomas reads it twice and imagines a person built from one fruit and one name.",
-    "Human message: pain should not be ranked. It should be shaped carefully enough that someone can carry it with less loneliness.",
+    "The app asked that week: What helped you open a door again? Mara did not answer. She read.",
+    "A man in Mexico wrote: I opened the door when hunger became stronger than shame.",
+    "A teacher in Korea wrote: my students left drawings on the floor until I wanted to see who made them.",
+    "A mother in Ghana wrote: I opened because my son knocked in rhythm with a song from when he was little.",
+    "A student in Germany wrote: I never opened. I moved through the window of someone else's patience.",
+    "Mara saved that one. It sounded like a joke until it became a map.",
+    "She looked at the window. It opened to a narrow fire escape and three pots of dry basil.",
+    "The blue door still felt impossible. But the window was smaller. Smaller things are sometimes more honest beginnings.",
+    "She opened it two inches. The city entered as cold air and a motorcycle passing below.",
+    "Human message: when the door is too much, begin with the window.",
   ],
   [
-    "The Human Verdict begins forming: people are carrying duty, regret, money fear, loneliness, family expectations, grief, and the strange pressure to appear grateful while tired.",
-    "The next day's chain asks: What helps you continue when advice is not enough? This is the kind of question people answer more slowly.",
-    "Mila writes: a clean uniform, even when my life feels unwashed. A nurse in Canada replies with a photo of polished shoes.",
-    "A doctor in Thailand sends a voice note about washing his cup after every shift. The ritual is small, but it gives the day a border.",
-    "Tomas writes: fixing one small thing completely. He repairs the broken radio and plays music through it before calling the customer.",
-    "Asha writes: walking without headphones so my own thoughts stop feeling like strangers. She takes a longer route home and notices a tree growing out of a cracked wall.",
-    "Kenji writes: making soup badly, then making it again. The answer becomes unexpectedly popular because humans trust imperfect rituals.",
-    "A teenager in Nairobi writes: I continue when someone older admits they are also confused. The sentence travels far.",
-    "A retired teacher in Seoul answers: I am older, and I am also confused. Please continue anyway.",
-    "Human message: when advice is too big, rituals can be small bridges back to yourself.",
+    "Lio's notes became a calendar. Monday was the sun. Tuesday was a question about whether clouds were tired. Wednesday was a drawing of a cup with armor.",
+    "Mara understood the cup immediately. She touched the cracked one on her table.",
+    "Her father had repaired radios, chairs, umbrellas, watches, and once, badly, a marriage between two neighbors who only needed someone to make them sit down.",
+    "He used to say: broken is not a verdict. Broken is a request for attention.",
+    "Mara hated that sentence after he died. It made grief sound practical, and grief had no interest in being useful.",
+    "Still, she washed the cracked cup and placed it beside the key.",
+    "That night she asked HumanChain privately: how do you return to people after disappearing?",
+    "She paid for a Deep Human Verdict because she wanted more than comfort. She wanted instructions that did not insult the size of the silence.",
+    "The answers came from people who had vanished, waited, forgiven, refused, returned, and been returned to.",
+    "Human message: return does not begin with a speech. It begins with one true sentence sent without demanding rescue.",
   ],
   [
-    "Someone asks the world whether hope is a feeling or a practice. The verdict says practice, by 67%.",
-    "Mila saves that verdict and renames it: For days when feelings cannot be trusted.",
-    "On the third day, Tomas uses 4 WLD to ask privately: How do you apologize to a child who became an adult while you were absent?",
-    "The app marks the question anonymous but verified. This matters to him. Shame wants a mask, but trust requires a real human behind it.",
-    "Answers arrive from parents, sons, daughters, guardians, teachers, and people who still wait for apologies they know may never come.",
-    "A woman in Mexico writes: do not explain first. Let the wound speak before you defend the knife.",
-    "A man in Indonesia writes: apology is not a speech. It is a schedule you keep after the speech.",
-    "A daughter in France writes: say exactly what you did. General regret makes the hurt person do the accounting.",
-    "Tomas copies three answers into a notebook. His handwriting looks younger when he is afraid.",
-    "Human message: repair begins when you stop asking your guilt to be forgiven before the hurt is heard.",
+    "The verdict gave her four steps: name the silence, do not overexplain, offer one next action, accept that some doors may now be closed to you.",
+    "Mara wrote the sentence on paper first: I disappeared because grief made every conversation feel like lifting furniture.",
+    "She crossed it out. Too poetic.",
+    "She wrote: I am sorry I went quiet. I was not well. I can answer one message today.",
+    "It looked small. It looked almost embarrassingly plain. That was why it was honest.",
+    "She sent it to her sister.",
+    "For six minutes, nothing happened. Mara watched the phone as if it were a dangerous animal.",
+    "Then her sister replied: one message is enough. Are you eating?",
+    "Mara cried because the question was ordinary. Ordinary mercy is often the kind that finally reaches us.",
+    "Human message: the right person will not always need your whole explanation before offering you soup.",
   ],
   [
-    "The Deep Human Verdict says: begin with ownership, ask what repair would mean, accept that forgiveness is not owed, and return consistently without demanding warmth.",
-    "Tomas closes the shop early. The city smells of rain and bread. He calls his son and says the first specific sentence.",
-    "The call lasts six minutes. It is not enough. It is not nothing.",
-    "Asha enters the Human Story section that weekend. The monthly story is not about one hero but many strangers connected by one question.",
-    "She finds herself inside it before she understands the shape. The pages move between Manila, Lisbon, Mumbai, Tokyo, and dozens of small human rooms in between.",
-    "On page 51, an image shows a table with phones, tea, and notes in many languages. Asha pauses there longer than the story requires.",
-    "The app does not pretend global means identical. People answer from different economies, religions, fears, jokes, family systems, and definitions of respect.",
-    "A farmer in Kenya says dignity is being paid on time. A musician in Argentina says dignity is making art without begging to be understood.",
-    "A mother in Turkey says dignity is closing the bathroom door for five minutes and not being followed. It becomes one of the most saved lines in the story.",
-    "Human message: being useful is beautiful; being used is different. Learn the difference before your body has to teach you.",
+    "The next day, Mara unlocked the blue door but did not open it. The sound of the lock turning felt dramatic, so she turned it again, just to prove it could become ordinary.",
+    "Lio slid a note under: I heard the door think about opening.",
+    "Mara wrote back: the door is shy.",
+    "He replied: tell it I am also shy but I still go to school.",
+    "This was unfairly persuasive.",
+    "At noon, Mara opened the door as wide as her foot. The hallway smelled like dust, laundry soap, and someone's lunch.",
+    "A small plant sat outside, watered and leaning toward her apartment as if trying to listen.",
+    "There was no crowd. No judgment. No soundtrack. Just the world, still there after all her absence.",
+    "She brought the plant inside and placed it by the cracked cup.",
+    "Human message: returning is rarely cinematic. Mostly, it is a foot in the doorway and a plant that survived.",
   ],
   [
-    "Asha pays 2 WLD to unlock reader reflections. The best one comes from a mechanic in Romania: we are not asking the world to carry us, only to stop pretending we weigh nothing.",
-    "That sentence follows her into Monday. She writes it on a sticky note and puts it inside her laptop where no manager can see.",
-    "Work feels different when she stops confusing being useful with being used.",
-    "Kenji's father wakes one morning asking for the sea. They live nowhere near it. The request is medically ordinary and emotionally impossible.",
-    "Kenji opens Ask The World: What do you do when someone you love asks for a place you cannot give them?",
-    "He selects Voice Answers because he does not want polished advice. He wants the hesitation inside people's voices.",
-    "A woman from Greece says she once brought a bowl of salt water to her grandmother and let her smell it.",
-    "A caregiver in Ghana says: sometimes the place is not geography. Ask what the sea remembers for him.",
-    "Kenji asks. His father says: your mother wore a blue dress there. Then he sleeps again.",
-    "Human message: impossible requests are sometimes memories knocking. Answer the memory, not only the words.",
+    "That evening, Mara read HumanChain's monthly story archive. She noticed how many stories were not about winning but about staying reachable.",
+    "A farmer wrote about drought. A nurse wrote about burnout. A father wrote about apology. A teenager wrote about being afraid of becoming ordinary.",
+    "The stories did not make suffering beautiful. They made it less private.",
+    "Mara added her first public link: I opened the window before I opened the door.",
+    "Within an hour, people from nineteen countries saved it.",
+    "Someone tipped 1 WLD and wrote: this is the only advice I can use today.",
+    "Mara did not feel proud. Pride was too large. She felt connected by one thin, believable thread.",
+    "Lio knocked once, then ran away. On the floor was a final note for the week: congratulations to the window.",
+    "Mara taped it above the table.",
+    "Human message: a sentence can become a handle for someone else's door.",
   ],
   [
-    "Kenji finds an old photograph, blue dress faded almost gray, and places it by the bed. His father touches the corner with two fingers.",
-    "Kenji posts a link: today I learned that love sometimes arrives disguised as an impossible request.",
-    "The world saves it carefully.",
-    "Mila's hospital begins a week of shortages. Everyone becomes efficient in the way people become when there is not enough of anything except need.",
-    "She stops opening HumanChain for two days, then feels oddly lonely for people she has never met.",
-    "When she returns, her streak has ended. The app offers a 1 WLD restore. She almost presses it, then decides the broken streak tells the truth.",
-    "She posts: I disappeared for two days because real life was louder than my rituals.",
-    "A teacher in New Zealand replies: a streak should remind you to live, not punish you for living.",
-    "Mila answers three questions that night: burnout, sending money home, and whether kindness can survive exhaustion.",
-    "Human message: if a ritual becomes a punishment, soften it. The point is return, not perfection.",
+    "The first visitor was not family. It was Mrs. Alvarez from downstairs, carrying soup in a container that had clearly lived many lives.",
+    "She said, I am returning this because you once brought it back with beans.",
+    "Mara did not remember the beans. Mrs. Alvarez did.",
+    "They stood in the doorway, both pretending the soup was the main subject.",
+    "Mrs. Alvarez looked at the cracked cup and said, that can be repaired.",
+    "Mara said, I know.",
+    "But she had not known until hearing someone else say it.",
+    "That night, she searched for gold repair methods and discovered that some traditions do not hide cracks. They honor the line where breaking met care.",
+    "She did not have gold. She had glue, yellow paint, and patience. It was enough for a beginning.",
+    "Human message: repair does not erase the crack. It gives the crack a different job.",
   ],
   [
-    "For the kindness question, Mila writes: kindness survives when it becomes smaller. A cup of water. A closed door. A message saying I cannot talk but I care.",
-    "Her answer receives tips from five countries. She uses none of them dramatically. She buys breakfast.",
-    "Breakfast can be a form of hope when your body has been treated like a tool.",
-    "HumanChain's World Map shows a strange pairing that Thursday: Finland and Brazil are both active in the Loneliness Room.",
-    "People compare winter silence and crowded loneliness. One writes: my city is loud enough to hide in. Another writes: my town is quiet enough to hear myself disappear.",
-    "The app creates a verdict: loneliness is not the absence of people; it is the absence of being known accurately.",
-    "Asha sends that verdict to a friend she has been avoiding. The friend replies with one word: yes.",
-    "That yes becomes a two-hour conversation. Not every chain stays inside the app. The best ones escape into life.",
-    "Tomas's son does not answer for four days. On the fifth, he sends a photo of a broken lamp and writes: can this be fixed?",
-    "Human message: when someone asks about the lamp, listen for the relationship hiding behind the object.",
+    "By the end of the month, the blue door opened every morning for ten minutes.",
+    "Mara made this rule because forever was too heavy and ten minutes was a cup she could hold.",
+    "Some mornings nobody passed. Some mornings Lio delivered news from the world: a lost umbrella, a dog with opinions, a cloud shaped like a shoe.",
+    "Her sister visited and did not mention the unanswered calls until the second cup of tea.",
+    "When she did, Mara used the sentence HumanChain had helped her build: I was not choosing silence against you. I was trapped inside it.",
+    "Her sister closed her eyes. Then she said, I needed that sentence months ago.",
+    "Mara said, I know.",
+    "They did not fix everything. They fixed enough to have another conversation later.",
+    "Enough is an underrated miracle.",
+    "Human message: some relationships are repaired in installments. Do not despise the first payment.",
   ],
   [
-    "Tomas understands the question is not only about the lamp. He replies: yes, if I can see what is broken.",
-    "His son comes Saturday. They talk mostly about screws, electricity, and lunch. Repair often enters through side doors.",
-    "Tomas does not ask for forgiveness. He asks if his son wants more rice.",
-    "It is the first good question he has asked in years.",
-    "At page 93 of the monthly story, the image shows different people watching the same sunrise from separate windows.",
-    "Mila sees it near dawn. Asha sees it at lunch. Kenji sees it after dinner. Tomas sees it while the repaired lamp cools on the counter.",
-    "They are not friends. They are not a group chat. They are part of a pattern that makes loneliness less convincing.",
-    "The story asks: What is one thing a stranger taught you this month?",
-    "Mila writes: rest is not a reward for finishing all need. Need does not finish.",
-    "Human message: the world becomes less abstract when a stranger teaches you one sentence you can actually use.",
+    "HumanChain chose Mara's link for the monthly story because thousands of users kept returning to the same line: I opened the window before I opened the door.",
+    "The story did not reveal her address, her face, or Lio's school. It kept the details that belonged to safety and shared the details that belonged to humanity.",
+    "Readers added their own doors: hospital doors, bedroom doors, office doors, immigration doors, apology doors, doors inside the chest that had no hinges but still refused to move.",
+    "A man wrote: I opened my email after six months.",
+    "A woman wrote: I told my daughter I was scared.",
+    "A student wrote: I washed one plate.",
+    "A grandfather wrote: I said his name out loud.",
+    "The Human Verdict formed slowly: people do not come back all at once. They return through small openings they can survive.",
+    "Mara read that sentence while holding the repaired cup.",
+    "Human message: do not measure return by distance. Measure it by direction.",
   ],
   [
-    "Tomas writes: an apology is a calendar. Asha writes: ordinary care repeated long enough becomes a life.",
-    "Kenji writes: impossible requests may be memories knocking.",
-    "Thousands of answers gather under theirs. Some are plain. Some are beautiful. Some are poorly translated and still unmistakably human.",
-    "The app does not flatten the world. It lets difference become readable.",
-    "A sponsored chain appears: What should future technology protect about humans? The question could become marketing. Instead, the answers become unexpectedly tender.",
-    "A farmer says technology should protect patience. A musician says mistakes. A child says grandparents' stories.",
-    "A programmer says the right to be unreachable.",
-    "Asha answers: protect the part of us that changes our mind after hearing someone else's pain.",
-    "Kenji answers: protect memory from becoming only data.",
-    "Human message: technology is most human when it protects the parts of us that cannot be optimized without being harmed.",
+    "On the last page, HumanChain asked readers to choose one object near them: a key, a cup, a ticket, a plant, a shoe, a phone, a photograph.",
+    "Then it asked: what has this object watched you survive?",
+    "The answers became the most saved chain of the month.",
+    "A key watched someone stop going back to a house where love had become fear.",
+    "A cup watched someone drink water after three days of forgetting they had a body.",
+    "A train ticket watched someone leave and later forgive themselves for leaving.",
+    "A plant watched someone learn that care can be scheduled before it becomes feeling.",
+    "A phone watched someone not send the cruel message.",
+    "A photograph watched someone remember without drowning.",
+    "Human message: ordinary objects become sacred when they stay beside us while we change.",
   ],
   [
-    "Mila answers: protect tired people from systems that call exhaustion dedication. Tomas answers: protect repair. New is not always better than mended.",
-    "The verdict says future tools should protect dignity, attention, privacy, slowness, language, grief, and the right to be more than productive.",
-    "That verdict becomes the most shared page of the month. People do not share it because it is perfect. They share it because it sounds like something humans should decide before they forget to decide.",
-    "Near the end of the month, a storm cuts power in Mila's neighborhood. Her phone has 19%. The hospital generator hums like an old promise.",
-    "She opens HumanChain once, not to post, only to read. The Daily Chain asks: What light stayed on for you?",
-    "A man in Pakistan writes: my daughter's joke. A woman in Norway writes: the neighbor who shoveled my door without telling me.",
-    "A student in Lagos writes: a stranger's answer that made me eat dinner.",
-    "Mila writes: the light stayed on in people who had no reason to answer me and answered anyway.",
-    "Her battery dies before she sees the reactions.",
-    "Human message: some help is quiet. Quiet help still counts.",
-  ],
-  [
-    "The next morning, the post has been saved 4,012 times. Not viral in the loud way. Useful in the quiet way.",
-    "One user tips 6 WLD with a note: this helped me not send a message I could not unsend.",
-    "Mila sits on the edge of a hospital bed and lets the world be heavy and kind at once.",
-    "The final Human Verdict for the story is not a command. It is a mirror assembled from many rooms.",
-    "It says: being human is carrying what others cannot see, and still becoming visible enough to be helped, corrected, witnessed, and changed.",
-    "It says people do not always need answers first. Sometimes they need accurate company.",
-    "It says money matters, family matters, health matters, dignity matters, but none of them can replace the sentence that arrives at the right hour.",
-    "It says technology becomes human when it increases our ability to notice one another without owning one another.",
-    "Asha saves the verdict. Tomas places it near the register. Kenji translates one line for his father. Mila sends it to herself because some messages need to wait for a future version of us.",
-    "Human message: the right sentence does not solve your life. It gives your life a better next step.",
-  ],
-  [
-    "The story asks readers to add one link before leaving.",
-    "The links come from islands, megacities, villages, suburbs, dorm rooms, shelters, airports, offices, temples, hospitals, kitchens, and sidewalks where people stop walking for ten seconds.",
-    "I am scared, but I am reachable. I am proud, but I can apologize. I am tired, but I can be gentle. I am lost, but I can ask better questions.",
-    "The chain becomes a global room with no ceiling.",
-    "On the last night, HumanChain shows Earth threaded with warm light. It is beautiful, but the beauty matters less than the small actions beneath it.",
-    "A nurse drinks water. A repairman makes a call. A designer takes a walk without headphones. A son places an old photograph beside a bed.",
-    "None of these actions will trend outside the people they touch. Still, the world is mostly held together by things too small to headline.",
-    "Final monthly question: What will you do with the link you were given?",
-    "Mila chooses sleep. Tomas chooses Saturday lunch. Asha chooses one honest boundary. Kenji chooses to ask his father about the blue dress while there is still time.",
-    "Human message: a story becomes real when it changes what someone does after closing it.",
-  ],
-  [
-    "Reader page: If this story found you at the right hour, add your own link to the chain.",
-    "Write one thing you are carrying, one thing that helped, or one sentence another human may need today.",
-    "You can answer privately, publicly, or with voice. You can simply save the story if that is all you have energy for.",
-    "The world does not need your perfect version to receive your real one.",
-    "This month's Human Verdict: people heal more honestly when advice, witness, and action meet in the same place.",
-    "Most repeated truth: I thought I was the only one.",
-    "Most saved answer: rest is not a reward for finishing all need.",
-    "Most tipped link: the light stayed on in people who had no reason to answer me and answered anyway.",
-    "What are you carrying that no one can see?",
-    "Add your link.",
+    "Mara still has difficult days. The story does not pretend otherwise.",
+    "Some mornings the blue door is heavy again. Some calls still go unanswered. Some grief returns wearing a new coat.",
+    "But the plant is alive. The cup holds tea. The key is no longer an accusation. The ticket is tucked into a book, not because she failed to leave, but because she learned there are many kinds of movement.",
+    "Lio still draws impossible suns.",
+    "Mrs. Alvarez still pretends soup is logistics.",
+    "Mara still opens HumanChain when she needs a sentence strong enough to borrow.",
+    "And once a week, she writes one for someone else.",
+    "Final monthly question: what is one small opening you can survive today?",
+    "Add your link if you can. Save this story if saving is all you have.",
+    "Human message: you do not have to open the whole door. Begin where light can enter.",
   ],
 ];
 
@@ -387,6 +351,13 @@ type Tab = "home" | "ask" | "chains" | "stories" | "me";
 
 type StoryArtKind =
   | "cover-symbol"
+  | "closed-door"
+  | "key-ticket"
+  | "repaired-cup"
+  | "open-window"
+  | "plant-door"
+  | "open-door"
+  | "light-opening"
   | "hands"
   | "world-thread"
   | "phone-table"
@@ -776,6 +747,8 @@ function StoriesView({
 }) {
   const [isReading, setIsReading] = useState(false);
   const [page, setPage] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [rating, setRating] = useState(0);
   const current = storyPages[page];
 
   function saveStory() {
@@ -806,7 +779,7 @@ function StoriesView({
           {current.image ? (
             <StoryPaperArt alt={current.image.alt} kind={current.image.art} />
           ) : null}
-          <span className="section-kicker">The Question That Crossed The World</span>
+          <span className="section-kicker">The Door That Waited</span>
           <p>{current.text}</p>
         </article>
         <section className="reader-actions">
@@ -840,10 +813,10 @@ function StoriesView({
       <section className="story-cover">
         <StoryCoverArt />
         <span>April Human Story</span>
-        <h2>The Question That Crossed The World</h2>
+        <h2>The Door That Waited</h2>
         <p>
-          A monthly global story about invisible burdens, verified human
-          answers, and the strangers who help us become visible again.
+          A monthly life story about a blue door, a cracked cup, and the small
+          openings that help a human return.
         </p>
         <button
           onClick={() => {
@@ -858,20 +831,20 @@ function StoriesView({
       <section className="story-pages">
         {[
           {
-            art: "honest-message" as const,
-            title: "The invisible question",
+            art: "closed-door" as const,
+            title: "The blue door",
           },
           {
-            art: "four-windows" as const,
-            title: "Four strangers",
+            art: "key-ticket" as const,
+            title: "Three objects",
           },
           {
-            art: "world-thread" as const,
-            title: "The world answers",
+            art: "open-window" as const,
+            title: "The first opening",
           },
           {
-            art: "verdict-mirror" as const,
-            title: "A verdict forms",
+            art: "repaired-cup" as const,
+            title: "The gold line",
           },
         ].map((chapter, index) => (
           <article
@@ -886,6 +859,41 @@ function StoriesView({
             <h3>{chapter.title}</h3>
           </article>
         ))}
+      </section>
+      <section className="story-rating-card">
+        <span className="section-kicker">Reader response</span>
+        <h3>Rate this monthly story</h3>
+        <div className="rating-actions" aria-label="Story rating">
+          {[1, 2, 3, 4, 5].map((value) => (
+            <button
+              aria-pressed={rating >= value}
+              className={rating >= value ? "active" : ""}
+              key={value}
+              onClick={() => {
+                setRating(value);
+                act("Story rated", `${value}/5 added to this monthly story.`);
+              }}
+              type="button"
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+        <button
+          className={liked ? "like-button active" : "like-button"}
+          onClick={() => {
+            setLiked((value) => !value);
+            act(
+              liked ? "Like removed" : "Story liked",
+              liked
+                ? "Your reaction was removed."
+                : "Your like was added to the monthly story.",
+            );
+          }}
+          type="button"
+        >
+          {liked ? "Liked" : "Like Story"}
+        </button>
       </section>
       <section className="panel">
         <div className="section-heading">
@@ -970,6 +978,67 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <circle className="gold-dot" cx="284" cy="66" r="5" />
         <path className="sketch-line heavy" d="M180 82c0-17 11-28 29-28 18 0 30 11 30 28 0 28-39 24-39 52" />
         <circle className="gold-dot" cx="200" cy="152" r="6" />
+      </>
+    ),
+    "closed-door": (
+      <>
+        <path className="sketch-line heavy" d="M123 48h114v144H123z" />
+        <path className="sketch-line" d="M145 70h70v94h-70z" />
+        <circle className="gold-dot" cx="204" cy="120" r="5" />
+        <path className="gold-line" d="M88 194h184" />
+        <path className="sketch-line" d="M97 194c23-18 48-26 75-24M263 194c-23-18-48-26-75-24" />
+      </>
+    ),
+    "key-ticket": (
+      <>
+        <rect className="sketch-line heavy" height="70" rx="8" width="118" x="168" y="84" />
+        <path className="sketch-line" d="M190 105h70M190 124h48M179 84v70" />
+        <circle className="sketch-line heavy" cx="94" cy="120" r="20" />
+        <path className="gold-line" d="M114 120h72M154 120v19M171 120v13" />
+        <path className="sketch-line" d="M222 154c-13 21-45 20-58 0" />
+      </>
+    ),
+    "repaired-cup": (
+      <>
+        <path className="sketch-line heavy" d="M116 88h116v61c0 30-22 50-58 50s-58-20-58-50V88Z" />
+        <path className="sketch-line" d="M232 109c33-3 45 34 14 50M119 88h110" />
+        <path className="gold-line" d="M174 90l-17 25 20 17-16 27 17 35" />
+        <path className="sketch-line" d="M94 199h164" />
+      </>
+    ),
+    "open-window": (
+      <>
+        <path className="sketch-line heavy" d="M93 62h174v121H93z" />
+        <path className="sketch-line" d="M180 62v121M93 123h174" />
+        <path className="gold-line" d="M184 122c26-26 48-35 79-31" />
+        <path className="sketch-line" d="M109 158c22-17 42-17 62 0M199 159c20-18 41-18 62 0" />
+        <circle className="gold-dot" cx="263" cy="91" r="6" />
+      </>
+    ),
+    "plant-door": (
+      <>
+        <path className="sketch-line heavy" d="M84 55h104v137H84z" />
+        <path className="gold-line" d="M188 139c28-20 51-20 79 0" />
+        <path className="sketch-line" d="M236 176c-3-32 6-55 27-73M263 103c-20 12-37 14-51 5M263 103c18 6 28 20 32 41" />
+        <circle className="gold-dot" cx="188" cy="139" r="5" />
+        <path className="sketch-line" d="M105 192h180" />
+      </>
+    ),
+    "open-door": (
+      <>
+        <path className="sketch-line heavy" d="M103 54h91v141H103zM194 54l65 28v94l-65 19" />
+        <path className="gold-line" d="M194 84c34 18 48 45 42 82" />
+        <circle className="gold-dot" cx="223" cy="129" r="5" />
+        <path className="sketch-line" d="M87 195h192" />
+      </>
+    ),
+    "light-opening": (
+      <>
+        <path className="sketch-line heavy" d="M86 66h188v120H86z" />
+        <path className="sketch-line" d="M131 66v120M229 66v120" />
+        <path className="gold-line" d="M132 186c25-62 48-90 97-120" />
+        <path className="gold-line" d="M132 186h97" />
+        <circle className="gold-dot" cx="229" cy="66" r="6" />
       </>
     ),
     hands: (
