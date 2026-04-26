@@ -82,8 +82,8 @@ const storyImageByPage: Record<
     art: "nurse",
   },
   10: {
-    alt: "A small golden thread leaving a phone and joining a world map",
-    art: "phone-thread",
+    alt: "Mila looking at her phone before sending an honest message",
+    art: "mila-phone",
   },
   14: {
     alt: "An elderly woman at a kitchen table remembering names",
@@ -354,7 +354,7 @@ type StoryArtKind =
   | "world-thread"
   | "phone-table"
   | "nurse"
-  | "phone-thread"
+  | "mila-phone"
   | "memory-table"
   | "train"
   | "repair"
@@ -940,14 +940,16 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
         <path className="sketch-line" d="M62 181h236M70 126h54M236 126h54" />
       </>
     ),
-    "phone-thread": (
+    "mila-phone": (
       <>
-        <rect className="sketch-line heavy" height="88" rx="12" width="54" x="70" y="83" />
-        <path className="gold-line" d="M122 116c58-50 111 35 166-21" />
-        <circle className="gold-dot" cx="122" cy="116" r="5" />
-        <circle className="gold-dot" cx="197" cy="124" r="5" />
-        <circle className="gold-dot" cx="288" cy="95" r="5" />
-        <path className="sketch-line" d="M181 70c44 9 78 39 88 79M151 153c34 22 82 26 124 5" />
+        <path className="sketch-line heavy" d="M138 89c8-29 73-29 82 0 8 27-7 54-41 54s-49-27-41-54Z" />
+        <path className="sketch-line" d="M147 103c18 9 43 9 65 0M159 121c12 8 28 8 40 0" />
+        <path className="sketch-line heavy" d="M109 191c11-39 34-58 70-58s59 19 72 58" />
+        <rect className="sketch-line heavy" height="58" rx="7" width="37" x="203" y="123" />
+        <path className="gold-line" d="M210 142h23M210 154h17M210 166h20" />
+        <path className="sketch-line" d="M154 153c14 17 30 22 49 15M118 184c-18-15-25-31-18-49M263 184c18-15 25-31 18-49" />
+        <path className="gold-line" d="M238 143c27-6 45-2 57 11" />
+        <circle className="gold-dot" cx="296" cy="154" r="5" />
       </>
     ),
     "memory-table": (
