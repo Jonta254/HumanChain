@@ -529,8 +529,8 @@ button {
 .story-cover {
   color: #fffdf8;
   background:
-    linear-gradient(135deg, rgba(18, 50, 39, 0.88), rgba(32, 35, 40, 0.7)),
-    url("https://image.pollinations.ai/prompt/realistic%20cinematic%20cover%20art%20for%20a%20global%20human%20story%20diverse%20people%20in%20different%20cities%20connected%20by%20warm%20gold%20threads%20phones%20windows%20train%20repair%20shop%20hospital%20near%20future%20premium%20no%20text?width=1200&height=1400&seed=2060&nologo=true");
+    linear-gradient(135deg, rgba(22, 31, 34, 0.78), rgba(36, 107, 85, 0.64)),
+    url("https://image.pollinations.ai/prompt/premium%20monthly%20magazine%20cover%20illustration%20pencil%20art%20on%20textured%20ivory%20paper%20for%20a%20global%20human%20story%20diverse%20people%20in%20different%20cities%20connected%20by%20warm%20gold%20threads%20phones%20windows%20train%20repair%20shop%20hospital%20near%20future%20HumanChain%20mood%20graphite%20soft%20shading%20subtle%20gold%20accent%20no%20watermark%20no%20text?width=1200&height=1400&seed=2060&nologo=true");
   background-size: cover;
   background-position: center;
 }
@@ -687,6 +687,10 @@ button {
   object-fit: cover;
   margin-bottom: 16px;
   border-radius: 18px;
+  border: 1px solid #ded2bf;
+  background: #f4ebdc;
+  filter: saturate(0.82) contrast(1.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 253, 248, 0.45);
 }
 
 .story-page .section-kicker {

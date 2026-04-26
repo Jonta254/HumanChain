@@ -68,140 +68,142 @@ const storyImageByPage: Record<
   1: {
     alt: "Realistic hands from different backgrounds holding small objects that matter",
     url: storyArtUrl(
-      "realistic cinematic art close up of human hands from different backgrounds holding small meaningful objects coins photo ticket key soft morning light global human story no text",
+      "premium pencil sketch on warm paper close up of human hands from different backgrounds holding small meaningful objects coins photo ticket key soft morning light global human story delicate graphite lines subtle gold accent no text",
       2041,
     ),
   },
   2: {
     alt: "Futuristic realistic global map of glowing human threads across cities",
     url: storyArtUrl(
-      "realistic futuristic global human network seen from above warm gold threads connecting cities and people holding phones premium cinematic human technology no text",
+      "premium pencil sketch on warm paper futuristic global human network seen from above warm gold threads connecting cities and tiny human figures holding phones delicate graphite crosshatching subtle gold accent no text",
       2042,
     ),
   },
   5: {
     alt: "A phone screen glowing in a quiet break room with a human question open",
     url: storyArtUrl(
-      "cinematic realistic art of a phone glowing on a quiet break room table with coffee and folded uniform nearby emotional human question mood no readable text",
+      "premium pencil sketch on warm paper phone glowing on a quiet break room table with coffee and folded uniform nearby emotional human question mood delicate graphite shading subtle gold light no readable text",
       2050,
     ),
   },
   9: {
     alt: "A tired nurse typing an honest sentence into her phone during a late shift",
     url: storyArtUrl(
-      "realistic cinematic art of a tired nurse in a hospital corridor typing an honest message into her phone during a late shift soft blue light emotional human vulnerability no text",
+      "premium pencil sketch on warm paper tired nurse in a quiet hospital corridor typing an honest message into her phone during a late shift emotional human vulnerability graphite lines subtle blue gray wash no text",
       2051,
     ),
   },
   10: {
     alt: "A small golden thread leaving a phone and joining a world map",
     url: storyArtUrl(
-      "near future cinematic art small golden thread flowing from a phone screen into a subtle world map made of human lights warm premium hopeful no text",
+      "premium pencil sketch on warm paper small golden thread flowing from a phone screen into a subtle hand drawn world map made of human lights warm hopeful no text",
       2052,
     ),
   },
   14: {
     alt: "An elderly woman at a kitchen table remembering names",
     url: storyArtUrl(
-      "realistic cinematic art elderly woman sitting at a kitchen table with old photographs and a cup of tea remembering names warm lamp emotional global human story no text",
+      "premium pencil sketch on warm paper elderly woman sitting at a kitchen table with old photographs and a cup of tea remembering names warm lamp emotional global human story no text",
       2053,
     ),
   },
   18: {
     alt: "A young nurse on a train reading answers on her phone at dawn",
     url: storyArtUrl(
-      "realistic cinematic art young nurse on early morning train reading a phone screen soft blue dawn city window global human story no text",
+      "premium pencil sketch on warm paper young nurse on early morning train reading a phone screen soft dawn city window global human story subtle blue gray shading no text",
       2043,
     ),
   },
   27: {
     alt: "A repair shop counter with a notebook, radio parts, and an unanswered phone",
     url: storyArtUrl(
-      "realistic cinematic art small repair shop counter with open radio parts notebook pencil and unanswered phone warm rain outside emotional father story no text",
+      "premium pencil sketch on warm paper small repair shop counter with open radio parts notebook pencil and unanswered phone warm rain outside emotional father story detailed graphite no text",
       2054,
     ),
   },
   34: {
     alt: "A fisherman repairing a net beside cold water at sunrise",
     url: storyArtUrl(
-      "realistic cinematic art older fisherman repairing a net beside cold water at sunrise quiet hands human dignity global story no text",
+      "premium pencil sketch on warm paper older fisherman repairing a net beside cold water at sunrise quiet hands human dignity global story delicate graphite no text",
       2044,
     ),
   },
   43: {
     alt: "A private anonymous question floating above a city at night",
     url: storyArtUrl(
-      "cinematic near future art anonymous verified human question represented as a soft glowing card above a rainy city at night private emotional no readable text",
+      "premium pencil sketch on warm paper anonymous verified human question represented as a soft glowing blank card above a rainy city at night private emotional subtle gold accent no readable text",
       2055,
     ),
   },
   51: {
     alt: "A small apartment table with phones, tea, and handwritten notes from different languages",
     url: storyArtUrl(
-      "realistic cinematic art small apartment table with phones tea handwritten notes in many languages warm lamp global human connection no readable text",
+      "premium pencil sketch on warm paper small apartment table with phones tea handwritten notes in many languages warm lamp global human connection delicate graphite no readable text",
       2045,
     ),
   },
   64: {
     alt: "A caregiver placing an old ocean photograph beside a bed",
     url: storyArtUrl(
-      "realistic cinematic art caregiver placing an old ocean photograph beside an elderly parent's bed soft evening light memory tenderness no text",
+      "premium pencil sketch on warm paper caregiver placing an old ocean photograph beside an elderly parent's bed soft evening light memory tenderness no text",
       2056,
     ),
   },
   72: {
     alt: "A global wall of small portraits and voice waves glowing softly",
     url: storyArtUrl(
-      "realistic futuristic installation wall of small human portraits and voice waveforms glowing softly museum of humanity premium warm no text",
+      "premium pencil sketch on warm paper futuristic installation wall of small human portraits and voice waveforms glowing softly museum of humanity graphite with subtle gold accents no text",
       2046,
     ),
   },
   81: {
     alt: "Two distant countries represented by windows lit in cold and warm cities",
     url: storyArtUrl(
-      "cinematic realistic art two distant cities one cold quiet one warm crowded connected by subtle golden thread lit apartment windows loneliness room no text",
+      "premium pencil sketch on warm paper two distant cities one cold quiet one warm crowded connected by subtle golden thread lit apartment windows loneliness room no text",
       2057,
     ),
   },
   93: {
     alt: "People in different countries looking at the same sunrise through windows",
     url: storyArtUrl(
-      "realistic cinematic split scene people in different countries looking at the same sunrise through windows warm human hope global no text",
+      "premium pencil sketch on warm paper split scene people in different countries looking at the same sunrise through windows warm human hope global graphite line art no text",
       2047,
     ),
   },
   106: {
     alt: "A future technology question represented by humans around a soft transparent screen",
     url: storyArtUrl(
-      "realistic near future cinematic art diverse humans standing around a soft transparent screen discussing future technology warm ethical human mood no readable text",
+      "premium pencil sketch on warm paper diverse humans standing around a soft transparent screen discussing future technology warm ethical human mood graphite and subtle gold no readable text",
       2058,
     ),
   },
   118: {
     alt: "A quiet futuristic public square where strangers read human messages",
     url: storyArtUrl(
-      "realistic near future public square at dusk diverse strangers reading soft glowing human messages on transparent screens calm premium no text",
+      "premium pencil sketch on warm paper near future public square at dusk diverse strangers reading soft glowing human messages on transparent screens calm premium no text",
       2048,
     ),
   },
   129: {
     alt: "A phone with one percent battery glowing in a dark hospital room",
     url: storyArtUrl(
-      "realistic cinematic art phone with very low battery glowing beside a hospital bed in dark room generator light emotional quiet no readable text",
+      "premium pencil sketch on warm paper phone with very low battery glowing beside a hospital bed in dark room generator light emotional quiet no readable text",
       2059,
     ),
   },
   142: {
     alt: "A beautiful realistic global chain of light crossing oceans and cities",
     url: storyArtUrl(
-      "realistic cinematic earth from high altitude with subtle warm threads of light crossing oceans and cities human chain hopeful premium no text",
+      "premium pencil sketch on warm paper earth from high altitude with subtle warm threads of light crossing oceans and cities human chain hopeful graphite with gold accent no text",
       2049,
     ),
   },
 };
 
 function storyArtUrl(prompt: string, seed: number) {
-  const encodedPrompt = encodeURIComponent(prompt);
+  const artDirection =
+    "consistent editorial illustration style, pencil art on textured ivory paper, hand drawn graphite, soft shading, premium monthly magazine, no watermark, no text";
+  const encodedPrompt = encodeURIComponent(`${prompt}, ${artDirection}`);
 
   return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=900&seed=${seed}&nologo=true`;
 }
