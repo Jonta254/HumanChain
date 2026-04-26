@@ -970,14 +970,23 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
   const nodes = {
     "cover-symbol": (
       <>
-        <circle className="sketch-line heavy" cx="180" cy="112" r="72" />
-        <path className="sketch-line" d="M113 97c41-15 87-15 134 0M112 130c42 18 90 18 136 0M180 40c-22 47-22 97 0 144M180 40c23 47 23 97 0 144" />
-        <path className="gold-line" d="M76 125c41-36 77 17 108-30 31-45 63 14 100-29" />
-        <circle className="gold-dot" cx="76" cy="125" r="5" />
-        <circle className="gold-dot" cx="184" cy="95" r="6" />
-        <circle className="gold-dot" cx="284" cy="66" r="5" />
-        <path className="sketch-line heavy" d="M180 82c0-17 11-28 29-28 18 0 30 11 30 28 0 28-39 24-39 52" />
-        <circle className="gold-dot" cx="200" cy="152" r="6" />
+        <path className="sketch-line heavy" d="M54 188h252" />
+        <path className="sketch-line heavy" d="M225 54h63v134h-63z" />
+        <path className="gold-line" d="M225 188c19-52 38-84 63-134" />
+        <circle className="gold-dot" cx="250" cy="120" r="5" />
+        <circle className="sketch-line" cx="142" cy="67" r="23" />
+        <path className="sketch-line heavy" d="M103 188c8-50 22-77 40-77 20 0 34 27 43 77" />
+        <rect className="sketch-line heavy" height="45" rx="6" width="31" x="165" y="116" />
+        <path className="gold-line" d="M172 132h18M172 144h14" />
+        <path className="sketch-line" d="M124 116c13 16 26 23 41 22M98 188c-15-15-20-31-16-50M194 188c17-14 27-31 29-51" />
+        <path className="gold-line" d="M196 133c38-34 70 13 101-25" />
+        <circle className="gold-dot" cx="196" cy="133" r="5" />
+        <circle className="gold-dot" cx="297" cy="108" r="5" />
+        <rect className="sketch-line" height="31" rx="4" width="52" x="64" y="113" />
+        <path className="sketch-line" d="M75 128h30M80 139h20" />
+        <circle className="sketch-line" cx="72" cy="164" r="13" />
+        <path className="gold-line" d="M85 164h29M103 164v11" />
+        <path className="sketch-line" d="M206 187c12-21 36-21 50 0" />
       </>
     ),
     "closed-door": (
