@@ -86,5 +86,6 @@ Required before live World features work:
 
 - `APP_ID`
 - `WORLD_RP_ID`
+- `WORLD_RP_SIGNING_SECRET`
 - `DEV_PORTAL_API_KEY`
 - `NEXT_PUBLIC_HUMANCHAIN_TREASURY`

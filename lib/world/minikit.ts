@@ -122,8 +122,8 @@ export async function inviteContactsToHumanChain(message: string) {
   return result.data.contacts;
 }
 
-export function sendSuccessHaptic() {
-  MiniKit.commands.sendHapticFeedback({
+export async function sendSuccessHaptic() {
+  return MiniKit.sendHapticFeedback({
     hapticsType: "notification",
     style: "success",
   });

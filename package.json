@@ -10,12 +10,13 @@
   },
   "dependencies": {
     "@worldcoin/idkit": "latest",
-    "@worldcoin/minikit-js": "latest",
     "@worldcoin/mini-apps-ui-kit-react": "latest",
+    "@worldcoin/minikit-js": "latest",
+    "lucide-react": "latest",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest"
+    "viem": "^2.48.4"
   },
   "devDependencies": {
     "@types/node": "latest",

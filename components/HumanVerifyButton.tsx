@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
-  IDKitWidget,
-  VerificationLevel,
-  type ISuccessResult,
+  CredentialRequest,
+  IDKitRequestWidget,
+  type IDKitResult,
+  type RpContext,
 } from "@worldcoin/idkit";
 
 type HumanVerifyButtonProps = {
@@ -20,8 +22,27 @@ export function HumanVerifyButton({
   onVerified,
 }: HumanVerifyButtonProps) {
   const appId = process.env.NEXT_PUBLIC_WORLD_APP_ID as `app_${string}`;
+  const [isOpen, setIsOpen] = useState(false);
+  const [rpContext, setRpContext] = useState<RpContext | null>(null);
 
-  async function handleVerify(proof: ISuccessResult) {
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch("/api/world/rp-context")
+      .then((response) => response.json())
+      .then((data: { rpContext: RpContext }) => {
+        if (isMounted) setRpContext(data.rpContext);
+      })
+      .catch(() => {
+        if (isMounted) setRpContext(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function handleVerify(proof: IDKitResult) {
     const response = await fetch("/api/world/verify-proof", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -38,19 +59,28 @@ export function HumanVerifyButton({
   }
 
   return (
-    <IDKitWidget
-      action={action}
-      app_id={appId}
-      handleVerify={handleVerify}
-      onSuccess={onVerified}
-      signal={signal}
-      verification_level={VerificationLevel.Orb}
-    >
-      {({ open }) => (
-        <button onClick={open} type="button">
-          {label}
-        </button>
-      )}
-    </IDKitWidget>
+    <>
+      <button
+        disabled={!rpContext}
+        onClick={() => setIsOpen(true)}
+        type="button"
+      >
+        {label}
+      </button>
+      {rpContext ? (
+        <IDKitRequestWidget
+          action={action}
+          allow_legacy_proofs={false}
+          app_id={appId}
+          autoClose
+          constraints={CredentialRequest("proof_of_human", { signal })}
+          handleVerify={handleVerify}
+          onOpenChange={setIsOpen}
+          onSuccess={() => onVerified?.()}
+          open={isOpen}
+          rp_context={rpContext}
+        />
+      ) : null}
+    </>
   );
 }
