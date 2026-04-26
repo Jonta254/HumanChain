@@ -771,6 +771,8 @@ button {
 }
 
 .story-page {
+  display: flex;
+  flex-direction: column;
   min-height: 62vh;
   padding: 18px;
   border: 1px solid var(--line);
@@ -864,6 +866,27 @@ button {
   color: var(--ink);
   font-size: 1.26rem;
   line-height: 1.65;
+}
+
+.story-thread-note {
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.story-thread-note span {
+  display: block;
+  color: var(--green);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.story-thread-note strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.42;
 }
 
 .toast {

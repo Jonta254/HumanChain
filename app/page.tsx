@@ -328,15 +328,49 @@ const globalStoryChapters = [
 
 const storyBeats = globalStoryChapters.flat();
 
+const ambientStoryArt: StoryArtKind[] = [
+  "closed-door",
+  "key-ticket",
+  "repaired-cup",
+  "open-window",
+  "plant-door",
+  "open-door",
+  "light-opening",
+  "phone-thread",
+  "anonymous",
+  "windows",
+  "add-link",
+];
+
 const storyPages = storyBeats.map((text, index) => {
-  const image = storyImageByPage[index + 1] ?? null;
+  const image =
+    storyImageByPage[index + 1] ??
+    (text.length < 260
+      ? {
+          alt: "Symbolic paper art reflecting this story moment",
+          art: ambientStoryArt[index % ambientStoryArt.length],
+        }
+      : null);
+  const nextText = storyBeats[index + 1];
 
   return {
     page: index + 1,
     text,
     image,
+    nextHint: nextText
+      ? `Next: ${createStoryHint(nextText)}`
+      : "Next: add your own link to the chain.",
   };
 });
+
+function createStoryHint(text: string) {
+  const cleaned = text.replace(/^Human message:\s*/i, "");
+  const firstSentence = cleaned.split(".")[0];
+
+  return firstSentence.length > 78
+    ? `${firstSentence.slice(0, 78).trim()}...`
+    : firstSentence;
+}
 
 const wldActions = [
   ["1 WLD", "Tip, Golden Link, or streak restore"],
@@ -781,6 +815,10 @@ function StoriesView({
           ) : null}
           <span className="section-kicker">The Door That Waited</span>
           <p>{current.text}</p>
+          <div className="story-thread-note">
+            <span>Next thread</span>
+            <strong>{current.nextHint}</strong>
+          </div>
         </article>
         <section className="reader-actions">
           <button
