@@ -59,12 +59,30 @@ const initialLinks = [
 ];
 
 const storyImages = [
-  "https://images.unsplash.com/photo-1494059980473-813e73ee784b?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1473773508845-188df298d2d1?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=85",
-  "https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=1200&q=85",
+  {
+    alt: "A realistic sunrise over a busy African city street",
+    url: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    alt: "A futuristic city walkway with light, glass, and human movement",
+    url: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    alt: "People sharing tea and conversation at a small table",
+    url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    alt: "Hands working carefully in a small independent business",
+    url: "https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    alt: "A realistic rainy city street glowing at dusk",
+    url: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    alt: "A warm portrait-like scene of community and support",
+    url: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1200&q=85",
+  },
 ];
 
 const storyBeats = [
@@ -223,7 +241,7 @@ const storyBeats = [
 
 const storyPages = Array.from({ length: 150 }, (_, index) => {
   const image =
-    index === 0 || (index + 1) % 15 === 0
+    index === 0 || index === 1 || (index + 1) % 15 === 0
       ? storyImages[Math.floor(index / 15) % storyImages.length]
       : null;
 
@@ -633,7 +651,7 @@ function StoriesView({
         </section>
         <article className="story-page">
           {current.image ? (
-            <img alt={`Story scene page ${current.page}`} src={current.image} />
+            <img alt={current.image.alt} src={current.image.url} />
           ) : null}
           <span className="section-kicker">The Day I Started Again</span>
           <p>{current.text}</p>
