@@ -971,22 +971,22 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
     "cover-symbol": (
       <>
         <path className="sketch-line heavy" d="M54 188h252" />
-        <path className="sketch-line heavy" d="M225 54h63v134h-63z" />
-        <path className="gold-line" d="M225 188c19-52 38-84 63-134" />
-        <circle className="gold-dot" cx="250" cy="120" r="5" />
-        <circle className="sketch-line" cx="142" cy="67" r="23" />
-        <path className="sketch-line heavy" d="M103 188c8-50 22-77 40-77 20 0 34 27 43 77" />
-        <rect className="sketch-line heavy" height="45" rx="6" width="31" x="165" y="116" />
-        <path className="gold-line" d="M172 132h18M172 144h14" />
-        <path className="sketch-line" d="M124 116c13 16 26 23 41 22M98 188c-15-15-20-31-16-50M194 188c17-14 27-31 29-51" />
-        <path className="gold-line" d="M196 133c38-34 70 13 101-25" />
-        <circle className="gold-dot" cx="196" cy="133" r="5" />
-        <circle className="gold-dot" cx="297" cy="108" r="5" />
-        <rect className="sketch-line" height="31" rx="4" width="52" x="64" y="113" />
-        <path className="sketch-line" d="M75 128h30M80 139h20" />
-        <circle className="sketch-line" cx="72" cy="164" r="13" />
-        <path className="gold-line" d="M85 164h29M103 164v11" />
-        <path className="sketch-line" d="M206 187c12-21 36-21 50 0" />
+        <path className="sketch-line heavy" d="M119 45h122v143H119z" />
+        <path className="sketch-line" d="M139 66h82v100h-82z" />
+        <path className="gold-line" d="M122 188c24-71 52-111 116-143" />
+        <circle className="gold-dot" cx="238" cy="45" r="6" />
+        <circle className="sketch-fill" cx="180" cy="91" r="19" />
+        <path className="sketch-fill" d="M142 174c6-39 18-62 38-62s32 23 38 62Z" />
+        <rect className="sketch-line" height="34" rx="5" width="24" x="196" y="119" />
+        <path className="gold-line" d="M202 132h12M202 142h9" />
+        <path className="gold-line" d="M220 132c28-19 45-44 52-76" />
+        <circle className="gold-dot" cx="272" cy="56" r="5" />
+        <circle className="sketch-line" cx="77" cy="129" r="17" />
+        <path className="gold-line" d="M94 129h34M113 129v12" />
+        <path className="sketch-line" d="M259 108h44v36h-44zM268 123h25" />
+        <path className="sketch-line" d="M65 76h42v30H65zM76 91h20" />
+        <path className="gold-line" d="M93 105c31 28 66 33 105 27" />
+        <path className="sketch-line" d="M140 188c21-13 58-13 80 0" />
       </>
     ),
     "closed-door": (
