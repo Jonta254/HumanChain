@@ -301,6 +301,66 @@ button {
   font-weight: 800;
 }
 
+.daily-card,
+.verdict-builder,
+.chain-score-card {
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--paper-strong);
+  box-shadow: 0 10px 28px rgba(62, 48, 31, 0.06);
+}
+
+.daily-card {
+  background: linear-gradient(135deg, #fffdf8, #f0f7f3);
+}
+
+.daily-card h2,
+.verdict-builder h2,
+.chain-score-card h2 {
+  margin: 6px 0;
+  font-size: 1.22rem;
+  line-height: 1.16;
+}
+
+.daily-card p,
+.chain-score-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.42;
+}
+
+.daily-reward {
+  display: inline-flex;
+  padding: 6px 8px;
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(36, 107, 85, 0.1);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.daily-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.daily-actions button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--paper-strong);
+  background: var(--ink);
+}
+
+.daily-actions button:disabled {
+  color: #928c83;
+  background: #e6ded2;
+}
+
 .streak-card h2,
 .pulse-card h2,
 .today-chain h2,
@@ -527,6 +587,32 @@ button {
   color: var(--gold);
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.verdict-builder {
+  color: var(--paper-strong);
+  background:
+    linear-gradient(135deg, rgba(32, 35, 40, 0.95), rgba(36, 107, 85, 0.84)),
+    radial-gradient(circle at 88% 20%, rgba(185, 130, 24, 0.32), transparent 30%);
+}
+
+.verdict-builder .section-kicker {
+  color: rgba(255, 253, 248, 0.8);
+}
+
+.verdict-parts {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.verdict-parts button {
+  min-height: 42px;
+  border: 1px solid rgba(255, 253, 248, 0.2);
+  border-radius: 14px;
+  color: var(--paper-strong);
+  background: rgba(255, 253, 248, 0.1);
+  text-align: left;
 }
 
 .chip-row button,
@@ -951,6 +1037,24 @@ button {
   gap: 10px;
 }
 
+.category-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.category-strip button {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: #fffcf6;
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .shelf-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -1022,6 +1126,46 @@ button {
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.32;
+}
+
+.creator-card,
+.trust-card {
+  display: grid;
+  gap: 8px;
+}
+
+.creator-row {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 58px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fffcf6;
+  text-align: left;
+}
+
+.creator-row span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.34;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.trust-grid button {
+  min-height: 54px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fffcf6;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .compact-actions {
@@ -1117,6 +1261,35 @@ button {
 .library-row {
   width: 100%;
   margin-top: 8px;
+}
+
+.chain-score-card {
+  color: var(--paper-strong);
+  background:
+    linear-gradient(135deg, rgba(32, 35, 40, 0.96), rgba(102, 87, 217, 0.72)),
+    radial-gradient(circle at 78% 18%, rgba(255, 253, 248, 0.22), transparent 34%);
+}
+
+.chain-score-card .section-kicker {
+  color: rgba(255, 253, 248, 0.8);
+}
+
+.chain-score-card h2 {
+  font-size: 2.35rem;
+}
+
+.score-bars {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.score-bars .meter i {
+  background: linear-gradient(90deg, #fffdf8, var(--gold));
+}
+
+.score-bars .meter::after {
+  background: rgba(255, 253, 248, 0.18);
 }
 
 .treasure-profile {

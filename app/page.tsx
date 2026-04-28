@@ -572,6 +572,30 @@ const chainFields = [
     mood: "belonging",
     detail: "Language, food, music, migration, identity, and human customs across countries.",
   },
+  {
+    name: "Health & Healing",
+    members: "22.6k",
+    mood: "recovery",
+    detail: "Daily strength, mental health, caregiving, body changes, and honest survival notes.",
+  },
+  {
+    name: "Migration & Home",
+    members: "16.9k",
+    mood: "memory",
+    detail: "Humans between countries sharing documents, loneliness, hope, work, and belonging.",
+  },
+  {
+    name: "Youth & Future",
+    members: "39.7k",
+    mood: "future",
+    detail: "Young humans asking about skills, identity, ambition, school, pressure, and purpose.",
+  },
+  {
+    name: "Parents & Children",
+    members: "20.5k",
+    mood: "care",
+    detail: "Real lessons from parents, guardians, children, teachers, and family builders.",
+  },
 ];
 
 const profileBadges = [
@@ -583,11 +607,52 @@ const profileBadges = [
 
 const pointRules = [
   ["Daily check-in", "+10 HP"],
+  ["Answer Daily Human", "+18 HP"],
   ["Answer a human", "+15 HP"],
   ["Ask a useful question", "+20 HP"],
   ["Add a chain link", "+12 HP"],
+  ["Enter a field", "+6 HP"],
   ["Read a story", "+8 HP"],
+  ["Give a trusted report", "+10 HP"],
   ["Publish accepted story", "+120 HP"],
+];
+
+const dailyHumanQuestion = {
+  title: "What truth did life teach you this week?",
+  detail: "Every verified human can answer once. Best answers become tomorrow's World Verdict.",
+  reward: "+18 HP",
+};
+
+const storyCategories = [
+  "World Stories",
+  "Money Stories",
+  "Faith Stories",
+  "Human Lessons",
+  "African Stories",
+  "Founder Stories",
+];
+
+const worldVerdictParts = [
+  "What most humans said",
+  "Best answer",
+  "Country differences",
+  "Hard truth",
+  "Final verdict",
+];
+
+const creatorEconomy = [
+  ["Story tips", "Readers reward stories that move them."],
+  ["Featured answers", "Top answers can earn visibility and future rewards."],
+  ["Premium reflections", "Deep Story and Deep Verdict unlocks support creators."],
+  ["Chain boosts", "Humans can boost important fields and links with WLD."],
+];
+
+const trustTools = [
+  "Verified-only publishing",
+  "Story review queue",
+  "Report harmful content",
+  "Anti-spam question limits",
+  "Blocked-topic safety review",
 ];
 
 type Tab = "home" | "ask" | "chains" | "stories" | "me";
@@ -644,6 +709,7 @@ export default function HumanChainApp() {
   const [links, setLinks] = useState(initialLinks);
   const [savedItems, setSavedItems] = useState(3);
   const [points, setPoints] = useState(420);
+  const [dailyAnswered, setDailyAnswered] = useState(false);
 
   function act(title: string, detail: string) {
     setToast({ title, detail });
@@ -697,13 +763,16 @@ export default function HumanChainApp() {
         return (
           <HomeView
             act={act}
+            dailyAnswered={dailyAnswered}
+            earnPoints={earnPoints}
             points={points}
+            setDailyAnswered={setDailyAnswered}
             setTab={setTab}
             streak={streak}
           />
         );
     }
-  }, [links, points, savedItems, streak, tab]);
+  }, [dailyAnswered, links, points, savedItems, streak, tab]);
 
   return (
     <main className="app-shell">
@@ -729,12 +798,18 @@ export default function HumanChainApp() {
 
 function HomeView({
   act,
+  dailyAnswered,
+  earnPoints,
   points,
+  setDailyAnswered,
   setTab,
   streak,
 }: {
   act: (title: string, detail: string) => void;
+  dailyAnswered: boolean;
+  earnPoints: EarnPoints;
   points: number;
+  setDailyAnswered: React.Dispatch<React.SetStateAction<boolean>>;
   setTab: (tab: Tab) => void;
   streak: number;
 }) {
@@ -819,6 +894,36 @@ function HomeView({
         <div className="points-ring">
           <strong>{Math.min(100, Math.round(points / 10))}%</strong>
           <span>Level 2</span>
+        </div>
+      </section>
+
+      <section className="daily-card">
+        <div className="section-heading">
+          <span>HumanChain Daily</span>
+          <CalendarCheck size={18} />
+        </div>
+        <span className="daily-reward">{dailyHumanQuestion.reward}</span>
+        <h2>{dailyHumanQuestion.title}</h2>
+        <p>{dailyHumanQuestion.detail}</p>
+        <div className="daily-actions">
+          <button
+            disabled={dailyAnswered}
+            onClick={() => {
+              if (dailyAnswered) {
+                act("Already answered", "Come back tomorrow for a new global question.");
+                return;
+              }
+
+              setDailyAnswered(true);
+              earnPoints(18, "Your Daily Human answer entered today's global verdict.");
+            }}
+            type="button"
+          >
+            {dailyAnswered ? "Answered Today" : "Answer Daily"}
+          </button>
+          <button onClick={() => setTab("ask")} type="button">
+            See answers
+          </button>
         </div>
       </section>
 
@@ -1001,6 +1106,30 @@ function AskView({
         </div>
       </section>
 
+      <section className="verdict-builder">
+        <span className="section-kicker">Premium World Verdict</span>
+        <h2>6 WLD turns answers into a real human report.</h2>
+        <div className="verdict-parts">
+          {worldVerdictParts.map((part) => (
+            <button
+              key={part}
+              onClick={() => act(part, "This section appears when enough verified answers arrive.")}
+              type="button"
+            >
+              {part}
+            </button>
+          ))}
+        </div>
+        <button
+          className="primary-command"
+          onClick={() => act("6 WLD Deep Verdict", "MiniKit Pay will unlock the full World Verdict.")}
+          type="button"
+        >
+          <CircleDollarSign size={18} />
+          Build Deep Verdict
+        </button>
+      </section>
+
       <section className="panel">
         <div className="section-heading">
           <span>Questions needing humans</span>
@@ -1027,7 +1156,13 @@ function AskView({
           <Radio size={18} />
         </div>
         <div className="compact-actions">
-          <button onClick={() => act("Voice answer", "Record up to 60 seconds.")} type="button">
+          <button
+            onClick={() => {
+              earnPoints(15, "Voice answers carry human tone and earn answer points.");
+              act("Voice answer", "Record up to 60 seconds.");
+            }}
+            type="button"
+          >
             Voice answer with emotion
           </button>
           <button onClick={() => act("Country answer", "Answer as your culture sees it.")} type="button">
@@ -1087,7 +1222,10 @@ function ChainsView({
             </div>
             <p>{field.detail}</p>
             <button
-              onClick={() => act(`${field.name} joined`, `You entered the ${field.mood} field.`)}
+              onClick={() => {
+                earnPoints(6, `You entered ${field.name} and expanded your human map.`);
+                act(`${field.name} joined`, `You entered the ${field.mood} field.`);
+              }}
               type="button"
             >
               Enter field
@@ -1112,7 +1250,13 @@ function ChainsView({
         </button>
       </section>
       <section className="chain-tools">
-        <button onClick={() => act("Chain Circle", "Invite 12 verified humans around one topic.")} type="button">
+        <button
+          onClick={() => {
+            earnPoints(6, "Starting a circle grows field activity.");
+            act("Chain Circle", "Invite 12 verified humans around one topic.");
+          }}
+          type="button"
+        >
           <Users size={17} />
           Circle
         </button>
@@ -1322,8 +1466,19 @@ function StoriesView({
       </section>
       <section className="panel story-market">
         <div className="section-heading">
-          <span>Story shelf</span>
+          <span>Published Story Library</span>
           <Library size={18} />
+        </div>
+        <div className="category-strip">
+          {storyCategories.map((category) => (
+            <button
+              key={category}
+              onClick={() => act(category, "This story category is now selected.")}
+              type="button"
+            >
+              {category}
+            </button>
+          ))}
         </div>
         {storyShelf.map((story) => (
           <article className="shelf-row" key={story.title}>
@@ -1384,6 +1539,43 @@ function StoriesView({
             <span key={step}>
               {index + 1}. {step}
             </span>
+          ))}
+        </div>
+      </section>
+      <section className="panel creator-card">
+        <div className="section-heading">
+          <span>WLD creator economy</span>
+          <Wallet size={18} />
+        </div>
+        {creatorEconomy.map(([title, detail]) => (
+          <button
+            className="creator-row"
+            key={title}
+            onClick={() => act(title, detail)}
+            type="button"
+          >
+            <strong>{title}</strong>
+            <span>{detail}</span>
+          </button>
+        ))}
+      </section>
+      <section className="panel trust-card">
+        <div className="section-heading">
+          <span>Moderation and trust</span>
+          <ShieldCheck size={18} />
+        </div>
+        <div className="trust-grid">
+          {trustTools.map((tool) => (
+            <button
+              key={tool}
+              onClick={() => {
+                earnPoints(10, "Trusted reports protect HumanChain quality.");
+                act(tool, "Trust action queued for review.");
+              }}
+              type="button"
+            >
+              {tool}
+            </button>
           ))}
         </div>
       </section>
@@ -1875,6 +2067,19 @@ function MeView({
   return (
     <div className="screen">
       <TopBar title="Treasure Profile" subtitle="Your verified human chain." />
+      <section className="chain-score-card">
+        <span className="section-kicker">Chain Score</span>
+        <h2>{Math.round(points / 8 + streak * 9)}</h2>
+        <p>
+          Built from points, streak, answers, saved stories, verified badges,
+          tips, and countries reached.
+        </p>
+        <div className="score-bars">
+          <Meter label="Helpfulness" value={76} />
+          <Meter label="Trust" value={68} />
+          <Meter label="Reach" value={54} />
+        </div>
+      </section>
       <section className="treasure-profile">
         <div className="treasure-mark">
           <div className="avatar">J</div>
