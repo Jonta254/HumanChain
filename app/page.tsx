@@ -376,6 +376,95 @@ const storyPages = storyBeats.map((text, index) => {
   };
 });
 
+const bitcoinWorldStory = {
+  title: "One Seed, One World",
+  subtitle: "Bitcoin, World, and the Human Chain",
+  author: "written in Africa by only1",
+  price: "2 WLD",
+  pages: [
+    {
+      art: "earth-chain" as const,
+      text: "In a small room somewhere on earth, a person using the name Satoshi wrote an idea that did not sound rich at first. It sounded like a seed: money that could move between people without asking a bank to stand in the middle.",
+    },
+    {
+      art: "phone-table" as const,
+      text: "Bitcoin began as software, a white paper, and a question: what if trust could be shared by a network instead of guarded by one office? The first believers were not buying a lifestyle. They were testing a machine for agreement.",
+    },
+    {
+      art: "world-thread" as const,
+      text: "The machine was the blockchain. Every block carried records. Every record was checked by many computers. The chain did not ask people to love each other. It asked them to verify the same truth.",
+    },
+    {
+      art: "key-ticket" as const,
+      text: "To own bitcoin was to hold a key. Not a golden key for showing off, but a private key that meant: this belongs to me because the network can prove it. Lose the key, and the lesson became painfully human.",
+    },
+    {
+      art: "low-battery" as const,
+      text: "At first, Bitcoin was quiet. Then it became a rumor, then a risk, then a price on screens, then a story families argued about at tables. Some saw freedom. Some saw danger. Some only saw numbers moving too fast.",
+    },
+    {
+      art: "public-square" as const,
+      text: "What Bitcoin became was bigger than a coin. It became a public square for one question: who should control value when the world no longer trusts every gatekeeper?",
+    },
+    {
+      art: "verdict-mirror" as const,
+      text: "But Bitcoin also revealed something hard. A network can prove coins moved, but it cannot prove the person behind a screen is real, honest, or in need. Money can travel globally while humanity still remains hidden.",
+    },
+    {
+      art: "cover-symbol" as const,
+      text: "That is where World enters the reflection. World asks another question: if the internet is filling with bots and artificial voices, how do real humans prove they are human without giving away their whole life?",
+    },
+    {
+      art: "honest-message" as const,
+      text: "Bitcoin gave the world a way to verify value. World gives the world a way to verify humanness. One is a chain of money. One is a chain of people. HumanChain stands where those two lessons meet.",
+    },
+    {
+      art: "hands" as const,
+      text: "In Africa, this story is not abstract. People know what it means to wait for payments, to mistrust systems, to be talented but unseen, to need a global door that does not ask where your passport was printed.",
+    },
+    {
+      art: "net" as const,
+      text: "Bitcoin taught us that value can cross borders. World suggests that identity can also cross borders. HumanChain asks for the next step: can verified humans cross borders with answers, stories, warnings, prayers, and help?",
+    },
+    {
+      art: "reply-ribbon" as const,
+      text: "A coin by itself does not comfort a lonely person. A verified answer can. A payment can reward a storyteller. A tip can thank a stranger. A question can travel farther when WLD gives it weight.",
+    },
+    {
+      art: "future-screen" as const,
+      text: "The future will not be only about owning digital money. It will be about knowing which voices are human, which communities are real, and which networks deserve trust when everything online can be copied.",
+    },
+    {
+      art: "train" as const,
+      text: "Bitcoin was the train that showed value could move without old rails. World is building a station for real people. HumanChain can become the place where those people speak before they transact.",
+    },
+    {
+      art: "light-opening" as const,
+      text: "The lesson is simple enough to remember: Bitcoin made scarcity digital. World makes humanness visible. HumanChain makes that visibility useful by turning humans into a living chain of meaning.",
+    },
+    {
+      art: "add-link" as const,
+      text: "So the story does not end with Satoshi, price charts, or headlines. It ends with a verified human opening the app and adding one link: what should value mean if the whole world can finally answer?",
+    },
+  ],
+};
+
+const bitcoinWorldPages = bitcoinWorldStory.pages.map((page, index) => {
+  const nextText = bitcoinWorldStory.pages[index + 1]?.text;
+
+  return {
+    page: index + 1,
+    text: page.text,
+    image: {
+      alt: `${bitcoinWorldStory.title} page ${index + 1} symbolic art`,
+      art: page.art,
+    },
+    nextHint: nextText
+      ? `Next: ${createStoryHint(nextText)}`
+      : "Next: carry this question into the chain.",
+  };
+});
+
 function createStoryHint(text: string) {
   const cleaned = text.replace(/^Human message:\s*/i, "");
   const firstSentence = cleaned.split(".")[0];
@@ -426,9 +515,9 @@ const storyShelf = [
   },
   {
     title: "Bitcoin By Satoshi",
-    label: "Short Origin Story",
-    detail: "A human-readable story about trust, money, and the first block.",
-    price: "2 WLD",
+    label: "Published Short Story",
+    detail: "One Seed, One World: Bitcoin, World, and the Human Chain.",
+    price: "Read",
   },
   {
     title: "The ORB",
@@ -1029,25 +1118,38 @@ function StoriesView({
   setSavedItems: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const [isReading, setIsReading] = useState(false);
+  const [isReadingBitcoin, setIsReadingBitcoin] = useState(false);
   const [page, setPage] = useState(0);
   const [liked, setLiked] = useState(false);
   const [rating, setRating] = useState(0);
-  const current = storyPages[page];
+  const activePages = isReadingBitcoin ? bitcoinWorldPages : storyPages;
+  const current = activePages[page];
+  const activeTitle = isReadingBitcoin
+    ? bitcoinWorldStory.title
+    : "The Door That Waited";
+  const activeByline = isReadingBitcoin ? bitcoinWorldStory.author : "April Human Story";
 
   function saveStory() {
     setSavedItems((value) => value + 1);
     keepStreak("The monthly Human Story was saved to your library.");
   }
 
-  if (isReading) {
+  if (isReading || isReadingBitcoin) {
     return (
       <div className="screen story-reader-screen">
         <section className="reader-top">
-          <button onClick={() => setIsReading(false)} type="button">
+          <button
+            onClick={() => {
+              setIsReading(false);
+              setIsReadingBitcoin(false);
+              setPage(0);
+            }}
+            type="button"
+          >
             Cover
           </button>
           <span>
-            Page {current.page} / {storyPages.length}
+            Page {current.page} / {activePages.length}
           </span>
           <button
             onClick={() =>
@@ -1062,7 +1164,8 @@ function StoriesView({
           {current.image ? (
             <StoryPaperArt alt={current.image.alt} kind={current.image.art} />
           ) : null}
-          <span className="section-kicker">The Door That Waited</span>
+          <span className="section-kicker">{activeByline}</span>
+          <h2 className="reader-title">{activeTitle}</h2>
           <p>{current.text}</p>
           <div className="story-thread-note">
             <span>Next thread</span>
@@ -1081,9 +1184,9 @@ function StoriesView({
             Save
           </button>
           <button
-            disabled={page === storyPages.length - 1}
+            disabled={page === activePages.length - 1}
             onClick={() =>
-              setPage((value) => Math.min(storyPages.length - 1, value + 1))
+              setPage((value) => Math.min(activePages.length - 1, value + 1))
             }
             type="button"
           >
@@ -1113,6 +1216,25 @@ function StoriesView({
           type="button"
         >
           Read Story
+        </button>
+      </section>
+      <section className="story-cover bitcoin-cover">
+        <StoryPaperArt
+          alt="A symbolic cover showing Bitcoin value, World identity, and a human chain"
+          kind="earth-chain"
+        />
+        <span>{bitcoinWorldStory.author}</span>
+        <h2>{bitcoinWorldStory.title}</h2>
+        <p>{bitcoinWorldStory.subtitle}. A clear story about what Bitcoin was, what it became, and how World reflects the next human layer.</p>
+        <button
+          onClick={() => {
+            setPage(0);
+            setIsReadingBitcoin(true);
+            keepStreak("You opened Bitcoin, World, and the Human Chain.");
+          }}
+          type="button"
+        >
+          Read Published Story
         </button>
       </section>
       <section className="story-pages">
@@ -1161,14 +1283,21 @@ function StoriesView({
               <p>{story.detail}</p>
             </div>
             <button
-              onClick={() =>
+              onClick={() => {
+                if (story.title === "Bitcoin By Satoshi") {
+                  setPage(0);
+                  setIsReadingBitcoin(true);
+                  keepStreak("You unlocked a published HumanChain short story.");
+                  return;
+                }
+
                 act(
-                  `${story.title}`,
+                  story.title,
                   story.price === "Free"
                     ? "Open this story."
                     : `${story.price} will unlock this short story.`,
-                )
-              }
+                );
+              }}
               type="button"
             >
               {story.price}

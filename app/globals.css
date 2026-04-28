@@ -788,6 +788,29 @@ button {
   font-size: 0.82rem;
 }
 
+.bitcoin-cover {
+  background:
+    linear-gradient(135deg, rgba(32, 35, 40, 0.94), rgba(185, 130, 24, 0.74)),
+    radial-gradient(circle at 70% 18%, rgba(255, 253, 248, 0.28), transparent 30%);
+}
+
+.bitcoin-cover .paper-art {
+  border-color: rgba(255, 253, 248, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.94), rgba(238, 226, 207, 0.88)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(185, 130, 24, 0.055) 0,
+      rgba(185, 130, 24, 0.055) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+}
+
+.bitcoin-cover h2 {
+  font-size: 1.45rem;
+}
+
 .cover-art {
   margin-bottom: 14px;
   border-radius: 18px;
@@ -1281,6 +1304,12 @@ button {
 
 .story-page .section-kicker {
   color: var(--green);
+}
+
+.reader-title {
+  margin: 8px 0 0;
+  font-size: 1.08rem;
+  line-height: 1.2;
 }
 
 .story-page p {
