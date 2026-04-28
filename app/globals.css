@@ -227,6 +227,7 @@ button {
 }
 
 .streak-card,
+.points-card,
 .panel,
 .pulse-card,
 .ask-box,
@@ -249,6 +250,55 @@ button {
   align-items: center;
   padding: 16px;
   background: linear-gradient(135deg, #fff9e9, #fffdf8);
+}
+
+.points-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 20px;
+  color: var(--paper-strong);
+  background:
+    linear-gradient(135deg, rgba(32, 35, 40, 0.96), rgba(47, 111, 237, 0.76)),
+    radial-gradient(circle at 16% 20%, rgba(255, 253, 248, 0.22), transparent 34%);
+  box-shadow: var(--shadow);
+}
+
+.points-card p {
+  margin: 0;
+  color: rgba(255, 253, 248, 0.78);
+  line-height: 1.4;
+}
+
+.points-card h2 {
+  margin: 5px 0;
+  font-size: 1.5rem;
+}
+
+.points-ring {
+  width: 82px;
+  height: 82px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 253, 248, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.14);
+}
+
+.points-ring strong,
+.points-ring span {
+  display: block;
+}
+
+.points-ring span {
+  color: rgba(255, 253, 248, 0.72);
+  font-size: 0.74rem;
+  font-weight: 800;
 }
 
 .streak-card h2,
@@ -1155,6 +1205,40 @@ button {
   color: var(--muted);
   font-size: 0.8rem;
   font-weight: 800;
+}
+
+.points-ledger {
+  background: linear-gradient(135deg, #fffdf8, #f1f5ff);
+}
+
+.point-rule {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.point-rule:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.point-rule span {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.point-rule strong {
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+.points-ledger p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
 }
 
 .compact-actions button {

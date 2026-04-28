@@ -581,6 +581,15 @@ const profileBadges = [
   "Answer helper",
 ];
 
+const pointRules = [
+  ["Daily check-in", "+10 HP"],
+  ["Answer a human", "+15 HP"],
+  ["Ask a useful question", "+20 HP"],
+  ["Add a chain link", "+12 HP"],
+  ["Read a story", "+8 HP"],
+  ["Publish accepted story", "+120 HP"],
+];
+
 type Tab = "home" | "ask" | "chains" | "stories" | "me";
 
 type StoryArtKind =
@@ -626,12 +635,15 @@ type Toast = {
   detail: string;
 };
 
+type EarnPoints = (amount: number, reason: string) => void;
+
 export default function HumanChainApp() {
   const [tab, setTab] = useState<Tab>("home");
   const [toast, setToast] = useState<Toast | null>(null);
   const [streak, setStreak] = useState(4);
   const [links, setLinks] = useState(initialLinks);
   const [savedItems, setSavedItems] = useState(3);
+  const [points, setPoints] = useState(420);
 
   function act(title: string, detail: string) {
     setToast({ title, detail });
@@ -642,14 +654,20 @@ export default function HumanChainApp() {
     act("Streak kept", detail);
   }
 
+  function earnPoints(amount: number, reason: string) {
+    setPoints((current) => current + amount);
+    act(`+${amount} Human Points`, reason);
+  }
+
   const activeView = useMemo(() => {
     switch (tab) {
       case "ask":
-        return <AskView act={act} keepStreak={keepStreak} />;
+        return <AskView act={act} earnPoints={earnPoints} keepStreak={keepStreak} />;
       case "chains":
         return (
           <ChainsView
             act={act}
+            earnPoints={earnPoints}
             keepStreak={keepStreak}
             links={links}
             setLinks={setLinks}
@@ -659,6 +677,7 @@ export default function HumanChainApp() {
         return (
           <StoriesView
             act={act}
+            earnPoints={earnPoints}
             keepStreak={keepStreak}
             setSavedItems={setSavedItems}
           />
@@ -667,7 +686,9 @@ export default function HumanChainApp() {
         return (
           <MeView
             act={act}
+            earnPoints={earnPoints}
             keepStreak={keepStreak}
+            points={points}
             savedItems={savedItems}
             streak={streak}
           />
@@ -676,12 +697,13 @@ export default function HumanChainApp() {
         return (
           <HomeView
             act={act}
+            points={points}
             setTab={setTab}
             streak={streak}
           />
         );
     }
-  }, [links, savedItems, streak, tab]);
+  }, [links, points, savedItems, streak, tab]);
 
   return (
     <main className="app-shell">
@@ -707,10 +729,12 @@ export default function HumanChainApp() {
 
 function HomeView({
   act,
+  points,
   setTab,
   streak,
 }: {
   act: (title: string, detail: string) => void;
+  points: number;
   setTab: (tab: Tab) => void;
   streak: number;
 }) {
@@ -783,6 +807,21 @@ function HomeView({
         </button>
       </section>
 
+      <section className="points-card">
+        <div>
+          <span className="section-kicker">Human Points</span>
+          <h2>{points.toLocaleString()} HP</h2>
+          <p>
+            Earn now by helping the network. Points will prepare early humans
+            for future rewards after launch.
+          </p>
+        </div>
+        <div className="points-ring">
+          <strong>{Math.min(100, Math.round(points / 10))}%</strong>
+          <span>Level 2</span>
+        </div>
+      </section>
+
       <section className="panel">
         <div className="section-heading">
           <span>Trending Verdict</span>
@@ -843,9 +882,11 @@ function HomeView({
 
 function AskView({
   act,
+  earnPoints,
   keepStreak,
 }: {
   act: (title: string, detail: string) => void;
+  earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
 }) {
   const [question, setQuestion] = useState("");
@@ -856,6 +897,7 @@ function AskView({
     const cleanQuestion =
       question.trim() || "How do I begin again when life feels heavy?";
     setPublished(cleanQuestion);
+    earnPoints(20, "Useful questions build your future earning score.");
     keepStreak("Your question is live and the Human Verdict is forming.");
   }
 
@@ -969,6 +1011,7 @@ function AskView({
             <p>{prompt}</p>
             <button
               onClick={() => {
+                earnPoints(15, "You earned points for helping another human.");
                 keepStreak("Your answer helped another verified human.");
               }}
               type="button"
@@ -1001,11 +1044,13 @@ function AskView({
 
 function ChainsView({
   act,
+  earnPoints,
   keepStreak,
   links,
   setLinks,
 }: {
   act: (title: string, detail: string) => void;
+  earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
   links: typeof initialLinks;
   setLinks: React.Dispatch<React.SetStateAction<typeof initialLinks>>;
@@ -1017,6 +1062,7 @@ function ChainsView({
       linkText.trim() || "I am still becoming, and today that is enough.";
     setLinks((current) => [{ country: "Verified Human", text }, ...current]);
     setLinkText("");
+    earnPoints(12, "Your chain link added value to today's field.");
     keepStreak("Your link joined today's global chain.");
   }
 
@@ -1110,10 +1156,12 @@ function ChainsView({
 
 function StoriesView({
   act,
+  earnPoints,
   keepStreak,
   setSavedItems,
 }: {
   act: (title: string, detail: string) => void;
+  earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
   setSavedItems: React.Dispatch<React.SetStateAction<number>>;
 }) {
@@ -1131,6 +1179,7 @@ function StoriesView({
 
   function saveStory() {
     setSavedItems((value) => value + 1);
+    earnPoints(8, "Saved stories improve your Human Points record.");
     keepStreak("The monthly Human Story was saved to your library.");
   }
 
@@ -1211,6 +1260,7 @@ function StoriesView({
         <button
           onClick={() => {
             setIsReading(true);
+            earnPoints(8, "Reading the monthly story strengthened your chain.");
             keepStreak("You opened this month's Human Story.");
           }}
           type="button"
@@ -1230,6 +1280,7 @@ function StoriesView({
           onClick={() => {
             setPage(0);
             setIsReadingBitcoin(true);
+            earnPoints(8, "Reading published stories grows your Human Points.");
             keepStreak("You opened Bitcoin, World, and the Human Chain.");
           }}
           type="button"
@@ -1287,6 +1338,7 @@ function StoriesView({
                 if (story.title === "Bitcoin By Satoshi") {
                   setPage(0);
                   setIsReadingBitcoin(true);
+                  earnPoints(8, "You opened a published HumanChain story.");
                   keepStreak("You unlocked a published HumanChain short story.");
                   return;
                 }
@@ -1320,7 +1372,10 @@ function StoriesView({
           Upload PDF or text
           <input
             accept=".pdf,.txt,.doc,.docx"
-            onChange={() => act("Story file selected", "3 WLD review and publish flow is ready.")}
+            onChange={() => {
+              earnPoints(25, "Story submission draft started.");
+              act("Story file selected", "3 WLD review and publish flow is ready.");
+            }}
             type="file"
           />
         </label>
@@ -1804,12 +1859,16 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 
 function MeView({
   act,
+  earnPoints,
   keepStreak,
+  points,
   savedItems,
   streak,
 }: {
   act: (title: string, detail: string) => void;
+  earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
+  points: number;
   savedItems: number;
   streak: number;
 }) {
@@ -1827,7 +1886,10 @@ function MeView({
           <p>Verified Chain Keeper. {streak}-day Human Streak.</p>
         </div>
         <button
-          onClick={() => keepStreak("Daily check-in sealed your Human Chain.")}
+          onClick={() => {
+            earnPoints(10, "Daily check-in points added before launch.");
+            keepStreak("Daily check-in sealed your Human Chain.");
+          }}
           type="button"
         >
           <CalendarCheck size={17} />
@@ -1846,10 +1908,27 @@ function MeView({
         </p>
       </section>
       <section className="stats-grid">
+        <Stat label="Points" value={String(points)} />
         <Stat label="Questions" value="3" />
         <Stat label="Answers" value="18" />
         <Stat label="Links" value="9" />
         <Stat label="Saved" value={String(savedItems)} />
+      </section>
+      <section className="panel points-ledger">
+        <div className="section-heading">
+          <span>Point rules</span>
+          <Star size={18} />
+        </div>
+        {pointRules.map(([action, reward]) => (
+          <div className="point-rule" key={action}>
+            <span>{action}</span>
+            <strong>{reward}</strong>
+          </div>
+        ))}
+        <p>
+          Human Points are not withdrawable yet. They track early value so real
+          contributors can be recognized when HumanChain launches rewards.
+        </p>
       </section>
       <section className="badge-cloud">
         {profileBadges.map((badge) => (
