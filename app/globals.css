@@ -127,6 +127,55 @@ button {
   margin: 14px 0;
 }
 
+.premium-grid {
+  display: grid;
+  gap: 9px;
+  margin: 14px 0;
+}
+
+.service-card {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid rgba(36, 107, 85, 0.16);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fffdf8, #f4ede1);
+}
+
+.service-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.service-card h3,
+.shelf-row h3,
+.field-card strong {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.2;
+}
+
+.service-card span,
+.shelf-row span,
+.field-card span {
+  color: var(--gold);
+  font-size: 0.76rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.service-card p,
+.field-card p,
+.publish-card p,
+.chain-id-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.42;
+}
+
 .action-card,
 .wld-button,
 .library-row,
@@ -181,9 +230,12 @@ button {
 .panel,
 .pulse-card,
 .ask-box,
+.ask-hero,
 .today-chain,
 .story-cover,
-.profile-card {
+.profile-card,
+.publish-card,
+.chain-id-card {
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--paper-strong);
@@ -225,9 +277,12 @@ button {
 .panel,
 .pulse-card,
 .ask-box,
+.ask-hero,
 .today-chain,
 .story-cover,
-.profile-card {
+.profile-card,
+.publish-card,
+.chain-id-card {
   margin-top: 14px;
   padding: 16px;
 }
@@ -310,6 +365,72 @@ button {
   color: var(--muted);
 }
 
+.field-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.field-strip button {
+  min-width: 138px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #fffcf6;
+  text-align: left;
+}
+
+.field-strip span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.ask-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  color: var(--paper-strong);
+  background:
+    linear-gradient(135deg, rgba(32, 35, 40, 0.94), rgba(47, 111, 237, 0.72)),
+    radial-gradient(circle at 20% 20%, rgba(255, 253, 248, 0.22), transparent 36%);
+}
+
+.ask-hero h2,
+.chain-map h2,
+.publish-card h2,
+.treasure-profile h2 {
+  margin: 6px 0;
+  font-size: 1.28rem;
+  line-height: 1.12;
+}
+
+.ask-hero p {
+  margin: 0;
+  color: rgba(255, 253, 248, 0.78);
+  line-height: 1.4;
+}
+
+.voice-orb {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 253, 248, 0.25);
+  border-radius: 999px;
+  color: var(--paper-strong);
+  background: rgba(255, 253, 248, 0.14);
+}
+
+.voice-orb.active {
+  color: var(--ink);
+  background: #fffdf8;
+  box-shadow: 0 0 0 8px rgba(255, 253, 248, 0.12);
+}
+
 .ask-box label {
   display: block;
   margin-bottom: 10px;
@@ -332,6 +453,30 @@ button {
   gap: 8px;
   margin-top: 10px;
   overflow-x: auto;
+}
+
+.ask-modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ask-modes button {
+  display: grid;
+  gap: 3px;
+  min-height: 58px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fffcf6;
+  text-align: left;
+}
+
+.ask-modes span {
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .chip-row button,
@@ -448,6 +593,96 @@ button {
   line-height: 1.4;
 }
 
+.chain-map {
+  position: relative;
+  min-height: 176px;
+  margin-top: 14px;
+  padding: 18px;
+  overflow: hidden;
+  border-radius: 24px;
+  color: var(--paper-strong);
+  background:
+    linear-gradient(135deg, rgba(32, 35, 40, 0.92), rgba(36, 107, 85, 0.86)),
+    radial-gradient(circle at 70% 30%, rgba(185, 130, 24, 0.38), transparent 34%);
+}
+
+.chain-map .section-kicker {
+  color: rgba(255, 253, 248, 0.82);
+}
+
+.chain-orbit {
+  position: absolute;
+  right: -8px;
+  bottom: -28px;
+  width: 170px;
+  height: 170px;
+  border: 1px solid rgba(255, 253, 248, 0.2);
+  border-radius: 999px;
+}
+
+.chain-orbit span,
+.chain-orbit i,
+.chain-orbit b {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.chain-orbit span {
+  inset: 38px;
+  border: 2px solid rgba(255, 253, 248, 0.34);
+}
+
+.chain-orbit i {
+  width: 18px;
+  height: 18px;
+  left: 28px;
+  top: 66px;
+  background: var(--gold);
+}
+
+.chain-orbit b {
+  width: 12px;
+  height: 12px;
+  right: 42px;
+  top: 42px;
+  background: var(--paper-strong);
+}
+
+.field-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.field-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper-strong);
+}
+
+.field-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.field-card button,
+.chain-tools button {
+  border: 0;
+  border-radius: 999px;
+  color: var(--paper-strong);
+  background: var(--ink);
+}
+
+.field-card button {
+  min-height: 38px;
+  padding: 8px 12px;
+  justify-self: start;
+}
+
 .today-chain {
   background: linear-gradient(135deg, #fff8f4, #fffdf8);
 }
@@ -524,6 +759,21 @@ button {
   display: flex;
   gap: 7px;
   overflow-x: auto;
+}
+
+.chain-tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chain-tools button {
+  min-height: 44px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
 }
 
 .story-cover {
@@ -623,6 +873,84 @@ button {
   font-weight: 800;
 }
 
+.story-market {
+  display: grid;
+  gap: 10px;
+}
+
+.shelf-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.shelf-row:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.shelf-row svg {
+  color: var(--green);
+}
+
+.shelf-row p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.shelf-row button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: var(--paper-strong);
+  background: var(--ink);
+  white-space: nowrap;
+}
+
+.publish-card {
+  display: grid;
+  gap: 12px;
+  background: linear-gradient(135deg, #fffdf8, #eef5ee);
+}
+
+.publish-card .section-kicker {
+  color: var(--green);
+}
+
+.upload-drop {
+  min-height: 58px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(36, 107, 85, 0.38);
+  border-radius: 16px;
+  color: var(--green);
+  background: rgba(36, 107, 85, 0.06);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.upload-drop input {
+  display: none;
+}
+
+.publish-steps {
+  display: grid;
+  gap: 7px;
+}
+
+.publish-steps span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.32;
+}
+
 .compact-actions {
   display: grid;
   gap: 8px;
@@ -716,6 +1044,100 @@ button {
 .library-row {
   width: 100%;
   margin-top: 8px;
+}
+
+.treasure-profile {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 24px;
+  color: var(--paper-strong);
+  background:
+    linear-gradient(135deg, rgba(32, 35, 40, 0.94), rgba(185, 130, 24, 0.72)),
+    radial-gradient(circle at 16% 10%, rgba(255, 253, 248, 0.28), transparent 34%);
+  box-shadow: var(--shadow);
+}
+
+.treasure-profile p {
+  margin: 0;
+  color: rgba(255, 253, 248, 0.78);
+  line-height: 1.4;
+}
+
+.treasure-profile button {
+  grid-column: 1 / -1;
+  min-height: 44px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  color: var(--ink);
+  background: #fffdf8;
+  font-weight: 850;
+}
+
+.treasure-mark {
+  position: relative;
+}
+
+.treasure-mark svg {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  color: #fffdf8;
+  fill: var(--green);
+}
+
+.chain-id-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  background: linear-gradient(135deg, #fffdf8, #f5efe4);
+}
+
+.chain-id-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.chain-id-card strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--green);
+  font-size: 1rem;
+}
+
+.chain-id-card p {
+  grid-column: 1 / -1;
+}
+
+.badge-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.badge-cloud span {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-strong);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.compact-actions button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .story-reader-screen {

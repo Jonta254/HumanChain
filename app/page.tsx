@@ -1,20 +1,33 @@
 "use client";
 
 import {
+  BadgeCheck,
   BookOpen,
+  CalendarCheck,
   CheckCircle2,
   CircleDollarSign,
+  Compass,
+  FileText,
   Flame,
   Globe2,
+  HeartHandshake,
   Home,
   Library,
+  LockKeyhole,
   MessageCircleQuestion,
+  Mic,
   PenLine,
+  Radio,
   Search,
   Send,
+  ShieldCheck,
   Sparkles,
+  Star,
+  Upload,
   UserRound,
+  Users,
   Vote,
+  Wallet,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -381,6 +394,104 @@ const wldActions = [
   ["6 WLD", "Unlock Deep Human Verdict"],
 ];
 
+const premiumServices = [
+  {
+    title: "Ask real humans",
+    detail: "Paid questions with country, voice, and private answer modes.",
+    price: "1-6 WLD",
+  },
+  {
+    title: "Human Stories",
+    detail: "Monthly story, public short stories, and paid human submissions.",
+    price: "2 WLD+",
+  },
+  {
+    title: "Chain Fields",
+    detail: "Live rooms where verified humans build purpose around identity.",
+    price: "Free + tips",
+  },
+  {
+    title: "Deep Verdict",
+    detail: "A premium synthesis from verified answers across the world.",
+    price: "6 WLD",
+  },
+];
+
+const storyShelf = [
+  {
+    title: "The Door That Waited",
+    label: "Monthly Human Story",
+    detail: "A life story about returning through small openings.",
+    price: "Free",
+  },
+  {
+    title: "Bitcoin By Satoshi",
+    label: "Short Origin Story",
+    detail: "A human-readable story about trust, money, and the first block.",
+    price: "2 WLD",
+  },
+  {
+    title: "The ORB",
+    label: "World Story",
+    detail: "A cinematic story about proof, identity, and being seen.",
+    price: "2 WLD",
+  },
+  {
+    title: "One Page From My Life",
+    label: "Human Submissions",
+    detail: "Paid stories from verified humans, reviewed before publishing.",
+    price: "3 WLD",
+  },
+];
+
+const publishSteps = [
+  "Upload PDF, TXT, or write inside HumanChain",
+  "Pay review and publishing fee",
+  "HumanChain formats it into pages with a cover",
+  "Readers can like, rate, save, and tip",
+];
+
+const answerQueue = [
+  "What helped you keep going when nobody saw you struggling?",
+  "What belief from your culture made you stronger?",
+  "What should a young person know before chasing money?",
+  "What is one truth about love people learn too late?",
+];
+
+const chainFields = [
+  {
+    name: "Faith & Prayer",
+    members: "18.4k",
+    mood: "hope",
+    detail: "Christians, Hindus, Muslims, Rastafari, and spiritual humans sharing daily strength.",
+  },
+  {
+    name: "Builders & Money",
+    members: "31.2k",
+    mood: "ambition",
+    detail: "Business ideas, WLD use, startup truth, and small wins from verified humans.",
+  },
+  {
+    name: "Love & Family",
+    members: "27.8k",
+    mood: "care",
+    detail: "Relationship wisdom, family repair, parenting, loneliness, and forgiveness.",
+  },
+  {
+    name: "Culture Rooms",
+    members: "44.1k",
+    mood: "belonging",
+    detail: "Language, food, music, migration, identity, and human customs across countries.",
+  },
+];
+
+const profileBadges = [
+  "Verified human",
+  "Chain keeper",
+  "Story reader",
+  "Answer helper",
+];
+
 type Tab = "home" | "ask" | "chains" | "stories" | "me";
 
 type StoryArtKind =
@@ -464,7 +575,14 @@ export default function HumanChainApp() {
           />
         );
       case "me":
-        return <MeView savedItems={savedItems} streak={streak} />;
+        return (
+          <MeView
+            act={act}
+            keepStreak={keepStreak}
+            savedItems={savedItems}
+            streak={streak}
+          />
+        );
       default:
         return (
           <HomeView
@@ -515,7 +633,10 @@ function HomeView({
           Verified human network
         </div>
         <h1>HumanChain</h1>
-        <p>Ask real humans. Follow the thread. Get the world's verdict.</p>
+        <p>
+          A verified human network for asking, answering, reading, publishing,
+          and joining chains of purpose.
+        </p>
         <div className="signal-strip" aria-label="Live global activity">
           {worldSignals.map((signal) => (
             <span key={signal}>{signal}</span>
@@ -538,10 +659,22 @@ function HomeView({
         />
         <ActionButton
           icon={<BookOpen size={20} />}
-          label="Read Human Story"
-          detail="Monthly issue live now"
+          label="Story Vault"
+          detail="Monthly and paid human stories"
           onClick={() => setTab("stories")}
         />
+      </section>
+
+      <section className="premium-grid" aria-label="HumanChain services">
+        {premiumServices.map((service) => (
+          <article className="service-card" key={service.title}>
+            <div>
+              <span>{service.price}</span>
+              <h3>{service.title}</h3>
+            </div>
+            <p>{service.detail}</p>
+          </article>
+        ))}
       </section>
 
       <section className="streak-card">
@@ -584,6 +717,25 @@ function HomeView({
         ))}
       </section>
 
+      <section className="panel">
+        <div className="section-heading">
+          <span>Live human fields</span>
+          <Users size={18} />
+        </div>
+        <div className="field-strip">
+          {chainFields.map((field) => (
+            <button
+              key={field.name}
+              onClick={() => setTab("chains")}
+              type="button"
+            >
+              <strong>{field.name}</strong>
+              <span>{field.members} humans</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="pulse-card">
         <div>
           <span className="section-kicker">Human Pulse</span>
@@ -609,6 +761,7 @@ function AskView({
 }) {
   const [question, setQuestion] = useState("");
   const [published, setPublished] = useState<string | null>(null);
+  const [voiceMode, setVoiceMode] = useState(false);
 
   function publishQuestion() {
     const cleanQuestion =
@@ -620,6 +773,32 @@ function AskView({
   return (
     <div className="screen">
       <TopBar title="Ask The World" subtitle="One question. Verified human answers." />
+      <section className="ask-hero">
+        <div>
+          <span className="section-kicker">Human Ask</span>
+          <h2>Ask people, not algorithms.</h2>
+          <p>
+            Choose who should answer, add voice for emotion, and pay WLD when
+            you want deeper reach.
+          </p>
+        </div>
+        <button
+          aria-pressed={voiceMode}
+          className={voiceMode ? "voice-orb active" : "voice-orb"}
+          onClick={() => {
+            setVoiceMode((value) => !value);
+            act(
+              voiceMode ? "Voice mode paused" : "Voice mode ready",
+              voiceMode
+                ? "Text question mode is active."
+                : "Microphone flow will record the question in World App.",
+            );
+          }}
+          type="button"
+        >
+          <Mic size={24} />
+        </button>
+      </section>
       <section className="ask-box">
         <label htmlFor="question">What do you want to ask humanity?</label>
         <textarea
@@ -628,8 +807,25 @@ function AskView({
           placeholder="Example: Should I leave my job and start my own business?"
           value={question}
         />
+        <div className="ask-modes">
+          {[
+            ["Text", "Free draft"],
+            ["Voice", "2 WLD reach"],
+            ["Private", "4 WLD"],
+            ["Deep Verdict", "6 WLD"],
+          ].map(([mode, price]) => (
+            <button
+              key={mode}
+              onClick={() => act(`${mode} mode`, `${price} selected for this question.`)}
+              type="button"
+            >
+              <strong>{mode}</strong>
+              <span>{price}</span>
+            </button>
+          ))}
+        </div>
         <div className="chip-row">
-          {["Love", "Money", "Business", "Family", "Culture"].map((chip) => (
+          {["Love", "Money", "Business", "Family", "Culture", "Faith"].map((chip) => (
             <button
               key={chip}
               onClick={() => act("Topic selected", `${chip} answers will be prioritized.`)}
@@ -679,11 +875,7 @@ function AskView({
           <span>Questions needing humans</span>
           <PenLine size={18} />
         </div>
-        {[
-          "How do I stop feeling behind in life?",
-          "What does love mean in your country?",
-          "What business can I start with little money?",
-        ].map((prompt) => (
+        {answerQueue.map((prompt) => (
           <article className="question-row" key={prompt}>
             <p>{prompt}</p>
             <button
@@ -696,6 +888,23 @@ function AskView({
             </button>
           </article>
         ))}
+      </section>
+      <section className="panel">
+        <div className="section-heading">
+          <span>Answer formats</span>
+          <Radio size={18} />
+        </div>
+        <div className="compact-actions">
+          <button onClick={() => act("Voice answer", "Record up to 60 seconds.")} type="button">
+            Voice answer with emotion
+          </button>
+          <button onClick={() => act("Country answer", "Answer as your culture sees it.")} type="button">
+            Country and culture answer
+          </button>
+          <button onClick={() => act("Anonymous answer", "Your identity stays private.")} type="button">
+            Anonymous verified answer
+          </button>
+        </div>
       </section>
     </div>
   );
@@ -724,13 +933,39 @@ function ChainsView({
 
   return (
     <div className="screen">
-      <TopBar title="Daily Human Chain" subtitle="All verified humans can add one link." />
+      <TopBar title="Human Fields" subtitle="Living chains for real humans." />
+      <section className="chain-map">
+        <span className="section-kicker">World field</span>
+        <h2>Find the chain that understands your life.</h2>
+        <div className="chain-orbit" aria-hidden="true">
+          <span />
+          <i />
+          <b />
+        </div>
+      </section>
+      <section className="field-grid">
+        {chainFields.map((field) => (
+          <article className="field-card" key={field.name}>
+            <div>
+              <strong>{field.name}</strong>
+              <span>{field.members} verified humans</span>
+            </div>
+            <p>{field.detail}</p>
+            <button
+              onClick={() => act(`${field.name} joined`, `You entered the ${field.mood} field.`)}
+              type="button"
+            >
+              Enter field
+            </button>
+          </article>
+        ))}
+      </section>
       <section className="today-chain">
-        <span className="section-kicker">Today's Chain</span>
-        <h2>What should the world remember today?</h2>
+        <span className="section-kicker">Today's main chain</span>
+        <h2>What truth should the world carry today?</h2>
         <p>
-          Open to verified humans globally. Add one sentence, voice thought, or
-          memory that another human may need.
+          Add one useful link: a lesson, memory, warning, prayer, business
+          truth, cultural wisdom, or voice thought another human may need.
         </p>
         <textarea
           onChange={(event) => setLinkText(event.target.value)}
@@ -739,6 +974,20 @@ function ChainsView({
         />
         <button onClick={addLink} type="button">
           Add My Link
+        </button>
+      </section>
+      <section className="chain-tools">
+        <button onClick={() => act("Chain Circle", "Invite 12 verified humans around one topic.")} type="button">
+          <Users size={17} />
+          Circle
+        </button>
+        <button onClick={() => act("Chain Pulse", "See what this field is feeling today.")} type="button">
+          <HeartHandshake size={17} />
+          Pulse
+        </button>
+        <button onClick={() => act("Golden Link", "Pin your best link for 2 WLD.")} type="button">
+          <Star size={17} />
+          Pin
         </button>
       </section>
       <section className="thread-list" aria-label="Human thread">
@@ -897,6 +1146,62 @@ function StoriesView({
             <h3>{chapter.title}</h3>
           </article>
         ))}
+      </section>
+      <section className="panel story-market">
+        <div className="section-heading">
+          <span>Story shelf</span>
+          <Library size={18} />
+        </div>
+        {storyShelf.map((story) => (
+          <article className="shelf-row" key={story.title}>
+            <FileText size={18} />
+            <div>
+              <span>{story.label}</span>
+              <h3>{story.title}</h3>
+              <p>{story.detail}</p>
+            </div>
+            <button
+              onClick={() =>
+                act(
+                  `${story.title}`,
+                  story.price === "Free"
+                    ? "Open this story."
+                    : `${story.price} will unlock this short story.`,
+                )
+              }
+              type="button"
+            >
+              {story.price}
+            </button>
+          </article>
+        ))}
+      </section>
+      <section className="publish-card">
+        <div>
+          <span className="section-kicker">Publish to humans</span>
+          <h2>Your life can become a chain.</h2>
+          <p>
+            Writers can upload a PDF or write inside the mini app. HumanChain
+            formats it into a readable story, adds a cover, then opens likes,
+            ratings, saves, and WLD tips.
+          </p>
+        </div>
+        <label className="upload-drop">
+          <Upload size={20} />
+          Upload PDF or text
+          <input
+            accept=".pdf,.txt,.doc,.docx"
+            onChange={() => act("Story file selected", "3 WLD review and publish flow is ready.")}
+            type="file"
+          />
+        </label>
+        <div className="publish-steps">
+          {publishSteps.map((step, index) => (
+            <span key={step}>
+              {index + 1}. {step}
+            </span>
+          ))}
+        </div>
       </section>
       <section className="story-rating-card">
         <span className="section-kicker">Reader response</span>
@@ -1369,21 +1674,47 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 }
 
 function MeView({
+  act,
+  keepStreak,
   savedItems,
   streak,
 }: {
+  act: (title: string, detail: string) => void;
+  keepStreak: (detail?: string) => void;
   savedItems: number;
   streak: number;
 }) {
   return (
     <div className="screen">
-      <TopBar title="My Human Passport" subtitle="Your chain across the world." />
-      <section className="profile-card">
-        <div className="avatar">HC</div>
-        <div>
-          <h2>Verified Human</h2>
-          <p>Chain Keeper. {streak}-day Human Streak.</p>
+      <TopBar title="Treasure Profile" subtitle="Your verified human chain." />
+      <section className="treasure-profile">
+        <div className="treasure-mark">
+          <div className="avatar">J</div>
+          <BadgeCheck size={22} />
         </div>
+        <div>
+          <span className="section-kicker">Human username</span>
+          <h2>@jonta254</h2>
+          <p>Verified Chain Keeper. {streak}-day Human Streak.</p>
+        </div>
+        <button
+          onClick={() => keepStreak("Daily check-in sealed your Human Chain.")}
+          type="button"
+        >
+          <CalendarCheck size={17} />
+          Check in
+        </button>
+      </section>
+      <section className="chain-id-card">
+        <div>
+          <span>Chain ID</span>
+          <strong>HC-JONTA-254</strong>
+        </div>
+        <ShieldCheck size={28} />
+        <p>
+          This profile represents one real verified human. Username becomes the
+          public chain handle across questions, stories, tips, and fields.
+        </p>
       </section>
       <section className="stats-grid">
         <Stat label="Questions" value="3" />
@@ -1391,14 +1722,24 @@ function MeView({
         <Stat label="Links" value="9" />
         <Stat label="Saved" value={String(savedItems)} />
       </section>
+      <section className="badge-cloud">
+        {profileBadges.map((badge) => (
+          <span key={badge}>{badge}</span>
+        ))}
+      </section>
       <section className="panel">
         <div className="section-heading">
-          <span>Human Library</span>
+          <span>Human vault</span>
           <BookOpen size={18} />
         </div>
         {["Saved Verdicts", "Monthly Stories", "Voice Notes", "Best Advice"].map(
           (item) => (
-            <button className="library-row" key={item} type="button">
+            <button
+              className="library-row"
+              key={item}
+              onClick={() => act(item, "Opened from your Human Vault.")}
+              type="button"
+            >
               {item}
             </button>
           ),
@@ -1410,9 +1751,18 @@ function MeView({
           <Search size={18} />
         </div>
         <div className="compact-actions">
-          <button type="button">Find countries I connected with</button>
-          <button type="button">Open Deep Human Mirror</button>
-          <button type="button">Review WLD activity</button>
+          <button onClick={() => act("Connection map", "Countries linked to your chain are loading.")} type="button">
+            <Compass size={17} />
+            Find countries I connected with
+          </button>
+          <button onClick={() => act("Deep Human Mirror", "6 WLD reflection flow is ready.")} type="button">
+            <LockKeyhole size={17} />
+            Open Deep Human Mirror
+          </button>
+          <button onClick={() => act("Notifications ready", "World App notifications can remind you to answer, read, and check in.")} type="button">
+            <Wallet size={17} />
+            Review WLD activity
+          </button>
         </div>
       </section>
     </div>
