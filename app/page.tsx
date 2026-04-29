@@ -465,6 +465,110 @@ const bitcoinWorldPages = bitcoinWorldStory.pages.map((page, index) => {
   };
 });
 
+const publishedStoryCollection = {
+  bitcoin: {
+    ...bitcoinWorldStory,
+    shelfTitle: "Bitcoin By Satoshi",
+  },
+  orb: {
+    title: "The ORB",
+    subtitle: "A World Story About Being Seen",
+    author: "publisher: jontAWorld",
+    price: "2 WLD",
+    shelfTitle: "The ORB",
+    pages: [
+      {
+        art: "cover-symbol" as const,
+        text: "The first time Nia heard about the Orb, she imagined a machine that wanted to take something from her. In her city, people had learned to be careful with promises, especially when the promise arrived wearing technology.",
+      },
+      {
+        art: "honest-message" as const,
+        text: "Her brother said it was not about taking her name. It was about proving she was one real human in a world where screens had become crowded with copies, scripts, and voices that did not breathe.",
+      },
+      {
+        art: "world-thread" as const,
+        text: "Nia did not believe him at first. She had seen too many systems ask poor people for trust and give them waiting rooms in return. But the question stayed with her: if the internet could no longer tell who was human, who would be heard?",
+      },
+      {
+        art: "phone-thread" as const,
+        text: "At the verification center, nobody asked for her secrets. The process felt smaller than the rumor. A light, a pause, a confirmation. The app did not tell her she was special. It told her she was unique.",
+      },
+      {
+        art: "hands" as const,
+        text: "That word followed her home. Unique did not mean rich. It did not mean safe. It meant there was one Nia, one set of tired hands, one laugh, one history no bot could borrow.",
+      },
+      {
+        art: "public-square" as const,
+        text: "Weeks later, Nia joined HumanChain and answered a stranger's question about fear. Her answer crossed borders. Someone saved it. Someone tipped it. Someone replied: I thought I was alone.",
+      },
+      {
+        art: "verdict-mirror" as const,
+        text: "That was when the Orb changed meaning. It was no longer only a device in a room. It became a doorway into a public square where being human could carry weight again.",
+      },
+      {
+        art: "light-opening" as const,
+        text: "Human message: technology becomes human when it helps a real person become visible without making them smaller.",
+      },
+    ],
+  },
+  onePage: {
+    title: "One Page From My Life",
+    subtitle: "A Human Submission",
+    author: "publisher: jontAWorld",
+    price: "3 WLD",
+    shelfTitle: "One Page From My Life",
+    pages: [
+      {
+        art: "memory-table" as const,
+        text: "I once owned a notebook with only one page left. I kept it for something important, so important that I never used it. Every day I carried it in my bag like a small future waiting for permission.",
+      },
+      {
+        art: "train" as const,
+        text: "When I left home for work, my mother put coins in my palm and told me not to spend them on pride. I laughed because I did not understand. Pride was not sold in shops, so I thought I was safe.",
+      },
+      {
+        art: "low-battery" as const,
+        text: "The city taught me otherwise. Pride was refusing to call when I was hungry. Pride was saying fine when my battery was one percent and my heart was less. Pride was pretending directions were easy.",
+      },
+      {
+        art: "reply-ribbon" as const,
+        text: "One night, a stranger shared food with me at a bus stop. He did not ask my story. He only said, tomorrow you will help someone else and then this food will keep moving.",
+      },
+      {
+        art: "notes" as const,
+        text: "I went home and finally used the last page. I wrote: I survived because somebody did not wait to know whether I deserved kindness.",
+      },
+      {
+        art: "add-link" as const,
+        text: "Years later, I still think a life can change on one page. Not the whole book. Just one honest page where a human stops hiding and lets another human enter.",
+      },
+    ],
+  },
+};
+
+type PublishedStoryKey = keyof typeof publishedStoryCollection;
+
+const publishedStoryPages = Object.fromEntries(
+  Object.entries(publishedStoryCollection).map(([key, story]) => [
+    key,
+    story.pages.map((page, index) => {
+      const nextText = story.pages[index + 1]?.text;
+
+      return {
+        page: index + 1,
+        text: page.text,
+        image: {
+          alt: `${story.title} page ${index + 1} symbolic art`,
+          art: page.art,
+        },
+        nextHint: nextText
+          ? `Next: ${createStoryHint(nextText)}`
+          : "Next: add your own link to this story.",
+      };
+    }),
+  ]),
+) as Record<PublishedStoryKey, typeof bitcoinWorldPages>;
+
 function createStoryHint(text: string) {
   const cleaned = text.replace(/^Human message:\s*/i, "");
   const firstSentence = cleaned.split(".")[0];
@@ -508,6 +612,7 @@ const premiumServices = [
 
 const storyShelf = [
   {
+    key: "monthly",
     title: "The Door That Waited",
     label: "Monthly Human Story",
     publisher: "jontAWorld",
@@ -515,6 +620,7 @@ const storyShelf = [
     price: "Free",
   },
   {
+    key: "bitcoin",
     title: "Bitcoin By Satoshi",
     label: "Published Short Story",
     publisher: "jontAWorld",
@@ -522,18 +628,20 @@ const storyShelf = [
     price: "Read",
   },
   {
+    key: "orb",
     title: "The ORB",
     label: "World Story",
     publisher: "jontAWorld",
     detail: "A cinematic story about proof, identity, and being seen.",
-    price: "2 WLD",
+    price: "Read",
   },
   {
+    key: "onePage",
     title: "One Page From My Life",
     label: "Human Submissions",
     publisher: "jontAWorld",
     detail: "Paid stories from verified humans, reviewed before publishing.",
-    price: "3 WLD",
+    price: "Read",
   },
 ];
 
@@ -1526,16 +1634,20 @@ function StoriesView({
   setSavedItems: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const [isReading, setIsReading] = useState(false);
-  const [isReadingBitcoin, setIsReadingBitcoin] = useState(false);
+  const [activePublishedStory, setActivePublishedStory] =
+    useState<PublishedStoryKey | null>(null);
   const [page, setPage] = useState(0);
   const [liked, setLiked] = useState(false);
   const [rating, setRating] = useState(0);
-  const activePages = isReadingBitcoin ? bitcoinWorldPages : storyPages;
+  const publishedStory = activePublishedStory
+    ? publishedStoryCollection[activePublishedStory]
+    : null;
+  const activePages = activePublishedStory
+    ? publishedStoryPages[activePublishedStory]
+    : storyPages;
   const current = activePages[page];
-  const activeTitle = isReadingBitcoin
-    ? bitcoinWorldStory.title
-    : "The Door That Waited";
-  const activeByline = isReadingBitcoin ? bitcoinWorldStory.author : "April Human Story";
+  const activeTitle = publishedStory?.title ?? "The Door That Waited";
+  const activeByline = publishedStory?.author ?? "April Human Story";
 
   function saveStory() {
     setSavedItems((value) => value + 1);
@@ -1543,14 +1655,14 @@ function StoriesView({
     keepStreak("The monthly Human Story was saved to your library.");
   }
 
-  if (isReading || isReadingBitcoin) {
+  if (isReading || activePublishedStory) {
     return (
       <div className="screen story-reader-screen">
         <section className="reader-top">
           <button
             onClick={() => {
               setIsReading(false);
-              setIsReadingBitcoin(false);
+              setActivePublishedStory(null);
               setPage(0);
             }}
             type="button"
@@ -1639,7 +1751,7 @@ function StoriesView({
         <button
           onClick={() => {
             setPage(0);
-            setIsReadingBitcoin(true);
+            setActivePublishedStory("bitcoin");
             earnPoints(8, "Reading published stories grows your Human Points.");
             keepStreak("You opened Bitcoin, World, and the Human Chain.");
           }}
@@ -1675,22 +1787,12 @@ function StoriesView({
             </div>
             <button
               onClick={() => {
-                if (story.title === "Bitcoin By Satoshi") {
+                if (story.key !== "monthly") {
+                  const storyKey = story.key as PublishedStoryKey;
                   setPage(0);
-                  setIsReadingBitcoin(true);
+                  setActivePublishedStory(storyKey);
                   earnPoints(8, "You opened a published HumanChain story.");
-                  keepStreak("You unlocked a published HumanChain short story.");
-                  return;
-                }
-
-                if (story.price.includes("WLD")) {
-                  openPayment({
-                    title: story.title,
-                    amount: story.price,
-                    detail: `Unlock this published story from ${story.publisher}.`,
-                    success: `${story.title} is ready to open after payment.`,
-                    points: 8,
-                  });
+                  keepStreak(`You opened ${story.title}.`);
                   return;
                 }
 
