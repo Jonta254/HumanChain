@@ -510,24 +510,28 @@ const storyShelf = [
   {
     title: "The Door That Waited",
     label: "Monthly Human Story",
+    publisher: "jontAWorld",
     detail: "A life story about returning through small openings.",
     price: "Free",
   },
   {
     title: "Bitcoin By Satoshi",
     label: "Published Short Story",
+    publisher: "jontAWorld",
     detail: "One Seed, One World: Bitcoin, World, and the Human Chain.",
     price: "Read",
   },
   {
     title: "The ORB",
     label: "World Story",
+    publisher: "jontAWorld",
     detail: "A cinematic story about proof, identity, and being seen.",
     price: "2 WLD",
   },
   {
     title: "One Page From My Life",
     label: "Human Submissions",
+    publisher: "jontAWorld",
     detail: "Paid stories from verified humans, reviewed before publishing.",
     price: "3 WLD",
   },
@@ -702,6 +706,22 @@ type Toast = {
 
 type EarnPoints = (amount: number, reason: string) => void;
 
+type PaymentRequest = {
+  title: string;
+  amount: string;
+  detail: string;
+  success: string;
+  points?: number;
+};
+
+type OpenPayment = (payment: PaymentRequest) => void;
+
+type DailyResponse = {
+  user: string;
+  text: string;
+  time: string;
+};
+
 export default function HumanChainApp() {
   const [tab, setTab] = useState<Tab>("home");
   const [toast, setToast] = useState<Toast | null>(null);
@@ -710,6 +730,20 @@ export default function HumanChainApp() {
   const [savedItems, setSavedItems] = useState(3);
   const [points, setPoints] = useState(420);
   const [dailyAnswered, setDailyAnswered] = useState(false);
+  const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(null);
+  const [dailyResponses, setDailyResponses] = useState<DailyResponse[]>([
+    {
+      user: "@mara_chain",
+      text: "Life taught me that silence is sometimes rest, not failure.",
+      time: "08:15",
+    },
+    {
+      user: "@worldbuilder",
+      text: "I learned that money is useful, but trusted people are rarer.",
+      time: "09:02",
+    },
+  ]);
+  const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
 
   function act(title: string, detail: string) {
     setToast({ title, detail });
@@ -725,10 +759,39 @@ export default function HumanChainApp() {
     act(`+${amount} Human Points`, reason);
   }
 
+  function openPayment(payment: PaymentRequest) {
+    setPaymentPrompt(payment);
+  }
+
+  function confirmPayment() {
+    if (!paymentPrompt) {
+      return;
+    }
+
+    const earnedPoints = paymentPrompt.points ?? 0;
+
+    if (earnedPoints > 0) {
+      setPoints((current) => current + earnedPoints);
+    }
+
+    setToast({
+      title: `${paymentPrompt.amount} prepared`,
+      detail: paymentPrompt.success,
+    });
+    setPaymentPrompt(null);
+  }
+
   const activeView = useMemo(() => {
     switch (tab) {
       case "ask":
-        return <AskView act={act} earnPoints={earnPoints} keepStreak={keepStreak} />;
+        return (
+          <AskView
+            act={act}
+            earnPoints={earnPoints}
+            keepStreak={keepStreak}
+            openPayment={openPayment}
+          />
+        );
       case "chains":
         return (
           <ChainsView
@@ -736,6 +799,7 @@ export default function HumanChainApp() {
             earnPoints={earnPoints}
             keepStreak={keepStreak}
             links={links}
+            openPayment={openPayment}
             setLinks={setLinks}
           />
         );
@@ -745,6 +809,7 @@ export default function HumanChainApp() {
             act={act}
             earnPoints={earnPoints}
             keepStreak={keepStreak}
+            openPayment={openPayment}
             setSavedItems={setSavedItems}
           />
         );
@@ -764,15 +829,20 @@ export default function HumanChainApp() {
           <HomeView
             act={act}
             dailyAnswered={dailyAnswered}
+            dailyAnsweredAt={dailyAnsweredAt}
+            dailyResponses={dailyResponses}
             earnPoints={earnPoints}
+            links={links}
+            setDailyAnsweredAt={setDailyAnsweredAt}
             points={points}
             setDailyAnswered={setDailyAnswered}
+            setDailyResponses={setDailyResponses}
             setTab={setTab}
             streak={streak}
           />
         );
     }
-  }, [dailyAnswered, links, points, savedItems, streak, tab]);
+  }, [dailyAnswered, dailyAnsweredAt, dailyResponses, links, points, savedItems, streak, tab]);
 
   return (
     <main className="app-shell">
@@ -790,6 +860,13 @@ export default function HumanChainApp() {
             </button>
           </div>
         ) : null}
+        {paymentPrompt ? (
+          <PaymentSheet
+            onCancel={() => setPaymentPrompt(null)}
+            onConfirm={confirmPayment}
+            payment={paymentPrompt}
+          />
+        ) : null}
         <BottomNav active={tab} onChange={setTab} />
       </section>
     </main>
@@ -799,23 +876,53 @@ export default function HumanChainApp() {
 function HomeView({
   act,
   dailyAnswered,
+  dailyAnsweredAt,
+  dailyResponses,
   earnPoints,
+  links,
   points,
+  setDailyAnsweredAt,
   setDailyAnswered,
+  setDailyResponses,
   setTab,
   streak,
 }: {
   act: (title: string, detail: string) => void;
   dailyAnswered: boolean;
+  dailyAnsweredAt: string | null;
+  dailyResponses: DailyResponse[];
   earnPoints: EarnPoints;
+  links: typeof initialLinks;
   points: number;
+  setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
   setDailyAnswered: React.Dispatch<React.SetStateAction<boolean>>;
+  setDailyResponses: React.Dispatch<React.SetStateAction<DailyResponse[]>>;
   setTab: (tab: Tab) => void;
   streak: number;
 }) {
+  const [dailyDraft, setDailyDraft] = useState("");
+  const liveVerdicts = [
+    {
+      question: dailyHumanQuestion.title,
+      result: `${dailyResponses.length} live answers recorded today`,
+      truth:
+        dailyResponses[0]?.text ??
+        "Answer the Daily to help form the first real verdict.",
+    },
+    {
+      question: "What should the world remember today?",
+      result: `${links.length} chain links from verified humans`,
+      truth: links[0]?.text ?? "The newest chain link will appear here.",
+    },
+  ];
+
   return (
     <div className="screen">
       <header className="hero">
+        <div className="brand-sigil" aria-hidden="true">
+          <span />
+          <i />
+        </div>
         <div className="eyebrow">
           <Globe2 size={16} />
           Verified human network
@@ -857,7 +964,7 @@ function HomeView({
         {premiumServices.map((service) => (
           <article className="service-card" key={service.title}>
             <div>
-              <span>{service.price}</span>
+              <span>HumanChain</span>
               <h3>{service.title}</h3>
             </div>
             <p>{service.detail}</p>
@@ -905,6 +1012,16 @@ function HomeView({
         <span className="daily-reward">{dailyHumanQuestion.reward}</span>
         <h2>{dailyHumanQuestion.title}</h2>
         <p>{dailyHumanQuestion.detail}</p>
+        <textarea
+          disabled={dailyAnswered}
+          onChange={(event) => setDailyDraft(event.target.value)}
+          placeholder="Write today's human answer..."
+          value={
+            dailyAnswered
+              ? `Answered at ${dailyAnsweredAt ?? "today"}`
+              : dailyDraft
+          }
+        />
         <div className="daily-actions">
           <button
             disabled={dailyAnswered}
@@ -915,6 +1032,21 @@ function HomeView({
               }
 
               setDailyAnswered(true);
+              const time = new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              setDailyAnsweredAt(time);
+              setDailyResponses((current) => [
+                {
+                  user: "@jonta254",
+                  text:
+                    dailyDraft.trim() ||
+                    "Life taught me that a real answer can carry another human.",
+                  time,
+                },
+                ...current,
+              ]);
               earnPoints(18, "Your Daily Human answer entered today's global verdict.");
             }}
             type="button"
@@ -925,6 +1057,14 @@ function HomeView({
             See answers
           </button>
         </div>
+        <div className="daily-live">
+          {dailyResponses.slice(0, 3).map((response) => (
+            <article key={`${response.user}-${response.time}`}>
+              <span>{response.user} · {response.time}</span>
+              <p>{response.text}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="panel">
@@ -932,7 +1072,7 @@ function HomeView({
           <span>Trending Verdict</span>
           <Vote size={18} />
         </div>
-        {verdicts.map((verdict) => (
+        {liveVerdicts.map((verdict) => (
           <article className="verdict-card" key={verdict.question}>
             <h3>{verdict.question}</h3>
             <p className="verdict-result">{verdict.result}</p>
@@ -989,10 +1129,12 @@ function AskView({
   act,
   earnPoints,
   keepStreak,
+  openPayment,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
+  openPayment: OpenPayment;
 }) {
   const [question, setQuestion] = useState("");
   const [published, setPublished] = useState<string | null>(null);
@@ -1052,7 +1194,25 @@ function AskView({
           ].map(([mode, price]) => (
             <button
               key={mode}
-              onClick={() => act(`${mode} mode`, `${price} selected for this question.`)}
+              onClick={() => {
+                if (mode === "Text") {
+                  act("Text mode", "Free draft selected for this question.");
+                  return;
+                }
+
+                openPayment({
+                  title: `${mode} question`,
+                  amount: price.replace(" reach", ""),
+                  detail:
+                    mode === "Voice"
+                      ? "Ask with voice so verified humans hear your tone before answering."
+                      : mode === "Private"
+                        ? "Hide your public identity while verified humans answer."
+                        : "Turn answers into most-said, best answer, country differences, hard truth, and final verdict.",
+                  success: `${mode} flow is prepared for World App payment.`,
+                  points: mode === "Deep Verdict" ? 12 : 6,
+                });
+              }}
               type="button"
             >
               <strong>{mode}</strong>
@@ -1110,7 +1270,7 @@ function AskView({
         <span className="section-kicker">Premium World Verdict</span>
         <h2>6 WLD turns answers into a real human report.</h2>
         <div className="verdict-parts">
-          {worldVerdictParts.map((part) => (
+        {worldVerdictParts.map((part) => (
             <button
               key={part}
               onClick={() => act(part, "This section appears when enough verified answers arrive.")}
@@ -1122,7 +1282,15 @@ function AskView({
         </div>
         <button
           className="primary-command"
-          onClick={() => act("6 WLD Deep Verdict", "MiniKit Pay will unlock the full World Verdict.")}
+          onClick={() =>
+            openPayment({
+              title: "Deep World Verdict",
+              amount: "6 WLD",
+              detail: "Unlock the full human report after enough verified answers arrive.",
+              success: "Deep Verdict payment is ready for World App.",
+              points: 12,
+            })
+          }
           type="button"
         >
           <CircleDollarSign size={18} />
@@ -1158,8 +1326,13 @@ function AskView({
         <div className="compact-actions">
           <button
             onClick={() => {
-              earnPoints(15, "Voice answers carry human tone and earn answer points.");
-              act("Voice answer", "Record up to 60 seconds.");
+              openPayment({
+                title: "Voice answer",
+                amount: "2 WLD",
+                detail: "Record up to 60 seconds and send an answer with human tone.",
+                success: "Voice answer recorder is ready after payment.",
+                points: 15,
+              });
             }}
             type="button"
           >
@@ -1182,15 +1355,18 @@ function ChainsView({
   earnPoints,
   keepStreak,
   links,
+  openPayment,
   setLinks,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
   links: typeof initialLinks;
+  openPayment: OpenPayment;
   setLinks: React.Dispatch<React.SetStateAction<typeof initialLinks>>;
 }) {
   const [linkText, setLinkText] = useState("");
+  const [chainView, setChainView] = useState<"quotes" | "groups">("quotes");
 
   function addLink() {
     const text =
@@ -1204,35 +1380,6 @@ function ChainsView({
   return (
     <div className="screen">
       <TopBar title="Human Fields" subtitle="Living chains for real humans." />
-      <section className="chain-map">
-        <span className="section-kicker">World field</span>
-        <h2>Find the chain that understands your life.</h2>
-        <div className="chain-orbit" aria-hidden="true">
-          <span />
-          <i />
-          <b />
-        </div>
-      </section>
-      <section className="field-grid">
-        {chainFields.map((field) => (
-          <article className="field-card" key={field.name}>
-            <div>
-              <strong>{field.name}</strong>
-              <span>{field.members} verified humans</span>
-            </div>
-            <p>{field.detail}</p>
-            <button
-              onClick={() => {
-                earnPoints(6, `You entered ${field.name} and expanded your human map.`);
-                act(`${field.name} joined`, `You entered the ${field.mood} field.`);
-              }}
-              type="button"
-            >
-              Enter field
-            </button>
-          </article>
-        ))}
-      </section>
       <section className="today-chain">
         <span className="section-kicker">Today's main chain</span>
         <h2>What truth should the world carry today?</h2>
@@ -1264,36 +1411,103 @@ function ChainsView({
           <HeartHandshake size={17} />
           Pulse
         </button>
-        <button onClick={() => act("Golden Link", "Pin your best link for 2 WLD.")} type="button">
+        <button
+          onClick={() =>
+            openPayment({
+              title: "Golden Link",
+              amount: "2 WLD",
+              detail: "Pin your best chain link so more verified humans see it.",
+              success: "Golden Link boost is prepared for World App.",
+              points: 8,
+            })
+          }
+          type="button"
+        >
           <Star size={17} />
           Pin
         </button>
       </section>
-      <section className="thread-list" aria-label="Human thread">
-        {links.map((link, index) => (
-          <article className="thread-item" key={`${link.country}-${link.text}-${index}`}>
-            <span className="thread-dot" />
-            <div>
-              <strong>{link.country}</strong>
-              <p>{link.text}</p>
-              <div className="reaction-row">
-                <button
-                  onClick={() => act("Reaction sent", "You told this human: I felt this.")}
-                  type="button"
-                >
-                  I felt this
-                </button>
-                <button
-                  onClick={() => act("1 WLD tip ready", "This will open MiniKit Pay in World App.")}
-                  type="button"
-                >
-                  Tip 1 WLD
-                </button>
-              </div>
-            </div>
-          </article>
-        ))}
+      <section className="chain-map">
+        <span className="section-kicker">World field</span>
+        <h2>Choose quotes or enter human groups.</h2>
+        <div className="chain-orbit" aria-hidden="true">
+          <span />
+          <i />
+          <b />
+        </div>
       </section>
+      <div className="chain-tabs">
+        <button
+          className={chainView === "quotes" ? "active" : ""}
+          onClick={() => setChainView("quotes")}
+          type="button"
+        >
+          All chain quotes
+        </button>
+        <button
+          className={chainView === "groups" ? "active" : ""}
+          onClick={() => setChainView("groups")}
+          type="button"
+        >
+          Human groups
+        </button>
+      </div>
+      {chainView === "groups" ? (
+        <section className="field-grid">
+          {chainFields.map((field) => (
+            <article className="field-card" key={field.name}>
+              <div>
+                <strong>{field.name}</strong>
+                <span>{field.members} verified humans</span>
+              </div>
+              <p>{field.detail}</p>
+              <button
+                onClick={() => {
+                  earnPoints(6, `You entered ${field.name} and expanded your human map.`);
+                  act(`${field.name} joined`, `You entered the ${field.mood} field.`);
+                }}
+                type="button"
+              >
+                Enter field
+              </button>
+            </article>
+          ))}
+        </section>
+      ) : (
+        <section className="thread-list" aria-label="Human thread">
+          {links.map((link, index) => (
+            <article className="thread-item" key={`${link.country}-${link.text}-${index}`}>
+              <span className="thread-dot" />
+              <div>
+                <strong>{link.country}</strong>
+                <p>{link.text}</p>
+                <div className="reaction-row">
+                  <button
+                    onClick={() => act("Reaction sent", "You told this human: I felt this.")}
+                    type="button"
+                  >
+                    I felt this
+                  </button>
+                  <button
+                    onClick={() =>
+                      openPayment({
+                        title: "Tip chain link",
+                        amount: "1 WLD",
+                        detail: "Send a small thank-you to this verified human.",
+                        success: "Tip is ready for World App payment.",
+                        points: 4,
+                      })
+                    }
+                    type="button"
+                  >
+                    Tip 1 WLD
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
     </div>
   );
 }
@@ -1302,11 +1516,13 @@ function StoriesView({
   act,
   earnPoints,
   keepStreak,
+  openPayment,
   setSavedItems,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
+  openPayment: OpenPayment;
   setSavedItems: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const [isReading, setIsReading] = useState(false);
@@ -1432,38 +1648,6 @@ function StoriesView({
           Read Published Story
         </button>
       </section>
-      <section className="story-pages">
-        {[
-          {
-            art: "closed-door" as const,
-            title: "The blue door",
-          },
-          {
-            art: "key-ticket" as const,
-            title: "Three objects",
-          },
-          {
-            art: "open-window" as const,
-            title: "The first opening",
-          },
-          {
-            art: "repaired-cup" as const,
-            title: "The gold line",
-          },
-        ].map((chapter, index) => (
-          <article
-            key={chapter.title}
-            onClick={() => {
-              setPage(index * 25);
-              setIsReading(true);
-            }}
-          >
-            <StoryPaperArt alt={`${chapter.title} symbol`} kind={chapter.art} />
-            <span>Chapter {index + 1}</span>
-            <h3>{chapter.title}</h3>
-          </article>
-        ))}
-      </section>
       <section className="panel story-market">
         <div className="section-heading">
           <span>Published Story Library</span>
@@ -1486,6 +1670,7 @@ function StoriesView({
             <div>
               <span>{story.label}</span>
               <h3>{story.title}</h3>
+              <small>publisher: {story.publisher}</small>
               <p>{story.detail}</p>
             </div>
             <button
@@ -1495,6 +1680,17 @@ function StoriesView({
                   setIsReadingBitcoin(true);
                   earnPoints(8, "You opened a published HumanChain story.");
                   keepStreak("You unlocked a published HumanChain short story.");
+                  return;
+                }
+
+                if (story.price.includes("WLD")) {
+                  openPayment({
+                    title: story.title,
+                    amount: story.price,
+                    detail: `Unlock this published story from ${story.publisher}.`,
+                    success: `${story.title} is ready to open after payment.`,
+                    points: 8,
+                  });
                   return;
                 }
 
@@ -1621,19 +1817,43 @@ function StoriesView({
         </div>
         <div className="compact-actions">
           <button
-            onClick={() => act("1 WLD tip ready", "Support the storyteller.")}
+            onClick={() =>
+              openPayment({
+                title: "Tip storyteller",
+                amount: "1 WLD",
+                detail: "Support the writer behind this story.",
+                success: "Storyteller tip is prepared for World App.",
+                points: 4,
+              })
+            }
             type="button"
           >
             1 WLD Tip Storyteller
           </button>
           <button
-            onClick={() => act("2 WLD bonus ready", "Unlock author notes and reader reflections.")}
+            onClick={() =>
+              openPayment({
+                title: "Bonus story pages",
+                amount: "2 WLD",
+                detail: "Unlock author notes and reader reflections.",
+                success: "Bonus pages are prepared for unlock.",
+                points: 6,
+              })
+            }
             type="button"
           >
             2 WLD Bonus Pages
           </button>
           <button
-            onClick={() => act("6 WLD reflection ready", "Create your Deep Story Reflection.")}
+            onClick={() =>
+              openPayment({
+                title: "Deep Story Reflection",
+                amount: "6 WLD",
+                detail: "Create a private reflection from the story and your answers.",
+                success: "Deep Story Reflection is prepared for World App.",
+                points: 12,
+              })
+            }
             type="button"
           >
             6 WLD Deep Reflection
@@ -2064,6 +2284,8 @@ function MeView({
   savedItems: number;
   streak: number;
 }) {
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
   return (
     <div className="screen">
       <TopBar title="Treasure Profile" subtitle="Your verified human chain." />
@@ -2082,7 +2304,9 @@ function MeView({
       </section>
       <section className="treasure-profile">
         <div className="treasure-mark">
-          <div className="avatar">J</div>
+          <div className="avatar">
+            {profileImage ? <img alt="Uploaded profile" src={profileImage} /> : "J"}
+          </div>
           <BadgeCheck size={22} />
         </div>
         <div>
@@ -2100,6 +2324,24 @@ function MeView({
           <CalendarCheck size={17} />
           Check in
         </button>
+        <label className="profile-upload">
+          <Upload size={16} />
+          Upload profile image
+          <input
+            accept="image/*"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+
+              if (!file) {
+                return;
+              }
+
+              setProfileImage(URL.createObjectURL(file));
+              earnPoints(5, "Profile image added to your human identity.");
+            }}
+            type="file"
+          />
+        </label>
       </section>
       <section className="chain-id-card">
         <div>
@@ -2179,6 +2421,38 @@ function MeView({
         </div>
       </section>
     </div>
+  );
+}
+
+function PaymentSheet({
+  onCancel,
+  onConfirm,
+  payment,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+  payment: PaymentRequest;
+}) {
+  return (
+    <section className="payment-backdrop" role="dialog" aria-modal="true">
+      <div className="payment-sheet">
+        <span className="section-kicker">World App payment</span>
+        <h2>{payment.title}</h2>
+        <strong>{payment.amount}</strong>
+        <p>{payment.detail}</p>
+        {payment.points ? (
+          <small>Confirming this also records +{payment.points} HP value.</small>
+        ) : null}
+        <div className="payment-actions">
+          <button onClick={onCancel} type="button">
+            Cancel
+          </button>
+          <button onClick={onConfirm} type="button">
+            Prepare Payment
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
