@@ -380,7 +380,9 @@ const bitcoinWorldStory = {
   title: "One Seed, One World",
   subtitle: "Bitcoin, World, and the Human Chain",
   author: "written in Africa by only1",
+  publisher: "jontAWorld",
   price: "2 WLD",
+  coverArt: "earth-chain" as const,
   pages: [
     {
       art: "earth-chain" as const,
@@ -473,40 +475,42 @@ const publishedStoryCollection = {
   orb: {
     title: "The ORB",
     subtitle: "A World Story About Being Seen",
-    author: "publisher: jontAWorld",
+    author: "short real story by only1",
+    publisher: "jontAWorld",
     price: "2 WLD",
     shelfTitle: "The ORB",
+    coverArt: "anonymous" as const,
     pages: [
       {
-        art: "cover-symbol" as const,
+        art: "anonymous" as const,
         text: "The first time Nia heard about the Orb, she imagined a machine that wanted to take something from her. In her city, people had learned to be careful with promises, especially when the promise arrived wearing technology.",
       },
       {
-        art: "honest-message" as const,
+        art: "voice-wall" as const,
         text: "Her brother said it was not about taking her name. It was about proving she was one real human in a world where screens had become crowded with copies, scripts, and voices that did not breathe.",
       },
       {
-        art: "world-thread" as const,
+        art: "windows" as const,
         text: "Nia did not believe him at first. She had seen too many systems ask poor people for trust and give them waiting rooms in return. But the question stayed with her: if the internet could no longer tell who was human, who would be heard?",
       },
       {
-        art: "phone-thread" as const,
+        art: "four-windows" as const,
         text: "At the verification center, nobody asked for her secrets. The process felt smaller than the rumor. A light, a pause, a confirmation. The app did not tell her she was special. It told her she was unique.",
       },
       {
-        art: "hands" as const,
+        art: "open-window" as const,
         text: "That word followed her home. Unique did not mean rich. It did not mean safe. It meant there was one Nia, one set of tired hands, one laugh, one history no bot could borrow.",
       },
       {
-        art: "public-square" as const,
+        art: "plant-door" as const,
         text: "Weeks later, Nia joined HumanChain and answered a stranger's question about fear. Her answer crossed borders. Someone saved it. Someone tipped it. Someone replied: I thought I was alone.",
       },
       {
-        art: "verdict-mirror" as const,
+        art: "repaired-cup" as const,
         text: "That was when the Orb changed meaning. It was no longer only a device in a room. It became a doorway into a public square where being human could carry weight again.",
       },
       {
-        art: "light-opening" as const,
+        art: "closed-door" as const,
         text: "Human message: technology becomes human when it helps a real person become visible without making them smaller.",
       },
     ],
@@ -514,24 +518,26 @@ const publishedStoryCollection = {
   onePage: {
     title: "One Page From My Life",
     subtitle: "A Human Submission",
-    author: "publisher: jontAWorld",
+    author: "human submission styled by only1",
+    publisher: "jontAWorld",
     price: "3 WLD",
     shelfTitle: "One Page From My Life",
+    coverArt: "memory-table" as const,
     pages: [
       {
         art: "memory-table" as const,
         text: "I once owned a notebook with only one page left. I kept it for something important, so important that I never used it. Every day I carried it in my bag like a small future waiting for permission.",
       },
       {
-        art: "train" as const,
+        art: "stair-symbol" as const,
         text: "When I left home for work, my mother put coins in my palm and told me not to spend them on pride. I laughed because I did not understand. Pride was not sold in shops, so I thought I was safe.",
       },
       {
-        art: "low-battery" as const,
+        art: "bed-photo" as const,
         text: "The city taught me otherwise. Pride was refusing to call when I was hungry. Pride was saying fine when my battery was one percent and my heart was less. Pride was pretending directions were easy.",
       },
       {
-        art: "reply-ribbon" as const,
+        art: "ocean-memory" as const,
         text: "One night, a stranger shared food with me at a bus stop. He did not ask my story. He only said, tomorrow you will help someone else and then this food will keep moving.",
       },
       {
@@ -539,7 +545,7 @@ const publishedStoryCollection = {
         text: "I went home and finally used the last page. I wrote: I survived because somebody did not wait to know whether I deserved kindness.",
       },
       {
-        art: "add-link" as const,
+        art: "broken-streak" as const,
         text: "Years later, I still think a life can change on one page. Not the whole book. Just one honest page where a human stops hiding and lets another human enter.",
       },
     ],
@@ -1647,7 +1653,9 @@ function StoriesView({
     : storyPages;
   const current = activePages[page];
   const activeTitle = publishedStory?.title ?? "The Door That Waited";
-  const activeByline = publishedStory?.author ?? "April Human Story";
+  const activeByline = publishedStory
+    ? `Published by ${publishedStory.publisher}`
+    : "Published by HumanChain Monthly";
 
   function saveStory() {
     setSavedItems((value) => value + 1);
@@ -1686,6 +1694,9 @@ function StoriesView({
             <StoryPaperArt alt={current.image.alt} kind={current.image.art} />
           ) : null}
           <span className="section-kicker">{activeByline}</span>
+          {publishedStory ? (
+            <small className="reader-publisher">{publishedStory.author}</small>
+          ) : null}
           <h2 className="reader-title">{activeTitle}</h2>
           <p>{current.text}</p>
           <div className="story-thread-note">
@@ -1743,7 +1754,7 @@ function StoriesView({
       <section className="story-cover bitcoin-cover">
         <StoryPaperArt
           alt="A symbolic cover showing Bitcoin value, World identity, and a human chain"
-          kind="earth-chain"
+          kind={bitcoinWorldStory.coverArt}
         />
         <span>{bitcoinWorldStory.author}</span>
         <h2>{bitcoinWorldStory.title}</h2>
