@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   CircleDollarSign,
   Compass,
-  FileText,
   Flame,
   Globe2,
   HeartHandshake,
@@ -1787,39 +1786,49 @@ function StoriesView({
             </button>
           ))}
         </div>
-        {storyShelf.map((story) => (
-          <article className="shelf-row" key={story.title}>
-            <FileText size={18} />
-            <div>
-              <span>{story.label}</span>
-              <h3>{story.title}</h3>
-              <small>publisher: {story.publisher}</small>
-              <p>{story.detail}</p>
-            </div>
-            <button
-              onClick={() => {
-                if (story.key !== "monthly") {
-                  const storyKey = story.key as PublishedStoryKey;
-                  setPage(0);
-                  setActivePublishedStory(storyKey);
-                  earnPoints(8, "You opened a published HumanChain story.");
-                  keepStreak(`You opened ${story.title}.`);
-                  return;
-                }
+        {storyShelf.map((story) => {
+          const storyKey =
+            story.key !== "monthly" ? (story.key as PublishedStoryKey) : null;
+          const thumbnailArt = storyKey
+            ? publishedStoryCollection[storyKey].coverArt
+            : ("cover-symbol" as const);
 
-                act(
-                  story.title,
-                  story.price === "Free"
-                    ? "Open this story."
-                    : `${story.price} will unlock this short story.`,
-                );
-              }}
-              type="button"
-            >
-              {story.price}
-            </button>
-          </article>
-        ))}
+          return (
+            <article className="shelf-row" key={story.title}>
+              <StoryPaperArt
+                alt={`${story.title} symbolic story thumbnail`}
+                kind={thumbnailArt}
+              />
+              <div>
+                <span>{story.label}</span>
+                <h3>{story.title}</h3>
+                <small>publisher: {story.publisher}</small>
+                <p>{story.detail}</p>
+              </div>
+              <button
+                onClick={() => {
+                  if (storyKey) {
+                    setPage(0);
+                    setActivePublishedStory(storyKey);
+                    earnPoints(8, "You opened a published HumanChain story.");
+                    keepStreak(`You opened ${story.title}.`);
+                    return;
+                  }
+
+                  act(
+                    story.title,
+                    story.price === "Free"
+                      ? "Open this story."
+                      : `${story.price} will unlock this short story.`,
+                  );
+                }}
+                type="button"
+              >
+                {story.price}
+              </button>
+            </article>
+          );
+        })}
       </section>
       <section className="publish-card">
         <div>
@@ -1979,15 +1988,45 @@ function StoriesView({
 
 function StoryCoverArt() {
   return (
-    <div
-      aria-label="Photorealistic Human Story cover showing a person at a blue door holding a phone"
-      className="cover-art cover-photo"
+    <figure
+      aria-label="Symbolic Human Story cover showing a person, a waiting door, a repaired cup, and a human thread"
+      className="cover-art symbolic-cover"
       role="img"
     >
-      <div className="cover-photo-mark">
-        <span />
-      </div>
-    </div>
+      <svg aria-hidden="true" viewBox="0 0 360 250">
+        <defs>
+          <linearGradient id="coverGlow" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stopColor="#f9eee0" />
+            <stop offset="0.52" stopColor="#d8e4d8" />
+            <stop offset="1" stopColor="#b98218" />
+          </linearGradient>
+          <filter id="coverRough">
+            <feTurbulence
+              baseFrequency="0.55"
+              numOctaves="2"
+              result="noise"
+              seed="11"
+            />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" />
+          </filter>
+        </defs>
+        <rect className="cover-paper" height="250" rx="22" width="360" />
+        <path className="cover-shadow" d="M28 214c78 22 179 19 304-9" />
+        <path className="cover-door" d="M118 45h105v166H118z" />
+        <path className="cover-door-inner" d="M139 66h62v122h-62z" />
+        <path className="cover-thread" d="M45 169c56-72 98 14 137-55 42-74 73 6 130-48" />
+        <circle className="cover-node" cx="45" cy="169" r="7" />
+        <circle className="cover-node" cx="182" cy="114" r="7" />
+        <circle className="cover-node" cx="312" cy="66" r="7" />
+        <circle className="cover-human" cx="167" cy="101" r="18" />
+        <path className="cover-human-body" d="M129 192c7-45 19-72 38-72s32 27 39 72Z" />
+        <path className="cover-phone" d="M200 133h25v38h-25z" />
+        <path className="cover-cup" d="M76 148h48v28c0 18-10 30-24 30s-24-12-24-30v-28Z" />
+        <path className="cover-cup-handle" d="M124 158c18-2 22 22 4 26" />
+        <path className="cover-crack" d="M101 149l-8 13 10 9-7 17 9 14" />
+        <path className="cover-light" d="M224 211c21-67 48-110 88-145" />
+      </svg>
+    </figure>
   );
 }
 

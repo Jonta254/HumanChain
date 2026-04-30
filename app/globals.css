@@ -1082,48 +1082,86 @@ button {
   overflow: hidden;
 }
 
-.cover-photo {
+.symbolic-cover {
   position: relative;
   min-height: 238px;
   border: 1px solid rgba(255, 253, 248, 0.24);
   background:
-    linear-gradient(180deg, rgba(14, 25, 24, 0.08), rgba(14, 25, 24, 0.44)),
-    url("/images/human-story-cover.png");
-  background-position: center;
-  background-size: cover;
+    linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(229, 217, 196, 0.9)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(74, 66, 56, 0.04) 0,
+      rgba(74, 66, 56, 0.04) 1px,
+      transparent 1px,
+      transparent 9px
+    );
   box-shadow: inset 0 -80px 100px rgba(13, 28, 26, 0.32);
 }
 
-.cover-photo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 70% 26%, rgba(255, 231, 173, 0.26), transparent 28%),
-    linear-gradient(135deg, rgba(18, 50, 39, 0.1), rgba(32, 35, 40, 0.2));
+.symbolic-cover svg {
+  display: block;
+  width: 100%;
+  min-height: 238px;
 }
 
-.cover-photo-mark {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  z-index: 1;
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: rgba(255, 253, 248, 0.84);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+.cover-paper {
+  fill: rgba(255, 250, 241, 0.92);
 }
 
-.cover-photo-mark span {
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--gold);
-  border-left-color: transparent;
-  border-radius: 999px;
-  transform: rotate(-24deg);
+.cover-shadow {
+  fill: none;
+  stroke: rgba(32, 35, 40, 0.13);
+  stroke-width: 16;
+}
+
+.cover-door,
+.cover-door-inner,
+.cover-phone,
+.cover-cup,
+.cover-cup-handle {
+  fill: none;
+  stroke: #243f39;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+  filter: url("#coverRough");
+}
+
+.cover-door-inner,
+.cover-phone,
+.cover-cup-handle {
+  stroke-width: 3;
+  opacity: 0.74;
+}
+
+.cover-thread,
+.cover-crack,
+.cover-light {
+  fill: none;
+  stroke: #b98218;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 5;
+  filter: url("#coverRough");
+}
+
+.cover-light {
+  stroke: url("#coverGlow");
+  opacity: 0.8;
+}
+
+.cover-node {
+  fill: #c58d22;
+  stroke: #714f12;
+  stroke-width: 2;
+}
+
+.cover-human,
+.cover-human-body {
+  fill: rgba(36, 63, 57, 0.16);
+  stroke: #243f39;
+  stroke-width: 3;
+  filter: url("#coverRough");
 }
 
 .story-pages {
@@ -1200,6 +1238,17 @@ button {
 
 .shelf-row svg {
   color: var(--green);
+}
+
+.shelf-row .paper-art {
+  width: 76px;
+  min-width: 76px;
+  margin: 0;
+  border-radius: 12px;
+}
+
+.shelf-row .paper-art-svg {
+  aspect-ratio: 1 / 1;
 }
 
 .shelf-row p {
