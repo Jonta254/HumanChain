@@ -715,6 +715,178 @@ const chainFields = [
   },
 ];
 
+const fieldQuoteRooms = {
+  "Faith & Prayer": {
+    intro: "Bible-rooted strength for prayer, waiting, courage, and quiet faith.",
+    quotes: [
+      {
+        source: "1 Thessalonians 5:17 KJV",
+        text: "Pray without ceasing.",
+        meaning: "A short verse for keeping the heart connected even in ordinary moments.",
+      },
+      {
+        source: "Philippians 4:6 KJV",
+        text: "Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.",
+        meaning: "Bring fear, need, and gratitude into prayer instead of carrying them alone.",
+      },
+      {
+        source: "Psalm 23:1 KJV",
+        text: "The Lord is my shepherd; I shall not want.",
+        meaning: "Faith can become rest when life feels uncertain.",
+      },
+      {
+        source: "Matthew 7:7 KJV",
+        text: "Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you.",
+        meaning: "Prayer is also movement: ask, seek, knock, continue.",
+      },
+      {
+        source: "Isaiah 40:31 KJV",
+        text: "They that wait upon the Lord shall renew their strength.",
+        meaning: "Waiting can be a place of renewal, not only delay.",
+      },
+    ],
+  },
+  "Builders & Money": {
+    intro: "Practical lines for money, discipline, work, and building with patience.",
+    quotes: [
+      {
+        source: "HumanChain Money Room",
+        text: "Do not build only for applause; build something that still works when nobody is watching.",
+        meaning: "Useful work survives quiet seasons.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "Money grows faster around clarity than around panic.",
+        meaning: "A calm plan beats rushed movement.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "Profit is good. Trust is what lets profit return.",
+        meaning: "Long-term business depends on reputation.",
+      },
+    ],
+  },
+  "Love & Family": {
+    intro: "Short wisdom for forgiveness, family repair, patience, and honest love.",
+    quotes: [
+      {
+        source: "HumanChain Family Room",
+        text: "A soft answer can save a whole house from becoming a battlefield.",
+        meaning: "Tone can protect love when emotions are loud.",
+      },
+      {
+        source: "HumanChain Family Room",
+        text: "Children remember the feeling of a room before they understand the reason.",
+        meaning: "Presence matters before explanation.",
+      },
+      {
+        source: "HumanChain Family Room",
+        text: "Forgiveness is not pretending it did not hurt; it is refusing to let hurt become your language.",
+        meaning: "Healing changes how pain speaks through us.",
+      },
+    ],
+  },
+  "Culture Rooms": {
+    intro: "Human customs, migration, food, language, and belonging across countries.",
+    quotes: [
+      {
+        source: "HumanChain Culture Room",
+        text: "A language is not only words. It is a map of what a people survived.",
+        meaning: "Culture carries memory.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "When people share food, strangers begin borrowing each other's peace.",
+        meaning: "Small rituals create belonging.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "Migration changes the address, but not the need to be known.",
+        meaning: "Home is also recognition.",
+      },
+    ],
+  },
+  "Health & Healing": {
+    intro: "Words for recovery, mental health, caregiving, and honest survival.",
+    quotes: [
+      {
+        source: "HumanChain Healing Room",
+        text: "Rest is not proof you are weak. It is how the body asks to continue.",
+        meaning: "Recovery needs respect.",
+      },
+      {
+        source: "HumanChain Healing Room",
+        text: "Some wounds close slowly because they are teaching the whole life to move differently.",
+        meaning: "Healing can change habits and pace.",
+      },
+      {
+        source: "HumanChain Healing Room",
+        text: "Tell one safe person the truth before silence becomes a room.",
+        meaning: "Connection can interrupt isolation.",
+      },
+    ],
+  },
+  "Youth & Future": {
+    intro: "For young humans building identity, skill, faith, ambition, and direction.",
+    quotes: [
+      {
+        source: "HumanChain Youth Room",
+        text: "You do not need to become loud to become powerful.",
+        meaning: "Quiet discipline can still change a future.",
+      },
+      {
+        source: "HumanChain Youth Room",
+        text: "Choose skills that make your future less dependent on permission.",
+        meaning: "Learning can become freedom.",
+      },
+      {
+        source: "HumanChain Youth Room",
+        text: "Do not confuse being early with being wrong.",
+        meaning: "Some good ideas need time to be understood.",
+      },
+    ],
+  },
+  "Parents & Children": {
+    intro: "Lessons for guardians, children, teachers, family builders, and care.",
+    quotes: [
+      {
+        source: "HumanChain Parents Room",
+        text: "A child may forget the advice, but they keep the safety of being listened to.",
+        meaning: "Listening becomes a form of love.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "Parents also need places where they can be human without losing respect.",
+        meaning: "Caregivers need care too.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "Teach with patience when possible; fear learns fast but forgets love.",
+        meaning: "Correction works best with dignity.",
+      },
+    ],
+  },
+};
+
+const initialHumanPosts = [
+  {
+    id: 1,
+    author: "@mara_chain",
+    caption: "A quiet desk, one cup, and the sentence that helped me start again.",
+    image: null as string | null,
+    theme: "gold",
+    reactions: 18,
+  },
+  {
+    id: 2,
+    author: "@worldbuilder",
+    caption: "Today I built one small thing before fear could explain why not.",
+    image: null as string | null,
+    theme: "green",
+    reactions: 31,
+  },
+];
+
 const profileBadges = [
   "Verified human",
   "Chain keeper",
@@ -728,7 +900,10 @@ const pointRules = [
   ["Answer a human", "+15 HP"],
   ["Ask a useful question", "+20 HP"],
   ["Add a chain link", "+12 HP"],
+  ["Publish image post", "+16 HP"],
+  ["React to image post", "+5 HP"],
   ["Enter a field", "+6 HP"],
+  ["Copy field quote", "+3 HP"],
   ["Read a story", "+8 HP"],
   ["Give a trusted report", "+10 HP"],
   ["Publish accepted story", "+120 HP"],
@@ -1479,7 +1654,14 @@ function ChainsView({
   setLinks: React.Dispatch<React.SetStateAction<typeof initialLinks>>;
 }) {
   const [linkText, setLinkText] = useState("");
-  const [chainView, setChainView] = useState<"quotes" | "groups">("quotes");
+  const [postCaption, setPostCaption] = useState("");
+  const [postImage, setPostImage] = useState<string | null>(null);
+  const [humanPosts, setHumanPosts] = useState(initialHumanPosts);
+  const [activeField, setActiveField] =
+    useState<(typeof chainFields)[number] | null>(null);
+  const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
+    "images",
+  );
 
   function addLink() {
     const text =
@@ -1490,9 +1672,127 @@ function ChainsView({
     keepStreak("Your link joined today's global chain.");
   }
 
+  function publishImagePost() {
+    const caption =
+      postCaption.trim() ||
+      "A real human moment I want the chain to remember today.";
+    setHumanPosts((current) => [
+      {
+        id: Date.now(),
+        author: "@you",
+        caption,
+        image: postImage,
+        theme: "gold",
+        reactions: 0,
+      },
+      ...current,
+    ]);
+    setPostCaption("");
+    setPostImage(null);
+    earnPoints(16, "Your human image post joined the visual chain.");
+    keepStreak("You posted a human image into today's chain.");
+  }
+
+  function reactToPost(postId: number, reaction: string) {
+    setHumanPosts((current) =>
+      current.map((post) =>
+        post.id === postId
+          ? { ...post, reactions: post.reactions + 1 }
+          : post,
+      ),
+    );
+    earnPoints(5, `Your ${reaction} reaction added life to a human post.`);
+    act("Reaction added", "You earned Human Points for reacting with meaning.");
+  }
+
+  async function copyQuote(text: string, source: string) {
+    const quote = `${text} — ${source}`;
+    try {
+      await navigator.clipboard.writeText(quote);
+      earnPoints(3, "Copied wisdom from a Human Field.");
+      act("Quote copied", "You can paste this wisdom anywhere.");
+    } catch {
+      act("Quote ready", quote);
+    }
+  }
+
+  if (activeField) {
+    const room =
+      fieldQuoteRooms[activeField.name as keyof typeof fieldQuoteRooms];
+
+    return (
+      <div className="screen">
+        <section className="field-room-hero">
+          <button onClick={() => setActiveField(null)} type="button">
+            Back
+          </button>
+          <span>{activeField.members} verified humans</span>
+          <h2>{activeField.name}</h2>
+          <p>{room.intro}</p>
+        </section>
+        <section className="field-quote-list">
+          {room.quotes.map((quote) => (
+            <article className="field-quote-card" key={quote.text}>
+              <span>{quote.source}</span>
+              <p>{quote.text}</p>
+              <small>{quote.meaning}</small>
+              <button
+                onClick={() => copyQuote(quote.text, quote.source)}
+                type="button"
+              >
+                Copy quote
+              </button>
+            </article>
+          ))}
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="screen">
       <TopBar title="Human Fields" subtitle="Living chains for real humans." />
+      <section className="image-chain-card">
+        <span className="section-kicker">Human Image Chain</span>
+        <h2>Post a real moment. Let humans react.</h2>
+        <p>
+          Share a photo from your day with a short human message. Every reaction
+          adds energy to the chain and awards Human Points.
+        </p>
+        {postImage ? (
+          <img alt="Selected human post" src={postImage} />
+        ) : (
+          <div className="image-post-placeholder">
+            <Upload size={22} />
+            <span>Your image stays inside this post preview.</span>
+          </div>
+        )}
+        <textarea
+          onChange={(event) => setPostCaption(event.target.value)}
+          placeholder="Write what this image means..."
+          value={postCaption}
+        />
+        <div className="image-post-actions">
+          <label>
+            <Upload size={17} />
+            Add image
+            <input
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  setPostImage(URL.createObjectURL(file));
+                  act("Image selected", "Add a caption, then publish it.");
+                }
+              }}
+              type="file"
+            />
+          </label>
+          <button onClick={publishImagePost} type="button">
+            Publish post
+          </button>
+        </div>
+      </section>
       <section className="today-chain">
         <span className="section-kicker">Today's main chain</span>
         <h2>What truth should the world carry today?</h2>
@@ -1542,7 +1842,7 @@ function ChainsView({
       </section>
       <section className="chain-map">
         <span className="section-kicker">World field</span>
-        <h2>Choose quotes or enter human groups.</h2>
+        <h2>Post images, read quotes, or enter human groups.</h2>
         <div className="chain-orbit" aria-hidden="true">
           <span />
           <i />
@@ -1550,6 +1850,13 @@ function ChainsView({
         </div>
       </section>
       <div className="chain-tabs">
+        <button
+          className={chainView === "images" ? "active" : ""}
+          onClick={() => setChainView("images")}
+          type="button"
+        >
+          Image posts
+        </button>
         <button
           className={chainView === "quotes" ? "active" : ""}
           onClick={() => setChainView("quotes")}
@@ -1565,7 +1872,39 @@ function ChainsView({
           Human groups
         </button>
       </div>
-      {chainView === "groups" ? (
+      {chainView === "images" ? (
+        <section className="image-post-grid">
+          {humanPosts.map((post) => (
+            <article className="image-post" key={post.id}>
+              {post.image ? (
+                <img alt={post.caption} src={post.image} />
+              ) : (
+                <div className={`generated-post-art ${post.theme}`}>
+                  <span />
+                  <i />
+                  <b />
+                </div>
+              )}
+              <div>
+                <strong>{post.author}</strong>
+                <p>{post.caption}</p>
+                <small>{post.reactions} reactions</small>
+                <div className="reaction-row">
+                  {["I felt this", "Inspired", "Praying"].map((reaction) => (
+                    <button
+                      key={reaction}
+                      onClick={() => reactToPost(post.id, reaction)}
+                      type="button"
+                    >
+                      {reaction}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+      ) : chainView === "groups" ? (
         <section className="field-grid">
           {chainFields.map((field) => (
             <article className="field-card" key={field.name}>
@@ -1577,7 +1916,8 @@ function ChainsView({
               <button
                 onClick={() => {
                   earnPoints(6, `You entered ${field.name} and expanded your human map.`);
-                  act(`${field.name} joined`, `You entered the ${field.mood} field.`);
+                  setActiveField(field);
+                  act(`${field.name} opened`, "Read, copy, and carry useful field wisdom.");
                 }}
                 type="button"
               >
