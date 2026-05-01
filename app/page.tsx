@@ -68,6 +68,30 @@ const initialLinks = [
     country: "Japan",
     text: "Silence can be care when words are tired.",
   },
+  {
+    country: "Ghana",
+    text: "A good name is built in the small moments nobody records.",
+  },
+  {
+    country: "Philippines",
+    text: "Begin with what your hands can do today.",
+  },
+  {
+    country: "Portugal",
+    text: "Peace is sometimes a bill paid early and a call returned honestly.",
+  },
+  {
+    country: "South Africa",
+    text: "The truth gets lighter when it is carried by more than one person.",
+  },
+  {
+    country: "Mexico",
+    text: "Family is not perfect people. It is people learning to return.",
+  },
+  {
+    country: "Canada",
+    text: "When the day is heavy, do the next kind thing.",
+  },
 ];
 
 const chainQuoteLibrary = [
@@ -118,6 +142,26 @@ const chainQuoteLibrary = [
   {
     country: "Wisdom",
     text: "If the lesson cost you pain, let it also pay someone else in guidance.",
+  },
+  {
+    country: "Prayer",
+    text: "Faith becomes visible when a worried heart still chooses to ask.",
+  },
+  {
+    country: "Business",
+    text: "Your first loyal users are proof that the idea has a pulse.",
+  },
+  {
+    country: "Care",
+    text: "Be gentle with people who are learning how to speak after surviving silence.",
+  },
+  {
+    country: "Discipline",
+    text: "Small daily order can rescue a life from big repeated confusion.",
+  },
+  {
+    country: "Identity",
+    text: "A verified human is not only a user. It is a voice with a life behind it.",
   },
 ];
 
@@ -1041,6 +1085,14 @@ const initialHumanPosts = [
     theme: "green",
     reactions: 31,
   },
+  {
+    id: 3,
+    author: "@faith_worker",
+    caption: "Morning light on my notebook before work. One prayer, one plan, one step.",
+    image: null as string | null,
+    theme: "gold",
+    reactions: 24,
+  },
 ];
 
 const profileBadges = [
@@ -1858,7 +1910,7 @@ function ChainsView({
   }
 
   async function copyQuote(text: string, source: string) {
-    const quote = `${text} — ${source}`;
+    const quote = `${text} - ${source}`;
     try {
       await navigator.clipboard.writeText(quote);
       earnPoints(3, "Copied wisdom from a Human Field.");
@@ -2026,6 +2078,10 @@ function ChainsView({
       </div>
       {chainView === "images" ? (
         <section className="image-post-grid">
+          <div className="chain-section-note">
+            <span>Human image posts</span>
+            <p>Photos and captions shared by verified humans. Reactions add Human Points and show what the chain is feeling.</p>
+          </div>
           {humanPosts.map((post) => (
             <article className="image-post" key={post.id}>
               {post.image ? (
@@ -2057,55 +2113,53 @@ function ChainsView({
           ))}
         </section>
       ) : chainView === "groups" ? (
-        <section className="field-grid">
-          {chainFields.map((field) => (
-            <article className="field-card" key={field.name}>
-              <div>
-                <strong>{field.name}</strong>
-                <span>{field.members} verified humans</span>
-              </div>
-              <p>{field.detail}</p>
-              <button
-                onClick={() => {
-                  earnPoints(6, `You entered ${field.name} and expanded your human map.`);
-                  setActiveField(field);
-                  act(`${field.name} opened`, "Read, copy, and carry useful field wisdom.");
-                }}
-                type="button"
-              >
-                Enter field
-              </button>
-            </article>
-          ))}
+        <section className="groups-stack">
+          <div className="chain-section-note">
+            <span>Permanent quote rooms</span>
+            <p>These are stable HumanChain quote libraries. Enter a field to read and copy deeper wisdom for that part of life.</p>
+          </div>
+          <div className="permanent-quote-grid">
+            {chainQuoteLibrary.slice(0, 6).map((quote) => (
+              <article className="permanent-quote-card" key={`${quote.country}-${quote.text}`}>
+                <span>{quote.country}</span>
+                <p>{quote.text}</p>
+                <button
+                  onClick={() => copyQuote(quote.text, quote.country)}
+                  type="button"
+                >
+                  Copy
+                </button>
+              </article>
+            ))}
+          </div>
+          <div className="field-grid">
+            {chainFields.map((field) => (
+              <article className="field-card" key={field.name}>
+                <div>
+                  <strong>{field.name}</strong>
+                  <span>{field.members} verified humans</span>
+                </div>
+                <p>{field.detail}</p>
+                <button
+                  onClick={() => {
+                    earnPoints(6, `You entered ${field.name} and expanded your human map.`);
+                    setActiveField(field);
+                    act(`${field.name} opened`, "Read, copy, and carry useful field wisdom.");
+                  }}
+                  type="button"
+                >
+                  Enter quote room
+                </button>
+              </article>
+            ))}
+          </div>
         </section>
       ) : (
         <section className="thread-list" aria-label="Human thread">
-          {chainQuoteLibrary.map((quote, index) => (
-            <article className="thread-item quote-thread" key={`${quote.country}-${index}`}>
-              <span className="thread-dot" />
-              <div>
-                <strong>{quote.country}</strong>
-                <p>{quote.text}</p>
-                <div className="reaction-row">
-                  <button
-                    onClick={() => copyQuote(quote.text, quote.country)}
-                    type="button"
-                  >
-                    Copy quote
-                  </button>
-                  <button
-                    onClick={() => {
-                      earnPoints(5, "You reacted to a chain quote.");
-                      act("Quote reaction", "This quote was added to your human taste signal.");
-                    }}
-                    type="button"
-                  >
-                    I felt this
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))}
+          <div className="chain-section-note live-note">
+            <span>Live chain quotes</span>
+            <p>This feed is only the links written by humans in Today's main chain. Add your link above and it appears here first.</p>
+          </div>
           {links.map((link, index) => (
             <article className="thread-item" key={`${link.country}-${link.text}-${index}`}>
               <span className="thread-dot" />
