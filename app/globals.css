@@ -1398,16 +1398,10 @@ button {
   position: relative;
   min-height: 238px;
   border: 1px solid rgba(255, 253, 248, 0.24);
-  background:
-    linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(229, 217, 196, 0.9)),
-    repeating-linear-gradient(
-      90deg,
-      rgba(74, 66, 56, 0.04) 0,
-      rgba(74, 66, 56, 0.04) 1px,
-      transparent 1px,
-      transparent 9px
-    );
-  box-shadow: inset 0 -80px 100px rgba(13, 28, 26, 0.32);
+  background: #efe2cf;
+  box-shadow:
+    inset 0 -80px 100px rgba(13, 28, 26, 0.18),
+    0 18px 34px rgba(13, 28, 26, 0.2);
 }
 
 .symbolic-cover svg {
@@ -2144,6 +2138,194 @@ button {
   font-size: 0.72rem;
   font-weight: 850;
   text-align: center;
+}
+
+.real-bg.wall {
+  fill: #d6cbbb;
+}
+
+.real-bg.warm {
+  fill: #dbcab4;
+}
+
+.real-bg.night {
+  fill: #1d2b2d;
+}
+
+.real-bg.world {
+  fill: #243f39;
+}
+
+.real-bg.dawn {
+  fill: #d9d6c6;
+}
+
+.real-floor {
+  fill: rgba(87, 74, 59, 0.22);
+}
+
+.real-shadow {
+  fill: none;
+  stroke: rgba(32, 35, 40, 0.2);
+  stroke-linecap: round;
+  stroke-width: 17;
+}
+
+.real-door-frame {
+  fill: #203a37;
+  filter: drop-shadow(0 16px 18px rgba(32, 35, 40, 0.2));
+}
+
+.real-door {
+  fill: #2f756c;
+}
+
+.real-door-panel {
+  fill: rgba(255, 253, 248, 0.16);
+  stroke: rgba(255, 253, 248, 0.34);
+  stroke-width: 2;
+}
+
+.real-door-light {
+  fill: none;
+  stroke: rgba(255, 236, 186, 0.4);
+  stroke-linecap: round;
+  stroke-width: 13;
+}
+
+.real-door-light.wide {
+  stroke-width: 19;
+}
+
+.real-knob,
+.real-node {
+  fill: #d19b2c;
+  stroke: rgba(91, 64, 16, 0.88);
+  stroke-width: 2;
+}
+
+.real-head {
+  fill: #47372d;
+  filter: drop-shadow(0 6px 8px rgba(32, 35, 40, 0.24));
+}
+
+.real-body {
+  fill: #57615c;
+  filter: drop-shadow(0 14px 15px rgba(32, 35, 40, 0.2));
+}
+
+.real-body.coat {
+  fill: #6f675e;
+}
+
+.real-phone {
+  fill: #202328;
+  stroke: rgba(255, 253, 248, 0.38);
+  stroke-width: 2;
+}
+
+.real-phone.glow {
+  fill: #202328;
+  filter: drop-shadow(0 0 14px rgba(153, 201, 255, 0.58));
+}
+
+.real-phone-light {
+  fill: none;
+  stroke: rgba(153, 201, 255, 0.26);
+  stroke-linecap: round;
+  stroke-width: 22;
+}
+
+.real-cup {
+  fill: #f0e3d0;
+  stroke: rgba(62, 48, 31, 0.46);
+  stroke-width: 3;
+  filter: drop-shadow(0 12px 14px rgba(62, 48, 31, 0.16));
+}
+
+.real-cup.large {
+  fill: #ead7bd;
+}
+
+.real-cup-handle {
+  fill: none;
+  stroke: rgba(62, 48, 31, 0.48);
+  stroke-linecap: round;
+  stroke-width: 4;
+}
+
+.real-crack {
+  fill: none;
+  stroke: #b98218;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.real-crack.large {
+  stroke-width: 5;
+}
+
+.real-thread {
+  fill: none;
+  stroke: #c58d22;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 6;
+  filter: drop-shadow(0 4px 5px rgba(91, 64, 16, 0.22));
+}
+
+.real-window-light {
+  fill: rgba(255, 241, 199, 0.34);
+  filter: blur(0.2px);
+}
+
+.real-window-light.blue {
+  fill: rgba(127, 175, 226, 0.26);
+}
+
+.real-table {
+  fill: #7b6147;
+  filter: drop-shadow(0 10px 10px rgba(62, 48, 31, 0.18));
+}
+
+.real-note {
+  fill: #fff9ec;
+  stroke: rgba(62, 48, 31, 0.24);
+  stroke-width: 2;
+}
+
+.real-note-line {
+  fill: none;
+  stroke: rgba(62, 48, 31, 0.38);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.real-globe {
+  fill: rgba(255, 253, 248, 0.11);
+  stroke: rgba(255, 253, 248, 0.5);
+  stroke-width: 3;
+}
+
+.real-globe-line {
+  fill: none;
+  stroke: rgba(255, 253, 248, 0.44);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.real-open-door {
+  fill: #2f756c;
+  filter: drop-shadow(0 14px 16px rgba(32, 35, 40, 0.22));
+}
+
+.real-plant {
+  fill: none;
+  stroke: #2f756c;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 5;
 }
 
 .paper-art {

@@ -2593,20 +2593,7 @@ function StoryCoverArt() {
           </filter>
         </defs>
         <rect className="cover-paper" height="250" rx="22" width="360" />
-        <path className="cover-shadow" d="M28 214c78 22 179 19 304-9" />
-        <path className="cover-door" d="M118 45h105v166H118z" />
-        <path className="cover-door-inner" d="M139 66h62v122h-62z" />
-        <path className="cover-thread" d="M45 169c56-72 98 14 137-55 42-74 73 6 130-48" />
-        <circle className="cover-node" cx="45" cy="169" r="7" />
-        <circle className="cover-node" cx="182" cy="114" r="7" />
-        <circle className="cover-node" cx="312" cy="66" r="7" />
-        <circle className="cover-human" cx="167" cy="101" r="18" />
-        <path className="cover-human-body" d="M129 192c7-45 19-72 38-72s32 27 39 72Z" />
-        <path className="cover-phone" d="M200 133h25v38h-25z" />
-        <path className="cover-cup" d="M76 148h48v28c0 18-10 30-24 30s-24-12-24-30v-28Z" />
-        <path className="cover-cup-handle" d="M124 158c18-2 22 22 4 26" />
-        <path className="cover-crack" d="M101 149l-8 13 10 9-7 17 9 14" />
-        <path className="cover-light" d="M224 211c21-67 48-110 88-145" />
+        <RealisticStoryScene kind="cover-symbol" />
       </svg>
     </figure>
   );
@@ -2672,12 +2659,146 @@ function StoryWallImage({
             </filter>
           </defs>
           <rect className="wall-photo-wash" height="230" rx="18" width="360" />
-          <StoryArtScene kind={kind} />
+          <RealisticStoryScene kind={kind} />
         </svg>
       </div>
       <figcaption>HumanChain wall memory</figcaption>
     </figure>
   );
+}
+
+function RealisticStoryScene({ kind }: { kind: StoryArtKind }) {
+  const blueDoorScene = (
+    <>
+      <rect className="real-bg wall" height="230" width="360" />
+      <path className="real-floor" d="M0 176h360v54H0z" />
+      <path className="real-shadow" d="M70 199c72 19 157 19 233-2" />
+      <rect className="real-door-frame" height="152" rx="3" width="96" x="143" y="32" />
+      <rect className="real-door" height="134" rx="2" width="70" x="156" y="44" />
+      <rect className="real-door-panel" height="48" rx="2" width="38" x="172" y="60" />
+      <path className="real-door-light" d="M226 44c34 33 45 82 30 136" />
+      <circle className="real-knob" cx="215" cy="117" r="5" />
+      <ellipse className="real-head" cx="185" cy="105" rx="17" ry="19" />
+      <path className="real-body" d="M153 170c7-43 18-66 34-66 18 0 31 24 38 66Z" />
+      <rect className="real-phone" height="33" rx="5" width="22" x="210" y="128" />
+      <path className="real-cup" d="M72 142h47v29c0 17-10 28-24 28s-23-11-23-28v-29Z" />
+      <path className="real-cup-handle" d="M119 151c18-2 23 23 3 28" />
+      <path className="real-crack" d="M97 144l-9 14 12 9-8 19 10 13" />
+      <path className="real-thread" d="M48 155c49-58 91 18 128-42 43-70 77 2 135-48" />
+      <circle className="real-node" cx="48" cy="155" r="7" />
+      <circle className="real-node" cx="176" cy="113" r="7" />
+      <circle className="real-node" cx="311" cy="65" r="7" />
+    </>
+  );
+
+  const tableScene = (
+    <>
+      <rect className="real-bg warm" height="230" width="360" />
+      <path className="real-window-light" d="M226 18h92v148h-92z" />
+      <path className="real-table" d="M42 148h276l-22 58H64Z" />
+      <path className="real-shadow" d="M76 188c64 21 150 20 213 0" />
+      <path className="real-cup large" d="M78 112h58v42c0 23-13 37-29 37s-29-14-29-37v-42Z" />
+      <path className="real-cup-handle large" d="M136 124c22-1 30 31 4 36" />
+      <path className="real-crack large" d="M108 116l-12 18 14 12-10 24 13 20" />
+      <rect className="real-note" height="58" rx="5" width="82" x="170" y="102" />
+      <path className="real-note-line" d="M184 120h48M184 136h38M184 151h44" />
+      <path className="real-thread" d="M60 125c61-34 95 28 148-4 36-22 67-16 94 16" />
+      <circle className="real-node" cx="60" cy="125" r="6" />
+      <circle className="real-node" cx="208" cy="121" r="6" />
+    </>
+  );
+
+  const phoneScene = (
+    <>
+      <rect className="real-bg night" height="230" width="360" />
+      <path className="real-window-light blue" d="M31 28h92v126H31z" />
+      <ellipse className="real-head" cx="184" cy="83" rx="20" ry="22" />
+      <path className="real-body coat" d="M139 176c10-59 24-87 45-87s38 29 48 87Z" />
+      <rect className="real-phone glow" height="44" rx="6" width="28" x="198" y="121" />
+      <path className="real-phone-light" d="M212 121c33 18 51 39 62 72" />
+      <path className="real-thread" d="M58 158c40-35 76-16 112-48 49-43 70 23 136-28" />
+      <circle className="real-node" cx="58" cy="158" r="6" />
+      <circle className="real-node" cx="170" cy="110" r="6" />
+      <circle className="real-node" cx="306" cy="82" r="6" />
+      <path className="real-shadow" d="M88 194c54 19 146 20 205 1" />
+    </>
+  );
+
+  const worldScene = (
+    <>
+      <rect className="real-bg world" height="230" width="360" />
+      <circle className="real-globe" cx="180" cy="111" r="74" />
+      <path className="real-globe-line" d="M112 91c44-15 91-15 136 0M109 132c48 22 97 22 142 0M180 38c-24 48-24 98 0 147M180 38c24 48 24 98 0 147" />
+      <path className="real-thread" d="M71 133c46-36 78 18 119-31 35-42 63 12 99-18" />
+      <circle className="real-node" cx="71" cy="133" r="6" />
+      <circle className="real-node" cx="190" cy="102" r="6" />
+      <circle className="real-node" cx="289" cy="84" r="6" />
+      <path className="real-shadow" d="M90 201c54 16 126 16 181 0" />
+    </>
+  );
+
+  const lightScene = (
+    <>
+      <rect className="real-bg dawn" height="230" width="360" />
+      <path className="real-floor" d="M0 172h360v58H0z" />
+      <rect className="real-door-frame" height="146" rx="4" width="94" x="104" y="42" />
+      <path className="real-open-door" d="M198 43l72 28v94l-72 23Z" />
+      <path className="real-door-light wide" d="M199 74c41 19 58 50 52 93" />
+      <path className="real-plant" d="M265 187c-4-39 8-67 35-90M300 97c-24 17-44 19-61 7M300 97c25 10 39 30 41 57" />
+      <path className="real-thread" d="M62 160c52-28 84 20 132-11 38-24 73-19 104 13" />
+      <circle className="real-node" cx="62" cy="160" r="6" />
+      <circle className="real-node" cx="194" cy="149" r="6" />
+    </>
+  );
+
+  if (
+    kind === "earth-chain" ||
+    kind === "world-thread" ||
+    kind === "net" ||
+    kind === "public-square" ||
+    kind === "verdict-mirror"
+  ) {
+    return worldScene;
+  }
+
+  if (
+    kind === "honest-message" ||
+    kind === "phone-thread" ||
+    kind === "low-battery" ||
+    kind === "repair-call" ||
+    kind === "voice-wall" ||
+    kind === "anonymous" ||
+    kind === "future-screen"
+  ) {
+    return phoneScene;
+  }
+
+  if (
+    kind === "key-ticket" ||
+    kind === "repaired-cup" ||
+    kind === "memory-table" ||
+    kind === "notes" ||
+    kind === "bed-photo" ||
+    kind === "ocean-memory" ||
+    kind === "repair"
+  ) {
+    return tableScene;
+  }
+
+  if (
+    kind === "open-window" ||
+    kind === "plant-door" ||
+    kind === "open-door" ||
+    kind === "light-opening" ||
+    kind === "cracked-tree" ||
+    kind === "sunrise-windows" ||
+    kind === "four-windows" ||
+    kind === "add-link"
+  ) {
+    return lightScene;
+  }
+
+  return blueDoorScene;
 }
 
 function StoryArtScene({ kind }: { kind: StoryArtKind }) {
