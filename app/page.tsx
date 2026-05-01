@@ -854,6 +854,21 @@ const fieldQuoteRooms = {
         text: "Then shall ye call upon me, and ye shall go and pray unto me, and I will hearken unto you.",
         meaning: "Faith believes that prayer is heard, not wasted.",
       },
+      {
+        source: "Romans 12:12 KJV",
+        text: "Rejoicing in hope; patient in tribulation; continuing instant in prayer.",
+        meaning: "Prayer gives rhythm to hope, patience, and pressure.",
+      },
+      {
+        source: "Hebrews 11:1 KJV",
+        text: "Now faith is the substance of things hoped for, the evidence of things not seen.",
+        meaning: "Faith carries what the eyes cannot yet confirm.",
+      },
+      {
+        source: "Psalm 121:2 KJV",
+        text: "My help cometh from the Lord, which made heaven and earth.",
+        meaning: "Prayer remembers where help begins.",
+      },
     ],
   },
   "Builders & Money": {
@@ -888,6 +903,21 @@ const fieldQuoteRooms = {
         source: "HumanChain Money Room",
         text: "A small honest sale teaches more than a big imaginary plan.",
         meaning: "Reality is the best business school.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "Save enough to stay calm, then build enough to stay useful.",
+        meaning: "Security and usefulness belong together.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "A business grows when promises become systems.",
+        meaning: "Repeatable trust is stronger than excitement.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "Do not chase money so fast that wisdom cannot keep up.",
+        meaning: "Pace protects judgment.",
       },
     ],
   },
@@ -924,6 +954,21 @@ const fieldQuoteRooms = {
         text: "Love is not proven by winning every argument.",
         meaning: "Peace sometimes matters more than being right.",
       },
+      {
+        source: "HumanChain Family Room",
+        text: "The apology that arrives early saves years of translation.",
+        meaning: "Quick humility prevents long confusion.",
+      },
+      {
+        source: "HumanChain Family Room",
+        text: "A parent can be strong and still say, I am tired.",
+        meaning: "Honesty can make care more human.",
+      },
+      {
+        source: "HumanChain Family Room",
+        text: "Do not make strangers inherit the kindness your family needed.",
+        meaning: "Practice gentleness where it first matters.",
+      },
     ],
   },
   "Culture Rooms": {
@@ -958,6 +1003,21 @@ const fieldQuoteRooms = {
         source: "HumanChain Culture Room",
         text: "Respect begins when curiosity enters before judgment.",
         meaning: "Understanding needs humility.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "A custom becomes beautiful when it protects dignity.",
+        meaning: "Culture should help people stand taller.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "Every accent is proof that a human carried home through distance.",
+        meaning: "Language marks survival and belonging.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "The world becomes smaller when people explain what matters to them.",
+        meaning: "Shared meaning reduces distance.",
       },
     ],
   },
@@ -994,6 +1054,21 @@ const fieldQuoteRooms = {
         text: "The body keeps records. Treat it like a witness, not an enemy.",
         meaning: "Care begins with listening.",
       },
+      {
+        source: "HumanChain Healing Room",
+        text: "Healing may be quiet because the deepest repairs do not perform.",
+        meaning: "Private progress is still progress.",
+      },
+      {
+        source: "HumanChain Healing Room",
+        text: "Ask for help before your strength becomes a disguise.",
+        meaning: "Support works best before collapse.",
+      },
+      {
+        source: "HumanChain Healing Room",
+        text: "You can be grateful and still need rest.",
+        meaning: "Gratitude does not cancel exhaustion.",
+      },
     ],
   },
   "Youth & Future": {
@@ -1029,6 +1104,21 @@ const fieldQuoteRooms = {
         text: "Learn one skill deeply enough that luck can recognize you.",
         meaning: "Preparation makes opportunity useful.",
       },
+      {
+        source: "HumanChain Youth Room",
+        text: "Do not let comparison steal the years meant for practice.",
+        meaning: "Growth needs attention more than envy.",
+      },
+      {
+        source: "HumanChain Youth Room",
+        text: "Your name becomes stronger when your habits can defend it.",
+        meaning: "Reputation is built before it is announced.",
+      },
+      {
+        source: "HumanChain Youth Room",
+        text: "A young person with patience is already ahead of noise.",
+        meaning: "Steady movement beats restless performance.",
+      },
     ],
   },
   "Parents & Children": {
@@ -1063,6 +1153,21 @@ const fieldQuoteRooms = {
         source: "HumanChain Parents Room",
         text: "The best inheritance may be a voice that stays calm in hard moments.",
         meaning: "Emotional safety lasts.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "Home should be the first place a child learns repair is possible.",
+        meaning: "Family can teach recovery after conflict.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "A child grows differently when correction does not remove belonging.",
+        meaning: "Discipline should not feel like exile.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "The strongest parents keep learning while they lead.",
+        meaning: "Authority grows with humility.",
       },
     ],
   },
@@ -1930,7 +2035,7 @@ function ChainsView({
           <button onClick={() => setActiveField(null)} type="button">
             Back
           </button>
-          <span>{activeField.members} verified humans</span>
+          <span>Verified humans</span>
           <h2>{activeField.name}</h2>
           <p>{room.intro}</p>
         </section>
@@ -2046,7 +2151,7 @@ function ChainsView({
       </section>
       <section className="chain-map">
         <span className="section-kicker">World field</span>
-        <h2>Post images, read quotes, or enter human groups.</h2>
+        <h2>Post images, follow live links, or enter quote rooms.</h2>
         <div className="chain-orbit" aria-hidden="true">
           <span />
           <i />
@@ -2061,19 +2166,19 @@ function ChainsView({
         >
           Image posts
         </button>
-        <button
-          className={chainView === "quotes" ? "active" : ""}
-          onClick={() => setChainView("quotes")}
-          type="button"
-        >
-          All chain quotes
+          <button
+            className={chainView === "quotes" ? "active" : ""}
+            onClick={() => setChainView("quotes")}
+            type="button"
+          >
+          Live links
         </button>
         <button
           className={chainView === "groups" ? "active" : ""}
           onClick={() => setChainView("groups")}
           type="button"
         >
-          Human groups
+          Quote rooms
         </button>
       </div>
       {chainView === "images" ? (
@@ -2137,7 +2242,7 @@ function ChainsView({
               <article className="field-card" key={field.name}>
                 <div>
                   <strong>{field.name}</strong>
-                  <span>{field.members} verified humans</span>
+                <span>Verified humans</span>
                 </div>
                 <p>{field.detail}</p>
                 <button
