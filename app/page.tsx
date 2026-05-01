@@ -70,6 +70,57 @@ const initialLinks = [
   },
 ];
 
+const chainQuoteLibrary = [
+  {
+    country: "HumanChain",
+    text: "A useful word can travel farther than a loud one.",
+  },
+  {
+    country: "Faith",
+    text: "Prayer is not escape; it is how courage learns where to stand.",
+  },
+  {
+    country: "Money",
+    text: "Spend slower than your fear and build faster than your excuses.",
+  },
+  {
+    country: "Family",
+    text: "Some homes heal when one person chooses a softer sentence.",
+  },
+  {
+    country: "Culture",
+    text: "A people are remembered by what they keep teaching their children.",
+  },
+  {
+    country: "Health",
+    text: "Healing is not always a comeback. Sometimes it is a new pace.",
+  },
+  {
+    country: "Youth",
+    text: "Your future does not need noise. It needs repeated useful action.",
+  },
+  {
+    country: "Work",
+    text: "A craft becomes valuable when it can help someone on an ordinary day.",
+  },
+  {
+    country: "Love",
+    text: "Love grows where truth can enter without being punished.",
+  },
+  {
+    country: "Purpose",
+    text: "Do not wait to feel ready before becoming responsible.",
+  },
+  {
+    country: "World",
+    text: "The chain becomes stronger when each human adds one honest link.",
+  },
+  {
+    country: "Wisdom",
+    text: "If the lesson cost you pain, let it also pay someone else in guidance.",
+  },
+];
+
 const storyImageByPage: Record<
   number,
   {
@@ -584,12 +635,12 @@ function createStoryHint(text: string) {
 }
 
 const wldActions = [
-  ["1 WLD", "Tip, Golden Link, or streak restore"],
-  ["2 WLD", "Pin a link or unlock story pages"],
-  ["3 WLD", "Ask one country or save a capsule"],
-  ["4 WLD", "Ask privately as a verified human"],
-  ["5 WLD", "Request voice answers"],
-  ["6 WLD", "Unlock Deep Human Verdict"],
+  ["tip", "Tip, Golden Link, or streak restore"],
+  ["pin", "Pin a link or unlock story pages"],
+  ["country", "Ask one country or save a capsule"],
+  ["private", "Ask privately as a verified human"],
+  ["voice", "Request voice answers"],
+  ["verdict", "Unlock Deep Human Verdict"],
 ];
 
 const premiumServices = [
@@ -744,6 +795,21 @@ const fieldQuoteRooms = {
         text: "They that wait upon the Lord shall renew their strength.",
         meaning: "Waiting can be a place of renewal, not only delay.",
       },
+      {
+        source: "Psalm 46:10 KJV",
+        text: "Be still, and know that I am God.",
+        meaning: "Stillness can be an act of trust when pressure is loud.",
+      },
+      {
+        source: "James 5:16 KJV",
+        text: "The effectual fervent prayer of a righteous man availeth much.",
+        meaning: "Prayer carries power when it is honest, faithful, and persistent.",
+      },
+      {
+        source: "Jeremiah 29:12 KJV",
+        text: "Then shall ye call upon me, and ye shall go and pray unto me, and I will hearken unto you.",
+        meaning: "Faith believes that prayer is heard, not wasted.",
+      },
     ],
   },
   "Builders & Money": {
@@ -763,6 +829,21 @@ const fieldQuoteRooms = {
         source: "HumanChain Money Room",
         text: "Profit is good. Trust is what lets profit return.",
         meaning: "Long-term business depends on reputation.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "The first capital is not money. It is the discipline to keep showing up.",
+        meaning: "Consistency gives ideas a chance to become real.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "Build something people can explain to a friend in one sentence.",
+        meaning: "Clear value spreads faster.",
+      },
+      {
+        source: "HumanChain Money Room",
+        text: "A small honest sale teaches more than a big imaginary plan.",
+        meaning: "Reality is the best business school.",
       },
     ],
   },
@@ -784,6 +865,21 @@ const fieldQuoteRooms = {
         text: "Forgiveness is not pretending it did not hurt; it is refusing to let hurt become your language.",
         meaning: "Healing changes how pain speaks through us.",
       },
+      {
+        source: "HumanChain Family Room",
+        text: "Call before pride turns a small distance into a family tradition.",
+        meaning: "Repair often starts while the wound is still small.",
+      },
+      {
+        source: "HumanChain Family Room",
+        text: "A family does not need perfect people; it needs people willing to return to truth.",
+        meaning: "Honesty can rebuild trust slowly.",
+      },
+      {
+        source: "HumanChain Family Room",
+        text: "Love is not proven by winning every argument.",
+        meaning: "Peace sometimes matters more than being right.",
+      },
     ],
   },
   "Culture Rooms": {
@@ -803,6 +899,21 @@ const fieldQuoteRooms = {
         source: "HumanChain Culture Room",
         text: "Migration changes the address, but not the need to be known.",
         meaning: "Home is also recognition.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "Tradition is a bridge when it helps people cross, not a wall that keeps them small.",
+        meaning: "Culture can protect and still grow.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "Every country has a song people play when they miss who they were.",
+        meaning: "Memory often travels through sound.",
+      },
+      {
+        source: "HumanChain Culture Room",
+        text: "Respect begins when curiosity enters before judgment.",
+        meaning: "Understanding needs humility.",
       },
     ],
   },
@@ -824,6 +935,21 @@ const fieldQuoteRooms = {
         text: "Tell one safe person the truth before silence becomes a room.",
         meaning: "Connection can interrupt isolation.",
       },
+      {
+        source: "HumanChain Healing Room",
+        text: "You are allowed to recover without performing strength for everyone.",
+        meaning: "Healing does not need to be dramatic to be real.",
+      },
+      {
+        source: "HumanChain Healing Room",
+        text: "Some days the victory is not getting better; it is not getting worse alone.",
+        meaning: "Small survival still counts.",
+      },
+      {
+        source: "HumanChain Healing Room",
+        text: "The body keeps records. Treat it like a witness, not an enemy.",
+        meaning: "Care begins with listening.",
+      },
     ],
   },
   "Youth & Future": {
@@ -844,6 +970,21 @@ const fieldQuoteRooms = {
         text: "Do not confuse being early with being wrong.",
         meaning: "Some good ideas need time to be understood.",
       },
+      {
+        source: "HumanChain Youth Room",
+        text: "Choose friends who make your future easier to respect.",
+        meaning: "Your circle shapes your standards.",
+      },
+      {
+        source: "HumanChain Youth Room",
+        text: "Confidence grows when promises to yourself stop being broken.",
+        meaning: "Self-trust is built in private.",
+      },
+      {
+        source: "HumanChain Youth Room",
+        text: "Learn one skill deeply enough that luck can recognize you.",
+        meaning: "Preparation makes opportunity useful.",
+      },
     ],
   },
   "Parents & Children": {
@@ -863,6 +1004,21 @@ const fieldQuoteRooms = {
         source: "HumanChain Parents Room",
         text: "Teach with patience when possible; fear learns fast but forgets love.",
         meaning: "Correction works best with dignity.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "A tired parent still deserves tenderness.",
+        meaning: "Caregivers are human before they are roles.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "Children need rules, but they also need a place to bring their mistakes.",
+        meaning: "Safety makes correction possible.",
+      },
+      {
+        source: "HumanChain Parents Room",
+        text: "The best inheritance may be a voice that stays calm in hard moments.",
+        meaning: "Emotional safety lasts.",
       },
     ],
   },
@@ -1475,11 +1631,11 @@ function AskView({
         />
         <div className="ask-modes">
           {[
-            ["Text", "Free draft"],
-            ["Voice", "2 WLD reach"],
-            ["Private", "4 WLD"],
-            ["Deep Verdict", "6 WLD"],
-          ].map(([mode, price]) => (
+            ["Text", "Free draft", "Free"],
+            ["Voice", "Voice reach", "2 WLD"],
+            ["Private", "Private reach", "4 WLD"],
+            ["Deep Verdict", "Full report", "6 WLD"],
+          ].map(([mode, label, amount]) => (
             <button
               key={mode}
               onClick={() => {
@@ -1490,7 +1646,7 @@ function AskView({
 
                 openPayment({
                   title: `${mode} question`,
-                  amount: price.replace(" reach", ""),
+                  amount,
                   detail:
                     mode === "Voice"
                       ? "Ask with voice so verified humans hear your tone before answering."
@@ -1504,7 +1660,7 @@ function AskView({
               type="button"
             >
               <strong>{mode}</strong>
-              <span>{price}</span>
+              <span>{label}</span>
             </button>
           ))}
         </div>
@@ -1534,29 +1690,25 @@ function AskView({
         </section>
       ) : null}
 
-      <section className="panel">
+      <section className="panel payment-hub">
         <div className="section-heading">
-          <span>WLD Reach</span>
+          <span>HumanPass payments</span>
           <CircleDollarSign size={18} />
         </div>
-        <div className="wld-grid">
-          {wldActions.map(([price, detail]) => (
-            <button
-              className="wld-button"
-              key={price}
-              onClick={() => act(`${price} selected`, detail)}
-              type="button"
-            >
-              <strong>{price}</strong>
-              <span>{detail}</span>
-            </button>
+        <p>
+          Paid actions now open one clean World App sheet. The amount appears
+          only when a human chooses the premium action.
+        </p>
+        <div className="payment-pills">
+          {wldActions.map(([, detail]) => (
+            <span key={detail}>{detail}</span>
           ))}
         </div>
       </section>
 
       <section className="verdict-builder">
         <span className="section-kicker">Premium World Verdict</span>
-        <h2>6 WLD turns answers into a real human report.</h2>
+        <h2>Turn answers into a real human report.</h2>
         <div className="verdict-parts">
         {worldVerdictParts.map((part) => (
             <button
@@ -1624,7 +1776,7 @@ function AskView({
             }}
             type="button"
           >
-            Voice answer with emotion
+            Unlock voice answer
           </button>
           <button onClick={() => act("Country answer", "Answer as your culture sees it.")} type="button">
             Country and culture answer
@@ -1928,6 +2080,32 @@ function ChainsView({
         </section>
       ) : (
         <section className="thread-list" aria-label="Human thread">
+          {chainQuoteLibrary.map((quote, index) => (
+            <article className="thread-item quote-thread" key={`${quote.country}-${index}`}>
+              <span className="thread-dot" />
+              <div>
+                <strong>{quote.country}</strong>
+                <p>{quote.text}</p>
+                <div className="reaction-row">
+                  <button
+                    onClick={() => copyQuote(quote.text, quote.country)}
+                    type="button"
+                  >
+                    Copy quote
+                  </button>
+                  <button
+                    onClick={() => {
+                      earnPoints(5, "You reacted to a chain quote.");
+                      act("Quote reaction", "This quote was added to your human taste signal.");
+                    }}
+                    type="button"
+                  >
+                    I felt this
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
           {links.map((link, index) => (
             <article className="thread-item" key={`${link.country}-${link.text}-${index}`}>
               <span className="thread-dot" />
@@ -1953,7 +2131,7 @@ function ChainsView({
                     }
                     type="button"
                   >
-                    Tip 1 WLD
+                    Tip human
                   </button>
                 </div>
               </div>
@@ -2021,16 +2199,26 @@ function StoriesView({
           </span>
           <button
             onClick={() =>
-              act("1 WLD tip ready", "This will support the storyteller in World App.")
+              openPayment({
+                title: "Tip storyteller",
+                amount: "1 WLD",
+                detail: "Support the human behind this story.",
+                success: "Story tip is prepared for World App.",
+                points: 4,
+              })
             }
             type="button"
           >
             Tip
           </button>
+          <div
+            className="reader-progress"
+            style={{ "--progress": `${((page + 1) / activePages.length) * 100}%` } as React.CSSProperties}
+          />
         </section>
         <article className="story-page">
           {current.image ? (
-            <StoryPaperArt alt={current.image.alt} kind={current.image.art} />
+            <StoryWallImage alt={current.image.alt} kind={current.image.art} />
           ) : null}
           <span className="section-kicker">{activeByline}</span>
           {publishedStory ? (
@@ -2187,7 +2375,7 @@ function StoriesView({
             accept=".pdf,.txt,.doc,.docx"
             onChange={() => {
               earnPoints(25, "Story submission draft started.");
-              act("Story file selected", "3 WLD review and publish flow is ready.");
+              act("Story file selected", "Review and publish flow is ready.");
             }}
             type="file"
           />
@@ -2290,7 +2478,7 @@ function StoriesView({
             }
             type="button"
           >
-            1 WLD Tip Storyteller
+            Tip Storyteller
           </button>
           <button
             onClick={() =>
@@ -2304,7 +2492,7 @@ function StoriesView({
             }
             type="button"
           >
-            2 WLD Bonus Pages
+            Unlock Bonus Pages
           </button>
           <button
             onClick={() =>
@@ -2318,7 +2506,7 @@ function StoriesView({
             }
             type="button"
           >
-            6 WLD Deep Reflection
+            Create Deep Reflection
           </button>
         </div>
       </section>
@@ -2399,6 +2587,41 @@ function StoryPaperArt({
         <rect className="sketch-wash" height="230" rx="18" width="360" />
         <StoryArtScene kind={kind} />
       </svg>
+    </figure>
+  );
+}
+
+function StoryWallImage({
+  alt,
+  kind,
+}: {
+  alt: string;
+  kind: StoryArtKind;
+}) {
+  return (
+    <figure
+      aria-label={alt}
+      className={`story-wall-photo wall-photo-${kind}`}
+      role="img"
+    >
+      <div className="wall-photo-frame">
+        <svg aria-hidden="true" className="wall-photo-scene" viewBox="0 0 360 230">
+          <defs>
+            <filter id="rough-pencil">
+              <feTurbulence
+                baseFrequency="0.35"
+                numOctaves="2"
+                result="noise"
+                seed="19"
+              />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.35" />
+            </filter>
+          </defs>
+          <rect className="wall-photo-wash" height="230" rx="18" width="360" />
+          <StoryArtScene kind={kind} />
+        </svg>
+      </div>
+      <figcaption>HumanChain wall memory</figcaption>
     </figure>
   );
 }
@@ -2846,6 +3069,24 @@ function MeView({
           public chain handle across questions, stories, tips, and fields.
         </p>
       </section>
+      <section className="profile-command-grid">
+        <button
+          onClick={() => act("Notifications", "Daily questions, story drops, and reaction alerts are enabled.")}
+          type="button"
+        >
+          <Radio size={18} />
+          <span>Notifications</span>
+          <strong>Daily chain ready</strong>
+        </button>
+        <button
+          onClick={() => act("Creator wallet", "Tips, boosts, and story earnings will appear here after launch.")}
+          type="button"
+        >
+          <Wallet size={18} />
+          <span>Creator wallet</span>
+          <strong>Prepared</strong>
+        </button>
+      </section>
       <section className="stats-grid">
         <Stat label="Points" value={String(points)} />
         <Stat label="Questions" value="3" />
@@ -2902,7 +3143,7 @@ function MeView({
             <Compass size={17} />
             Find countries I connected with
           </button>
-          <button onClick={() => act("Deep Human Mirror", "6 WLD reflection flow is ready.")} type="button">
+          <button onClick={() => act("Deep Human Mirror", "Premium reflection flow is ready.")} type="button">
             <LockKeyhole size={17} />
             Open Deep Human Mirror
           </button>
