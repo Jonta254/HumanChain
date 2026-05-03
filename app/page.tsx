@@ -8,7 +8,6 @@ import {
   CircleDollarSign,
   Compass,
   Flame,
-  Globe2,
   HeartHandshake,
   Home,
   Library,
@@ -29,14 +28,6 @@ import {
   Wallet,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-
-const worldSignals = [
-  "Kenya is answering money questions",
-  "Brazil is active in love",
-  "India joined today's chain",
-  "Japan sent 42 voice notes",
-  "Nigeria is trending in business",
-];
 
 const verdicts = [
   {
@@ -908,6 +899,8 @@ const chainFields = [
   },
 ];
 
+type ChainField = (typeof chainFields)[number];
+
 const fieldQuoteRooms = {
   "Faith & Prayer": {
     intro: "Bible-rooted strength for prayer, waiting, courage, and quiet faith.",
@@ -1430,6 +1423,7 @@ export default function HumanChainApp() {
   const [points, setPoints] = useState(420);
   const [dailyAnswered, setDailyAnswered] = useState(false);
   const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(null);
+  const [activeField, setActiveField] = useState<ChainField | null>(null);
   const [dailyResponses, setDailyResponses] = useState<DailyResponse[]>([
     {
       user: "@mara_chain",
@@ -1494,11 +1488,13 @@ export default function HumanChainApp() {
       case "chains":
         return (
           <ChainsView
+            activeField={activeField}
             act={act}
             earnPoints={earnPoints}
             keepStreak={keepStreak}
             links={links}
             openPayment={openPayment}
+            setActiveField={setActiveField}
             setLinks={setLinks}
           />
         );
@@ -1533,6 +1529,7 @@ export default function HumanChainApp() {
             earnPoints={earnPoints}
             links={links}
             setDailyAnsweredAt={setDailyAnsweredAt}
+            setActiveField={setActiveField}
             points={points}
             setDailyAnswered={setDailyAnswered}
             setDailyResponses={setDailyResponses}
@@ -1541,7 +1538,7 @@ export default function HumanChainApp() {
           />
         );
     }
-  }, [dailyAnswered, dailyAnsweredAt, dailyResponses, links, points, savedItems, streak, tab]);
+  }, [activeField, dailyAnswered, dailyAnsweredAt, dailyResponses, links, points, savedItems, streak, tab]);
 
   return (
     <main className="app-shell">
@@ -1581,6 +1578,7 @@ function HomeView({
   links,
   points,
   setDailyAnsweredAt,
+  setActiveField,
   setDailyAnswered,
   setDailyResponses,
   setTab,
@@ -1594,6 +1592,7 @@ function HomeView({
   links: typeof initialLinks;
   points: number;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
+  setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
   setDailyAnswered: React.Dispatch<React.SetStateAction<boolean>>;
   setDailyResponses: React.Dispatch<React.SetStateAction<DailyResponse[]>>;
   setTab: (tab: Tab) => void;
@@ -1618,23 +1617,23 @@ function HomeView({
   return (
     <div className="screen">
       <header className="hero">
-        <div className="brand-sigil" aria-hidden="true">
-          <span />
-          <i />
+        <div className="hero-brandline">
+          <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.svg" />
+          <div>
+            <span>Verified human network</span>
+            <strong>HumanChain</strong>
+          </div>
         </div>
-        <div className="eyebrow">
-          <Globe2 size={16} />
-          Verified human network
-        </div>
-        <h1>HumanChain</h1>
+        <h1>Where real humans carry wisdom forward.</h1>
         <p>
-          A verified human network for asking, answering, reading, publishing,
-          and joining chains of purpose.
+          Ask real people, read human stories, save field wisdom, and build a
+          visible chain of purpose inside World App.
         </p>
-        <div className="signal-strip" aria-label="Live global activity">
-          {worldSignals.map((signal) => (
-            <span key={signal}>{signal}</span>
-          ))}
+        <div className="home-proof-grid" aria-label="HumanChain highlights">
+          <span>Daily human question</span>
+          <span>Story vault</span>
+          <span>Quote rooms</span>
+          <span>Human points</span>
         </div>
       </header>
 
@@ -1663,7 +1662,7 @@ function HomeView({
         {premiumServices.map((service) => (
           <article className="service-card" key={service.title}>
             <div>
-              <span>HumanChain</span>
+              <span>Core path</span>
               <h3>{service.title}</h3>
             </div>
             <p>{service.detail}</p>
@@ -1798,11 +1797,14 @@ function HomeView({
           {chainFields.map((field) => (
             <button
               key={field.name}
-              onClick={() => setTab("chains")}
+              onClick={() => {
+                setActiveField(field);
+                setTab("chains");
+              }}
               type="button"
             >
               <strong>{field.name}</strong>
-              <span>{field.members} humans</span>
+              <span>Open quote room</span>
             </button>
           ))}
         </div>
@@ -2046,26 +2048,28 @@ function AskView({
 }
 
 function ChainsView({
+  activeField,
   act,
   earnPoints,
   keepStreak,
   links,
   openPayment,
+  setActiveField,
   setLinks,
 }: {
+  activeField: ChainField | null;
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   keepStreak: (detail?: string) => void;
   links: typeof initialLinks;
   openPayment: OpenPayment;
+  setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
   setLinks: React.Dispatch<React.SetStateAction<typeof initialLinks>>;
 }) {
   const [linkText, setLinkText] = useState("");
   const [postCaption, setPostCaption] = useState("");
   const [postImage, setPostImage] = useState<string | null>(null);
   const [humanPosts, setHumanPosts] = useState(initialHumanPosts);
-  const [activeField, setActiveField] =
-    useState<(typeof chainFields)[number] | null>(null);
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
   );

@@ -59,16 +59,17 @@ button {
 
 .hero {
   position: relative;
-  padding: 24px 18px 18px;
-  border-radius: 0 0 28px 28px;
+  padding: 20px 18px 18px;
+  border-radius: 28px;
   color: var(--paper-strong);
   background:
-    radial-gradient(circle at 22% 18%, rgba(255, 253, 248, 0.2), transparent 18%),
-    radial-gradient(circle at 82% 24%, rgba(185, 130, 24, 0.34), transparent 20%),
-    linear-gradient(135deg, rgba(22, 42, 41, 0.98), rgba(36, 107, 85, 0.94));
+    radial-gradient(circle at 14% 18%, rgba(255, 253, 248, 0.22), transparent 18%),
+    radial-gradient(circle at 86% 18%, rgba(214, 163, 58, 0.32), transparent 22%),
+    linear-gradient(135deg, #132827, #246b55 58%, #17312f);
   background-size: cover;
   background-position: center;
   overflow: hidden;
+  box-shadow: 0 18px 36px rgba(23, 49, 47, 0.18);
 }
 
 .hero::before,
@@ -105,32 +106,34 @@ button {
   z-index: 1;
 }
 
-.brand-sigil {
-  position: absolute;
-  right: 18px;
-  bottom: 16px;
-  width: 86px;
-  height: 86px;
-  opacity: 0.7;
+.hero-brandline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.brand-sigil span,
-.brand-sigil i {
-  position: absolute;
-  border-radius: 999px;
+.hero-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(13, 28, 26, 0.24);
 }
 
-.brand-sigil span {
-  inset: 10px;
-  border: 2px solid rgba(255, 253, 248, 0.38);
+.hero-brandline div {
+  display: grid;
+  gap: 2px;
 }
 
-.brand-sigil i {
-  width: 12px;
-  height: 12px;
-  right: 12px;
-  top: 24px;
-  background: var(--gold);
+.hero-brandline span {
+  color: rgba(255, 253, 248, 0.76);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.hero-brandline strong {
+  color: #fffdf8;
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .eyebrow,
@@ -147,8 +150,8 @@ button {
 
 .hero h1,
 .top-bar h1 {
-  margin: 12px 0 8px;
-  font-size: 2.15rem;
+  margin: 18px 0 8px;
+  font-size: 2rem;
   line-height: 1.02;
   letter-spacing: 0;
 }
@@ -163,25 +166,24 @@ button {
   line-height: 1.45;
 }
 
-.signal-strip {
-  display: flex;
+.home-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 22px;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
-.signal-strip::-webkit-scrollbar {
-  display: none;
-}
-
-.signal-strip span {
-  flex: 0 0 auto;
-  padding: 9px 11px;
+.home-proof-grid span {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 9px 10px;
   border: 1px solid rgba(255, 253, 248, 0.25);
-  border-radius: 999px;
+  border-radius: 14px;
   background: rgba(255, 253, 248, 0.16);
+  color: #fffdf8;
   font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .quick-grid {
