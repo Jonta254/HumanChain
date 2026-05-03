@@ -2676,30 +2676,12 @@ function StoriesView({
 function StoryCoverArt() {
   return (
     <figure
-      aria-label="Symbolic Human Story cover showing a person, a waiting door, a repaired cup, and a human thread"
-      className="cover-art symbolic-cover"
-      role="img"
+      className="cover-art realistic-cover"
     >
-      <svg aria-hidden="true" viewBox="0 0 360 250">
-        <defs>
-          <linearGradient id="coverGlow" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0" stopColor="#f9eee0" />
-            <stop offset="0.52" stopColor="#d8e4d8" />
-            <stop offset="1" stopColor="#b98218" />
-          </linearGradient>
-          <filter id="coverRough">
-            <feTurbulence
-              baseFrequency="0.55"
-              numOctaves="2"
-              result="noise"
-              seed="11"
-            />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" />
-          </filter>
-        </defs>
-        <rect className="cover-paper" height="250" rx="22" width="360" />
-        <RealisticStoryScene kind="cover-symbol" />
-      </svg>
+      <img
+        alt="Black and white realistic scene for The Door That Waited showing a person at a door with a cracked cup"
+        src="/images/story-bw-door.svg"
+      />
     </figure>
   );
 }
@@ -2744,32 +2726,67 @@ function StoryWallImage({
   alt: string;
   kind: StoryArtKind;
 }) {
+  const src = storyPhotoForKind(kind);
+
   return (
-    <figure
-      aria-label={alt}
-      className={`story-wall-photo wall-photo-${kind}`}
-      role="img"
-    >
+    <figure aria-label={alt} className={`story-wall-photo wall-photo-${kind}`}>
       <div className="wall-photo-frame">
-        <svg aria-hidden="true" className="wall-photo-scene" viewBox="0 0 360 230">
-          <defs>
-            <filter id="rough-pencil">
-              <feTurbulence
-                baseFrequency="0.35"
-                numOctaves="2"
-                result="noise"
-                seed="19"
-              />
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.35" />
-            </filter>
-          </defs>
-          <rect className="wall-photo-wash" height="230" rx="18" width="360" />
-          <RealisticStoryScene kind={kind} />
-        </svg>
+        <img alt={alt} src={src} />
       </div>
       <figcaption>HumanChain wall memory</figcaption>
     </figure>
   );
+}
+
+function storyPhotoForKind(kind: StoryArtKind) {
+  if (
+    kind === "earth-chain" ||
+    kind === "world-thread" ||
+    kind === "net" ||
+    kind === "public-square" ||
+    kind === "verdict-mirror"
+  ) {
+    return "/images/story-bw-world.svg";
+  }
+
+  if (
+    kind === "honest-message" ||
+    kind === "phone-thread" ||
+    kind === "low-battery" ||
+    kind === "repair-call" ||
+    kind === "voice-wall" ||
+    kind === "anonymous" ||
+    kind === "future-screen"
+  ) {
+    return "/images/story-bw-phone.svg";
+  }
+
+  if (
+    kind === "key-ticket" ||
+    kind === "repaired-cup" ||
+    kind === "memory-table" ||
+    kind === "notes" ||
+    kind === "bed-photo" ||
+    kind === "ocean-memory" ||
+    kind === "repair"
+  ) {
+    return "/images/story-bw-table.svg";
+  }
+
+  if (
+    kind === "open-window" ||
+    kind === "plant-door" ||
+    kind === "open-door" ||
+    kind === "light-opening" ||
+    kind === "cracked-tree" ||
+    kind === "sunrise-windows" ||
+    kind === "four-windows" ||
+    kind === "add-link"
+  ) {
+    return "/images/story-bw-window.svg";
+  }
+
+  return "/images/story-bw-door.svg";
 }
 
 function RealisticStoryScene({ kind }: { kind: StoryArtKind }) {

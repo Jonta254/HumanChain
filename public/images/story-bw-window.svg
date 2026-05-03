@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-label="Black and white realistic story scene of an open door and plant in morning light">
+  <defs>
+    <linearGradient id="room" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f0eee7"/>
+      <stop offset="0.5" stop-color="#b2aea2"/>
+      <stop offset="1" stop-color="#4c4d49"/>
+    </linearGradient>
+    <radialGradient id="openLight" cx="62%" cy="38%" r="52%">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.68"/>
+      <stop offset="0.45" stop-color="#efead9" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#111" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#111" flood-opacity="0.3"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence baseFrequency="0.78" numOctaves="3" seed="52"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.18"/></feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+  </defs>
+  <rect width="960" height="640" fill="url(#room)"/>
+  <rect width="960" height="640" fill="url(#openLight)"/>
+  <path d="M0 448h960v192H0z" fill="#716f67" opacity="0.42"/>
+  <g filter="url(#shadow)">
+    <rect x="258" y="112" width="210" height="386" rx="8" fill="#1d2927"/>
+    <path d="M468 113l178 72v249l-178 64z" fill="#4b5d58"/>
+    <path d="M468 184c112 52 150 132 112 266" fill="none" stroke="#fff" stroke-opacity="0.26" stroke-width="36" stroke-linecap="round"/>
+  </g>
+  <path d="M662 515c-12-116 26-197 112-270" fill="none" stroke="#293d36" stroke-width="13" stroke-linecap="round"/>
+  <path d="M774 245c-76 53-135 60-180 21M774 245c73 34 113 93 119 178" fill="none" stroke="#293d36" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M141 426c149-74 241 54 374-26 102-61 190-42 267 41" fill="none" stroke="#f8f4e6" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round"/>
+  <path d="M141 426c149-74 241 54 374-26 102-61 190-42 267 41" fill="none" stroke="#111" stroke-opacity="0.28" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="141" cy="426" r="16" fill="#efead9" stroke="#111" stroke-width="5"/>
+  <circle cx="515" cy="400" r="16" fill="#efead9" stroke="#111" stroke-width="5"/>
+  <path d="M182 541c173 39 384 39 592-3" fill="none" stroke="#111" stroke-opacity="0.24" stroke-width="34" stroke-linecap="round"/>
+  <rect width="960" height="640" filter="url(#grain)" opacity="0.55"/>
+</svg>

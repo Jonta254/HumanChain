@@ -1410,6 +1410,24 @@ button {
   min-height: 238px;
 }
 
+.realistic-cover {
+  padding: 12px;
+  border: 1px solid rgba(255, 253, 248, 0.24);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.3), rgba(0, 0, 0, 0.18)),
+    #1d2b2d;
+  box-shadow: 0 18px 34px rgba(13, 28, 26, 0.22);
+}
+
+.realistic-cover img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 14px;
+  filter: grayscale(1) contrast(1.08);
+}
+
 .cover-paper {
   fill: rgba(255, 250, 241, 0.92);
 }
@@ -2095,17 +2113,13 @@ button {
     inset 0 0 0 6px rgba(238, 226, 207, 0.72);
 }
 
-.wall-photo-scene {
+.wall-photo-frame img {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 10;
-  overflow: hidden;
+  object-fit: cover;
   border-radius: 12px;
-  background:
-    radial-gradient(circle at 20% 18%, rgba(255, 253, 248, 0.55), transparent 22%),
-    linear-gradient(135deg, rgba(49, 88, 75, 0.48), rgba(185, 130, 24, 0.23)),
-    #eee2cf;
-  filter: saturate(1.08) contrast(1.08);
+  filter: grayscale(1) contrast(1.08);
 }
 
 .wall-photo-wash {
