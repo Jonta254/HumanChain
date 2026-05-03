@@ -530,8 +530,8 @@ const storyPages = monthlyStoryTextPages.map((storyPage, index) => {
 const imageWithPhoto = image
     ? {
         ...image,
-        alt: `${image.alt}. The image is matched to this story moment.`,
-        photo: image.photo ?? storyPhotoForTheme(image.art, "monthly"),
+        alt: storyImageAltForPage(storyPage.text, "monthly"),
+        photo: image.photo ?? storyPhotoForStoryPage(storyPage.text, image.art, "monthly"),
       }
     : null;
 
@@ -636,9 +636,9 @@ const bitcoinWorldPages = bitcoinWorldTextPages.map((page, index) => {
     text: page.text,
     image: publishedStoryImagePages.has(index)
       ? {
-          alt: `${bitcoinWorldStory.title} page ${index + 1} black and white story image`,
+          alt: storyImageAltForPage(page.text, "bitcoin"),
           art: page.art ?? bitcoinWorldStory.coverArt,
-          photo: storyPhotoForTheme(page.art ?? bitcoinWorldStory.coverArt, "bitcoin"),
+          photo: storyPhotoForStoryPage(page.text, page.art ?? bitcoinWorldStory.coverArt, "bitcoin"),
         }
       : null,
     nextHint: nextText
@@ -753,9 +753,9 @@ const publishedStoryPages = Object.fromEntries(
           text: page.text,
           image: publishedStoryImagePages.has(index)
             ? {
-              alt: `${story.title} page ${index + 1} black and white story image`,
+              alt: storyImageAltForPage(page.text, theme),
               art: page.art ?? story.coverArt,
-              photo: storyPhotoForTheme(page.art ?? story.coverArt, theme),
+              photo: storyPhotoForStoryPage(page.text, page.art ?? story.coverArt, theme),
             }
             : null,
           nextHint: nextText
@@ -2859,6 +2859,122 @@ function StoryWallImage({
       </div>
     </figure>
   );
+}
+
+function storyImageAltForPage(text: string, theme: "monthly" | PublishedStoryKey) {
+  const lowerText = text.toLowerCase();
+
+  if (theme === "bitcoin") {
+    if (lowerText.includes("private key") || lowerText.includes("hold a key")) {
+      return "Colored story image of a hand holding a private key and digital value";
+    }
+
+    if (lowerText.includes("blockchain") || lowerText.includes("network") || lowerText.includes("borders")) {
+      return "Colored story image of a global network on a desk at sunrise";
+    }
+
+    return "Colored story image of a dawn desk where a global money idea begins";
+  }
+
+  if (theme === "orb") {
+    return "Colored story image of a calm Orb verification room and a real human being seen";
+  }
+
+  if (theme === "onePage") {
+    if (lowerText.includes("notebook") || lowerText.includes("page") || lowerText.includes("wrote")) {
+      return "Colored story image of an open notebook where one honest life page is written";
+    }
+
+    return "Colored story image of a rainy bus stop with coins, a notebook, and human kindness";
+  }
+
+  if (lowerText.includes("window") || lowerText.includes("plant") || lowerText.includes("opening")) {
+    return "Colored story image of a slightly open apartment window and a small plant";
+  }
+
+  if (
+    lowerText.includes("cup") ||
+    lowerText.includes("key") ||
+    lowerText.includes("ticket") ||
+    lowerText.includes("table") ||
+    lowerText.includes("repair")
+  ) {
+    return "Colored story image of a cracked cup, key, and train ticket on a warm apartment table";
+  }
+
+  return "Colored story image of the blue door where the monthly story begins";
+}
+
+function storyPhotoForStoryPage(
+  text: string,
+  kind: StoryArtKind,
+  theme: "monthly" | PublishedStoryKey,
+) {
+  const lowerText = text.toLowerCase();
+
+  if (theme === "bitcoin") {
+    if (
+      lowerText.includes("private key") ||
+      lowerText.includes("hold a key") ||
+      lowerText.includes("lose the key") ||
+      lowerText.includes("belongs to me")
+    ) {
+      return "/images/story-scene-bitcoin-key-color.png";
+    }
+
+    if (
+      lowerText.includes("blockchain") ||
+      lowerText.includes("network") ||
+      lowerText.includes("computers") ||
+      lowerText.includes("borders") ||
+      lowerText.includes("verify value") ||
+      lowerText.includes("global")
+    ) {
+      return "/images/story-scene-bitcoin-network-color.png";
+    }
+
+    return "/images/story-cover-bitcoin-color.png";
+  }
+
+  if (theme === "orb") {
+    return "/images/story-scene-orb-verify-color.png";
+  }
+
+  if (theme === "onePage") {
+    if (
+      lowerText.includes("notebook") ||
+      lowerText.includes("one page") ||
+      lowerText.includes("wrote") ||
+      lowerText.includes("write")
+    ) {
+      return "/images/story-scene-onepage-write-color.png";
+    }
+
+    return "/images/story-cover-onepage-color.png";
+  }
+
+  if (
+    lowerText.includes("window") ||
+    lowerText.includes("plant") ||
+    lowerText.includes("air") ||
+    lowerText.includes("opening") ||
+    lowerText.includes("sunrise")
+  ) {
+    return "/images/story-scene-door-window-color.png";
+  }
+
+  if (
+    lowerText.includes("cup") ||
+    lowerText.includes("key") ||
+    lowerText.includes("ticket") ||
+    lowerText.includes("table") ||
+    lowerText.includes("repair") ||
+    lowerText.includes("soup")
+  ) {
+    return "/images/story-scene-door-table-color.png";
+  }
+
+  return storyPhotoForTheme(kind, theme);
 }
 
 function storyPhotoForTheme(kind: StoryArtKind, theme: "monthly" | PublishedStoryKey) {
