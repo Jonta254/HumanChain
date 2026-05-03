@@ -172,34 +172,27 @@ type StoryImage = {
 };
 
 const monthlyStoryPhotos = [
-  "/images/story-bw-door.svg",
-  "/images/story-bw-table.svg",
-  "/images/story-bw-window.svg",
-  "/images/story-bw-phone.svg",
-  "/images/story-bw-world.svg",
+  "/images/story-cover-door-color.png",
+  "/images/story-scene-door-table-color.png",
+  "/images/story-scene-door-window-color.png",
 ];
 
 const monthlyStoryCover = "/images/story-cover-door-color.png";
 
 const bitcoinStoryPhotos = [
-  "/images/story-bw-bitcoin-seed.svg",
-  "/images/story-bw-blockchain.svg",
-  "/images/story-bw-bitcoin-key.svg",
-  "/images/story-bw-bitcoin-world.svg",
+  "/images/story-cover-bitcoin-color.png",
+  "/images/story-scene-bitcoin-network-color.png",
+  "/images/story-scene-bitcoin-key-color.png",
 ];
 
 const orbStoryPhotos = [
-  "/images/story-bw-orb.svg",
-  "/images/story-bw-identity.svg",
-  "/images/story-bw-human-answer.svg",
-  "/images/story-bw-orb-crossing.svg",
+  "/images/story-cover-orb-color.png",
+  "/images/story-scene-orb-verify-color.png",
 ];
 
 const onePageStoryPhotos = [
-  "/images/story-bw-notebook.svg",
-  "/images/story-bw-coins.svg",
-  "/images/story-bw-busstop.svg",
-  "/images/story-bw-lastpage.svg",
+  "/images/story-cover-onepage-color.png",
+  "/images/story-scene-onepage-write-color.png",
 ];
 
 const publishedStoryImagePages = new Set([0, 3, 6]);
@@ -534,10 +527,11 @@ const storyPages = monthlyStoryTextPages.map((storyPage, index) => {
     : null;
   const nextText = monthlyStoryTextPages[index + 1]?.text;
 
-  const imageWithPhoto = image
+const imageWithPhoto = image
     ? {
         ...image,
-        photo: image.photo ?? monthlyStoryPhotos[index % monthlyStoryPhotos.length],
+        alt: `${image.alt}. The image is matched to this story moment.`,
+        photo: image.photo ?? storyPhotoForTheme(image.art, "monthly"),
       }
     : null;
 
@@ -644,7 +638,7 @@ const bitcoinWorldPages = bitcoinWorldTextPages.map((page, index) => {
       ? {
           alt: `${bitcoinWorldStory.title} page ${index + 1} black and white story image`,
           art: page.art ?? bitcoinWorldStory.coverArt,
-          photo: bitcoinWorldStory.photos[index % bitcoinWorldStory.photos.length],
+          photo: storyPhotoForTheme(page.art ?? bitcoinWorldStory.coverArt, "bitcoin"),
         }
       : null,
     nextHint: nextText
@@ -752,16 +746,17 @@ const publishedStoryPages = Object.fromEntries(
       key,
       storyTextPages.map((page, index) => {
         const nextText = storyTextPages[index + 1]?.text;
+        const theme = key as PublishedStoryKey;
 
         return {
           page: index + 1,
           text: page.text,
           image: publishedStoryImagePages.has(index)
             ? {
-                alt: `${story.title} page ${index + 1} black and white story image`,
-                art: page.art ?? story.coverArt,
-                photo: story.photos[index % story.photos.length],
-              }
+              alt: `${story.title} page ${index + 1} black and white story image`,
+              art: page.art ?? story.coverArt,
+              photo: storyPhotoForTheme(page.art ?? story.coverArt, theme),
+            }
             : null,
           nextHint: nextText
             ? `Next: ${createStoryHint(nextText)}`
@@ -2866,6 +2861,39 @@ function StoryWallImage({
   );
 }
 
+function storyPhotoForTheme(kind: StoryArtKind, theme: "monthly" | PublishedStoryKey) {
+  if (theme === "bitcoin") {
+    if (kind === "key-ticket" || kind === "hands" || kind === "low-battery") {
+      return "/images/story-scene-bitcoin-key-color.png";
+    }
+
+    if (
+      kind === "earth-chain" ||
+      kind === "phone-table" ||
+      kind === "world-thread" ||
+      kind === "net" ||
+      kind === "public-square" ||
+      kind === "future-screen" ||
+      kind === "verdict-mirror" ||
+      kind === "add-link"
+    ) {
+      return "/images/story-scene-bitcoin-network-color.png";
+    }
+
+    return "/images/story-cover-bitcoin-color.png";
+  }
+
+  if (theme === "orb") {
+    return "/images/story-scene-orb-verify-color.png";
+  }
+
+  if (theme === "onePage") {
+    return "/images/story-scene-onepage-write-color.png";
+  }
+
+  return storyPhotoForKind(kind);
+}
+
 function storyPhotoForKind(kind: StoryArtKind) {
   if (
     kind === "earth-chain" ||
@@ -2874,7 +2902,7 @@ function storyPhotoForKind(kind: StoryArtKind) {
     kind === "public-square" ||
     kind === "verdict-mirror"
   ) {
-    return "/images/story-bw-world.svg";
+    return "/images/story-scene-bitcoin-network-color.png";
   }
 
   if (
@@ -2886,7 +2914,7 @@ function storyPhotoForKind(kind: StoryArtKind) {
     kind === "anonymous" ||
     kind === "future-screen"
   ) {
-    return "/images/story-bw-phone.svg";
+    return "/images/story-scene-orb-verify-color.png";
   }
 
   if (
@@ -2898,7 +2926,7 @@ function storyPhotoForKind(kind: StoryArtKind) {
     kind === "ocean-memory" ||
     kind === "repair"
   ) {
-    return "/images/story-bw-table.svg";
+    return "/images/story-scene-door-table-color.png";
   }
 
   if (
@@ -2911,10 +2939,10 @@ function storyPhotoForKind(kind: StoryArtKind) {
     kind === "four-windows" ||
     kind === "add-link"
   ) {
-    return "/images/story-bw-window.svg";
+    return "/images/story-scene-door-window-color.png";
   }
 
-  return "/images/story-bw-door.svg";
+  return "/images/story-cover-door-color.png";
 }
 
 function RealisticStoryScene({ kind }: { kind: StoryArtKind }) {
