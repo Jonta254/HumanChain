@@ -200,8 +200,8 @@ const onePageStoryPhotos = [
   "/images/story-bw-lastpage.svg",
 ];
 
-const publishedStoryImagePages = new Set([0, 4, 8, 12]);
-const monthlyStoryImagePages = new Set([1, 9, 27, 51, 76, 101, 129, 149]);
+const publishedStoryImagePages = new Set([0, 3, 6]);
+const monthlyStoryImagePages = new Set([0, 4, 8, 12, 16, 20, 24, 28]);
 
 const storyImageByPage: Record<number, StoryImage> = {
   1: {
@@ -481,12 +481,56 @@ const ambientStoryArt: StoryArtKind[] = [
   "add-link",
 ];
 
-const storyPages = storyBeats.map((text, index) => {
-  const pageNumber = index + 1;
-  const image = monthlyStoryImagePages.has(pageNumber)
-    ? storyImageByPage[pageNumber] ?? null
+type StoryTextItem = {
+  text: string;
+  art?: StoryArtKind;
+};
+
+function createBalancedStoryPages(
+  items: StoryTextItem[],
+  minLength = 320,
+  maxLength = 560,
+) {
+  const pages: Array<{ text: string; art?: StoryArtKind; sourceIndex: number }> = [];
+  let text = "";
+  let art: StoryArtKind | undefined;
+  let sourceIndex = 0;
+
+  items.forEach((item, index) => {
+    const nextText = text ? `${text} ${item.text}` : item.text;
+
+    if (text && text.length >= minLength && nextText.length > maxLength) {
+      pages.push({ text, art, sourceIndex });
+      text = item.text;
+      art = item.art;
+      sourceIndex = index;
+      return;
+    }
+
+    text = nextText;
+    art = art ?? item.art;
+  });
+
+  if (text) {
+    pages.push({ text, art, sourceIndex });
+  }
+
+  return pages;
+}
+
+const monthlyStoryTextPages = createBalancedStoryPages(
+  storyBeats.map((text) => ({ text })),
+);
+
+const storyPages = monthlyStoryTextPages.map((storyPage, index) => {
+  const storyImage = storyImageByPage[storyPage.sourceIndex + 1];
+  const image = monthlyStoryImagePages.has(index)
+    ? storyImage ?? {
+        alt: "Black and white story image reflecting this part of the monthly story",
+        art: ambientStoryArt[index % ambientStoryArt.length],
+      }
     : null;
-  const nextText = storyBeats[index + 1];
+  const nextText = monthlyStoryTextPages[index + 1]?.text;
 
   const imageWithPhoto = image
     ? {
@@ -497,7 +541,7 @@ const storyPages = storyBeats.map((text, index) => {
 
   return {
     page: index + 1,
-    text,
+    text: storyPage.text,
     image: imageWithPhoto,
     nextHint: nextText
       ? `Next: ${createStoryHint(nextText)}`
@@ -582,8 +626,14 @@ const bitcoinWorldStory = {
   ],
 };
 
-const bitcoinWorldPages = bitcoinWorldStory.pages.map((page, index) => {
-  const nextText = bitcoinWorldStory.pages[index + 1]?.text;
+const bitcoinWorldTextPages = createBalancedStoryPages(
+  bitcoinWorldStory.pages,
+  300,
+  620,
+);
+
+const bitcoinWorldPages = bitcoinWorldTextPages.map((page, index) => {
+  const nextText = bitcoinWorldTextPages[index + 1]?.text;
 
   return {
     page: index + 1,
@@ -591,7 +641,7 @@ const bitcoinWorldPages = bitcoinWorldStory.pages.map((page, index) => {
     image: publishedStoryImagePages.has(index)
       ? {
           alt: `${bitcoinWorldStory.title} page ${index + 1} black and white story image`,
-          art: page.art,
+          art: page.art ?? bitcoinWorldStory.coverArt,
           photo: bitcoinWorldStory.photos[index % bitcoinWorldStory.photos.length],
         }
       : null,
@@ -693,27 +743,31 @@ const publishedStoryCollection = {
 type PublishedStoryKey = keyof typeof publishedStoryCollection;
 
 const publishedStoryPages = Object.fromEntries(
-  Object.entries(publishedStoryCollection).map(([key, story]) => [
-    key,
-    story.pages.map((page, index) => {
-      const nextText = story.pages[index + 1]?.text;
+  Object.entries(publishedStoryCollection).map(([key, story]) => {
+    const storyTextPages = createBalancedStoryPages(story.pages, 300, 620);
 
-      return {
-        page: index + 1,
-        text: page.text,
-        image: publishedStoryImagePages.has(index)
-          ? {
-              alt: `${story.title} page ${index + 1} black and white story image`,
-              art: page.art,
-              photo: story.photos[index % story.photos.length],
-            }
-          : null,
-        nextHint: nextText
-          ? `Next: ${createStoryHint(nextText)}`
-          : "Next: add your own link to this story.",
-      };
-    }),
-  ]),
+    return [
+      key,
+      storyTextPages.map((page, index) => {
+        const nextText = storyTextPages[index + 1]?.text;
+
+        return {
+          page: index + 1,
+          text: page.text,
+          image: publishedStoryImagePages.has(index)
+            ? {
+                alt: `${story.title} page ${index + 1} black and white story image`,
+                art: page.art ?? story.coverArt,
+                photo: story.photos[index % story.photos.length],
+              }
+            : null,
+          nextHint: nextText
+            ? `Next: ${createStoryHint(nextText)}`
+            : "Next: add your own link to this story.",
+        };
+      }),
+    ];
+  }),
 ) as Record<PublishedStoryKey, typeof bitcoinWorldPages>;
 
 function createStoryHint(text: string) {
@@ -2788,7 +2842,6 @@ function StoryWallImage({
       <div className="wall-photo-frame">
         <img alt={alt} src={imageSrc} />
       </div>
-      <figcaption>HumanChain wall memory</figcaption>
     </figure>
   );
 }

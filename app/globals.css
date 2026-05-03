@@ -2096,7 +2096,7 @@ button {
 .story-wall-photo {
   position: relative;
   margin: 0 0 16px;
-  padding: 18px 14px 28px;
+  padding: 18px 14px;
   border-radius: 22px;
   background:
     linear-gradient(180deg, rgba(228, 216, 196, 0.86), rgba(196, 181, 157, 0.76)),
@@ -2170,17 +2170,6 @@ button {
 .story-wall-photo .gold-dot,
 .story-wall-photo .gold-fill {
   fill: rgba(209, 155, 44, 0.72);
-}
-
-.story-wall-photo figcaption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 8px;
-  color: rgba(62, 48, 31, 0.62);
-  font-size: 0.72rem;
-  font-weight: 850;
-  text-align: center;
 }
 
 .real-bg.wall {
