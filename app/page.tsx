@@ -200,6 +200,9 @@ const onePageStoryPhotos = [
   "/images/story-bw-lastpage.svg",
 ];
 
+const publishedStoryImagePages = new Set([0, 4, 8, 12]);
+const monthlyStoryImagePages = new Set([1, 9, 27, 51, 76, 101, 129, 149]);
+
 const storyImageByPage: Record<number, StoryImage> = {
   1: {
     alt: "A closed door with a small line of light under it",
@@ -479,14 +482,10 @@ const ambientStoryArt: StoryArtKind[] = [
 ];
 
 const storyPages = storyBeats.map((text, index) => {
-  const image =
-    storyImageByPage[index + 1] ??
-    (text.length < 260
-      ? {
-          alt: "Symbolic paper art reflecting this story moment",
-          art: ambientStoryArt[index % ambientStoryArt.length],
-        }
-      : null);
+  const pageNumber = index + 1;
+  const image = monthlyStoryImagePages.has(pageNumber)
+    ? storyImageByPage[pageNumber] ?? null
+    : null;
   const nextText = storyBeats[index + 1];
 
   const imageWithPhoto = image
@@ -589,11 +588,13 @@ const bitcoinWorldPages = bitcoinWorldStory.pages.map((page, index) => {
   return {
     page: index + 1,
     text: page.text,
-    image: {
-      alt: `${bitcoinWorldStory.title} page ${index + 1} symbolic art`,
-      art: page.art,
-      photo: bitcoinWorldStory.photos[index % bitcoinWorldStory.photos.length],
-    },
+    image: publishedStoryImagePages.has(index)
+      ? {
+          alt: `${bitcoinWorldStory.title} page ${index + 1} black and white story image`,
+          art: page.art,
+          photo: bitcoinWorldStory.photos[index % bitcoinWorldStory.photos.length],
+        }
+      : null,
     nextHint: nextText
       ? `Next: ${createStoryHint(nextText)}`
       : "Next: carry this question into the chain.",
@@ -700,11 +701,13 @@ const publishedStoryPages = Object.fromEntries(
       return {
         page: index + 1,
         text: page.text,
-        image: {
-          alt: `${story.title} page ${index + 1} symbolic art`,
-          art: page.art,
-          photo: story.photos[index % story.photos.length],
-        },
+        image: publishedStoryImagePages.has(index)
+          ? {
+              alt: `${story.title} page ${index + 1} black and white story image`,
+              art: page.art,
+              photo: story.photos[index % story.photos.length],
+            }
+          : null,
         nextHint: nextText
           ? `Next: ${createStoryHint(nextText)}`
           : "Next: add your own link to this story.",
@@ -2373,9 +2376,8 @@ function StoriesView({
     : storyPages;
   const current = activePages[page];
   const activeTitle = publishedStory?.title ?? "The Door That Waited";
-  const activeByline = publishedStory
-    ? `Published by ${publishedStory.publisher}`
-    : "Published by HumanChain Monthly";
+  const activePublisher = publishedStory?.publisher ?? "HumanChain Monthly";
+  const activeAuthor = publishedStory?.author ?? "monthly human story";
 
   function saveStory() {
     setSavedItems((value) => value + 1);
@@ -2420,6 +2422,16 @@ function StoriesView({
           />
         </section>
         <article className="story-page">
+          {page === 0 ? (
+            <header className="reader-masthead">
+              <span>{publishedStory ? "Published story" : "Monthly human story"}</span>
+              <h1>{activeTitle}</h1>
+              <small>
+                Published by {activePublisher}
+                {publishedStory ? ` - ${activeAuthor}` : ""}
+              </small>
+            </header>
+          ) : null}
           {current.image ? (
             <StoryWallImage
               alt={current.image.alt}
@@ -2427,16 +2439,8 @@ function StoriesView({
               src={current.image.photo}
             />
           ) : null}
-          <span className="section-kicker">{activeByline}</span>
-          {publishedStory ? (
-            <small className="reader-publisher">{publishedStory.author}</small>
-          ) : null}
-          <h2 className="reader-title">{activeTitle}</h2>
+          {page > 0 ? <span className="reader-chapter">{activeTitle}</span> : null}
           <p>{current.text}</p>
-          <div className="story-thread-note">
-            <span>Next thread</span>
-            <strong>{current.nextHint}</strong>
-          </div>
         </article>
         <section className="reader-actions">
           <button
