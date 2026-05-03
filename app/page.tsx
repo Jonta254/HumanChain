@@ -165,13 +165,42 @@ const chainQuoteLibrary = [
   },
 ];
 
-const storyImageByPage: Record<
-  number,
-  {
-    alt: string;
-    art: StoryArtKind;
-  }
-> = {
+type StoryImage = {
+  alt: string;
+  art: StoryArtKind;
+  photo?: string;
+};
+
+const monthlyStoryPhotos = [
+  "/images/story-bw-door.svg",
+  "/images/story-bw-table.svg",
+  "/images/story-bw-window.svg",
+  "/images/story-bw-phone.svg",
+  "/images/story-bw-world.svg",
+];
+
+const bitcoinStoryPhotos = [
+  "/images/story-bw-bitcoin-seed.svg",
+  "/images/story-bw-blockchain.svg",
+  "/images/story-bw-bitcoin-key.svg",
+  "/images/story-bw-bitcoin-world.svg",
+];
+
+const orbStoryPhotos = [
+  "/images/story-bw-orb.svg",
+  "/images/story-bw-identity.svg",
+  "/images/story-bw-human-answer.svg",
+  "/images/story-bw-orb-crossing.svg",
+];
+
+const onePageStoryPhotos = [
+  "/images/story-bw-notebook.svg",
+  "/images/story-bw-coins.svg",
+  "/images/story-bw-busstop.svg",
+  "/images/story-bw-lastpage.svg",
+];
+
+const storyImageByPage: Record<number, StoryImage> = {
   1: {
     alt: "A closed door with a small line of light under it",
     art: "closed-door",
@@ -460,10 +489,17 @@ const storyPages = storyBeats.map((text, index) => {
       : null);
   const nextText = storyBeats[index + 1];
 
+  const imageWithPhoto = image
+    ? {
+        ...image,
+        photo: image.photo ?? monthlyStoryPhotos[index % monthlyStoryPhotos.length],
+      }
+    : null;
+
   return {
     page: index + 1,
     text,
-    image,
+    image: imageWithPhoto,
     nextHint: nextText
       ? `Next: ${createStoryHint(nextText)}`
       : "Next: add your own link to the chain.",
@@ -477,6 +513,8 @@ const bitcoinWorldStory = {
   publisher: "jontAWorld",
   price: "2 WLD",
   coverArt: "earth-chain" as const,
+  coverPhoto: "/images/story-bw-bitcoin-world.svg",
+  photos: bitcoinStoryPhotos,
   pages: [
     {
       art: "earth-chain" as const,
@@ -554,6 +592,7 @@ const bitcoinWorldPages = bitcoinWorldStory.pages.map((page, index) => {
     image: {
       alt: `${bitcoinWorldStory.title} page ${index + 1} symbolic art`,
       art: page.art,
+      photo: bitcoinWorldStory.photos[index % bitcoinWorldStory.photos.length],
     },
     nextHint: nextText
       ? `Next: ${createStoryHint(nextText)}`
@@ -574,6 +613,8 @@ const publishedStoryCollection = {
     price: "2 WLD",
     shelfTitle: "The ORB",
     coverArt: "anonymous" as const,
+    coverPhoto: "/images/story-bw-orb.svg",
+    photos: orbStoryPhotos,
     pages: [
       {
         art: "anonymous" as const,
@@ -617,6 +658,8 @@ const publishedStoryCollection = {
     price: "3 WLD",
     shelfTitle: "One Page From My Life",
     coverArt: "memory-table" as const,
+    coverPhoto: "/images/story-bw-notebook.svg",
+    photos: onePageStoryPhotos,
     pages: [
       {
         art: "memory-table" as const,
@@ -660,6 +703,7 @@ const publishedStoryPages = Object.fromEntries(
         image: {
           alt: `${story.title} page ${index + 1} symbolic art`,
           art: page.art,
+          photo: story.photos[index % story.photos.length],
         },
         nextHint: nextText
           ? `Next: ${createStoryHint(nextText)}`
@@ -2377,7 +2421,11 @@ function StoriesView({
         </section>
         <article className="story-page">
           {current.image ? (
-            <StoryWallImage alt={current.image.alt} kind={current.image.art} />
+            <StoryWallImage
+              alt={current.image.alt}
+              kind={current.image.art}
+              src={current.image.photo}
+            />
           ) : null}
           <span className="section-kicker">{activeByline}</span>
           {publishedStory ? (
@@ -2438,9 +2486,10 @@ function StoriesView({
         </button>
       </section>
       <section className="story-cover bitcoin-cover">
-        <StoryPaperArt
+        <StoryWallImage
           alt="A symbolic cover showing Bitcoin value, World identity, and a human chain"
           kind={bitcoinWorldStory.coverArt}
+          src={bitcoinWorldStory.coverPhoto}
         />
         <span>{bitcoinWorldStory.author}</span>
         <h2>{bitcoinWorldStory.title}</h2>
@@ -2722,16 +2771,18 @@ function StoryPaperArt({
 function StoryWallImage({
   alt,
   kind,
+  src,
 }: {
   alt: string;
   kind: StoryArtKind;
+  src?: string;
 }) {
-  const src = storyPhotoForKind(kind);
+  const imageSrc = src ?? storyPhotoForKind(kind);
 
   return (
     <figure aria-label={alt} className={`story-wall-photo wall-photo-${kind}`}>
       <div className="wall-photo-frame">
-        <img alt={alt} src={src} />
+        <img alt={alt} src={imageSrc} />
       </div>
       <figcaption>HumanChain wall memory</figcaption>
     </figure>

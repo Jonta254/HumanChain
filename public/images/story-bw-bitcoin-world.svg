@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-label="Black and white realistic city map with bitcoin value crossing borders">
+  <defs><radialGradient id="light" cx="52%" cy="32%" r="52%"><stop offset="0" stop-color="#fff" stop-opacity=".65"/><stop offset=".58" stop-color="#d8d8d2" stop-opacity=".18"/><stop offset="1" stop-color="#111" stop-opacity="0"/></radialGradient><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#eeeeea"/><stop offset=".5" stop-color="#90938f"/><stop offset="1" stop-color="#1f1f1f"/></linearGradient><filter id="grain"><feTurbulence baseFrequency=".84" numOctaves="3" seed="215"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18"/></feComponentTransfer><feBlend in="SourceGraphic" mode="multiply"/></filter></defs>
+  <rect width="960" height="640" fill="url(#bg)"/><rect width="960" height="640" fill="url(#light)"/>
+  <g opacity=".5" fill="none" stroke="#111" stroke-width="4"><path d="M80 490C210 410 288 442 402 360c118-85 219-56 368-150"/><path d="M136 186c132 83 238 74 360 30 146-53 230 7 340 72"/><path d="M120 390h720M184 260h590M286 120v430M466 92v480M646 124v418"/></g>
+  <g fill="#171717"><circle cx="206" cy="448" r="16"/><circle cx="404" cy="360" r="16"/><circle cx="588" cy="286" r="16"/><circle cx="770" cy="210" r="16"/></g>
+  <path d="M206 448c92-62 130-18 198-88 76-79 126 10 184-74 52-75 98-44 182-76" fill="none" stroke="#f7f1de" stroke-width="12" stroke-linecap="round"/>
+  <path d="M206 448c92-62 130-18 198-88 76-79 126 10 184-74 52-75 98-44 182-76" fill="none" stroke="#111" stroke-opacity=".32" stroke-width="5" stroke-linecap="round"/>
+  <g fill="#e8e4d8" stroke="#111" stroke-width="6"><circle cx="206" cy="448" r="22"/><circle cx="404" cy="360" r="22"/><circle cx="588" cy="286" r="22"/><circle cx="770" cy="210" r="22"/></g><rect width="960" height="640" filter="url(#grain)" opacity=".58"/>
+</svg>

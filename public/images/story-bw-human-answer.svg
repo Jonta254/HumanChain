@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" role="img" aria-label="Black and white realistic scene of a phone answer crossing from one human to another">
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#f0eee7"/><stop offset=".5" stop-color="#8f8f89"/><stop offset="1" stop-color="#202020"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#111" flood-opacity=".36"/></filter><filter id="grain"><feTurbulence baseFrequency=".8" numOctaves="3" seed="216"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18"/></feComponentTransfer><feBlend in="SourceGraphic" mode="multiply"/></filter></defs>
+  <rect width="960" height="640" fill="url(#bg)"/><path d="M0 426h960v214H0z" fill="#4c4c4c" opacity=".5"/>
+  <g filter="url(#shadow)"><rect x="155" y="184" width="154" height="276" rx="30" fill="#171717"/><rect x="174" y="218" width="116" height="188" rx="12" fill="#e4e1d8"/><path d="M198 260h70M198 302h84M198 344h56" stroke="#222" stroke-opacity=".5" stroke-width="9" stroke-linecap="round"/></g>
+  <g filter="url(#shadow)"><ellipse cx="706" cy="244" rx="48" ry="56" fill="#171717"/><path d="M610 508c18-150 51-238 100-238 50 0 88 88 108 238z" fill="#3a3a3a"/></g>
+  <path d="M252 344c112-90 191 65 306-34 72-62 117-61 184-12" fill="none" stroke="#f6f1e3" stroke-width="12" stroke-linecap="round"/>
+  <path d="M252 344c112-90 191 65 306-34 72-62 117-61 184-12" fill="none" stroke="#111" stroke-opacity=".34" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="252" cy="344" r="17" fill="#e9e4d8" stroke="#111" stroke-width="6"/><circle cx="558" cy="310" r="17" fill="#e9e4d8" stroke="#111" stroke-width="6"/><circle cx="742" cy="298" r="17" fill="#e9e4d8" stroke="#111" stroke-width="6"/><rect width="960" height="640" filter="url(#grain)" opacity=".58"/>
+</svg>
