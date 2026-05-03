@@ -1422,10 +1422,10 @@ button {
 .realistic-cover img {
   width: 100%;
   display: block;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 14px;
-  filter: grayscale(1) contrast(1.08);
+  filter: saturate(1.08) contrast(1.02);
 }
 
 .cover-paper {
@@ -1573,6 +1573,17 @@ button {
 
 .shelf-row .paper-art-svg {
   aspect-ratio: 1 / 1;
+}
+
+.story-thumb-image {
+  width: 76px;
+  min-width: 76px;
+  aspect-ratio: 1 / 1;
+  display: block;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(62, 48, 31, 0.08);
 }
 
 .shelf-row p {

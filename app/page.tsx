@@ -179,6 +179,8 @@ const monthlyStoryPhotos = [
   "/images/story-bw-world.svg",
 ];
 
+const monthlyStoryCover = "/images/story-cover-door-color.png";
+
 const bitcoinStoryPhotos = [
   "/images/story-bw-bitcoin-seed.svg",
   "/images/story-bw-blockchain.svg",
@@ -556,7 +558,7 @@ const bitcoinWorldStory = {
   publisher: "jontAWorld",
   price: "2 WLD",
   coverArt: "earth-chain" as const,
-  coverPhoto: "/images/story-bw-bitcoin-world.svg",
+  coverPhoto: "/images/story-cover-bitcoin-color.png",
   photos: bitcoinStoryPhotos,
   pages: [
     {
@@ -664,7 +666,7 @@ const publishedStoryCollection = {
     price: "2 WLD",
     shelfTitle: "The ORB",
     coverArt: "anonymous" as const,
-    coverPhoto: "/images/story-bw-orb.svg",
+    coverPhoto: "/images/story-cover-orb-color.png",
     photos: orbStoryPhotos,
     pages: [
       {
@@ -709,7 +711,7 @@ const publishedStoryCollection = {
     price: "3 WLD",
     shelfTitle: "One Page From My Life",
     coverArt: "memory-table" as const,
-    coverPhoto: "/images/story-bw-notebook.svg",
+    coverPhoto: "/images/story-cover-onepage-color.png",
     photos: onePageStoryPhotos,
     pages: [
       {
@@ -2525,7 +2527,10 @@ function StoriesView({
     <div className="screen">
       <TopBar title="Human Story" subtitle="A monthly story about being human." />
       <section className="story-cover">
-        <StoryCoverArt />
+        <StoryCoverPhoto
+          alt="Colored cinematic cover for The Door That Waited showing a blue door and cracked cup"
+          src={monthlyStoryCover}
+        />
         <span>April Human Story</span>
         <h2>The Door That Waited</h2>
         <p>
@@ -2544,9 +2549,8 @@ function StoriesView({
         </button>
       </section>
       <section className="story-cover bitcoin-cover">
-        <StoryWallImage
-          alt="A symbolic cover showing Bitcoin value, World identity, and a human chain"
-          kind={bitcoinWorldStory.coverArt}
+        <StoryCoverPhoto
+          alt="Colored cinematic cover for One Seed One World showing Bitcoin, a desk, and global connection"
           src={bitcoinWorldStory.coverPhoto}
         />
         <span>{bitcoinWorldStory.author}</span>
@@ -2583,15 +2587,15 @@ function StoriesView({
         {storyShelf.map((story) => {
           const storyKey =
             story.key !== "monthly" ? (story.key as PublishedStoryKey) : null;
-          const thumbnailArt = storyKey
-            ? publishedStoryCollection[storyKey].coverArt
-            : ("cover-symbol" as const);
+          const thumbnailSrc = storyKey
+            ? publishedStoryCollection[storyKey].coverPhoto
+            : monthlyStoryCover;
 
           return (
             <article className="shelf-row" key={story.title}>
-              <StoryPaperArt
-                alt={`${story.title} symbolic story thumbnail`}
-                kind={thumbnailArt}
+              <StoryThumbImage
+                alt={`${story.title} colored story cover`}
+                src={thumbnailSrc}
               />
               <div>
                 <span>{story.label}</span>
@@ -2780,17 +2784,33 @@ function StoriesView({
   );
 }
 
-function StoryCoverArt() {
+function StoryCoverPhoto({
+  alt,
+  src,
+}: {
+  alt: string;
+  src: string;
+}) {
   return (
     <figure
       className="cover-art realistic-cover"
     >
       <img
-        alt="Black and white realistic scene for The Door That Waited showing a person at a door with a cracked cup"
-        src="/images/story-bw-door.svg"
+        alt={alt}
+        src={src}
       />
     </figure>
   );
+}
+
+function StoryThumbImage({
+  alt,
+  src,
+}: {
+  alt: string;
+  src: string;
+}) {
+  return <img alt={alt} className="story-thumb-image" src={src} />;
 }
 
 function StoryPaperArt({
