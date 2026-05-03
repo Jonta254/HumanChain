@@ -848,6 +848,43 @@ const answerQueue = [
   "What is one truth about love people learn too late?",
 ];
 
+const starterAskThreads = [
+  {
+    question: "How do I start again after losing confidence?",
+    topic: "Life",
+    mode: "Text",
+    answers: [
+      {
+        user: "@mara_chain",
+        country: "Kenya",
+        text: "Start with one promise you can keep before sunset. Confidence returns through evidence.",
+      },
+      {
+        user: "@renato_human",
+        country: "Brazil",
+        text: "Tell one safe person the truth. Shame gets weaker when it stops being private.",
+      },
+    ],
+  },
+  {
+    question: "Should I chase money first or build skill first?",
+    topic: "Money",
+    mode: "Country",
+    answers: [
+      {
+        user: "@builder_ama",
+        country: "Ghana",
+        text: "Build the skill that can earn in many rooms. Money follows usefulness more often than noise.",
+      },
+      {
+        user: "@tomas_work",
+        country: "Portugal",
+        text: "Earn enough to breathe, then invest time in the skill that compounds.",
+      },
+    ],
+  },
+];
+
 const chainFields = [
   {
     name: "Faith & Prayer",
@@ -1838,15 +1875,60 @@ function AskView({
   openPayment: OpenPayment;
 }) {
   const [question, setQuestion] = useState("");
-  const [published, setPublished] = useState<string | null>(null);
+  const [selectedMode, setSelectedMode] = useState("Text");
+  const [selectedTopic, setSelectedTopic] = useState("Life");
+  const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
+  const [threads, setThreads] = useState(starterAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
 
   function publishQuestion() {
     const cleanQuestion =
       question.trim() || "How do I begin again when life feels heavy?";
-    setPublished(cleanQuestion);
+    setThreads((current) => [
+      {
+        question: cleanQuestion,
+        topic: selectedTopic,
+        mode: selectedMode,
+        answers: [
+          {
+            user: "@humanchain_ai",
+            country: "World",
+            text: "Your question is live. Verified humans will answer from experience, not from guessing.",
+          },
+        ],
+      },
+      ...current,
+    ]);
+    setQuestion("");
     earnPoints(20, "Useful questions build your future earning score.");
     keepStreak("Your question is live and the Human Verdict is forming.");
+  }
+
+  function answerThread(questionText: string) {
+    const draft =
+      answerDrafts[questionText]?.trim() ||
+      "My honest answer: begin with the smallest action that proves life can still move.";
+
+    setThreads((current) =>
+      current.map((thread) =>
+        thread.question === questionText
+          ? {
+              ...thread,
+              answers: [
+                {
+                  user: "@jonta254",
+                  country: "Verified human",
+                  text: draft,
+                },
+                ...thread.answers,
+              ],
+            }
+          : thread,
+      ),
+    );
+    setAnswerDrafts((current) => ({ ...current, [questionText]: "" }));
+    earnPoints(15, "Your answer helped another verified human.");
+    keepStreak("Your answer joined the Human Ask board.");
   }
 
   return (
@@ -1857,8 +1939,8 @@ function AskView({
           <span className="section-kicker">Human Ask</span>
           <h2>Ask people, not algorithms.</h2>
           <p>
-            Choose who should answer, add voice for emotion, and pay WLD when
-            you want deeper reach.
+            Choose a human route, publish one honest question, and watch real
+            answers form into a living verdict.
           </p>
         </div>
         <button
@@ -1888,16 +1970,19 @@ function AskView({
         />
         <div className="ask-modes">
           {[
-            ["Text", "Free draft", "Free"],
-            ["Voice", "Voice reach", "2 WLD"],
-            ["Private", "Private reach", "4 WLD"],
-            ["Deep Verdict", "Full report", "6 WLD"],
+            ["Text", "Public question", "Free"],
+            ["Voice", "Hear my tone", "2 WLD"],
+            ["Private", "Hide identity", "4 WLD"],
+            ["Deep Verdict", "Human report", "6 WLD"],
           ].map(([mode, label, amount]) => (
             <button
+              aria-pressed={selectedMode === mode}
+              className={selectedMode === mode ? "active" : ""}
               key={mode}
               onClick={() => {
+                setSelectedMode(mode);
                 if (mode === "Text") {
-                  act("Text mode", "Free draft selected for this question.");
+                  act("Text mode", "Public text question selected.");
                   return;
                 }
 
@@ -1922,10 +2007,15 @@ function AskView({
           ))}
         </div>
         <div className="chip-row">
-          {["Love", "Money", "Business", "Family", "Culture", "Faith"].map((chip) => (
+          {["Life", "Love", "Money", "Business", "Family", "Culture", "Faith"].map((chip) => (
             <button
+              aria-pressed={selectedTopic === chip}
+              className={selectedTopic === chip ? "active" : ""}
               key={chip}
-              onClick={() => act("Topic selected", `${chip} answers will be prioritized.`)}
+              onClick={() => {
+                setSelectedTopic(chip);
+                act("Topic selected", `${chip} answers will be prioritized.`);
+              }}
               type="button"
             >
               {chip}
@@ -1938,14 +2028,75 @@ function AskView({
         </button>
       </section>
 
-      {published ? (
-        <section className="live-card">
-          <span className="section-kicker">World Verdict forming</span>
-          <h2>{published}</h2>
-          <p>12 verified humans invited. 3 countries are answering.</p>
-          <Meter label="Verdict progress" value={38} />
-        </section>
-      ) : null}
+      <section className="ask-board">
+        <div className="section-heading">
+          <span>Live Human Questions</span>
+          <MessageCircleQuestion size={18} />
+        </div>
+        {threads.map((thread, index) => (
+          <article className="ask-thread" key={`${thread.question}-${index}`}>
+            <div className="ask-thread-top">
+              <span>{thread.topic}</span>
+              <small>{thread.mode} route</small>
+            </div>
+            <h3>{thread.question}</h3>
+            <Meter label={`${thread.answers.length} answers`} value={Math.min(92, 22 + thread.answers.length * 18)} />
+            <div className="answer-stack">
+              {thread.answers.map((answer) => (
+                <div className="answer-card" key={`${thread.question}-${answer.user}-${answer.text}`}>
+                  <strong>{answer.user} · {answer.country}</strong>
+                  <p>{answer.text}</p>
+                </div>
+              ))}
+            </div>
+            <textarea
+              aria-label={`Answer ${thread.question}`}
+              className="answer-input"
+              onChange={(event) =>
+                setAnswerDrafts((current) => ({
+                  ...current,
+                  [thread.question]: event.target.value,
+                }))
+              }
+              placeholder="Add your real human answer..."
+              value={answerDrafts[thread.question] ?? ""}
+            />
+            <div className="thread-actions">
+              <button onClick={() => answerThread(thread.question)} type="button">
+                Answer
+              </button>
+              <button
+                onClick={() =>
+                  openPayment({
+                    title: "Boost question",
+                    amount: "2 WLD",
+                    detail: "Invite more verified humans to answer this question.",
+                    success: "Question boost is prepared for World App.",
+                    points: 8,
+                  })
+                }
+                type="button"
+              >
+                Boost reach
+              </button>
+              <button
+                onClick={() =>
+                  openPayment({
+                    title: "Deep Verdict",
+                    amount: "6 WLD",
+                    detail: "Turn this question's answers into a human verdict report.",
+                    success: "Deep Verdict is prepared for World App.",
+                    points: 12,
+                  })
+                }
+                type="button"
+              >
+                Build verdict
+              </button>
+            </div>
+          </article>
+        ))}
+      </section>
 
       <section className="panel payment-hub">
         <div className="section-heading">
@@ -2005,12 +2156,13 @@ function AskView({
             <p>{prompt}</p>
             <button
               onClick={() => {
-                earnPoints(15, "You earned points for helping another human.");
-                keepStreak("Your answer helped another verified human.");
+                setQuestion(prompt);
+                setSelectedMode("Text");
+                act("Question loaded", "Edit it or ask verified humans now.");
               }}
               type="button"
             >
-              Answer
+              Ask this
             </button>
           </article>
         ))}
