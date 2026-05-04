@@ -27,7 +27,7 @@ import {
   Vote,
   Wallet,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   authenticateHumanWallet,
   humanHaptic,
@@ -1317,6 +1317,11 @@ const initialHumanPosts = [
     image: null as string | null,
     theme: "gold",
     reactions: 18,
+    loves: 11,
+    tips: 3,
+    comments: ["This feels like my Monday.", "The cup detail stayed with me."],
+    createdAt: "Today, 08:20",
+    owner: false,
   },
   {
     id: 2,
@@ -1325,6 +1330,11 @@ const initialHumanPosts = [
     image: null as string | null,
     theme: "green",
     reactions: 31,
+    loves: 19,
+    tips: 6,
+    comments: ["Needed this.", "Small things count."],
+    createdAt: "Today, 09:02",
+    owner: false,
   },
   {
     id: 3,
@@ -1333,6 +1343,11 @@ const initialHumanPosts = [
     image: null as string | null,
     theme: "gold",
     reactions: 24,
+    loves: 14,
+    tips: 4,
+    comments: ["One prayer, one plan is strong."],
+    createdAt: "Yesterday, 18:44",
+    owner: false,
   },
 ];
 
@@ -1460,6 +1475,16 @@ type DailyResponse = {
   time: string;
 };
 
+type HumanPost = (typeof initialHumanPosts)[number];
+
+type HistoryRecord = {
+  id: number;
+  title: string;
+  detail: string;
+  time: string;
+  kind: "post" | "reaction" | "comment" | "tip" | "delete" | "profile";
+};
+
 type VerifiedHuman = {
   username: string;
   wallet?: string;
@@ -1478,6 +1503,16 @@ export default function HumanChainApp() {
   const [dailyAnswered, setDailyAnswered] = useState(false);
   const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(null);
   const [activeField, setActiveField] = useState<ChainField | null>(null);
+  const [humanPosts, setHumanPosts] = useState<HumanPost[]>(initialHumanPosts);
+  const [historyRecords, setHistoryRecords] = useState<HistoryRecord[]>([
+    {
+      id: 1,
+      title: "HumanChain opened",
+      detail: "Your chain history starts here.",
+      time: "Today",
+      kind: "profile",
+    },
+  ]);
   const [dailyResponses, setDailyResponses] = useState<DailyResponse[]>([
     {
       user: "@mara_chain",
@@ -1492,8 +1527,50 @@ export default function HumanChainApp() {
   ]);
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
 
+  useEffect(() => {
+    try {
+      const storedPosts = window.localStorage.getItem("humanchain_posts");
+      const storedHistory = window.localStorage.getItem("humanchain_history");
+
+      if (storedPosts) {
+        setHumanPosts(JSON.parse(storedPosts) as HumanPost[]);
+      }
+
+      if (storedHistory) {
+        setHistoryRecords(JSON.parse(storedHistory) as HistoryRecord[]);
+      }
+    } catch {
+      window.localStorage.removeItem("humanchain_posts");
+      window.localStorage.removeItem("humanchain_history");
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("humanchain_posts", JSON.stringify(humanPosts));
+  }, [humanPosts]);
+
+  useEffect(() => {
+    window.localStorage.setItem("humanchain_history", JSON.stringify(historyRecords));
+  }, [historyRecords]);
+
   function act(title: string, detail: string) {
     setToast({ title, detail });
+  }
+
+  function recordHistory(record: Omit<HistoryRecord, "id" | "time">) {
+    const time = new Intl.DateTimeFormat("en", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date());
+
+    setHistoryRecords((current) => [
+      {
+        ...record,
+        id: Date.now(),
+        time,
+      },
+      ...current,
+    ]);
   }
 
   function keepStreak(detail = "Your Human Streak is alive for today.") {
@@ -1625,10 +1702,13 @@ export default function HumanChainApp() {
             activeField={activeField}
             act={act}
             earnPoints={earnPoints}
+            humanPosts={humanPosts}
             keepStreak={keepStreak}
             links={links}
             openPayment={openPayment}
+            recordHistory={recordHistory}
             setActiveField={setActiveField}
+            setHumanPosts={setHumanPosts}
             setLinks={setLinks}
           />
         );
@@ -1648,7 +1728,10 @@ export default function HumanChainApp() {
             act={act}
             earnPoints={earnPoints}
             keepStreak={keepStreak}
+            historyRecords={historyRecords}
+            humanPosts={humanPosts}
             points={points}
+            recordHistory={recordHistory}
             savedItems={savedItems}
             streak={streak}
           />
@@ -2364,25 +2447,31 @@ function ChainsView({
   activeField,
   act,
   earnPoints,
+  humanPosts,
   keepStreak,
   links,
   openPayment,
+  recordHistory,
   setActiveField,
+  setHumanPosts,
   setLinks,
 }: {
   activeField: ChainField | null;
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  humanPosts: HumanPost[];
   keepStreak: (detail?: string) => void;
   links: typeof initialLinks;
   openPayment: OpenPayment;
+  recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
+  setHumanPosts: React.Dispatch<React.SetStateAction<HumanPost[]>>;
   setLinks: React.Dispatch<React.SetStateAction<typeof initialLinks>>;
 }) {
   const [linkText, setLinkText] = useState("");
   const [postCaption, setPostCaption] = useState("");
   const [postImage, setPostImage] = useState<string | null>(null);
-  const [humanPosts, setHumanPosts] = useState(initialHumanPosts);
+  const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
   );
@@ -2400,6 +2489,11 @@ function ChainsView({
     const caption =
       postCaption.trim() ||
       "A real human moment I want the chain to remember today.";
+    const createdAt = new Intl.DateTimeFormat("en", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date());
+
     setHumanPosts((current) => [
       {
         id: Date.now(),
@@ -2408,25 +2502,81 @@ function ChainsView({
         image: postImage,
         theme: "gold",
         reactions: 0,
+        loves: 0,
+        tips: 0,
+        comments: [],
+        createdAt,
+        owner: true,
       },
       ...current,
     ]);
     setPostCaption("");
     setPostImage(null);
+    recordHistory({
+      title: "Image post published",
+      detail: caption,
+      kind: "post",
+    });
     earnPoints(16, "Your human image post joined the visual chain.");
     keepStreak("You posted a human image into today's chain.");
   }
 
-  function reactToPost(postId: number, reaction: string) {
+  function reactToPost(postId: number, reaction: string, field: "reactions" | "loves" = "reactions") {
     setHumanPosts((current) =>
       current.map((post) =>
         post.id === postId
-          ? { ...post, reactions: post.reactions + 1 }
+          ? { ...post, [field]: post[field] + 1, reactions: field === "loves" ? post.reactions : post.reactions + 1 }
           : post,
       ),
     );
+    recordHistory({
+      title: `${reaction} sent`,
+      detail: "You interacted with a human image post.",
+      kind: field === "loves" ? "reaction" : "reaction",
+    });
     earnPoints(5, `Your ${reaction} reaction added life to a human post.`);
     act("Reaction added", "You earned Human Points for reacting with meaning.");
+  }
+
+  function commentOnPost(postId: number) {
+    const comment = commentDrafts[postId]?.trim();
+
+    if (!comment) {
+      act("Write a comment", "Add a real human response before sending.");
+      return;
+    }
+
+    setHumanPosts((current) =>
+      current.map((post) =>
+        post.id === postId
+          ? { ...post, comments: [`@you: ${comment}`, ...post.comments] }
+          : post,
+      ),
+    );
+    setCommentDrafts((current) => ({ ...current, [postId]: "" }));
+    recordHistory({
+      title: "Comment added",
+      detail: comment,
+      kind: "comment",
+    });
+    earnPoints(7, "Your comment gave another human a real response.");
+  }
+
+  function deletePost(postId: number) {
+    const ownedPost = humanPosts.find((post) => post.id === postId && post.owner);
+
+    if (!ownedPost) {
+      act("Only your post", "You can delete posts that you published.");
+      return;
+    }
+
+    setHumanPosts((current) => current.filter((post) => post.id !== postId));
+    recordHistory({
+      title: "Image post deleted",
+      detail: ownedPost.caption,
+      kind: "delete",
+    });
+    act("Post deleted", "The post was removed from your image chain and history remains recorded.");
   }
 
   async function copyQuote(text: string, source: string) {
@@ -2505,8 +2655,12 @@ function ChainsView({
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (file) {
-                  setPostImage(URL.createObjectURL(file));
-                  act("Image selected", "Add a caption, then publish it.");
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setPostImage(String(reader.result));
+                    act("Image selected", "Add a caption, then publish it.");
+                  };
+                  reader.readAsDataURL(file);
                 }
               }}
               type="file"
@@ -2614,10 +2768,58 @@ function ChainsView({
                 </div>
               )}
               <div>
-                <strong>{post.author}</strong>
+                <div className="post-head">
+                  <div>
+                    <strong>{post.author}</strong>
+                    <small>{post.createdAt}</small>
+                  </div>
+                  {post.owner ? (
+                    <button
+                      className="delete-post-button"
+                      onClick={() => deletePost(post.id)}
+                      type="button"
+                    >
+                      Delete
+                    </button>
+                  ) : null}
+                </div>
                 <p>{post.caption}</p>
-                <small>{post.reactions} reactions</small>
-                <div className="reaction-row">
+                <div className="post-metrics">
+                  <span>{post.reactions} reactions</span>
+                  <span>{post.loves} loves</span>
+                  <span>{post.tips} tips</span>
+                  <span>{post.comments.length} comments</span>
+                </div>
+                <div className="reaction-row social-actions">
+                  <button onClick={() => reactToPost(post.id, "Love", "loves")} type="button">
+                    Love
+                  </button>
+                  <button
+                    onClick={() => {
+                      setHumanPosts((current) =>
+                        current.map((currentPost) =>
+                          currentPost.id === post.id
+                            ? { ...currentPost, tips: currentPost.tips + 1 }
+                            : currentPost,
+                        ),
+                      );
+                      recordHistory({
+                        title: "Post tip prepared",
+                        detail: `You prepared a WLD tip for ${post.author}.`,
+                        kind: "tip",
+                      });
+                      openPayment({
+                        title: "Tip human",
+                        amount: "1 WLD",
+                        detail: "Send a small thank-you to this human image post.",
+                        success: "Post tip is ready for World App payment.",
+                        points: 4,
+                      });
+                    }}
+                    type="button"
+                  >
+                    Tip
+                  </button>
                   {["I felt this", "Inspired", "Praying"].map((reaction) => (
                     <button
                       key={reaction}
@@ -2628,6 +2830,28 @@ function ChainsView({
                     </button>
                   ))}
                 </div>
+                <div className="comment-box">
+                  <input
+                    onChange={(event) =>
+                      setCommentDrafts((current) => ({
+                        ...current,
+                        [post.id]: event.target.value,
+                      }))
+                    }
+                    placeholder="Add a real comment..."
+                    value={commentDrafts[post.id] ?? ""}
+                  />
+                  <button onClick={() => commentOnPost(post.id)} type="button">
+                    Comment
+                  </button>
+                </div>
+                {post.comments.length ? (
+                  <div className="comment-list">
+                    {post.comments.slice(0, 3).map((comment, index) => (
+                      <span key={`${post.id}-${comment}-${index}`}>{comment}</span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </article>
           ))}
@@ -3873,15 +4097,21 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 function MeView({
   act,
   earnPoints,
+  historyRecords,
+  humanPosts,
   keepStreak,
   points,
+  recordHistory,
   savedItems,
   streak,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  historyRecords: HistoryRecord[];
+  humanPosts: HumanPost[];
   keepStreak: (detail?: string) => void;
   points: number;
+  recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   savedItems: number;
   streak: number;
 }) {
@@ -3937,7 +4167,17 @@ function MeView({
                 return;
               }
 
-              setProfileImage(URL.createObjectURL(file));
+              const reader = new FileReader();
+
+              reader.onload = () => {
+                setProfileImage(String(reader.result));
+                recordHistory({
+                  title: "Profile image updated",
+                  detail: "Your HumanChain profile now has a personal image.",
+                  kind: "profile",
+                });
+              };
+              reader.readAsDataURL(file);
               earnPoints(5, "Profile image added to your human identity.");
             }}
             type="file"
@@ -3998,6 +4238,48 @@ function MeView({
         <Stat label="Answers" value="18" />
         <Stat label="Links" value="9" />
         <Stat label="Saved" value={String(savedItems)} />
+      </section>
+      <section className="panel human-history-panel">
+        <div className="section-heading">
+          <span>My post history</span>
+          <Library size={18} />
+        </div>
+        {humanPosts.filter((post) => post.owner).length ? (
+          humanPosts
+            .filter((post) => post.owner)
+            .map((post) => (
+              <article className="history-post-card" key={post.id}>
+                {post.image ? (
+                  <img alt={post.caption} src={post.image} />
+                ) : (
+                  <div className="history-post-symbol" />
+                )}
+                <div>
+                  <strong>{post.caption}</strong>
+                  <span>
+                    {post.createdAt} - {post.loves} loves - {post.comments.length} comments
+                  </span>
+                </div>
+              </article>
+            ))
+        ) : (
+          <p>Your published image posts will appear here and stay until you delete them.</p>
+        )}
+      </section>
+      <section className="panel human-history-panel">
+        <div className="section-heading">
+          <span>Human activity record</span>
+          <Radio size={18} />
+        </div>
+        {historyRecords.slice(0, 8).map((record) => (
+          <article className={`history-record ${record.kind}`} key={record.id}>
+            <span>{record.time}</span>
+            <div>
+              <strong>{record.title}</strong>
+              <p>{record.detail}</p>
+            </div>
+          </article>
+        ))}
       </section>
       <section className="panel points-ledger">
         <div className="section-heading">
