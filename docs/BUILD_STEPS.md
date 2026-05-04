@@ -43,3 +43,28 @@ This file remembers the path from idea to launch.
 - Add database storage.
 - Test inside World App.
 - Submit to Mini App Store review.
+
+## Current Verification Commands
+
+Use these commands before every push:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+```
+
+For Windows sandbox sessions where `next build` fails with `spawn EPERM`, the
+app is not failing. Next.js needs to spawn worker processes during production
+builds. Run the build outside the sandbox, or use:
+
+```bash
+pnpm build:webpack
+```
+
+`pnpm verify` runs lint, typecheck, and the webpack production build together.
+The default Vercel build command should remain:
+
+```bash
+pnpm build
+```

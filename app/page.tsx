@@ -27,7 +27,7 @@ import {
   Vote,
   Wallet,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   authenticateHumanWallet,
   humanHaptic,
@@ -36,19 +36,6 @@ import {
   requestWorldPermission,
 } from "@/lib/worldMiniApp";
 import { normalizePaymentFeature } from "@/lib/worldPayments";
-
-const verdicts = [
-  {
-    question: "Should I start over at 30?",
-    result: "52% say yes, but plan carefully",
-    truth: "You are not late. You are unprepared.",
-  },
-  {
-    question: "What do people regret most about love?",
-    result: "41% say silence during small moments",
-    truth: "Pride is expensive when the heart is involved.",
-  },
-];
 
 const initialLinks = [
   {
@@ -169,12 +156,6 @@ type StoryImage = {
   art: StoryArtKind;
   photo?: string;
 };
-
-const monthlyStoryPhotos = [
-  "/images/story-cover-door-color.png",
-  "/images/story-scene-door-table-color.png",
-  "/images/story-scene-door-window-color.png",
-];
 
 const monthlyStoryCover = "/images/story-cover-door-color.png";
 
@@ -621,31 +602,6 @@ const bitcoinWorldStory = {
   ],
 };
 
-const bitcoinWorldTextPages = createBalancedStoryPages(
-  bitcoinWorldStory.pages,
-  300,
-  620,
-);
-
-const bitcoinWorldPages = bitcoinWorldTextPages.map((page, index) => {
-  const nextText = bitcoinWorldTextPages[index + 1]?.text;
-
-  return {
-    page: index + 1,
-    text: page.text,
-    image: publishedStoryImagePages.has(index)
-      ? {
-          alt: storyImageAltForPage(page.text, "bitcoin"),
-          art: page.art ?? bitcoinWorldStory.coverArt,
-          photo: storyPhotoForStoryPage(page.text, page.art ?? bitcoinWorldStory.coverArt, "bitcoin"),
-        }
-      : null,
-    nextHint: nextText
-      ? `Next: ${createStoryHint(nextText)}`
-      : "Next: carry this question into the chain.",
-  };
-});
-
 const publishedStoryCollection = {
   bitcoin: {
     ...bitcoinWorldStory,
@@ -737,6 +693,13 @@ const publishedStoryCollection = {
 
 type PublishedStoryKey = keyof typeof publishedStoryCollection;
 
+type PublishedStoryPage = {
+  page: number;
+  text: string;
+  image: StoryImage | null;
+  nextHint: string;
+};
+
 const publishedStoryPages = Object.fromEntries(
   Object.entries(publishedStoryCollection).map(([key, story]) => {
     const storyTextPages = createBalancedStoryPages(story.pages, 300, 620);
@@ -764,7 +727,7 @@ const publishedStoryPages = Object.fromEntries(
       }),
     ];
   }),
-) as Record<PublishedStoryKey, typeof bitcoinWorldPages>;
+) as Record<PublishedStoryKey, PublishedStoryPage[]>;
 
 function createStoryHint(text: string) {
   const cleaned = text.replace(/^Human message:\s*/i, "");
@@ -1491,6 +1454,62 @@ type VerifiedHuman = {
   mode: "world" | "preview";
 };
 
+function loadStoredHumanPosts() {
+  if (typeof window === "undefined") {
+    return initialHumanPosts;
+  }
+
+  try {
+    const storedPosts = window.localStorage.getItem("humanchain_posts");
+
+    return storedPosts ? (JSON.parse(storedPosts) as HumanPost[]) : initialHumanPosts;
+  } catch {
+    window.localStorage.removeItem("humanchain_posts");
+    return initialHumanPosts;
+  }
+}
+
+function loadStoredHistoryRecords(): HistoryRecord[] {
+  if (typeof window === "undefined") {
+    return [
+      {
+        id: 1,
+        title: "HumanChain opened",
+        detail: "Your chain history starts here.",
+        time: "Today",
+        kind: "profile",
+      },
+    ];
+  }
+
+  try {
+    const storedHistory = window.localStorage.getItem("humanchain_history");
+
+    return storedHistory
+      ? (JSON.parse(storedHistory) as HistoryRecord[])
+      : [
+          {
+            id: 1,
+            title: "HumanChain opened",
+            detail: "Your chain history starts here.",
+            time: "Today",
+            kind: "profile",
+          },
+        ];
+  } catch {
+    window.localStorage.removeItem("humanchain_history");
+    return [
+      {
+        id: 1,
+        title: "HumanChain opened",
+        detail: "Your chain history starts here.",
+        time: "Today",
+        kind: "profile",
+      },
+    ];
+  }
+}
+
 export default function HumanChainApp() {
   const [tab, setTab] = useState<Tab>("home");
   const [toast, setToast] = useState<Toast | null>(null);
@@ -1503,16 +1522,10 @@ export default function HumanChainApp() {
   const [dailyAnswered, setDailyAnswered] = useState(false);
   const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(null);
   const [activeField, setActiveField] = useState<ChainField | null>(null);
-  const [humanPosts, setHumanPosts] = useState<HumanPost[]>(initialHumanPosts);
-  const [historyRecords, setHistoryRecords] = useState<HistoryRecord[]>([
-    {
-      id: 1,
-      title: "HumanChain opened",
-      detail: "Your chain history starts here.",
-      time: "Today",
-      kind: "profile",
-    },
-  ]);
+  const [humanPosts, setHumanPosts] = useState<HumanPost[]>(loadStoredHumanPosts);
+  const [historyRecords, setHistoryRecords] = useState<HistoryRecord[]>(
+    loadStoredHistoryRecords,
+  );
   const [dailyResponses, setDailyResponses] = useState<DailyResponse[]>([
     {
       user: "@mara_chain",
@@ -1526,24 +1539,6 @@ export default function HumanChainApp() {
     },
   ]);
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
-
-  useEffect(() => {
-    try {
-      const storedPosts = window.localStorage.getItem("humanchain_posts");
-      const storedHistory = window.localStorage.getItem("humanchain_history");
-
-      if (storedPosts) {
-        setHumanPosts(JSON.parse(storedPosts) as HumanPost[]);
-      }
-
-      if (storedHistory) {
-        setHistoryRecords(JSON.parse(storedHistory) as HistoryRecord[]);
-      }
-    } catch {
-      window.localStorage.removeItem("humanchain_posts");
-      window.localStorage.removeItem("humanchain_history");
-    }
-  }, []);
 
   useEffect(() => {
     window.localStorage.setItem("humanchain_posts", JSON.stringify(humanPosts));
@@ -1685,7 +1680,7 @@ export default function HumanChainApp() {
     setPaymentPrompt(null);
   }
 
-  const activeView = useMemo(() => {
+  const activeView = (() => {
     switch (tab) {
       case "ask":
         return (
@@ -1755,7 +1750,7 @@ export default function HumanChainApp() {
           />
         );
     }
-  }, [activeField, dailyAnswered, dailyAnsweredAt, dailyResponses, links, points, savedItems, streak, tab]);
+  })();
 
   return (
     <main className="app-shell">
@@ -2055,7 +2050,7 @@ function HomeView({
           <article className="verdict-card" key={verdict.question}>
             <h3>{verdict.question}</h3>
             <p className="verdict-result">{verdict.result}</p>
-            <p className="quoted">"{verdict.truth}"</p>
+            <p className="quoted">&ldquo;{verdict.truth}&rdquo;</p>
             <button
               className="mini-command"
               onClick={() =>
@@ -2672,7 +2667,7 @@ function ChainsView({
         </div>
       </section>
       <section className="today-chain">
-        <span className="section-kicker">Today's main chain</span>
+        <span className="section-kicker">Today&apos;s main chain</span>
         <h2>What truth should the world carry today?</h2>
         <p>
           Add one useful link: a lesson, memory, warning, prayer, business
@@ -2902,7 +2897,7 @@ function ChainsView({
         <section className="thread-list" aria-label="Human thread">
           <div className="chain-section-note live-note">
             <span>Live chain quotes</span>
-            <p>This feed is only the links written by humans in Today's main chain. Add your link above and it appears here first.</p>
+            <p>This feed is only the links written by humans in Today&apos;s main chain. Add your link above and it appears here first.</p>
           </div>
           {links.map((link, index) => (
             <article className="thread-item" key={`${link.country}-${link.text}-${index}`}>

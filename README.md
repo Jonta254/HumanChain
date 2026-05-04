@@ -23,6 +23,18 @@ pnpm dev
 
 The app is designed for World App mobile webviews first.
 
+## Verification
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+```
+
+If a Windows sandbox blocks Next.js worker processes with `spawn EPERM`, run the
+same command outside the sandbox. `pnpm build:webpack` is available as a local
+fallback, while Vercel should keep using `pnpm build`.
+
 ## Important Docs
 
 - [Build steps](docs/BUILD_STEPS.md)

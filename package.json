@@ -5,8 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:webpack": "next build --webpack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint app components lib --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "verify": "pnpm lint && pnpm typecheck && pnpm build:webpack"
   },
   "dependencies": {
     "@worldcoin/idkit": "latest",
@@ -22,7 +25,7 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "eslint": "latest",
+    "eslint": "^9.39.4",
     "eslint-config-next": "latest",
     "typescript": "latest"
   }
