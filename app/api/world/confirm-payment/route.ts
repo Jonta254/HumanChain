@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { PayResult } from "@worldcoin/minikit-js/commands";
+import {
+  humanChainPaymentFeatures,
+  isHumanChainPaymentFeature,
+  normalizePaymentFeature,
+} from "@/lib/worldPayments";
 
 export async function POST(req: NextRequest) {
   const { payload, reference, feature, amount } = (await req.json()) as {
@@ -9,7 +14,16 @@ export async function POST(req: NextRequest) {
     amount?: number;
   };
 
-  if (!payload?.transactionId || !reference || !feature || !amount) {
+  const normalizedFeature = normalizePaymentFeature(feature ?? "");
+
+  if (
+    !payload?.transactionId ||
+    !reference ||
+    !normalizedFeature ||
+    !isHumanChainPaymentFeature(normalizedFeature) ||
+    amount !== humanChainPaymentFeatures[normalizedFeature] ||
+    !reference.startsWith(`humanchain:${normalizedFeature}:${amount}:`)
+  ) {
     return NextResponse.json(
       { error: "Missing payment confirmation data." },
       { status: 400 },
@@ -40,7 +54,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: isMined,
     reference,
-    feature,
+    feature: normalizedFeature,
     amount,
     transaction,
   });

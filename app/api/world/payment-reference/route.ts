@@ -1,5 +1,10 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  humanChainPaymentFeatures,
+  isHumanChainPaymentFeature,
+  normalizePaymentFeature,
+} from "@/lib/worldPayments";
 
 export async function POST(req: NextRequest) {
   const { feature, amount } = (await req.json()) as {
@@ -7,7 +12,14 @@ export async function POST(req: NextRequest) {
     amount?: number;
   };
 
-  if (!feature || !amount || amount < 1 || amount > 6) {
+  const normalizedFeature = normalizePaymentFeature(feature ?? "");
+
+  if (
+    !normalizedFeature ||
+    !isHumanChainPaymentFeature(normalizedFeature) ||
+    !amount ||
+    amount !== humanChainPaymentFeatures[normalizedFeature]
+  ) {
     return NextResponse.json(
       { error: "Invalid HumanChain payment feature." },
       { status: 400 },
@@ -15,6 +27,7 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({
-    reference: `humanchain:${feature}:${amount}:${randomUUID()}`,
+    reference: `humanchain:${normalizedFeature}:${amount}:${randomUUID()}`,
+    feature: normalizedFeature,
   });
 }

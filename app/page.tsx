@@ -28,6 +28,14 @@ import {
   Wallet,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import {
+  authenticateHumanWallet,
+  humanHaptic,
+  payWithWorld,
+  Permission,
+  requestWorldPermission,
+} from "@/lib/worldMiniApp";
+import { normalizePaymentFeature } from "@/lib/worldPayments";
 
 const verdicts = [
   {
@@ -1440,6 +1448,7 @@ type PaymentRequest = {
   amount: string;
   detail: string;
   success: string;
+  feature?: string;
   points?: number;
 };
 
@@ -1480,11 +1489,13 @@ export default function HumanChainApp() {
   }
 
   function keepStreak(detail = "Your Human Streak is alive for today.") {
+    void humanHaptic("light");
     setStreak((current) => current + 1);
     act("Streak kept", detail);
   }
 
   function earnPoints(amount: number, reason: string) {
+    void humanHaptic("light");
     setPoints((current) => current + amount);
     act(`+${amount} Human Points`, reason);
   }
@@ -1493,8 +1504,41 @@ export default function HumanChainApp() {
     setPaymentPrompt(payment);
   }
 
-  function confirmPayment() {
+  async function confirmPayment() {
     if (!paymentPrompt) {
+      return;
+    }
+
+    const amount = Number.parseInt(paymentPrompt.amount, 10);
+    const feature = paymentPrompt.feature ?? normalizePaymentFeature(paymentPrompt.title);
+
+    try {
+      const result = await payWithWorld({
+        amount,
+        description: paymentPrompt.detail,
+        feature,
+      });
+
+      if ("pendingSetup" in result && result.pendingSetup) {
+        setToast({
+          title: "World setup needed",
+          detail: result.message,
+        });
+        return;
+      }
+
+      if ("error" in result && result.error) {
+        setToast({
+          title: "Payment not prepared",
+          detail: result.error,
+        });
+        return;
+      }
+    } catch (error) {
+      setToast({
+        title: "World payment failed",
+        detail: error instanceof Error ? error.message : "Try again in World App.",
+      });
       return;
     }
 
@@ -3796,7 +3840,14 @@ function MeView({
       </section>
       <section className="profile-command-grid">
         <button
-          onClick={() => act("Notifications", "Daily questions, story drops, and reaction alerts are enabled.")}
+          onClick={async () => {
+            try {
+              await requestWorldPermission(Permission.Notifications);
+              act("Notifications ready", "World App can remind you about Daily questions, story drops, and reactions.");
+            } catch (error) {
+              act("Notification permission", error instanceof Error ? error.message : "Try again inside World App.");
+            }
+          }}
           type="button"
         >
           <Radio size={18} />
@@ -3804,12 +3855,24 @@ function MeView({
           <strong>Daily chain ready</strong>
         </button>
         <button
-          onClick={() => act("Creator wallet", "Tips, boosts, and story earnings will appear here after launch.")}
+          onClick={async () => {
+            try {
+              const auth = await authenticateHumanWallet();
+              act(
+                auth.verification?.ok ? "Wallet connected" : "Wallet checked",
+                auth.verification?.address
+                  ? `${auth.verification.address.slice(0, 6)}...${auth.verification.address.slice(-4)} is ready for HumanChain.`
+                  : "Wallet auth is ready. Add App ID details before launch.",
+              );
+            } catch (error) {
+              act("Wallet auth failed", error instanceof Error ? error.message : "Try again inside World App.");
+            }
+          }}
           type="button"
         >
           <Wallet size={18} />
           <span>Creator wallet</span>
-          <strong>Prepared</strong>
+          <strong>Connect</strong>
         </button>
       </section>
       <section className="stats-grid">
@@ -3872,9 +3935,16 @@ function MeView({
             <LockKeyhole size={17} />
             Open Deep Human Mirror
           </button>
-          <button onClick={() => act("Notifications ready", "World App notifications can remind you to answer, read, and check in.")} type="button">
+          <button onClick={async () => {
+            try {
+              await requestWorldPermission(Permission.Microphone);
+              act("Microphone ready", "Voice answers can request microphone access in World App.");
+            } catch (error) {
+              act("Microphone permission", error instanceof Error ? error.message : "Try again inside World App.");
+            }
+          }} type="button">
             <Wallet size={17} />
-            Review WLD activity
+            Enable voice access
           </button>
         </div>
       </section>
@@ -3888,7 +3958,7 @@ function PaymentSheet({
   payment,
 }: {
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   payment: PaymentRequest;
 }) {
   return (
