@@ -18,6 +18,11 @@ export function isWorldMiniAppReady() {
 
 export async function authenticateHumanWallet() {
   const nonceResponse = await fetch("/api/world/nonce");
+
+  if (!nonceResponse.ok) {
+    throw new Error("Could not prepare World wallet login.");
+  }
+
   const { nonce } = (await nonceResponse.json()) as { nonce: string };
 
   const result = await MiniKit.walletAuth<WalletAuthResult>({
@@ -32,6 +37,18 @@ export async function authenticateHumanWallet() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nonce, payload }),
   });
+
+  if (!verifyResponse.ok) {
+    const errorPayload = (await verifyResponse.json()) as { error?: string };
+
+    return {
+      result,
+      verification: {
+        ok: false,
+        error: errorPayload.error ?? "World wallet verification failed.",
+      },
+    };
+  }
 
   return {
     result,
@@ -91,9 +108,20 @@ export async function payWithWorld({ amount, description, feature }: WorldPaymen
     }),
   });
 
+  const confirmation = await confirmationResponse.json();
+
+  if (!confirmationResponse.ok || confirmation?.ok === false) {
+    return {
+      ok: false,
+      error: confirmation?.error ?? "World payment could not be confirmed.",
+      payment,
+      confirmation,
+    };
+  }
+
   return {
     payment,
-    confirmation: await confirmationResponse.json(),
+    confirmation,
   };
 }
 

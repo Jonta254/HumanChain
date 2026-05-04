@@ -1460,9 +1460,17 @@ type DailyResponse = {
   time: string;
 };
 
+type VerifiedHuman = {
+  username: string;
+  wallet?: string;
+  mode: "world" | "preview";
+};
+
 export default function HumanChainApp() {
   const [tab, setTab] = useState<Tab>("home");
   const [toast, setToast] = useState<Toast | null>(null);
+  const [verifiedHuman, setVerifiedHuman] = useState<VerifiedHuman | null>(null);
+  const [gateBusy, setGateBusy] = useState(false);
   const [streak, setStreak] = useState(4);
   const [links, setLinks] = useState(initialLinks);
   const [savedItems, setSavedItems] = useState(3);
@@ -1502,6 +1510,51 @@ export default function HumanChainApp() {
 
   function openPayment(payment: PaymentRequest) {
     setPaymentPrompt(payment);
+  }
+
+  async function enterWithWorld() {
+    setGateBusy(true);
+
+    try {
+      const auth = await authenticateHumanWallet();
+      const address = auth.verification?.address as string | undefined;
+
+      if (!auth.verification?.ok || !address) {
+        setToast({
+          title: "World verification needed",
+          detail: auth.verification?.error ?? "Open HumanChain inside World App and verify your wallet.",
+        });
+        return;
+      }
+
+      setVerifiedHuman({
+        username: `@human_${address.slice(2, 8).toLowerCase()}`,
+        wallet: address,
+        mode: "world",
+      });
+      setToast({
+        title: "Verified human entered",
+        detail: `${address.slice(0, 6)}...${address.slice(-4)} is ready for HumanChain.`,
+      });
+    } catch (error) {
+      setToast({
+        title: "World login failed",
+        detail: error instanceof Error ? error.message : "Try again inside World App.",
+      });
+    } finally {
+      setGateBusy(false);
+    }
+  }
+
+  function enterPreview() {
+    setVerifiedHuman({
+      username: "@preview_human",
+      mode: "preview",
+    });
+    setToast({
+      title: "Preview opened",
+      detail: "World wallet, payments, and permissions remain ready for the real Mini App.",
+    });
   }
 
   async function confirmPayment() {
@@ -1624,7 +1677,13 @@ export default function HumanChainApp() {
   return (
     <main className="app-shell">
       <section className="phone-frame">
-        {activeView}
+        {verifiedHuman ? activeView : (
+          <LoginGate
+            busy={gateBusy}
+            onPreview={enterPreview}
+            onVerify={enterWithWorld}
+          />
+        )}
         {toast ? (
           <div className="toast" role="status">
             <CheckCircle2 size={18} />
@@ -1644,9 +1703,67 @@ export default function HumanChainApp() {
             payment={paymentPrompt}
           />
         ) : null}
-        <BottomNav active={tab} onChange={setTab} />
+        {verifiedHuman ? <BottomNav active={tab} onChange={setTab} /> : null}
       </section>
     </main>
+  );
+}
+
+function LoginGate({
+  busy,
+  onPreview,
+  onVerify,
+}: {
+  busy: boolean;
+  onPreview: () => void;
+  onVerify: () => void | Promise<void>;
+}) {
+  return (
+    <div className="login-gate">
+      <section className="gate-card">
+        <div className="gate-brand">
+          <img alt="HumanChain logo" src="/images/humanchain-logo.svg" />
+          <div>
+            <span>World Mini App</span>
+            <strong>HumanChain</strong>
+          </div>
+        </div>
+        <div className="gate-orbit" aria-hidden="true">
+          <span />
+          <i />
+          <b />
+        </div>
+        <h1>Enter as one real human.</h1>
+        <p>
+          Ask, answer, publish, read, and build a visible chain of wisdom with
+          World wallet authentication and verified-human trust.
+        </p>
+        <button className="gate-primary" disabled={busy} onClick={onVerify} type="button">
+          <ShieldCheck size={19} />
+          {busy ? "Checking World wallet..." : "Continue with World App"}
+        </button>
+        <button className="gate-secondary" onClick={onPreview} type="button">
+          Preview HumanChain
+        </button>
+      </section>
+      <section className="gate-trust-grid" aria-label="HumanChain entry features">
+        <div>
+          <BadgeCheck size={18} />
+          <strong>Human first</strong>
+          <span>Wallet auth protects the entry.</span>
+        </div>
+        <div>
+          <CircleDollarSign size={18} />
+          <strong>WLD ready</strong>
+          <span>Paid actions open one clean World sheet.</span>
+        </div>
+        <div>
+          <Radio size={18} />
+          <strong>Permission clear</strong>
+          <span>Voice and notifications ask only when needed.</span>
+        </div>
+      </section>
+    </div>
   );
 }
 

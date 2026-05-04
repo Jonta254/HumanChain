@@ -3,11 +3,19 @@ import { verifySiweMessage } from "@worldcoin/minikit-js/siwe";
 
 export async function POST(req: NextRequest) {
   const { nonce, payload } = await req.json();
+  const storedNonce = req.cookies.get("humanchain_siwe_nonce")?.value;
 
   if (!nonce || !payload) {
     return NextResponse.json(
       { error: "Missing SIWE nonce or wallet auth payload." },
       { status: 400 },
+    );
+  }
+
+  if (!storedNonce || storedNonce !== nonce) {
+    return NextResponse.json(
+      { ok: false, error: "Expired or mismatched wallet auth nonce." },
+      { status: 401 },
     );
   }
 
@@ -25,11 +33,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       ok: true,
       address: verification.siweMessageData.address,
       statement: verification.siweMessageData.statement,
     });
+
+    response.cookies.delete("humanchain_siwe_nonce");
+
+    return response;
   } catch (error) {
     return NextResponse.json(
       {
