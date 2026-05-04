@@ -1,11 +1,11 @@
 import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
+import { noStoreJson } from "@/lib/serverApi";
 
 export async function GET() {
   const now = Math.floor(Date.now() / 1000);
 
   if (!process.env.WORLD_RP_ID || !process.env.WORLD_RP_SIGNING_SECRET) {
-    return NextResponse.json({
+    return noStoreJson({
       rpContext: {
         rp_id: process.env.WORLD_RP_ID ?? "rp_development_placeholder",
         nonce: randomUUID(),
@@ -18,7 +18,7 @@ export async function GET() {
   }
 
   // TODO: Generate an official RP context signature with WORLD_RP_SIGNING_SECRET.
-  return NextResponse.json({
+  return noStoreJson({
     rpContext: {
       rp_id: process.env.WORLD_RP_ID,
       nonce: randomUUID(),

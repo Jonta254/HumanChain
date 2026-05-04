@@ -12,6 +12,7 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm build:webpack"
   },
   "dependencies": {
+    "@vercel/blob": "^2.3.3",
     "@worldcoin/idkit": "latest",
     "@worldcoin/mini-apps-ui-kit-react": "latest",
     "@worldcoin/minikit-js": "latest",

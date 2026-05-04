@@ -1,9 +1,9 @@
 import { randomBytes } from "crypto";
-import { NextResponse } from "next/server";
+import { noStoreJson } from "@/lib/serverApi";
 
 export async function GET() {
   const nonce = randomBytes(16).toString("hex");
-  const response = NextResponse.json({ nonce });
+  const response = noStoreJson({ nonce });
 
   response.cookies.set("humanchain_siwe_nonce", nonce, {
     httpOnly: true,

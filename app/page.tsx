@@ -2466,6 +2466,8 @@ function ChainsView({
   const [linkText, setLinkText] = useState("");
   const [postCaption, setPostCaption] = useState("");
   const [postImage, setPostImage] = useState<string | null>(null);
+  const [postFile, setPostFile] = useState<File | null>(null);
+  const [isPublishingPost, setIsPublishingPost] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
@@ -2480,7 +2482,7 @@ function ChainsView({
     keepStreak("Your link joined today's global chain.");
   }
 
-  function publishImagePost() {
+  async function publishImagePost() {
     const caption =
       postCaption.trim() ||
       "A real human moment I want the chain to remember today.";
@@ -2488,13 +2490,43 @@ function ChainsView({
       hour: "2-digit",
       minute: "2-digit",
     }).format(new Date());
+    let imageUrl = postImage;
+
+    setIsPublishingPost(true);
+
+    try {
+      if (postFile) {
+        const formData = new FormData();
+        formData.append("file", postFile);
+
+        const response = await fetch("/api/posts/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const payload = (await response.json()) as {
+          ok?: boolean;
+          url?: string;
+          pendingSetup?: boolean;
+          message?: string;
+          error?: string;
+        };
+
+        if (payload.ok && payload.url) {
+          imageUrl = payload.url;
+        } else if (!payload.pendingSetup) {
+          act("Image upload failed", payload.error ?? "Using local preview until storage is ready.");
+        }
+      }
+    } finally {
+      setIsPublishingPost(false);
+    }
 
     setHumanPosts((current) => [
       {
         id: Date.now(),
         author: "@you",
         caption,
-        image: postImage,
+        image: imageUrl,
         theme: "gold",
         reactions: 0,
         loves: 0,
@@ -2507,6 +2539,7 @@ function ChainsView({
     ]);
     setPostCaption("");
     setPostImage(null);
+    setPostFile(null);
     recordHistory({
       title: "Image post published",
       detail: caption,
@@ -2653,6 +2686,7 @@ function ChainsView({
                   const reader = new FileReader();
                   reader.onload = () => {
                     setPostImage(String(reader.result));
+                    setPostFile(file);
                     act("Image selected", "Add a caption, then publish it.");
                   };
                   reader.readAsDataURL(file);
@@ -2661,8 +2695,8 @@ function ChainsView({
               type="file"
             />
           </label>
-          <button onClick={publishImagePost} type="button">
-            Publish post
+          <button disabled={isPublishingPost} onClick={publishImagePost} type="button">
+            {isPublishingPost ? "Publishing..." : "Publish post"}
           </button>
         </div>
       </section>

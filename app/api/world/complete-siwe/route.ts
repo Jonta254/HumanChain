@@ -1,19 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { verifySiweMessage } from "@worldcoin/minikit-js/siwe";
+import {
+  isRateLimited,
+  noStoreJson,
+  rateLimitResponse,
+  readJsonBody,
+} from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
-  const { nonce, payload } = await req.json();
+  if (isRateLimited(req, "complete-siwe", 12)) {
+    return rateLimitResponse();
+  }
+
+  const body = await readJsonBody<{
+    nonce?: string;
+    payload?: Parameters<typeof verifySiweMessage>[0];
+  }>(req);
+
+  if (!body) {
+    return noStoreJson({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  const { nonce, payload } = body;
   const storedNonce = req.cookies.get("humanchain_siwe_nonce")?.value;
 
   if (!nonce || !payload) {
-    return NextResponse.json(
+    return noStoreJson(
       { error: "Missing SIWE nonce or wallet auth payload." },
       { status: 400 },
     );
   }
 
   if (!storedNonce || storedNonce !== nonce) {
-    return NextResponse.json(
+    return noStoreJson(
       { ok: false, error: "Expired or mismatched wallet auth nonce." },
       { status: 401 },
     );
@@ -27,13 +46,13 @@ export async function POST(req: NextRequest) {
     );
 
     if (!verification.isValid) {
-      return NextResponse.json(
+      return noStoreJson(
         { ok: false, error: "Invalid wallet signature." },
         { status: 401 },
       );
     }
 
-    const response = NextResponse.json({
+    const response = noStoreJson({
       ok: true,
       address: verification.siweMessageData.address,
       statement: verification.siweMessageData.statement,
@@ -43,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    return NextResponse.json(
+    return noStoreJson(
       {
         ok: false,
         error: error instanceof Error ? error.message : "Wallet auth failed.",

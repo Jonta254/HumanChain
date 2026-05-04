@@ -39,6 +39,7 @@ fallback, while Vercel should keep using `pnpm build`.
 
 - [Build steps](docs/BUILD_STEPS.md)
 - [Product structure](docs/HUMANCHAIN_STRUCTURE.md)
+- [Production readiness](docs/PRODUCTION_READINESS.md)
 - [World docs notes](docs/WORLD_DOCS_NOTES.md)
 
 ## Environment

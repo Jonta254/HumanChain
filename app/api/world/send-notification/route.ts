@@ -1,22 +1,50 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import {
+  isRateLimited,
+  isSafeMiniAppPath,
+  isWalletAddress,
+  noStoreJson,
+  rateLimitResponse,
+  readJsonBody,
+} from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
-  const { walletAddresses, title, message, path } = (await req.json()) as {
+  if (isRateLimited(req, "send-notification", 10)) {
+    return rateLimitResponse();
+  }
+
+  const body = await readJsonBody<{
     walletAddresses?: string[];
     title?: string;
     message?: string;
     path?: string;
-  };
+  }>(req);
 
-  if (!walletAddresses?.length || !title || !message || !path) {
-    return NextResponse.json(
+  if (!body) {
+    return noStoreJson({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  const { walletAddresses, title, message, path } = body;
+
+  if (
+    !walletAddresses?.length ||
+    walletAddresses.length > 100 ||
+    walletAddresses.some((address) => !isWalletAddress(address)) ||
+    !title ||
+    title.length > 45 ||
+    !message ||
+    message.length > 140 ||
+    !path ||
+    !isSafeMiniAppPath(path)
+  ) {
+    return noStoreJson(
       { error: "Missing notification data." },
       { status: 400 },
     );
   }
 
   if (!process.env.APP_ID || !process.env.DEV_PORTAL_API_KEY) {
-    return NextResponse.json({
+    return noStoreJson({
       ok: false,
       pendingSetup: true,
       message:
@@ -42,5 +70,18 @@ export async function POST(req: NextRequest) {
     },
   );
 
-  return NextResponse.json(await response.json());
+  const payload = await response.json();
+
+  if (!response.ok) {
+    return noStoreJson(
+      {
+        ok: false,
+        error: "World notification request failed.",
+        payload,
+      },
+      { status: 502 },
+    );
+  }
+
+  return noStoreJson(payload);
 }
