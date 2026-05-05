@@ -2423,6 +2423,54 @@ button {
   line-height: 1.34;
 }
 
+.market-vault-row,
+.stored-market-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(36, 107, 85, 0.12);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(241, 247, 244, 0.92)),
+    radial-gradient(circle at 100% 0%, rgba(47, 111, 237, 0.08), transparent 7rem);
+}
+
+.market-vault-row strong,
+.stored-market-row strong {
+  display: block;
+  line-height: 1.18;
+}
+
+.market-vault-row span,
+.market-vault-row small,
+.stored-market-row span,
+.stored-market-row small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.market-vault-row small,
+.stored-market-row small {
+  color: var(--green);
+}
+
+.market-vault-row button,
+.stored-market-row button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: var(--paper-strong);
+  background: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
 .badge-cloud {
   display: flex;
   flex-wrap: wrap;

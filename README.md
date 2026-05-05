@@ -1,6 +1,6 @@
 # HumanChain
 
-HumanChain is a World Mini App concept where verified humans ask real questions, join daily global chains, read monthly human stories, and get the world's verdict.
+HumanChain is a World Mini App concept where verified humans ask real questions, join daily global chains, read monthly human stories, trade through a nearby human marketplace, and get the world's verdict.
 
 ## Core Promise
 
@@ -8,11 +8,20 @@ Ask real humans. Get the world's verdict.
 
 ## Primary Areas
 
-- Home: live global highlights, streaks, verdict previews, and quick actions.
+- Home: live global highlights, streaks, verdict previews, marketplace entry, and quick actions.
 - Ask: ask verified humans questions and unlock WLD-powered reach.
+- Market: store item listings, upload up to 3 included photos, pay small publishing fees, boost nearby discovery, promote business links, and keep marketplace history.
 - Chains: join the daily global chain and add one meaningful link.
 - Stories: read the monthly Human Story, a page-based story about being human.
-- Me: streak, profile, badges, WLD actions, and saved human wisdom.
+- Me: streak, profile, badges, WLD actions, saved human wisdom, and stored marketplace history.
+
+## Local Storage
+
+HumanChain stores preview activity locally so the app feels continuous while backend storage is being connected:
+
+- `humanchain_posts`: image posts and comments.
+- `humanchain_marketplace`: stored marketplace listings, photos, prices, areas, links, and payment-ready status.
+- `humanchain_history`: profile, post, tip, and marketplace activity records.
 
 ## Local Development
 

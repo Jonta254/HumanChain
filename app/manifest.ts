@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "HumanChain",
     short_name: "HumanChain",
     description:
-      "A verified human knowledge and story network inside World App.",
+      "A verified human network for questions, stories, marketplace listings, and nearby commerce inside World App.",
     start_url: "/",
     display: "standalone",
     background_color: "#fbf7ef",

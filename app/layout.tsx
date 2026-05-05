@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   applicationName: "HumanChain",
   title: "HumanChain",
   description:
-    "Ask real humans, join daily chains, read monthly stories, and get the world's verdict.",
+    "Ask real humans, join daily chains, read stories, and trade in a verified nearby marketplace.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/images/humanchain-logo.svg",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "HumanChain",
     description:
-      "A verified human knowledge and story network for World App.",
+      "A verified human network for wisdom, stories, marketplace listings, and nearby commerce inside World App.",
     images: ["/images/story-cover-door-color.png"],
   },
 };

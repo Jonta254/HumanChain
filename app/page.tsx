@@ -1326,6 +1326,7 @@ const profileBadges = [
   "Chain keeper",
   "Story reader",
   "Answer helper",
+  "Market seller",
 ];
 
 const pointRules = [
@@ -1335,6 +1336,8 @@ const pointRules = [
   ["Ask a useful question", "+20 HP"],
   ["Add a chain link", "+12 HP"],
   ["Publish image post", "+16 HP"],
+  ["Store marketplace listing", "+10 HP"],
+  ["Enable nearby market", "+5 HP"],
   ["React to image post", "+5 HP"],
   ["Enter a field", "+6 HP"],
   ["Copy field quote", "+3 HP"],
@@ -1371,10 +1374,12 @@ const creatorEconomy = [
   ["Featured answers", "Top answers can earn visibility and future rewards."],
   ["Premium reflections", "Deep Story and Deep Verdict unlocks support creators."],
   ["Chain boosts", "Humans can boost important fields and links with WLD."],
+  ["Marketplace publishing", "Sellers and businesses pay small fees to list, boost, and promote."],
 ];
 
 const trustTools = [
   "Verified-only publishing",
+  "Marketplace listing history",
   "Story review queue",
   "Report harmful content",
   "Anti-spam question limits",
@@ -1458,6 +1463,19 @@ const marketplaceChecklist = [
   "Seller link or chat",
 ];
 
+type MarketplaceListing = {
+  id: number;
+  title: string;
+  price: string;
+  condition: string;
+  area: string;
+  link: string;
+  details: string;
+  photos: Array<{ id: number; name: string; src: string }>;
+  status: "draft" | "payment-ready";
+  createdAt: string;
+};
+
 type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me";
 
 type StoryArtKind =
@@ -1529,7 +1547,7 @@ type HistoryRecord = {
   title: string;
   detail: string;
   time: string;
-  kind: "post" | "reaction" | "comment" | "tip" | "delete" | "profile";
+  kind: "post" | "reaction" | "comment" | "tip" | "delete" | "profile" | "market";
 };
 
 type VerifiedHuman = {
@@ -1550,6 +1568,23 @@ function loadStoredHumanPosts() {
   } catch {
     window.localStorage.removeItem("humanchain_posts");
     return initialHumanPosts;
+  }
+}
+
+function loadStoredMarketplaceListings(): MarketplaceListing[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const storedListings = window.localStorage.getItem("humanchain_marketplace");
+
+    return storedListings
+      ? (JSON.parse(storedListings) as MarketplaceListing[])
+      : [];
+  } catch {
+    window.localStorage.removeItem("humanchain_marketplace");
+    return [];
   }
 }
 
@@ -1607,6 +1642,9 @@ export default function HumanChainApp() {
   const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(null);
   const [activeField, setActiveField] = useState<ChainField | null>(null);
   const [humanPosts, setHumanPosts] = useState<HumanPost[]>(loadStoredHumanPosts);
+  const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>(
+    loadStoredMarketplaceListings,
+  );
   const [historyRecords, setHistoryRecords] = useState<HistoryRecord[]>(
     loadStoredHistoryRecords,
   );
@@ -1627,6 +1665,13 @@ export default function HumanChainApp() {
   useEffect(() => {
     window.localStorage.setItem("humanchain_posts", JSON.stringify(humanPosts));
   }, [humanPosts]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      "humanchain_marketplace",
+      JSON.stringify(marketplaceListings),
+    );
+  }, [marketplaceListings]);
 
   useEffect(() => {
     window.localStorage.setItem("humanchain_history", JSON.stringify(historyRecords));
@@ -1806,7 +1851,10 @@ export default function HumanChainApp() {
           <MarketplaceView
             act={act}
             earnPoints={earnPoints}
+            marketplaceListings={marketplaceListings}
             openPayment={openPayment}
+            recordHistory={recordHistory}
+            setMarketplaceListings={setMarketplaceListings}
           />
         );
       case "me":
@@ -1817,6 +1865,7 @@ export default function HumanChainApp() {
             keepStreak={keepStreak}
             historyRecords={historyRecords}
             humanPosts={humanPosts}
+            marketplaceListings={marketplaceListings}
             points={points}
             recordHistory={recordHistory}
             savedItems={savedItems}
@@ -1905,8 +1954,8 @@ function LoginGate({
         </div>
         <h1>Enter as one real human.</h1>
         <p>
-          Ask, answer, publish, read, and build a visible chain of wisdom with
-          World wallet authentication and verified-human trust.
+          Ask, answer, publish, read, trade nearby, and build a visible chain
+          of wisdom with World wallet authentication and verified-human trust.
         </p>
         <button className="gate-primary" disabled={busy} onClick={onVerify} type="button">
           <ShieldCheck size={19} />
@@ -1924,8 +1973,8 @@ function LoginGate({
         </div>
         <div>
           <CircleDollarSign size={18} />
-          <strong>WLD ready</strong>
-          <span>Paid actions open one clean World sheet.</span>
+          <strong>WLD commerce</strong>
+          <span>Stories, boosts, listings, and ads use one payment flow.</span>
         </div>
         <div>
           <Radio size={18} />
@@ -1994,13 +2043,13 @@ function HomeView({
         </div>
         <h1>Where real humans carry wisdom forward.</h1>
         <p>
-          Ask real people, read human stories, save field wisdom, and build a
-          visible chain of purpose inside World App.
+          Ask real people, read human stories, save field wisdom, trade with
+          nearby humans, and build a visible chain of purpose inside World App.
         </p>
         <div className="home-proof-grid" aria-label="HumanChain highlights">
           <span>Daily human question</span>
           <span>Story vault</span>
-          <span>Quote rooms</span>
+          <span>Nearby marketplace</span>
           <span>Human points</span>
         </div>
       </header>
@@ -2017,6 +2066,12 @@ function HomeView({
           label="Join Today's Chain"
           detail="Add one link to the world"
           onClick={() => setTab("chains")}
+        />
+        <ActionButton
+          icon={<Store size={20} />}
+          label="Human Market"
+          detail="Buy, sell, and promote nearby"
+          onClick={() => setTab("market")}
         />
         <ActionButton
           icon={<BookOpen size={20} />}
@@ -4218,17 +4273,31 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 function MarketplaceView({
   act,
   earnPoints,
+  marketplaceListings,
   openPayment,
+  recordHistory,
+  setMarketplaceListings,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  marketplaceListings: MarketplaceListing[];
   openPayment: OpenPayment;
+  recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
+  setMarketplaceListings: React.Dispatch<React.SetStateAction<MarketplaceListing[]>>;
 }) {
   const [activeFilter, setActiveFilter] = useState("Near me");
   const [locationReady, setLocationReady] = useState(false);
   const [listingPhotos, setListingPhotos] = useState<
     Array<{ id: number; name: string; src: string }>
   >([]);
+  const [listingDraft, setListingDraft] = useState({
+    area: "",
+    condition: "",
+    details: "",
+    link: "",
+    price: "",
+    title: "",
+  });
 
   const filteredItems = marketplaceItems.filter((item) => {
     if (activeFilter === "New") return item.condition === "New listed";
@@ -4246,6 +4315,53 @@ function MarketplaceView({
       feature: normalizePaymentFeature(`marketplace-${plan[0]}`),
       points: 12,
     });
+    recordHistory({
+      title: `${plan[0]} prepared`,
+      detail: `${plan[1]} marketplace action opened through World payment.`,
+      kind: "market",
+    });
+  }
+
+  function updateListingDraft(field: keyof typeof listingDraft, value: string) {
+    setListingDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  function saveMarketplaceListing() {
+    const title = listingDraft.title.trim() || "Untitled marketplace listing";
+    const listing: MarketplaceListing = {
+      id: Date.now(),
+      title,
+      price: listingDraft.price.trim() || "Price not set",
+      condition: listingDraft.condition || "Condition not set",
+      area: listingDraft.area.trim() || "Nearby area not set",
+      link: listingDraft.link.trim(),
+      details: listingDraft.details.trim(),
+      photos: listingPhotos,
+      status: "payment-ready",
+      createdAt: new Intl.DateTimeFormat("en", {
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        month: "short",
+      }).format(new Date()),
+    };
+
+    setMarketplaceListings((current) => [listing, ...current]);
+    recordHistory({
+      title: "Marketplace listing stored",
+      detail: `${title} saved with ${listingPhotos.length} photo${listingPhotos.length === 1 ? "" : "s"} and can be published after payment.`,
+      kind: "market",
+    });
+    earnPoints(10, "Your marketplace listing was stored in HumanChain history.");
+    setListingDraft({
+      area: "",
+      condition: "",
+      details: "",
+      link: "",
+      price: "",
+      title: "",
+    });
+    setListingPhotos([]);
   }
 
   function handleListingPhotos(files: FileList | null) {
@@ -4384,18 +4500,47 @@ function MarketplaceView({
           </div>
         </div>
         <div className="listing-fields">
-          <input aria-label="Item title" placeholder="Item title, e.g. iPhone 12 clean" />
-          <input aria-label="Price" placeholder="Price, e.g. 18 WLD or KES 12,000" />
-          <select aria-label="Condition" defaultValue="">
+          <input
+            aria-label="Item title"
+            onChange={(event) => updateListingDraft("title", event.target.value)}
+            placeholder="Item title, e.g. iPhone 12 clean"
+            value={listingDraft.title}
+          />
+          <input
+            aria-label="Price"
+            onChange={(event) => updateListingDraft("price", event.target.value)}
+            placeholder="Price, e.g. 18 WLD or KES 12,000"
+            value={listingDraft.price}
+          />
+          <select
+            aria-label="Condition"
+            onChange={(event) => updateListingDraft("condition", event.target.value)}
+            value={listingDraft.condition}
+          >
             <option disabled value="">Condition</option>
             <option>New listed</option>
             <option>Second hand</option>
             <option>Refurbished</option>
             <option>Service or business</option>
           </select>
-          <input aria-label="Pickup area" placeholder="Pickup area or delivery route" />
-          <input aria-label="Business or product link" placeholder="Optional link: shop, WhatsApp, website" />
-          <textarea aria-label="Listing details" placeholder="Short details: size, defects, warranty, delivery, why buyers should trust it." />
+          <input
+            aria-label="Pickup area"
+            onChange={(event) => updateListingDraft("area", event.target.value)}
+            placeholder="Pickup area or delivery route"
+            value={listingDraft.area}
+          />
+          <input
+            aria-label="Business or product link"
+            onChange={(event) => updateListingDraft("link", event.target.value)}
+            placeholder="Optional link: shop, WhatsApp, website"
+            value={listingDraft.link}
+          />
+          <textarea
+            aria-label="Listing details"
+            onChange={(event) => updateListingDraft("details", event.target.value)}
+            placeholder="Short details: size, defects, warranty, delivery, why buyers should trust it."
+            value={listingDraft.details}
+          />
         </div>
         <div className="listing-checklist">
           {marketplaceChecklist.map((item) => (
@@ -4407,12 +4552,48 @@ function MarketplaceView({
         </div>
         <button
           className="primary-command"
-          onClick={() => publishListing(marketplacePlans[0])}
+          onClick={() => {
+            saveMarketplaceListing();
+            publishListing(marketplacePlans[0]);
+          }}
           type="button"
         >
-          Publish with 3 photos - 1 WLD
+          Store and publish - 1 WLD
         </button>
       </section>
+
+      {marketplaceListings.length ? (
+        <section className="market-panel stored-market-panel">
+          <div className="section-heading">
+            <span>Stored marketplace history</span>
+            <Library size={18} />
+          </div>
+          {marketplaceListings.slice(0, 4).map((listing) => (
+            <article className="stored-market-row" key={listing.id}>
+              <div>
+                <strong>{listing.title}</strong>
+                <span>
+                  {listing.price} - {listing.condition} - {listing.photos.length} photos
+                </span>
+                <small>{listing.area} - {listing.createdAt}</small>
+              </div>
+              <button
+                onClick={() => {
+                  publishListing(marketplacePlans[2]);
+                  recordHistory({
+                    title: "Marketplace boost reopened",
+                    detail: `${listing.title} was selected for local boost.`,
+                    kind: "market",
+                  });
+                }}
+                type="button"
+              >
+                Boost
+              </button>
+            </article>
+          ))}
+        </section>
+      ) : null}
 
       <section className="market-signal-grid">
         {marketplaceSignals.map((signal) => (
@@ -4552,6 +4733,7 @@ function MeView({
   historyRecords,
   humanPosts,
   keepStreak,
+  marketplaceListings,
   points,
   recordHistory,
   savedItems,
@@ -4562,6 +4744,7 @@ function MeView({
   historyRecords: HistoryRecord[];
   humanPosts: HumanPost[];
   keepStreak: (detail?: string) => void;
+  marketplaceListings: MarketplaceListing[];
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   savedItems: number;
@@ -4716,6 +4899,38 @@ function MeView({
             ))
         ) : (
           <p>Your published image posts will appear here and stay until you delete them.</p>
+        )}
+      </section>
+      <section className="panel human-history-panel">
+        <div className="section-heading">
+          <span>Marketplace vault</span>
+          <Store size={18} />
+        </div>
+        {marketplaceListings.length ? (
+          marketplaceListings.slice(0, 5).map((listing) => (
+            <article className="market-vault-row" key={listing.id}>
+              <div>
+                <strong>{listing.title}</strong>
+                <span>
+                  {listing.price} - {listing.condition} - {listing.photos.length} photos
+                </span>
+                <small>{listing.area} - {listing.status}</small>
+              </div>
+              <button
+                onClick={() =>
+                  act(
+                    "Marketplace listing opened",
+                    `${listing.title} is stored in your HumanChain marketplace history.`,
+                  )
+                }
+                type="button"
+              >
+                View
+              </button>
+            </article>
+          ))
+        ) : (
+          <p>Your stored marketplace listings, business ads, and paid boosts will appear here.</p>
         )}
       </section>
       <section className="panel human-history-panel">
