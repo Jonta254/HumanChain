@@ -18,6 +18,11 @@ type WorldShareInput = {
   url?: string;
 };
 
+type WorldChatInput = {
+  message: string;
+  to?: string[];
+};
+
 export function isWorldMiniAppReady() {
   return MiniKit.isInstalled();
 }
@@ -175,6 +180,19 @@ export async function shareWithWorld({ text, title, url }: WorldShareInput) {
         timestamp: new Date().toISOString(),
       };
     },
+  });
+}
+
+export async function chatWithWorld({ message, to }: WorldChatInput) {
+  return MiniKit.chat({
+    message,
+    to,
+    fallback: () => ({
+      count: to?.length ?? 1,
+      status: "success",
+      version: 1,
+      timestamp: new Date().toISOString(),
+    }),
   });
 }
 

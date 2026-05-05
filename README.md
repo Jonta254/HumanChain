@@ -15,6 +15,25 @@ Ask real humans. Get the world's verdict.
 - Stories: read the monthly Human Story, a page-based story about being human.
 - Me: streak, profile, badges, WLD actions, saved human wisdom, and stored marketplace history.
 
+## User Control
+
+- Marketplace listing history can be cleared from the Me tab.
+- Image posts can be reset from the Me tab.
+- Activity history can be reset from the Me tab.
+- A local preview account can be deleted, clearing local posts, marketplace listings, and history from the device.
+
+## World Mini App Commands Used
+
+- Wallet Auth: verified human entry.
+- Pay: paid publishing, boosts, stories, and marketplace actions with backend confirmation.
+- World Chat: direct seller inbox messages from Marketplace listing cards.
+- Share: native sharing for listings and business ads.
+- Request Permission: notifications and microphone access only when needed.
+
+## Mini App Guidelines
+
+HumanChain includes an in-app guide with English, Spanish, Swahili, French, and Arabic guidance for questions, stories, marketplace trading, paid actions, chat, and account deletion.
+
 ## Local Storage
 
 HumanChain stores preview activity locally so the app feels continuous while backend storage is being connected:

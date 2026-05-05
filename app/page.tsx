@@ -36,6 +36,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   authenticateHumanWallet,
+  chatWithWorld,
   humanHaptic,
   payWithWorld,
   Permission,
@@ -1386,6 +1387,69 @@ const trustTools = [
   "Blocked-topic safety review",
 ];
 
+const guideLanguages = [
+  {
+    code: "en",
+    name: "English",
+    title: "HumanChain Guide",
+    points: [
+      "Be a real human: use World wallet login for trusted access.",
+      "Ask useful questions and answer from lived experience.",
+      "Marketplace buyers browse freely; sellers pay small fees to publish or boost.",
+      "Use Human Chat for seller conversations and keep meetups safe.",
+      "You can clear marketplace data, posts, history, or your local account anytime.",
+    ],
+  },
+  {
+    code: "es",
+    name: "Spanish",
+    title: "Guia de HumanChain",
+    points: [
+      "Entra como humano real con World wallet.",
+      "Haz preguntas utiles y responde con experiencia real.",
+      "Los compradores navegan gratis; los vendedores pagan poco para publicar o impulsar.",
+      "Usa Human Chat para hablar con vendedores y mantener acuerdos seguros.",
+      "Puedes borrar mercado, publicaciones, historial o tu cuenta local cuando quieras.",
+    ],
+  },
+  {
+    code: "sw",
+    name: "Swahili",
+    title: "Mwongozo wa HumanChain",
+    points: [
+      "Ingia kama binadamu halisi kwa World wallet.",
+      "Uliza maswali yenye maana na jibu kutokana na uzoefu.",
+      "Wanunuzi wanaangalia bure; wauzaji hulipa kidogo kuchapisha au kuboost.",
+      "Tumia Human Chat kuongea na muuzaji na kupanga biashara salama.",
+      "Unaweza kufuta soko, machapisho, historia, au akaunti ya kifaa hiki.",
+    ],
+  },
+  {
+    code: "fr",
+    name: "French",
+    title: "Guide HumanChain",
+    points: [
+      "Entre comme humain verifie avec World wallet.",
+      "Pose des questions utiles et reponds avec experience humaine.",
+      "Les acheteurs parcourent librement; les vendeurs paient peu pour publier ou booster.",
+      "Utilise Human Chat pour parler aux vendeurs et garder les echanges clairs.",
+      "Tu peux effacer le marche, les posts, l'historique ou le compte local.",
+    ],
+  },
+  {
+    code: "ar",
+    name: "Arabic",
+    title: "HumanChain Guide",
+    points: [
+      "ادخل كإنسان حقيقي عبر World wallet.",
+      "اسأل أسئلة مفيدة وأجب من تجربة حقيقية.",
+      "المشترون يتصفحون مجانا، والبائع يدفع رسوما صغيرة للنشر أو الترويج.",
+      "استخدم Human Chat للتواصل مع البائعين بوضوح.",
+      "يمكنك حذف بيانات السوق أو المنشورات أو السجل أو الحساب المحلي.",
+    ],
+  },
+];
+
 const marketplaceItems = [
   {
     title: "Samsung Galaxy A54",
@@ -1452,7 +1516,7 @@ const marketplaceSignals = [
   "Location-first discovery",
   "3 photos included per listing",
   "New and second-hand items",
-  "Verified human seller chat",
+  "World Chat seller inbox",
   "Business links and campaigns",
 ];
 
@@ -1697,6 +1761,61 @@ export default function HumanChainApp() {
     ]);
   }
 
+  function resetHistory() {
+    setHistoryRecords([
+      {
+        id: Date.now(),
+        title: "History reset",
+        detail: "Local HumanChain activity history was cleared by the user.",
+        time: "Now",
+        kind: "profile",
+      },
+    ]);
+    act("History reset", "Your local HumanChain activity record was cleared.");
+  }
+
+  function clearMarketplaceData() {
+    setMarketplaceListings([]);
+    recordHistory({
+      title: "Marketplace data cleared",
+      detail: "Stored listings, photos, links, and marketplace drafts were removed locally.",
+      kind: "market",
+    });
+    act("Marketplace cleared", "Your local marketplace listings were removed from this device.");
+  }
+
+  function clearPostData() {
+    setHumanPosts(initialHumanPosts);
+    recordHistory({
+      title: "Post data reset",
+      detail: "Your local image posts were reset to the starter HumanChain feed.",
+      kind: "delete",
+    });
+    act("Posts reset", "Your local image post data was cleared from this device.");
+  }
+
+  function deleteLocalAccount() {
+    window.localStorage.removeItem("humanchain_posts");
+    window.localStorage.removeItem("humanchain_marketplace");
+    window.localStorage.removeItem("humanchain_history");
+    setHumanPosts(initialHumanPosts);
+    setMarketplaceListings([]);
+    setHistoryRecords([
+      {
+        id: Date.now(),
+        title: "HumanChain opened",
+        detail: "Your chain history starts here.",
+        time: "Today",
+        kind: "profile",
+      },
+    ]);
+    setVerifiedHuman(null);
+    setToast({
+      title: "Local account deleted",
+      detail: "Preview profile, stored marketplace data, posts, and history were removed from this device.",
+    });
+  }
+
   function keepStreak(detail = "Your Human Streak is alive for today.") {
     void humanHaptic("light");
     setStreak((current) => current + 1);
@@ -1861,6 +1980,9 @@ export default function HumanChainApp() {
         return (
           <MeView
             act={act}
+            clearMarketplaceData={clearMarketplaceData}
+            clearPostData={clearPostData}
+            deleteLocalAccount={deleteLocalAccount}
             earnPoints={earnPoints}
             keepStreak={keepStreak}
             historyRecords={historyRecords}
@@ -1868,6 +1990,7 @@ export default function HumanChainApp() {
             marketplaceListings={marketplaceListings}
             points={points}
             recordHistory={recordHistory}
+            resetHistory={resetHistory}
             savedItems={savedItems}
             streak={streak}
           />
@@ -2016,6 +2139,7 @@ function HomeView({
   streak: number;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
+  const [guideLanguage, setGuideLanguage] = useState(guideLanguages[0]);
   const liveVerdicts = [
     {
       question: dailyHumanQuestion.title,
@@ -2091,6 +2215,31 @@ function HomeView({
             <p>{service.detail}</p>
           </article>
         ))}
+      </section>
+
+      <section className="panel guide-panel">
+        <div className="section-heading">
+          <span>Mini app guide</span>
+          <ShieldCheck size={18} />
+        </div>
+        <div className="language-row" aria-label="Guide languages">
+          {guideLanguages.map((language) => (
+            <button
+              className={guideLanguage.code === language.code ? "active" : ""}
+              key={language.code}
+              onClick={() => setGuideLanguage(language)}
+              type="button"
+            >
+              {language.name}
+            </button>
+          ))}
+        </div>
+        <article className="guide-card">
+          <strong>{guideLanguage.title}</strong>
+          {guideLanguage.points.map((point) => (
+            <p key={point}>{point}</p>
+          ))}
+        </article>
       </section>
 
       <section className="streak-card">
@@ -4415,6 +4564,25 @@ function MarketplaceView({
     }
   }
 
+  async function openSellerChat(item: (typeof marketplaceItems)[number]) {
+    const sellerUsername = item.seller.replace(/^@/, "");
+
+    try {
+      await chatWithWorld({
+        message: `Hi ${item.seller}, I saw ${item.title} on HumanChain Market. Is it still available near ${item.location}?`,
+        to: [sellerUsername],
+      });
+      recordHistory({
+        title: "Marketplace chat opened",
+        detail: `World Chat opened for ${item.title} with ${item.seller}.`,
+        kind: "market",
+      });
+      act("World Chat opened", `${item.seller}'s Human Chat inbox is ready for this listing.`);
+    } catch (error) {
+      act("Chat unavailable", error instanceof Error ? error.message : "Try opening the seller from World App.");
+    }
+  }
+
   return (
     <div className="screen marketplace-screen">
       <section className="market-hero">
@@ -4642,15 +4810,12 @@ function MarketplaceView({
               </div>
               <div className="market-card-actions">
                 <button
-                  onClick={() =>
-                    act(
-                      "Seller chat ready",
-                      `${item.seller} can receive buyer interest, questions, and trusted meetup details.`,
-                    )
-                  }
+                  onClick={() => {
+                    void openSellerChat(item);
+                  }}
                   type="button"
                 >
-                  Chat
+                  Human Chat
                 </button>
                 <button
                   onClick={() => {
@@ -4729,6 +4894,9 @@ function MarketplaceView({
 
 function MeView({
   act,
+  clearMarketplaceData,
+  clearPostData,
+  deleteLocalAccount,
   earnPoints,
   historyRecords,
   humanPosts,
@@ -4736,10 +4904,14 @@ function MeView({
   marketplaceListings,
   points,
   recordHistory,
+  resetHistory,
   savedItems,
   streak,
 }: {
   act: (title: string, detail: string) => void;
+  clearMarketplaceData: () => void;
+  clearPostData: () => void;
+  deleteLocalAccount: () => void;
   earnPoints: EarnPoints;
   historyRecords: HistoryRecord[];
   humanPosts: HumanPost[];
@@ -4747,6 +4919,7 @@ function MeView({
   marketplaceListings: MarketplaceListing[];
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
+  resetHistory: () => void;
   savedItems: number;
   streak: number;
 }) {
@@ -4963,6 +5136,35 @@ function MeView({
           Human Points are not withdrawable yet. They track early value so real
           contributors can be recognized when HumanChain launches rewards.
         </p>
+      </section>
+      <section className="panel account-control-panel">
+        <div className="section-heading">
+          <span>Data and account controls</span>
+          <LockKeyhole size={18} />
+        </div>
+        <p>
+          HumanChain stores preview data on this device until backend storage is
+          connected. You can remove stored listings, posts, history, or the
+          whole local account view.
+        </p>
+        <div className="account-control-grid">
+          <button onClick={clearMarketplaceData} type="button">
+            <Store size={17} />
+            <span>Clear marketplace</span>
+          </button>
+          <button onClick={clearPostData} type="button">
+            <Upload size={17} />
+            <span>Clear posts</span>
+          </button>
+          <button onClick={resetHistory} type="button">
+            <Radio size={17} />
+            <span>Reset history</span>
+          </button>
+          <button className="danger" onClick={deleteLocalAccount} type="button">
+            <LockKeyhole size={17} />
+            <span>Delete local account</span>
+          </button>
+        </div>
       </section>
       <section className="badge-cloud">
         {profileBadges.map((badge) => (
