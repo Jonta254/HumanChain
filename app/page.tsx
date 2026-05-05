@@ -8,19 +8,25 @@ import {
   CircleDollarSign,
   Compass,
   Flame,
+  HandCoins,
   HeartHandshake,
   Home,
   Library,
   LockKeyhole,
+  MapPin,
   MessageCircleQuestion,
   Mic,
+  PlusCircle,
   PenLine,
   Radio,
   Search,
   Send,
   ShieldCheck,
+  ShoppingBag,
   Sparkles,
   Star,
+  Store,
+  Tag,
   Upload,
   UserRound,
   Users,
@@ -34,6 +40,7 @@ import {
   payWithWorld,
   Permission,
   requestWorldPermission,
+  shareWithWorld,
 } from "@/lib/worldMiniApp";
 import { normalizePaymentFeature } from "@/lib/worldPayments";
 
@@ -1374,7 +1381,84 @@ const trustTools = [
   "Blocked-topic safety review",
 ];
 
-type Tab = "home" | "ask" | "chains" | "stories" | "me";
+const marketplaceItems = [
+  {
+    title: "Samsung Galaxy A54",
+    seller: "@nairobitech",
+    condition: "Second hand",
+    price: "WLD 22",
+    distance: "1.4 km",
+    location: "Westlands",
+    tag: "Phone",
+    trust: "World ID seller",
+    tone: "blue",
+    photos: 3,
+    quality: "Clean front, back, and screen photos",
+  },
+  {
+    title: "New Ankara tote batch",
+    seller: "@amina_makes",
+    condition: "New listed",
+    price: "WLD 4",
+    distance: "2.1 km",
+    location: "Kilimani",
+    tag: "Handmade",
+    trust: "3 verified buyers",
+    tone: "gold",
+    photos: 4,
+    quality: "Styled product photos and size detail",
+  },
+  {
+    title: "Restaurant launch poster",
+    seller: "@taste254",
+    condition: "Sponsored",
+    price: "Open link",
+    distance: "3.8 km",
+    location: "Lavington",
+    tag: "Marketing",
+    trust: "Business link allowed",
+    tone: "green",
+    photos: 2,
+    quality: "Menu preview and shop-front image",
+  },
+  {
+    title: "Used study desk",
+    seller: "@student_chain",
+    condition: "Second hand",
+    price: "WLD 7",
+    distance: "4.6 km",
+    location: "Ngong Road",
+    tag: "Home",
+    trust: "Pickup only",
+    tone: "violet",
+    photos: 3,
+    quality: "Wide photo plus scratches disclosed",
+  },
+];
+
+const marketplacePlans = [
+  ["Quick listing", "1 WLD", "Publish one item with 3 included photos."],
+  ["Extra photo pack", "2 WLD", "Add up to 3 more photos to one listing."],
+  ["Local boost", "2 WLD", "Push a listing higher in nearby discovery."],
+  ["Business ad", "4 WLD", "Market a shop, service, event, or link."],
+];
+
+const marketplaceSignals = [
+  "Location-first discovery",
+  "3 photos included per listing",
+  "New and second-hand items",
+  "Verified human seller chat",
+  "Business links and campaigns",
+];
+
+const marketplaceChecklist = [
+  "Clear cover photo",
+  "Price and condition",
+  "Pickup area or delivery note",
+  "Seller link or chat",
+];
+
+type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me";
 
 type StoryArtKind =
   | "cover-symbol"
@@ -1715,6 +1799,14 @@ export default function HumanChainApp() {
             keepStreak={keepStreak}
             openPayment={openPayment}
             setSavedItems={setSavedItems}
+          />
+        );
+      case "market":
+        return (
+          <MarketplaceView
+            act={act}
+            earnPoints={earnPoints}
+            openPayment={openPayment}
           />
         );
       case "me":
@@ -4123,6 +4215,337 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
   return nodes[kind];
 }
 
+function MarketplaceView({
+  act,
+  earnPoints,
+  openPayment,
+}: {
+  act: (title: string, detail: string) => void;
+  earnPoints: EarnPoints;
+  openPayment: OpenPayment;
+}) {
+  const [activeFilter, setActiveFilter] = useState("Near me");
+  const [locationReady, setLocationReady] = useState(false);
+  const [listingPhotos, setListingPhotos] = useState<
+    Array<{ id: number; name: string; src: string }>
+  >([]);
+
+  const filteredItems = marketplaceItems.filter((item) => {
+    if (activeFilter === "New") return item.condition === "New listed";
+    if (activeFilter === "Second hand") return item.condition === "Second hand";
+    if (activeFilter === "Marketing") return item.tag === "Marketing";
+    return true;
+  });
+
+  function publishListing(plan: (typeof marketplacePlans)[number]) {
+    openPayment({
+      title: `${plan[0]} marketplace fee`,
+      amount: plan[1],
+      detail: `${plan[2]} Payment stays small so humans can do business without heavy publishing friction.`,
+      success: `${plan[0]} is ready. Add your item, photos, location, and contact link after wallet setup.`,
+      feature: normalizePaymentFeature(`marketplace-${plan[0]}`),
+      points: 12,
+    });
+  }
+
+  function handleListingPhotos(files: FileList | null) {
+    if (!files?.length) {
+      return;
+    }
+
+    const selectedFiles = Array.from(files);
+    const includedFiles = selectedFiles.slice(0, 3);
+
+    setListingPhotos([]);
+
+    includedFiles.forEach((file, index) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        setListingPhotos((current) => [
+          ...current,
+          {
+            id: Date.now() + index,
+            name: file.name,
+            src: String(reader.result),
+          },
+        ]);
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    if (selectedFiles.length > 3) {
+      publishListing(marketplacePlans[1]);
+      act(
+        "Extra photos reserved",
+        "The first 3 photos are included. Extra photos need the small photo-pack fee before publishing.",
+      );
+    } else {
+      act("Photos added", `${includedFiles.length} listing photo slot${includedFiles.length > 1 ? "s" : ""} ready.`);
+    }
+  }
+
+  async function shareMarketItem(item: (typeof marketplaceItems)[number]) {
+    try {
+      await shareWithWorld({
+        title: `${item.title} on HumanChain Market`,
+        text: `${item.title} - ${item.price} near ${item.location}. ${item.condition}, ${item.photos} photos, seller ${item.seller}.`,
+        url: process.env.NEXT_PUBLIC_APP_URL,
+      });
+      act("Listing shared", "World share opened for this marketplace item.");
+    } catch (error) {
+      act("Share unavailable", error instanceof Error ? error.message : "Try sharing from World App.");
+    }
+  }
+
+  return (
+    <div className="screen marketplace-screen">
+      <section className="market-hero">
+        <div className="market-hero-top">
+          <div>
+            <span className="section-kicker">HumanChain Market</span>
+            <h1>Buy, sell, and promote nearby.</h1>
+          </div>
+          <Store size={30} />
+        </div>
+        <p>
+          A verified human marketplace for new items, second-hand goods,
+          services, business links, and local discovery inside World App.
+        </p>
+        <div className="market-location-card">
+          <MapPin size={18} />
+          <div>
+            <strong>{locationReady ? "Nearby market active" : "Location preview"}</strong>
+            <span>
+              {locationReady
+                ? "Showing listings around your current area."
+                : "Enable location in World App to rank items close to you."}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setLocationReady(true);
+              earnPoints(5, "Location discovery makes your marketplace more useful.");
+            }}
+            type="button"
+          >
+            Use
+          </button>
+        </div>
+      </section>
+
+      <section className="market-actions">
+        <button
+          onClick={() => publishListing(marketplacePlans[0])}
+          type="button"
+        >
+          <PlusCircle size={19} />
+          <span>Sell item</span>
+          <strong>1 WLD</strong>
+        </button>
+        <button
+          onClick={() => publishListing(marketplacePlans[3])}
+          type="button"
+        >
+          <HandCoins size={19} />
+          <span>Market business</span>
+          <strong>4 WLD</strong>
+        </button>
+      </section>
+
+      <section className="market-panel listing-studio">
+        <div className="section-heading">
+          <span>Create seller listing</span>
+          <Upload size={18} />
+        </div>
+        <div className="listing-photo-zone">
+          <label className="listing-upload">
+            <Upload size={20} />
+            <strong>Add item photos</strong>
+            <span>3 photos included. More photos trigger an extra photo pack.</span>
+            <input
+              accept="image/*"
+              multiple
+              onChange={(event) => handleListingPhotos(event.target.files)}
+              type="file"
+            />
+          </label>
+          <div className="listing-photo-grid">
+            {[0, 1, 2].map((slot) => {
+              const photo = listingPhotos[slot];
+
+              return (
+                <div className={photo ? "filled" : ""} key={slot}>
+                  {photo ? <img alt={photo.name} src={photo.src} /> : <span>{slot + 1}</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="listing-fields">
+          <input aria-label="Item title" placeholder="Item title, e.g. iPhone 12 clean" />
+          <input aria-label="Price" placeholder="Price, e.g. 18 WLD or KES 12,000" />
+          <select aria-label="Condition" defaultValue="">
+            <option disabled value="">Condition</option>
+            <option>New listed</option>
+            <option>Second hand</option>
+            <option>Refurbished</option>
+            <option>Service or business</option>
+          </select>
+          <input aria-label="Pickup area" placeholder="Pickup area or delivery route" />
+          <input aria-label="Business or product link" placeholder="Optional link: shop, WhatsApp, website" />
+          <textarea aria-label="Listing details" placeholder="Short details: size, defects, warranty, delivery, why buyers should trust it." />
+        </div>
+        <div className="listing-checklist">
+          {marketplaceChecklist.map((item) => (
+            <span key={item}>
+              <CheckCircle2 size={14} />
+              {item}
+            </span>
+          ))}
+        </div>
+        <button
+          className="primary-command"
+          onClick={() => publishListing(marketplacePlans[0])}
+          type="button"
+        >
+          Publish with 3 photos - 1 WLD
+        </button>
+      </section>
+
+      <section className="market-signal-grid">
+        {marketplaceSignals.map((signal) => (
+          <span key={signal}>{signal}</span>
+        ))}
+      </section>
+
+      <section className="market-panel">
+        <div className="section-heading">
+          <span>Discover near you</span>
+          <ShoppingBag size={18} />
+        </div>
+        <div className="market-filter-row">
+          {["Near me", "New", "Second hand", "Marketing"].map((filter) => (
+            <button
+              className={activeFilter === filter ? "active" : ""}
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              type="button"
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+        <div className="market-list">
+          {filteredItems.map((item) => (
+            <article className={`market-item ${item.tone}`} key={item.title}>
+              <div className="market-item-art">
+                <Tag size={22} />
+              </div>
+              <div>
+                <div className="market-item-top">
+                  <strong>{item.title}</strong>
+                  <span>{item.price}</span>
+                </div>
+                <p>
+                  {item.condition} by {item.seller} in {item.location}
+                </p>
+                <div className="market-item-meta">
+                  <span>{item.distance}</span>
+                  <span>{item.tag}</span>
+                  <span>{item.photos} photos</span>
+                  <span>{item.trust}</span>
+                </div>
+                <small>{item.quality}</small>
+              </div>
+              <div className="market-card-actions">
+                <button
+                  onClick={() =>
+                    act(
+                      "Seller chat ready",
+                      `${item.seller} can receive buyer interest, questions, and trusted meetup details.`,
+                    )
+                  }
+                  type="button"
+                >
+                  Chat
+                </button>
+                <button
+                  onClick={() => {
+                    void shareMarketItem(item);
+                  }}
+                  type="button"
+                >
+                  Share
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="market-panel market-plan-panel">
+        <div className="section-heading">
+          <span>Small publishing fees</span>
+          <CircleDollarSign size={18} />
+        </div>
+        {marketplacePlans.map((plan) => (
+          <button
+            className="market-plan"
+            key={plan[0]}
+            onClick={() => publishListing(plan)}
+            type="button"
+          >
+            <div>
+              <strong>{plan[0]}</strong>
+              <span>{plan[2]}</span>
+            </div>
+            <b>{plan[1]}</b>
+          </button>
+        ))}
+        <p>
+          Buyers can browse and chat freely. Sellers and advertisers pay a small
+          publishing fee so the marketplace stays serious, affordable, and clean.
+        </p>
+      </section>
+
+      <section className="market-panel">
+        <div className="section-heading">
+          <span>Business marketing</span>
+          <Send size={18} />
+        </div>
+        <div className="market-link-box">
+          <strong>Promote a shop, service, event, page, or WhatsApp link.</strong>
+          <p>
+            Ads can include a verified owner, location, short pitch, image,
+            external link, and contact button. Links stay visible but are
+            clearly marked as marketing.
+          </p>
+          <button
+            onClick={() => publishListing(marketplacePlans[3])}
+            type="button"
+          >
+            Prepare business ad
+          </button>
+          <button
+            onClick={() => {
+              void shareWithWorld({
+                title: "HumanChain Market business ad",
+                text: "Promote a verified local shop, service, event, or link inside HumanChain Market.",
+                url: process.env.NEXT_PUBLIC_APP_URL,
+              });
+            }}
+            type="button"
+          >
+            Share ad preview
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function MeView({
   act,
   earnPoints,
@@ -4422,6 +4845,7 @@ function BottomNav({
   const items: Array<[Tab, string, React.ReactNode]> = [
     ["home", "Home", <Home key="home" size={20} />],
     ["ask", "Ask", <MessageCircleQuestion key="ask" size={20} />],
+    ["market", "Market", <Store key="market" size={20} />],
     ["chains", "Chains", <Sparkles key="chains" size={20} />],
     ["stories", "Stories", <BookOpen key="stories" size={20} />],
     ["me", "Me", <UserRound key="me" size={20} />],

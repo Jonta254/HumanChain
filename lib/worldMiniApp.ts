@@ -12,6 +12,12 @@ type WorldPaymentInput = {
   feature: string;
 };
 
+type WorldShareInput = {
+  text: string;
+  title: string;
+  url?: string;
+};
+
 export function isWorldMiniAppReady() {
   return MiniKit.isInstalled();
 }
@@ -144,6 +150,26 @@ export async function humanHaptic(style: "light" | "medium" | "heavy" = "light")
     fallback: () => {
       navigator.vibrate?.(style === "heavy" ? 45 : 20);
       return {
+        status: "success",
+        version: 1,
+        timestamp: new Date().toISOString(),
+      };
+    },
+  });
+}
+
+export async function shareWithWorld({ text, title, url }: WorldShareInput) {
+  return MiniKit.share({
+    text,
+    title,
+    url,
+    fallback: async () => {
+      if (navigator.share) {
+        await navigator.share({ text, title, url });
+      }
+
+      return {
+        shared_files_count: 0,
         status: "success",
         version: 1,
         timestamp: new Date().toISOString(),
