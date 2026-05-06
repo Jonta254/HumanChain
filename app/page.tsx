@@ -1606,7 +1606,10 @@ type MarketplaceItem = (typeof marketplaceItems)[number];
 type MarketBid = {
   amount: number;
   buyer: string;
+  createdAt: string;
+  id: number;
   note: string;
+  status: "saved" | "sent";
 };
 
 type MarketLocationState = {
@@ -1682,7 +1685,9 @@ type DailyResponse = {
   time: string;
 };
 
-type HumanPost = (typeof initialHumanPosts)[number];
+type HumanPost = (typeof initialHumanPosts)[number] & {
+  storageStatus?: "cloud-safe" | "local-safe";
+};
 
 type HistoryRecord = {
   id: number;
@@ -1698,19 +1703,69 @@ type VerifiedHuman = {
   mode: "world" | "preview";
 };
 
+type AppMemory = {
+  appLanguageCode: string;
+  dailyAnswered: boolean;
+  dailyAnsweredAt: string | null;
+  notificationReady: boolean;
+  points: number;
+  savedItems: number;
+  streak: number;
+  verifiedHuman: VerifiedHuman | null;
+};
+
+const storageKeys = {
+  appMemory: "humanchain_app_memory",
+  bids: "humanchain_market_bids",
+  history: "humanchain_history",
+  marketplace: "humanchain_marketplace",
+  posts: "humanchain_posts",
+} as const;
+
+function loadJsonFromStorage<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(key);
+
+    return storedValue ? (JSON.parse(storedValue) as T) : fallback;
+  } catch {
+    window.localStorage.removeItem(key);
+    return fallback;
+  }
+}
+
+function saveJsonToStorage(key: string, value: unknown) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function getInitialMarketBids() {
+  return Object.fromEntries(
+    marketplaceItems.map((item) => [
+      item.title,
+      (item.bidding?.offers ?? []).map((offer) => ({
+        ...offer,
+        createdAt: "Seed",
+        id: Math.round((offer.amount + item.title.length) * 1000),
+        status: "sent" as const,
+      })),
+    ]),
+  );
+}
+
 function loadStoredHumanPosts() {
   if (typeof window === "undefined") {
     return initialHumanPosts;
   }
 
-  try {
-    const storedPosts = window.localStorage.getItem("humanchain_posts");
-
-    return storedPosts ? (JSON.parse(storedPosts) as HumanPost[]) : initialHumanPosts;
-  } catch {
-    window.localStorage.removeItem("humanchain_posts");
-    return initialHumanPosts;
-  }
+  return loadJsonFromStorage<HumanPost[]>(storageKeys.posts, initialHumanPosts);
 }
 
 function loadStoredMarketplaceListings(): MarketplaceListing[] {
@@ -1718,16 +1773,7 @@ function loadStoredMarketplaceListings(): MarketplaceListing[] {
     return [];
   }
 
-  try {
-    const storedListings = window.localStorage.getItem("humanchain_marketplace");
-
-    return storedListings
-      ? (JSON.parse(storedListings) as MarketplaceListing[])
-      : [];
-  } catch {
-    window.localStorage.removeItem("humanchain_marketplace");
-    return [];
-  }
+  return loadJsonFromStorage<MarketplaceListing[]>(storageKeys.marketplace, []);
 }
 
 function loadStoredHistoryRecords(): HistoryRecord[] {
@@ -1743,48 +1789,54 @@ function loadStoredHistoryRecords(): HistoryRecord[] {
     ];
   }
 
-  try {
-    const storedHistory = window.localStorage.getItem("humanchain_history");
+  return loadJsonFromStorage<HistoryRecord[]>(storageKeys.history, [
+    {
+      id: 1,
+      title: "HumanChain opened",
+      detail: "Your chain history starts here.",
+      time: "Today",
+      kind: "profile",
+    },
+  ]);
+}
 
-    return storedHistory
-      ? (JSON.parse(storedHistory) as HistoryRecord[])
-      : [
-          {
-            id: 1,
-            title: "HumanChain opened",
-            detail: "Your chain history starts here.",
-            time: "Today",
-            kind: "profile",
-          },
-        ];
-  } catch {
-    window.localStorage.removeItem("humanchain_history");
-    return [
-      {
-        id: 1,
-        title: "HumanChain opened",
-        detail: "Your chain history starts here.",
-        time: "Today",
-        kind: "profile",
-      },
-    ];
-  }
+function loadStoredAppMemory(): AppMemory {
+  return loadJsonFromStorage<AppMemory>(storageKeys.appMemory, {
+    appLanguageCode: appLanguages[0].code,
+    dailyAnswered: false,
+    dailyAnsweredAt: null,
+    notificationReady: false,
+    points: 420,
+    savedItems: 3,
+    streak: 4,
+    verifiedHuman: null,
+  });
 }
 
 export default function HumanChainApp() {
+  const [storedAppMemory] = useState(loadStoredAppMemory);
   const [tab, setTab] = useState<Tab>("home");
   const [toast, setToast] = useState<Toast | null>(null);
-  const [verifiedHuman, setVerifiedHuman] = useState<VerifiedHuman | null>(null);
+  const [verifiedHuman, setVerifiedHuman] = useState<VerifiedHuman | null>(
+    storedAppMemory.verifiedHuman,
+  );
   const [gateBusy, setGateBusy] = useState(false);
-  const [notificationReady, setNotificationReady] = useState(false);
+  const [notificationReady, setNotificationReady] = useState(
+    storedAppMemory.notificationReady,
+  );
   const [worldContext, setWorldContext] = useState(getWorldMiniAppContext);
-  const [appLanguage, setAppLanguage] = useState<AppLanguage>(appLanguages[0]);
-  const [streak, setStreak] = useState(4);
+  const [appLanguage, setAppLanguage] = useState<AppLanguage>(
+    appLanguages.find((language) => language.code === storedAppMemory.appLanguageCode) ??
+      appLanguages[0],
+  );
+  const [streak, setStreak] = useState(storedAppMemory.streak);
   const [links, setLinks] = useState(initialLinks);
-  const [savedItems, setSavedItems] = useState(3);
-  const [points, setPoints] = useState(420);
-  const [dailyAnswered, setDailyAnswered] = useState(false);
-  const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(null);
+  const [savedItems, setSavedItems] = useState(storedAppMemory.savedItems);
+  const [points, setPoints] = useState(storedAppMemory.points);
+  const [dailyAnswered, setDailyAnswered] = useState(storedAppMemory.dailyAnswered);
+  const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(
+    storedAppMemory.dailyAnsweredAt,
+  );
   const [activeField, setActiveField] = useState<ChainField | null>(null);
   const [humanPosts, setHumanPosts] = useState<HumanPost[]>(loadStoredHumanPosts);
   const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>(
@@ -1828,19 +1880,38 @@ export default function HumanChainApp() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem("humanchain_posts", JSON.stringify(humanPosts));
+    saveJsonToStorage(storageKeys.posts, humanPosts);
   }, [humanPosts]);
 
   useEffect(() => {
-    window.localStorage.setItem(
-      "humanchain_marketplace",
-      JSON.stringify(marketplaceListings),
-    );
+    saveJsonToStorage(storageKeys.marketplace, marketplaceListings);
   }, [marketplaceListings]);
 
   useEffect(() => {
-    window.localStorage.setItem("humanchain_history", JSON.stringify(historyRecords));
+    saveJsonToStorage(storageKeys.history, historyRecords);
   }, [historyRecords]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.appMemory, {
+      appLanguageCode: appLanguage.code,
+      dailyAnswered,
+      dailyAnsweredAt,
+      notificationReady,
+      points,
+      savedItems,
+      streak,
+      verifiedHuman,
+    } satisfies AppMemory);
+  }, [
+    appLanguage,
+    dailyAnswered,
+    dailyAnsweredAt,
+    notificationReady,
+    points,
+    savedItems,
+    streak,
+    verifiedHuman,
+  ]);
 
   function act(title: string, detail: string) {
     setToast({ title, detail });
@@ -1896,9 +1967,11 @@ export default function HumanChainApp() {
   }
 
   function deleteLocalAccount() {
-    window.localStorage.removeItem("humanchain_posts");
-    window.localStorage.removeItem("humanchain_marketplace");
-    window.localStorage.removeItem("humanchain_history");
+    window.localStorage.removeItem(storageKeys.posts);
+    window.localStorage.removeItem(storageKeys.marketplace);
+    window.localStorage.removeItem(storageKeys.history);
+    window.localStorage.removeItem(storageKeys.bids);
+    window.localStorage.removeItem(storageKeys.appMemory);
     setHumanPosts(initialHumanPosts);
     setMarketplaceListings([]);
     setHistoryRecords([
@@ -1911,6 +1984,13 @@ export default function HumanChainApp() {
       },
     ]);
     setVerifiedHuman(null);
+    setAppLanguage(appLanguages[0]);
+    setDailyAnswered(false);
+    setDailyAnsweredAt(null);
+    setNotificationReady(false);
+    setPoints(420);
+    setSavedItems(3);
+    setStreak(4);
     setToast({
       title: "Local account deleted",
       detail: "Preview profile, stored marketplace data, posts, and history were removed from this device.",
@@ -2957,6 +3037,7 @@ function ChainsView({
       minute: "2-digit",
     }).format(new Date());
     let imageUrl = postImage;
+    let storageStatus: HumanPost["storageStatus"] = "local-safe";
 
     setIsPublishingPost(true);
 
@@ -2979,10 +3060,13 @@ function ChainsView({
 
         if (payload.ok && payload.url) {
           imageUrl = payload.url;
+          storageStatus = "cloud-safe";
         } else if (!payload.pendingSetup) {
-          act("Image upload failed", payload.error ?? "Using local preview until storage is ready.");
+          act("Image upload failed", payload.error ?? "The post will still publish in your app.");
         }
       }
+    } catch {
+      act("Post published", "Network upload was unavailable, but your post still joined the app.");
     } finally {
       setIsPublishingPost(false);
     }
@@ -3000,6 +3084,7 @@ function ChainsView({
         comments: [],
         createdAt,
         owner: true,
+        storageStatus,
       },
       ...current,
     ]);
@@ -4613,8 +4698,9 @@ function MarketplaceView({
   });
   const [bidDrafts, setBidDrafts] = useState<Record<string, string>>({});
   const [marketBids, setMarketBids] = useState<Record<string, MarketBid[]>>(() =>
-    Object.fromEntries(
-      marketplaceItems.map((item) => [item.title, item.bidding?.offers ?? []]),
+    loadJsonFromStorage<Record<string, MarketBid[]>>(
+      storageKeys.bids,
+      getInitialMarketBids(),
     ),
   );
   const [listingPhotos, setListingPhotos] = useState<
@@ -4639,6 +4725,10 @@ function MarketplaceView({
     return true;
   });
   const locationReady = marketLocation.status === "ready";
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.bids, marketBids);
+  }, [marketBids]);
 
   function publishListing(plan: (typeof marketplacePlans)[number]) {
     openPayment({
@@ -4852,6 +4942,23 @@ function MarketplaceView({
     );
   }
 
+  function getMinimumNextBid(item: MarketplaceItem) {
+    if (!item.bidding) {
+      return 0;
+    }
+
+    const topBid = getTopBid(item);
+
+    return topBid ? Math.max(item.bidding.floor, topBid.amount + 0.5) : item.bidding.floor;
+  }
+
+  function setQuickBid(item: MarketplaceItem, amount: number) {
+    setBidDrafts((current) => ({
+      ...current,
+      [item.title]: amount.toFixed(amount % 1 === 0 ? 0 : 1),
+    }));
+  }
+
   async function placeBid(item: MarketplaceItem) {
     if (!item.bidding) {
       act("Direct sale item", "This listing uses chat-first buying instead of timed bidding.");
@@ -4859,19 +4966,27 @@ function MarketplaceView({
     }
 
     const nextBid = Number.parseFloat(bidDrafts[item.title] ?? "");
+    const minimumNextBid = getMinimumNextBid(item);
 
-    if (!Number.isFinite(nextBid) || nextBid < item.bidding.floor) {
+    if (!Number.isFinite(nextBid) || nextBid < minimumNextBid) {
       act(
         "Bid too low",
-        `Enter at least ${item.bidding.floor} WLD so the seller receives serious offers near the target price.`,
+        `Enter at least ${minimumNextBid} WLD so your offer beats the current bid and stays serious.`,
       );
       return;
     }
 
+    const bidId = (marketBids[item.title]?.length ?? 0) + 1;
     const bid: MarketBid = {
       amount: nextBid,
       buyer: "@you",
+      createdAt: new Intl.DateTimeFormat("en", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date()),
+      id: bidId,
       note: nextBid >= item.bidding.target ? "Near seller target. Strong offer." : "Open offer for seller review.",
+      status: "saved",
     };
 
     setMarketBids((current) => ({
@@ -4890,6 +5005,12 @@ function MarketplaceView({
         message: `I placed a ${nextBid} WLD bid on ${item.title}. Let me know if this is close enough to accept.`,
         to: [item.seller.replace(/^@/, "")],
       });
+      setMarketBids((current) => ({
+        ...current,
+        [item.title]: (current[item.title] ?? []).map((offer) =>
+          offer.id === bidId ? { ...offer, status: "sent" } : offer,
+        ),
+      }));
       act("Bid sent to seller", "World Chat opened so the buyer and seller can confirm details directly.");
     } catch (error) {
       act("Bid saved", error instanceof Error ? error.message : "Bid is saved in the mini app preview.");
@@ -5191,9 +5312,20 @@ function MarketplaceView({
                       </strong>
                     </div>
                     <p>
-                      Seller target {item.bidding.target} WLD. Minimum serious
-                      offer {item.bidding.floor} WLD.
+                      Seller target {item.bidding.target} WLD. Next bid must be
+                      at least {getMinimumNextBid(item)} WLD.
                     </p>
+                    <div className="quick-bid-row" aria-label={`Quick bids for ${item.title}`}>
+                      {[getMinimumNextBid(item), item.bidding.target].map((amount) => (
+                        <button
+                          key={`${item.title}-${amount}`}
+                          onClick={() => setQuickBid(item, amount)}
+                          type="button"
+                        >
+                          {amount} WLD
+                        </button>
+                      ))}
+                    </div>
                     <div className="bid-row">
                       <input
                         aria-label={`Bid amount for ${item.title}`}
@@ -5213,8 +5345,8 @@ function MarketplaceView({
                     </div>
                     <div className="bid-stack">
                       {(marketBids[item.title] ?? []).slice(0, 3).map((bid) => (
-                        <span key={`${bid.buyer}-${bid.amount}-${bid.note}`}>
-                          {bid.buyer}: {bid.amount} WLD - {bid.note}
+                        <span key={`${bid.id}-${bid.buyer}-${bid.amount}-${bid.note}`}>
+                          {bid.buyer}: {bid.amount} WLD - {bid.note} - {bid.status === "sent" ? "sent" : "saved"}
                         </span>
                       ))}
                     </div>

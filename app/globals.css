@@ -3890,6 +3890,25 @@ button {
   margin: 7px 0;
 }
 
+.quick-bid-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+}
+
+.quick-bid-row button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  border: 1px solid rgba(47, 111, 237, 0.16);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--blue);
+  background: rgba(47, 111, 237, 0.08);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
 .bid-row input {
   min-width: 0;
   flex: 1;
