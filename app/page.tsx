@@ -27,6 +27,7 @@ import {
   ShoppingBag,
   Sparkles,
   Star,
+  Settings,
   Store,
   Tag,
   Upload,
@@ -39,6 +40,8 @@ import { useEffect, useState } from "react";
 import {
   authenticateHumanWallet,
   chatWithWorld,
+  getWorldMiniAppContext,
+  getWorldPermissions,
   humanHaptic,
   payWithWorld,
   Permission,
@@ -1389,10 +1392,18 @@ const trustTools = [
   "Blocked-topic safety review",
 ];
 
-const guideLanguages = [
+const appLanguages = [
   {
     code: "en",
     name: "English",
+    nav: {
+      ask: "Preguntar",
+      chains: "Cadenas",
+      home: "Inicio",
+      market: "Mercado",
+      me: "Yo",
+      stories: "Historias",
+    },
     title: "HumanChain Guide",
     points: [
       "Be a real human: use World wallet login for trusted access.",
@@ -1401,10 +1412,19 @@ const guideLanguages = [
       "Use Human Chat for seller conversations and keep meetups safe.",
       "You can clear marketplace data, posts, history, or your local account anytime.",
     ],
+    settingsTitle: "Settings",
   },
   {
     code: "es",
     name: "Spanish",
+    nav: {
+      ask: "Demander",
+      chains: "Chaines",
+      home: "Accueil",
+      market: "Marche",
+      me: "Moi",
+      stories: "Histoires",
+    },
     title: "Guia de HumanChain",
     points: [
       "Entra como humano real con World wallet.",
@@ -1413,22 +1433,19 @@ const guideLanguages = [
       "Usa Human Chat para hablar con vendedores y mantener acuerdos seguros.",
       "Puedes borrar mercado, publicaciones, historial o tu cuenta local cuando quieras.",
     ],
-  },
-  {
-    code: "sw",
-    name: "Swahili",
-    title: "Mwongozo wa HumanChain",
-    points: [
-      "Ingia kama binadamu halisi kwa World wallet.",
-      "Uliza maswali yenye maana na jibu kutokana na uzoefu.",
-      "Wanunuzi wanaangalia bure; wauzaji hulipa kidogo kuchapisha au kuboost.",
-      "Tumia Human Chat kuongea na muuzaji na kupanga biashara salama.",
-      "Unaweza kufuta soko, machapisho, historia, au akaunti ya kifaa hiki.",
-    ],
+    settingsTitle: "Settings",
   },
   {
     code: "fr",
     name: "French",
+    nav: {
+      ask: "Perguntar",
+      chains: "Cadeias",
+      home: "Inicio",
+      market: "Mercado",
+      me: "Eu",
+      stories: "Historias",
+    },
     title: "Guide HumanChain",
     points: [
       "Entre comme humain verifie avec World wallet.",
@@ -1437,20 +1454,32 @@ const guideLanguages = [
       "Utilise Human Chat pour parler aux vendeurs et garder les echanges clairs.",
       "Tu peux effacer le marche, les posts, l'historique ou le compte local.",
     ],
+    settingsTitle: "Settings",
   },
   {
-    code: "ar",
-    name: "Arabic",
-    title: "HumanChain Guide",
+    code: "pt",
+    name: "Portuguese",
+    nav: {
+      ask: "Ask",
+      chains: "Chains",
+      home: "Home",
+      market: "Market",
+      me: "Me",
+      stories: "Stories",
+    },
+    title: "Guia HumanChain",
     points: [
-      "ادخل كإنسان حقيقي عبر World wallet.",
-      "اسأل أسئلة مفيدة وأجب من تجربة حقيقية.",
-      "المشترون يتصفحون مجانا، والبائع يدفع رسوما صغيرة للنشر أو الترويج.",
-      "استخدم Human Chat للتواصل مع البائعين بوضوح.",
-      "يمكنك حذف بيانات السوق أو المنشورات أو السجل أو الحساب المحلي.",
+      "Entre como humano real com World wallet.",
+      "Faca perguntas uteis e responda com experiencia real.",
+      "Compradores navegam livremente; vendedores pagam pouco para publicar ou impulsionar.",
+      "Use Human Chat para conversar com vendedores e manter acordos claros.",
+      "Voce pode limpar mercado, posts, historico ou a conta local quando quiser.",
     ],
+    settingsTitle: "Settings",
   },
 ];
+
+type AppLanguage = (typeof appLanguages)[number];
 
 const marketplaceItems = [
   {
@@ -1578,6 +1607,15 @@ type MarketBid = {
   amount: number;
   buyer: string;
   note: string;
+};
+
+type MarketLocationState = {
+  accuracy?: number;
+  label: string;
+  lat?: number;
+  lng?: number;
+  source: "not-requested" | "browser-gps" | "manual" | "unavailable";
+  status: "idle" | "requesting" | "ready" | "denied";
 };
 
 type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me";
@@ -1739,6 +1777,8 @@ export default function HumanChainApp() {
   const [verifiedHuman, setVerifiedHuman] = useState<VerifiedHuman | null>(null);
   const [gateBusy, setGateBusy] = useState(false);
   const [notificationReady, setNotificationReady] = useState(false);
+  const [worldContext, setWorldContext] = useState(getWorldMiniAppContext);
+  const [appLanguage, setAppLanguage] = useState<AppLanguage>(appLanguages[0]);
   const [streak, setStreak] = useState(4);
   const [links, setLinks] = useState(initialLinks);
   const [savedItems, setSavedItems] = useState(3);
@@ -1766,6 +1806,26 @@ export default function HumanChainApp() {
     },
   ]);
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
+
+  useEffect(() => {
+    getWorldPermissions()
+      .then((result) => {
+        const permissions = result.data?.permissions as
+          | { notifications?: boolean | { status?: string } }
+          | undefined;
+        const notifications = permissions?.notifications;
+        const isGranted =
+          notifications === true ||
+          (typeof notifications === "object" && notifications?.status === "success");
+
+        if (isGranted) {
+          setNotificationReady(true);
+        }
+      })
+      .catch(() => {
+        setWorldContext(getWorldMiniAppContext());
+      });
+  }, []);
 
   useEffect(() => {
     window.localStorage.setItem("humanchain_posts", JSON.stringify(humanPosts));
@@ -1914,14 +1974,13 @@ export default function HumanChainApp() {
       }
 
       setVerifiedHuman({
-        username: `@human_${address.slice(2, 8).toLowerCase()}`,
+        username: worldContext.username ? `@${worldContext.username}` : `@human_${address.slice(2, 8).toLowerCase()}`,
         wallet: address,
         mode: "world",
       });
-      void enableHumanChainNotifications("login");
       setToast({
         title: "Verified human entered",
-        detail: `${address.slice(0, 6)}...${address.slice(-4)} is ready for HumanChain.`,
+        detail: `${address.slice(0, 6)}...${address.slice(-4)} is ready. Notification, location, chat, and payment actions stay user controlled.`,
       });
     } catch (error) {
       setToast({
@@ -2086,13 +2145,22 @@ export default function HumanChainApp() {
   return (
     <main className="app-shell">
       <section className="phone-frame">
+        <AppSettingsBar
+          activeLanguage={appLanguage}
+          notificationReady={notificationReady}
+          onEnableNotifications={() => enableHumanChainNotifications("settings")}
+          onChange={setAppLanguage}
+          worldContext={worldContext}
+        />
         {verifiedHuman ? activeView : (
           <LoginGate
+            appLanguage={appLanguage}
             busy={gateBusy}
             notificationReady={notificationReady}
             onEnableNotifications={() => enableHumanChainNotifications("login")}
             onPreview={enterPreview}
             onVerify={enterWithWorld}
+            worldContext={worldContext}
           />
         )}
         {toast ? (
@@ -2114,24 +2182,30 @@ export default function HumanChainApp() {
             payment={paymentPrompt}
           />
         ) : null}
-        {verifiedHuman ? <BottomNav active={tab} onChange={setTab} /> : null}
+        {verifiedHuman ? (
+          <BottomNav active={tab} appLanguage={appLanguage} onChange={setTab} />
+        ) : null}
       </section>
     </main>
   );
 }
 
 function LoginGate({
+  appLanguage,
   busy,
   notificationReady,
   onEnableNotifications,
   onPreview,
   onVerify,
+  worldContext,
 }: {
+  appLanguage: AppLanguage;
   busy: boolean;
   notificationReady: boolean;
   onEnableNotifications: () => void | Promise<void>;
   onPreview: () => void;
   onVerify: () => void | Promise<void>;
+  worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   return (
     <div className="login-gate">
@@ -2154,13 +2228,19 @@ function LoginGate({
           of wisdom with World wallet authentication, World Chat, bid alerts,
           and verified-human trust.
         </p>
+        <div className="gate-context-strip">
+          <span>Opened from {worldContext.launchLocation ?? "World App preview"}</span>
+          <span>{worldContext.deviceOS ?? "Device"} ready</span>
+          <span>{appLanguage.name} selected</span>
+        </div>
         <div className="gate-notification-prompt">
           <Bell size={18} />
           <div>
             <strong>{notificationReady ? "Notifications allowed" : "Allow HumanChain notifications?"}</strong>
             <span>
               Get functional alerts for inbox messages, bids, accepted offers,
-              daily questions, story drops, payments, and account safety.
+              daily questions, story drops, payments, and account safety. You
+              can skip this and still enter.
             </span>
           </div>
           <button onClick={onEnableNotifications} type="button">
@@ -2226,7 +2306,6 @@ function HomeView({
   streak: number;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
-  const [guideLanguage, setGuideLanguage] = useState(guideLanguages[0]);
   const liveVerdicts = [
     {
       question: dailyHumanQuestion.title,
@@ -2304,29 +2383,33 @@ function HomeView({
         ))}
       </section>
 
-      <section className="panel guide-panel">
+      <section className="panel home-command-center">
         <div className="section-heading">
-          <span>Mini app guide</span>
-          <ShieldCheck size={18} />
+          <span>Today on HumanChain</span>
+          <Radio size={18} />
         </div>
-        <div className="language-row" aria-label="Guide languages">
-          {guideLanguages.map((language) => (
-            <button
-              className={guideLanguage.code === language.code ? "active" : ""}
-              key={language.code}
-              onClick={() => setGuideLanguage(language)}
-              type="button"
-            >
-              {language.name}
-            </button>
-          ))}
-        </div>
-        <article className="guide-card">
-          <strong>{guideLanguage.title}</strong>
-          {guideLanguage.points.map((point) => (
-            <p key={point}>{point}</p>
-          ))}
-        </article>
+        {[
+          ["Answer", "Join the Daily Human Question before the verdict closes.", "Ask"],
+          ["Connect", "Add one chain link from your field or lived experience.", "Chains"],
+          ["Trade", "Check nearby verified listings and serious bid windows.", "Market"],
+        ].map(([title, detail, action]) => (
+          <button
+            className="home-command-row"
+            key={title}
+            onClick={() => {
+              if (action === "Ask") setTab("ask");
+              if (action === "Chains") setTab("chains");
+              if (action === "Market") setTab("market");
+            }}
+            type="button"
+          >
+            <div>
+              <strong>{title}</strong>
+              <span>{detail}</span>
+            </div>
+            <b>{action}</b>
+          </button>
+        ))}
       </section>
 
       <section className="streak-card">
@@ -4522,7 +4605,12 @@ function MarketplaceView({
   setMarketplaceListings: React.Dispatch<React.SetStateAction<MarketplaceListing[]>>;
 }) {
   const [activeFilter, setActiveFilter] = useState("Near me");
-  const [locationReady, setLocationReady] = useState(false);
+  const [manualArea, setManualArea] = useState("Nairobi");
+  const [marketLocation, setMarketLocation] = useState<MarketLocationState>({
+    label: "Location not shared",
+    source: "not-requested",
+    status: "idle",
+  });
   const [bidDrafts, setBidDrafts] = useState<Record<string, string>>({});
   const [marketBids, setMarketBids] = useState<Record<string, MarketBid[]>>(() =>
     Object.fromEntries(
@@ -4550,6 +4638,7 @@ function MarketplaceView({
     if (activeFilter === "Marketing") return item.tag === "Marketing";
     return true;
   });
+  const locationReady = marketLocation.status === "ready";
 
   function publishListing(plan: (typeof marketplacePlans)[number]) {
     openPayment({
@@ -4569,6 +4658,75 @@ function MarketplaceView({
 
   function updateListingDraft(field: keyof typeof listingDraft, value: string) {
     setListingDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  function requestMarketplaceLocation() {
+    setMarketLocation((current) => ({
+      ...current,
+      label: "Requesting browser location...",
+      status: "requesting",
+    }));
+
+    if (!navigator.geolocation) {
+      setMarketLocation({
+        label: "GPS unavailable. Use the area field instead.",
+        source: "unavailable",
+        status: "denied",
+      });
+      act(
+        "Location unavailable",
+        "World MiniKit does not provide GPS. This device/browser has no geolocation, so use manual area matching.",
+      );
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { accuracy, latitude, longitude } = position.coords;
+
+        setMarketLocation({
+          accuracy,
+          label: `GPS shared, about ${Math.round(accuracy)}m accuracy`,
+          lat: latitude,
+          lng: longitude,
+          source: "browser-gps",
+          status: "ready",
+        });
+        earnPoints(5, "Nearby marketplace is now ranked with your explicit browser location consent.");
+      },
+      (error) => {
+        setMarketLocation({
+          label: error.code === error.PERMISSION_DENIED ? "Location not allowed" : "Location could not be read",
+          source: "unavailable",
+          status: "denied",
+        });
+        act(
+          "Location not connected",
+          "You can still browse by manually entering your area. HumanChain will not guess or store GPS without consent.",
+        );
+      },
+      {
+        enableHighAccuracy: false,
+        maximumAge: 300_000,
+        timeout: 10_000,
+      },
+    );
+  }
+
+  function useManualMarketplaceArea() {
+    const area = manualArea.trim();
+
+    if (!area) {
+      act("Area needed", "Enter a town, estate, or pickup zone to rank nearby listings manually.");
+      return;
+    }
+
+    setMarketLocation({
+      label: `Manual area: ${area}`,
+      source: "manual",
+      status: "ready",
+    });
+    earnPoints(3, "Manual marketplace area connected without GPS.");
   }
 
   function saveMarketplaceListing() {
@@ -4755,23 +4913,30 @@ function MarketplaceView({
         <div className="market-location-card">
           <MapPin size={18} />
           <div>
-            <strong>{locationReady ? "Nearby market active" : "Location preview"}</strong>
+            <strong>{locationReady ? "Nearby market active" : "Connect nearby market"}</strong>
             <span>
-              {locationReady
-                ? "Showing listings around your current area."
-                : "Enable location in World App to rank items close to you."}
+              {locationReady ? marketLocation.label : "World launch context is not GPS. Share browser location or enter an area."}
             </span>
           </div>
-          <button
-            onClick={() => {
-              setLocationReady(true);
-              earnPoints(5, "Location discovery makes your marketplace more useful.");
-            }}
-            type="button"
-          >
-            Use
+          <button onClick={requestMarketplaceLocation} type="button">
+            {marketLocation.status === "requesting" ? "..." : "GPS"}
           </button>
         </div>
+        <div className="manual-location-row">
+          <input
+            aria-label="Manual marketplace area"
+            onChange={(event) => setManualArea(event.target.value)}
+            placeholder="Area, e.g. Westlands"
+            value={manualArea}
+          />
+          <button onClick={useManualMarketplaceArea} type="button">
+            Use area
+          </button>
+        </div>
+        <small className="market-transparency-note">
+          Transparency: HumanChain uses World launch context for app entry and
+          browser/manual location for nearby ranking only after you choose it.
+        </small>
       </section>
 
       <section className="market-actions">
@@ -4791,6 +4956,24 @@ function MarketplaceView({
           <span>Market business</span>
           <strong>4 WLD</strong>
         </button>
+      </section>
+
+      <section className="market-panel market-flow-panel">
+        <div className="section-heading">
+          <span>Marketplace flow</span>
+          <Gavel size={18} />
+        </div>
+        {[
+          ["Seller publishes", "Pay the small listing fee, add photos, set direct sale or timed bidding."],
+          ["Buyer interacts", "Browse freely, open Human Chat, share listing, or place a bid near the seller target."],
+          ["Seller chooses", "Seller accepts the best serious offer or continues the listing until the duration ends."],
+          ["Humans confirm", "Final meetup, delivery, and payment confirmation stay transparent in chat/history."],
+        ].map(([title, detail]) => (
+          <article className="market-flow-step" key={title}>
+            <strong>{title}</strong>
+            <span>{detail}</span>
+          </article>
+        ))}
       </section>
 
       <section className="market-panel listing-studio">
@@ -5245,7 +5428,7 @@ function MeView({
               await requestWorldPermission(Permission.Notifications);
               act(
                 "Notifications ready",
-                "World App can send functional alerts for inbox, bids, accepted offers, stories, payments, rewards, and safety.",
+                "World App can send functional alerts for inbox, bids, accepted offers, stories, payments, rewards, and safety. You can turn them off in World App settings.",
               );
             } catch (error) {
               act("Notification permission", error instanceof Error ? error.message : "Try again inside World App.");
@@ -5301,6 +5484,23 @@ function MeView({
           allowed by the user through MiniKit, and sent only for relevant
           functional mini-app activity.
         </p>
+      </section>
+      <section className="panel notification-sector-panel">
+        <div className="section-heading">
+          <span>World app context</span>
+          <MapPin size={18} />
+        </div>
+        {[
+          ["Launch source", "HumanChain can read whether it opened from chat, home, app store, deep link, or wallet tab."],
+          ["Device metadata", "World App may provide OS, app version, and safe-area information for layout."],
+          ["Nearby market", "GPS is not taken from World context. The user must tap GPS or type an area."],
+          ["Privacy rule", "No analytics should be collected when World context says optional analytics is off."],
+        ].map(([title, detail]) => (
+          <article className="notification-sector" key={title}>
+            <strong>{title}</strong>
+            <span>{detail}</span>
+          </article>
+        ))}
       </section>
       <section className="stats-grid">
         <Stat label="Points" value={String(points)} />
@@ -5519,20 +5719,90 @@ function PaymentSheet({
   );
 }
 
+function AppSettingsBar({
+  activeLanguage,
+  notificationReady,
+  onEnableNotifications,
+  onChange,
+  worldContext,
+}: {
+  activeLanguage: AppLanguage;
+  notificationReady: boolean;
+  onEnableNotifications: () => void | Promise<void>;
+  onChange: (language: AppLanguage) => void;
+  worldContext: ReturnType<typeof getWorldMiniAppContext>;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <section className="app-settings-bar" aria-label="Mini app settings">
+      <button
+        aria-expanded={open}
+        className="settings-trigger"
+        onClick={() => setOpen((current) => !current)}
+        type="button"
+      >
+        <Settings size={17} />
+        <span>{activeLanguage.settingsTitle}</span>
+      </button>
+      {open ? (
+        <div className="settings-popover">
+          <div className="settings-section">
+            <strong>Language</strong>
+            <div className="settings-language-row">
+              {appLanguages.map((language) => (
+                <button
+                  className={activeLanguage.code === language.code ? "active" : ""}
+                  key={language.code}
+                  onClick={() => onChange(language)}
+                  type="button"
+                >
+                  {language.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="settings-section">
+            <strong>{activeLanguage.title}</strong>
+            {activeLanguage.points.map((point) => (
+              <p key={point}>{point}</p>
+            ))}
+          </div>
+          <div className="settings-section compact">
+            <strong>World context</strong>
+            <span>Opened from {worldContext.launchLocation ?? "World App preview"}</span>
+            <span>{worldContext.deviceOS ?? "Device"} ready</span>
+          </div>
+          <button
+            className="settings-notification"
+            onClick={onEnableNotifications}
+            type="button"
+          >
+            <Bell size={15} />
+            {notificationReady ? "Notifications ready" : "Allow notifications"}
+          </button>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function BottomNav({
   active,
+  appLanguage,
   onChange,
 }: {
   active: Tab;
+  appLanguage: AppLanguage;
   onChange: (tab: Tab) => void;
 }) {
   const items: Array<[Tab, string, React.ReactNode]> = [
-    ["home", "Home", <Home key="home" size={20} />],
-    ["ask", "Ask", <MessageCircleQuestion key="ask" size={20} />],
-    ["market", "Market", <Store key="market" size={20} />],
-    ["chains", "Chains", <Sparkles key="chains" size={20} />],
-    ["stories", "Stories", <BookOpen key="stories" size={20} />],
-    ["me", "Me", <UserRound key="me" size={20} />],
+    ["home", appLanguage.nav.home, <Home key="home" size={20} />],
+    ["ask", appLanguage.nav.ask, <MessageCircleQuestion key="ask" size={20} />],
+    ["chains", appLanguage.nav.chains, <Sparkles key="chains" size={20} />],
+    ["market", appLanguage.nav.market, <Store key="market" size={20} />],
+    ["stories", appLanguage.nav.stories, <BookOpen key="stories" size={20} />],
+    ["me", appLanguage.nav.me, <UserRound key="me" size={20} />],
   ];
 
   return (

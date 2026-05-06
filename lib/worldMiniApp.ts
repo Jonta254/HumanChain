@@ -23,8 +23,79 @@ type WorldChatInput = {
   to?: string[];
 };
 
+type WorldPermissionSnapshot = {
+  notifications?: unknown;
+  contacts?: unknown;
+  microphone?: unknown;
+};
+
+export type WorldMiniAppContext = {
+  deviceOS?: string;
+  launchLocation?: string | null;
+  permissions?: WorldPermissionSnapshot;
+  profilePictureUrl?: string;
+  username?: string;
+  walletAddress?: string;
+  worldAppVersion?: number;
+};
+
 export function isWorldMiniAppReady() {
   return MiniKit.isInstalled();
+}
+
+function readMiniKitValue<T>(key: string): T | undefined {
+  return (MiniKit as unknown as Record<string, T | undefined>)[key];
+}
+
+export function getWorldMiniAppContext(): WorldMiniAppContext {
+  const user = readMiniKitValue<{
+    permissions?: WorldPermissionSnapshot;
+    profilePictureUrl?: string;
+    username?: string;
+    walletAddress?: string;
+  } | null>("user");
+  const deviceProperties = readMiniKitValue<{
+    deviceOS?: string;
+    worldAppVersion?: number;
+  } | null>("deviceProperties");
+
+  return {
+    deviceOS: deviceProperties?.deviceOS,
+    launchLocation: readMiniKitValue<string | null>("location") ?? null,
+    permissions: user?.permissions,
+    profilePictureUrl: user?.profilePictureUrl,
+    username: user?.username,
+    walletAddress: user?.walletAddress,
+    worldAppVersion: deviceProperties?.worldAppVersion,
+  };
+}
+
+export async function getWorldPermissions() {
+  const miniKitWithPermissions = MiniKit as unknown as {
+    getPermissions?: (input?: Record<string, never>) => Promise<{
+      data?: {
+        permissions?: WorldPermissionSnapshot;
+        status?: string;
+        timestamp?: string;
+        version?: number;
+      };
+      executedWith?: string;
+    }>;
+  };
+
+  if (!miniKitWithPermissions.getPermissions) {
+    return {
+      executedWith: "fallback",
+      data: {
+        permissions: getWorldMiniAppContext().permissions ?? {},
+        status: "success",
+        timestamp: new Date().toISOString(),
+        version: 1,
+      },
+    };
+  }
+
+  return miniKitWithPermissions.getPermissions({});
 }
 
 export async function authenticateHumanWallet() {
