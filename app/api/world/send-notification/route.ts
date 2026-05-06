@@ -14,6 +14,12 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await readJsonBody<{
+    localisations?: Array<{
+      language: string;
+      message: string;
+      title: string;
+    }>;
+    sector?: string;
     walletAddresses?: string[];
     title?: string;
     message?: string;
@@ -24,18 +30,39 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { walletAddresses, title, message, path } = body;
+  const { localisations, sector, walletAddresses, title, message, path } = body;
+  const notificationTitle = title?.trim();
+  const notificationMessage = message?.trim();
+  const notificationPath = path?.trim() ?? "";
+  const safeSectors = new Set([
+    "inbox",
+    "marketplace",
+    "daily",
+    "stories",
+    "payments",
+    "account",
+  ]);
+  const hasInvalidLocalisation = localisations?.some(
+    (item) =>
+      !item.language ||
+      !item.title ||
+      item.title.length > 30 ||
+      !item.message ||
+      item.message.length > 200,
+  );
 
   if (
     !walletAddresses?.length ||
-    walletAddresses.length > 100 ||
+    walletAddresses.length > 1000 ||
     walletAddresses.some((address) => !isWalletAddress(address)) ||
-    !title ||
-    title.length > 45 ||
-    !message ||
-    message.length > 140 ||
+    !notificationTitle ||
+    notificationTitle.length > 30 ||
+    !notificationMessage ||
+    notificationMessage.length > 200 ||
     !path ||
-    !isSafeMiniAppPath(path)
+    !isSafeMiniAppPath(notificationPath) ||
+    (sector && !safeSectors.has(sector)) ||
+    hasInvalidLocalisation
   ) {
     return noStoreJson(
       { error: "Missing notification data." },
@@ -63,9 +90,10 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         app_id: process.env.APP_ID,
         wallet_addresses: walletAddresses,
-        title,
-        message,
-        mini_app_path: `worldapp://mini-app?app_id=${process.env.APP_ID}&path=${path}`,
+        title: notificationTitle,
+        message: notificationMessage,
+        localisations,
+        mini_app_path: `worldapp://mini-app?app_id=${process.env.APP_ID}&path=${encodeURIComponent(notificationPath)}`,
       }),
     },
   );

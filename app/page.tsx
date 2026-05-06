@@ -2,12 +2,14 @@
 
 import {
   BadgeCheck,
+  Bell,
   BookOpen,
   CalendarCheck,
   CheckCircle2,
   CircleDollarSign,
   Compass,
   Flame,
+  Gavel,
   HandCoins,
   HeartHandshake,
   Home,
@@ -1463,6 +1465,15 @@ const marketplaceItems = [
     tone: "blue",
     photos: 3,
     quality: "Clean front, back, and screen photos",
+    bidding: {
+      target: 22,
+      floor: 18,
+      ends: "18h left",
+      offers: [
+        { buyer: "@sam_bid", amount: 18, note: "Can pick in Westlands today." },
+        { buyer: "@techmama", amount: 20, note: "Cashless pickup after work." },
+      ],
+    },
   },
   {
     title: "New Ankara tote batch",
@@ -1476,6 +1487,14 @@ const marketplaceItems = [
     tone: "gold",
     photos: 4,
     quality: "Styled product photos and size detail",
+    bidding: {
+      target: 4,
+      floor: 3,
+      ends: "2d left",
+      offers: [
+        { buyer: "@giftbuyer", amount: 3, note: "Need two bags if available." },
+      ],
+    },
   },
   {
     title: "Restaurant launch poster",
@@ -1489,6 +1508,7 @@ const marketplaceItems = [
     tone: "green",
     photos: 2,
     quality: "Menu preview and shop-front image",
+    bidding: null,
   },
   {
     title: "Used study desk",
@@ -1502,6 +1522,14 @@ const marketplaceItems = [
     tone: "violet",
     photos: 3,
     quality: "Wide photo plus scratches disclosed",
+    bidding: {
+      target: 7,
+      floor: 5,
+      ends: "9h left",
+      offers: [
+        { buyer: "@campusbuyer", amount: 5, note: "Can collect near Ngong Road." },
+      ],
+    },
   },
 ];
 
@@ -1515,6 +1543,7 @@ const marketplacePlans = [
 const marketplaceSignals = [
   "Location-first discovery",
   "3 photos included per listing",
+  "Timed bidding near seller price",
   "New and second-hand items",
   "World Chat seller inbox",
   "Business links and campaigns",
@@ -1531,6 +1560,9 @@ type MarketplaceListing = {
   id: number;
   title: string;
   price: string;
+  bidFloor: string;
+  duration: string;
+  saleMode: "direct" | "bidding";
   condition: string;
   area: string;
   link: string;
@@ -1538,6 +1570,14 @@ type MarketplaceListing = {
   photos: Array<{ id: number; name: string; src: string }>;
   status: "draft" | "payment-ready";
   createdAt: string;
+};
+
+type MarketplaceItem = (typeof marketplaceItems)[number];
+
+type MarketBid = {
+  amount: number;
+  buyer: string;
+  note: string;
 };
 
 type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me";
@@ -1698,6 +1738,7 @@ export default function HumanChainApp() {
   const [toast, setToast] = useState<Toast | null>(null);
   const [verifiedHuman, setVerifiedHuman] = useState<VerifiedHuman | null>(null);
   const [gateBusy, setGateBusy] = useState(false);
+  const [notificationReady, setNotificationReady] = useState(false);
   const [streak, setStreak] = useState(4);
   const [links, setLinks] = useState(initialLinks);
   const [savedItems, setSavedItems] = useState(3);
@@ -1832,6 +1873,31 @@ export default function HumanChainApp() {
     setPaymentPrompt(payment);
   }
 
+  async function enableHumanChainNotifications(context = "login") {
+    try {
+      await requestWorldPermission(Permission.Notifications);
+      setNotificationReady(true);
+      recordHistory({
+        title: "Notifications enabled",
+        detail:
+          "Daily questions, direct inbox, marketplace bids, story drops, payments, and account alerts can now notify this human.",
+        kind: "profile",
+      });
+      setToast({
+        title: "Notifications ready",
+        detail:
+          context === "login"
+            ? "HumanChain will only send functional World App alerts tied to your account and activity."
+            : "Sector alerts are ready for every important HumanChain action.",
+      });
+    } catch (error) {
+      setToast({
+        title: "Notification permission",
+        detail: error instanceof Error ? error.message : "Open inside World App and allow HumanChain notifications.",
+      });
+    }
+  }
+
   async function enterWithWorld() {
     setGateBusy(true);
 
@@ -1852,6 +1918,7 @@ export default function HumanChainApp() {
         wallet: address,
         mode: "world",
       });
+      void enableHumanChainNotifications("login");
       setToast({
         title: "Verified human entered",
         detail: `${address.slice(0, 6)}...${address.slice(-4)} is ready for HumanChain.`,
@@ -2022,6 +2089,8 @@ export default function HumanChainApp() {
         {verifiedHuman ? activeView : (
           <LoginGate
             busy={gateBusy}
+            notificationReady={notificationReady}
+            onEnableNotifications={() => enableHumanChainNotifications("login")}
             onPreview={enterPreview}
             onVerify={enterWithWorld}
           />
@@ -2053,10 +2122,14 @@ export default function HumanChainApp() {
 
 function LoginGate({
   busy,
+  notificationReady,
+  onEnableNotifications,
   onPreview,
   onVerify,
 }: {
   busy: boolean;
+  notificationReady: boolean;
+  onEnableNotifications: () => void | Promise<void>;
   onPreview: () => void;
   onVerify: () => void | Promise<void>;
 }) {
@@ -2078,8 +2151,22 @@ function LoginGate({
         <h1>Enter as one real human.</h1>
         <p>
           Ask, answer, publish, read, trade nearby, and build a visible chain
-          of wisdom with World wallet authentication and verified-human trust.
+          of wisdom with World wallet authentication, World Chat, bid alerts,
+          and verified-human trust.
         </p>
+        <div className="gate-notification-prompt">
+          <Bell size={18} />
+          <div>
+            <strong>{notificationReady ? "Notifications allowed" : "Allow HumanChain notifications?"}</strong>
+            <span>
+              Get functional alerts for inbox messages, bids, accepted offers,
+              daily questions, story drops, payments, and account safety.
+            </span>
+          </div>
+          <button onClick={onEnableNotifications} type="button">
+            {notificationReady ? "Ready" : "Allow"}
+          </button>
+        </div>
         <button className="gate-primary" disabled={busy} onClick={onVerify} type="button">
           <ShieldCheck size={19} />
           {busy ? "Checking World wallet..." : "Continue with World App"}
@@ -2102,7 +2189,7 @@ function LoginGate({
         <div>
           <Radio size={18} />
           <strong>Permission clear</strong>
-          <span>Voice and notifications ask only when needed.</span>
+          <span>Notifications ask in context and stay functional.</span>
         </div>
       </section>
     </div>
@@ -4436,15 +4523,24 @@ function MarketplaceView({
 }) {
   const [activeFilter, setActiveFilter] = useState("Near me");
   const [locationReady, setLocationReady] = useState(false);
+  const [bidDrafts, setBidDrafts] = useState<Record<string, string>>({});
+  const [marketBids, setMarketBids] = useState<Record<string, MarketBid[]>>(() =>
+    Object.fromEntries(
+      marketplaceItems.map((item) => [item.title, item.bidding?.offers ?? []]),
+    ),
+  );
   const [listingPhotos, setListingPhotos] = useState<
     Array<{ id: number; name: string; src: string }>
   >([]);
   const [listingDraft, setListingDraft] = useState({
     area: "",
+    bidFloor: "",
     condition: "",
     details: "",
+    duration: "3 days",
     link: "",
     price: "",
+    saleMode: "direct" as MarketplaceListing["saleMode"],
     title: "",
   });
 
@@ -4481,6 +4577,9 @@ function MarketplaceView({
       id: Date.now(),
       title,
       price: listingDraft.price.trim() || "Price not set",
+      bidFloor: listingDraft.bidFloor.trim(),
+      duration: listingDraft.duration.trim() || "3 days",
+      saleMode: listingDraft.saleMode,
       condition: listingDraft.condition || "Condition not set",
       area: listingDraft.area.trim() || "Nearby area not set",
       link: listingDraft.link.trim(),
@@ -4504,10 +4603,13 @@ function MarketplaceView({
     earnPoints(10, "Your marketplace listing was stored in HumanChain history.");
     setListingDraft({
       area: "",
+      bidFloor: "",
       condition: "",
       details: "",
+      duration: "3 days",
       link: "",
       price: "",
+      saleMode: "direct",
       title: "",
     });
     setListingPhotos([]);
@@ -4551,7 +4653,7 @@ function MarketplaceView({
     }
   }
 
-  async function shareMarketItem(item: (typeof marketplaceItems)[number]) {
+  async function shareMarketItem(item: MarketplaceItem) {
     try {
       await shareWithWorld({
         title: `${item.title} on HumanChain Market`,
@@ -4564,7 +4666,7 @@ function MarketplaceView({
     }
   }
 
-  async function openSellerChat(item: (typeof marketplaceItems)[number]) {
+  async function openSellerChat(item: MarketplaceItem) {
     const sellerUsername = item.seller.replace(/^@/, "");
 
     try {
@@ -4580,6 +4682,59 @@ function MarketplaceView({
       act("World Chat opened", `${item.seller}'s Human Chat inbox is ready for this listing.`);
     } catch (error) {
       act("Chat unavailable", error instanceof Error ? error.message : "Try opening the seller from World App.");
+    }
+  }
+
+  function getTopBid(item: MarketplaceItem) {
+    const offers = marketBids[item.title] ?? [];
+
+    return offers.reduce<MarketBid | null>(
+      (best, offer) => (!best || offer.amount > best.amount ? offer : best),
+      null,
+    );
+  }
+
+  async function placeBid(item: MarketplaceItem) {
+    if (!item.bidding) {
+      act("Direct sale item", "This listing uses chat-first buying instead of timed bidding.");
+      return;
+    }
+
+    const nextBid = Number.parseFloat(bidDrafts[item.title] ?? "");
+
+    if (!Number.isFinite(nextBid) || nextBid < item.bidding.floor) {
+      act(
+        "Bid too low",
+        `Enter at least ${item.bidding.floor} WLD so the seller receives serious offers near the target price.`,
+      );
+      return;
+    }
+
+    const bid: MarketBid = {
+      amount: nextBid,
+      buyer: "@you",
+      note: nextBid >= item.bidding.target ? "Near seller target. Strong offer." : "Open offer for seller review.",
+    };
+
+    setMarketBids((current) => ({
+      ...current,
+      [item.title]: [bid, ...(current[item.title] ?? [])],
+    }));
+    setBidDrafts((current) => ({ ...current, [item.title]: "" }));
+    recordHistory({
+      title: "Marketplace bid placed",
+      detail: `${nextBid} WLD bid placed on ${item.title}. Seller can accept the best offer before ${item.bidding.ends}.`,
+      kind: "market",
+    });
+
+    try {
+      await chatWithWorld({
+        message: `I placed a ${nextBid} WLD bid on ${item.title}. Let me know if this is close enough to accept.`,
+        to: [item.seller.replace(/^@/, "")],
+      });
+      act("Bid sent to seller", "World Chat opened so the buyer and seller can confirm details directly.");
+    } catch (error) {
+      act("Bid saved", error instanceof Error ? error.message : "Bid is saved in the mini app preview.");
     }
   }
 
@@ -4677,9 +4832,38 @@ function MarketplaceView({
           <input
             aria-label="Price"
             onChange={(event) => updateListingDraft("price", event.target.value)}
-            placeholder="Price, e.g. 18 WLD or KES 12,000"
+            placeholder="Target price, e.g. 18 WLD or KES 12,000"
             value={listingDraft.price}
           />
+          <select
+            aria-label="Sale mode"
+            onChange={(event) =>
+              updateListingDraft(
+                "saleMode",
+                event.target.value as MarketplaceListing["saleMode"],
+              )
+            }
+            value={listingDraft.saleMode}
+          >
+            <option value="direct">Direct chat sale</option>
+            <option value="bidding">Timed bidding</option>
+          </select>
+          <input
+            aria-label="Minimum bid"
+            onChange={(event) => updateListingDraft("bidFloor", event.target.value)}
+            placeholder="Minimum bid, e.g. 15 WLD"
+            value={listingDraft.bidFloor}
+          />
+          <select
+            aria-label="Listing duration"
+            onChange={(event) => updateListingDraft("duration", event.target.value)}
+            value={listingDraft.duration}
+          >
+            <option>24 hours</option>
+            <option>3 days</option>
+            <option>7 days</option>
+            <option>14 days</option>
+          </select>
           <select
             aria-label="Condition"
             onChange={(event) => updateListingDraft("condition", event.target.value)}
@@ -4743,7 +4927,12 @@ function MarketplaceView({
                 <span>
                   {listing.price} - {listing.condition} - {listing.photos.length} photos
                 </span>
-                <small>{listing.area} - {listing.createdAt}</small>
+                <small>
+                  {listing.saleMode === "bidding"
+                    ? `Bidding ${listing.duration}, floor ${listing.bidFloor || "not set"}`
+                    : "Direct chat sale"}{" "}
+                  - {listing.area} - {listing.createdAt}
+                </small>
               </div>
               <button
                 onClick={() => {
@@ -4807,6 +4996,51 @@ function MarketplaceView({
                   <span>{item.trust}</span>
                 </div>
                 <small>{item.quality}</small>
+                {item.bidding ? (
+                  <div className="bid-console">
+                    <div className="bid-console-top">
+                      <span>
+                        <Gavel size={14} />
+                        Bidding closes {item.bidding.ends}
+                      </span>
+                      <strong>
+                        Best {getTopBid(item)?.amount ?? item.bidding.floor} WLD
+                      </strong>
+                    </div>
+                    <p>
+                      Seller target {item.bidding.target} WLD. Minimum serious
+                      offer {item.bidding.floor} WLD.
+                    </p>
+                    <div className="bid-row">
+                      <input
+                        aria-label={`Bid amount for ${item.title}`}
+                        inputMode="decimal"
+                        onChange={(event) =>
+                          setBidDrafts((current) => ({
+                            ...current,
+                            [item.title]: event.target.value,
+                          }))
+                        }
+                        placeholder={`${item.bidding.floor}+ WLD`}
+                        value={bidDrafts[item.title] ?? ""}
+                      />
+                      <button onClick={() => void placeBid(item)} type="button">
+                        Bid
+                      </button>
+                    </div>
+                    <div className="bid-stack">
+                      {(marketBids[item.title] ?? []).slice(0, 3).map((bid) => (
+                        <span key={`${bid.buyer}-${bid.amount}-${bid.note}`}>
+                          {bid.buyer}: {bid.amount} WLD - {bid.note}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="direct-chat-note">
+                    Direct inbox sale. Buyers use Human Chat or the listing link.
+                  </div>
+                )}
               </div>
               <div className="market-card-actions">
                 <button
@@ -4852,7 +5086,8 @@ function MarketplaceView({
         ))}
         <p>
           Buyers can browse and chat freely. Sellers and advertisers pay a small
-          publishing fee so the marketplace stays serious, affordable, and clean.
+          publishing fee, choose direct inbox sale or timed bidding, and receive
+          offer alerts so the marketplace stays serious, affordable, and clean.
         </p>
       </section>
 
@@ -5008,7 +5243,10 @@ function MeView({
           onClick={async () => {
             try {
               await requestWorldPermission(Permission.Notifications);
-              act("Notifications ready", "World App can remind you about Daily questions, story drops, and reactions.");
+              act(
+                "Notifications ready",
+                "World App can send functional alerts for inbox, bids, accepted offers, stories, payments, rewards, and safety.",
+              );
             } catch (error) {
               act("Notification permission", error instanceof Error ? error.message : "Try again inside World App.");
             }
@@ -5017,7 +5255,7 @@ function MeView({
         >
           <Radio size={18} />
           <span>Notifications</span>
-          <strong>Daily chain ready</strong>
+          <strong>Every sector ready</strong>
         </button>
         <button
           onClick={async () => {
@@ -5039,6 +5277,30 @@ function MeView({
           <span>Creator wallet</span>
           <strong>Connect</strong>
         </button>
+      </section>
+      <section className="panel notification-sector-panel">
+        <div className="section-heading">
+          <span>Notification sectors</span>
+          <Bell size={18} />
+        </div>
+        {[
+          ["Direct inbox", "New World Chat messages from buyers, sellers, and chain replies."],
+          ["Marketplace", "New bids, higher competing bids, accepted offers, boosts, and listing expiry."],
+          ["Daily chain", "Daily question reminders, answer reactions, streak saves, and Human Points."],
+          ["Stories", "Monthly story drops, saved-story replies, tips, and reader milestones."],
+          ["Payments", "WLD payment prepared, confirmed, failed, refunded, or pending setup."],
+          ["Account safety", "Wallet login, permission changes, data controls, and verification events."],
+        ].map(([title, detail]) => (
+          <article className="notification-sector" key={title}>
+            <strong>{title}</strong>
+            <span>{detail}</span>
+          </article>
+        ))}
+        <p>
+          World requires notifications to be enabled in the Developer Portal,
+          allowed by the user through MiniKit, and sent only for relevant
+          functional mini-app activity.
+        </p>
       </section>
       <section className="stats-grid">
         <Stat label="Points" value={String(points)} />
@@ -5088,6 +5350,11 @@ function MeView({
                   {listing.price} - {listing.condition} - {listing.photos.length} photos
                 </span>
                 <small>{listing.area} - {listing.status}</small>
+                <small>
+                  {listing.saleMode === "bidding"
+                    ? `Bid window ${listing.duration}, floor ${listing.bidFloor || "not set"}`
+                    : "Direct inbox/chat sale"}
+                </small>
               </div>
               <button
                 onClick={() =>

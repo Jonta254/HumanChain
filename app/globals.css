@@ -179,6 +179,43 @@ button {
   line-height: 1.48;
 }
 
+.gate-notification-prompt {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(255, 253, 248, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.1);
+}
+
+.gate-notification-prompt div {
+  display: grid;
+  gap: 3px;
+}
+
+.gate-notification-prompt strong {
+  font-size: 0.88rem;
+}
+
+.gate-notification-prompt span {
+  color: rgba(255, 253, 248, 0.76);
+  font-size: 0.76rem;
+  line-height: 1.28;
+}
+
+.gate-notification-prompt button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--ink);
+  background: #fffdf8;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
 .gate-primary,
 .gate-secondary {
   min-height: 50px;
@@ -2393,6 +2430,38 @@ button {
   line-height: 1.2;
 }
 
+.notification-sector-panel {
+  background: linear-gradient(135deg, #fffdf8, #eef5ff);
+}
+
+.notification-sector {
+  display: grid;
+  gap: 4px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.notification-sector:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.notification-sector strong {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.notification-sector span,
+.notification-sector-panel p {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.notification-sector-panel p {
+  margin: 10px 0 0;
+}
+
 .human-history-panel {
   display: grid;
   gap: 10px;
@@ -3553,6 +3622,83 @@ button {
   color: var(--blue);
   font-size: 0.72rem;
   font-weight: 850;
+  line-height: 1.25;
+}
+
+.bid-console,
+.direct-chat-note {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid rgba(47, 111, 237, 0.14);
+  border-radius: 14px;
+  background: #f7faff;
+}
+
+.bid-console-top,
+.bid-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.bid-console-top span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--blue);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.bid-console-top strong {
+  color: var(--ink);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.bid-console p,
+.direct-chat-note {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.32;
+}
+
+.bid-console p {
+  margin: 7px 0;
+}
+
+.bid-row input {
+  min-width: 0;
+  flex: 1;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: #fffdf8;
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.bid-row button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 13px;
+  color: #fffdf8;
+  background: var(--blue);
+  font-weight: 900;
+}
+
+.bid-stack {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.bid-stack span {
+  color: var(--muted);
+  font-size: 0.74rem;
   line-height: 1.25;
 }
 
