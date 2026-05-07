@@ -55,19 +55,50 @@ button {
 
 .app-settings-bar {
   display: grid;
-  gap: 10px;
-  margin: 14px 0 8px;
+  gap: 12px;
+  margin: 18px 0 0;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 18px;
   background:
     linear-gradient(135deg, #fffdf8, #f0f7f3),
     radial-gradient(circle at 100% 0%, rgba(36, 107, 85, 0.1), transparent 8rem);
   box-shadow: 0 10px 28px rgba(62, 48, 31, 0.06);
 }
 
+.settings-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-card-heading div {
+  display: grid;
+  gap: 3px;
+}
+
+.settings-card-heading span {
+  color: var(--ink);
+  font-size: 0.94rem;
+  font-weight: 950;
+}
+
+.settings-card-heading p,
+.settings-notification-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.34;
+}
+
+.settings-card-heading svg {
+  flex: 0 0 auto;
+  color: var(--green);
+}
+
 .settings-trigger {
-  min-height: 36px;
+  min-height: 42px;
   width: 100%;
   display: inline-flex;
   align-items: center;
@@ -78,14 +109,18 @@ button {
   padding: 7px 11px;
   color: var(--ink);
   background: #fffdf8;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 900;
 }
 
 .settings-popover {
   display: grid;
-  gap: 10px;
-  padding-top: 2px;
+  gap: 12px;
+  position: static;
+  width: 100%;
+  max-width: 100%;
+  padding-top: 4px;
+  overflow: visible;
 }
 
 .settings-section {
@@ -112,9 +147,9 @@ button {
 }
 
 .settings-language-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
 }
 
 .settings-language-row button,
@@ -127,6 +162,7 @@ button {
   background: #fffcf6;
   font-size: 0.76rem;
   font-weight: 850;
+  white-space: normal;
 }
 
 .settings-language-row button.active,

@@ -1873,6 +1873,128 @@ const appLanguages = [
 
 type AppLanguage = (typeof appLanguages)[number];
 
+const settingsEssentialsByLanguage: Record<
+  string,
+  {
+    accountTitle: string;
+    accountPoints: string[];
+    dataTitle: string;
+    dataPoints: string[];
+    languageHint: string;
+    locationTitle: string;
+    locationPoints: string[];
+    notificationsHint: string;
+    panelDetail: string;
+    panelTitle: string;
+  }
+> = {
+  en: {
+    accountTitle: "Account safety",
+    accountPoints: [
+      "World wallet verification protects trusted entry.",
+      "You can remove local posts, listings, history, or account data from your profile.",
+    ],
+    dataTitle: "Data and storage",
+    dataPoints: [
+      "Posts, marketplace listings, and bids keep a local-safe copy first.",
+      "Backend receipts attach when cloud storage is configured.",
+    ],
+    languageHint: "Choose one language and the Home, entry, settings, and navigation copy update together.",
+    locationTitle: "Nearby market location",
+    locationPoints: [
+      "GPS is never taken from World context automatically.",
+      "Market location only changes after the user taps GPS or enters an area.",
+    ],
+    notificationsHint: "Functional alerts cover inbox, bids, accepted offers, stories, payments, and account safety.",
+    panelDetail: "Change language, notification permission, World context, storage, location, and account safety.",
+    panelTitle: "Home settings",
+  },
+  es: {
+    accountTitle: "Seguridad de cuenta",
+    accountPoints: [
+      "La verificacion con World wallet protege la entrada confiable.",
+      "Puedes eliminar publicaciones, listados, historial o datos locales desde tu perfil.",
+    ],
+    dataTitle: "Datos y almacenamiento",
+    dataPoints: [
+      "Publicaciones, listados y pujas guardan primero una copia local segura.",
+      "Los recibos del backend se agregan cuando el almacenamiento cloud este configurado.",
+    ],
+    languageHint: "Elige un idioma y Home, entrada, ajustes y navegacion cambian juntos.",
+    locationTitle: "Ubicacion del mercado cercano",
+    locationPoints: [
+      "El GPS nunca se toma automaticamente del contexto de World.",
+      "La ubicacion del mercado solo cambia cuando el usuario toca GPS o escribe un area.",
+    ],
+    notificationsHint: "Las alertas cubren inbox, pujas, ofertas aceptadas, historias, pagos y seguridad.",
+    panelDetail: "Cambia idioma, notificaciones, contexto de World, almacenamiento, ubicacion y seguridad.",
+    panelTitle: "Ajustes de inicio",
+  },
+  fr: {
+    accountTitle: "Securite du compte",
+    accountPoints: [
+      "La verification World wallet protege l'entree de confiance.",
+      "Tu peux supprimer posts, annonces, historique ou donnees locales depuis ton profil.",
+    ],
+    dataTitle: "Donnees et stockage",
+    dataPoints: [
+      "Les posts, annonces et offres gardent d'abord une copie locale sure.",
+      "Les recus backend s'ajoutent quand le stockage cloud est configure.",
+    ],
+    languageHint: "Choisis une langue et Home, entree, reglages et navigation changent ensemble.",
+    locationTitle: "Localisation du marche proche",
+    locationPoints: [
+      "Le GPS n'est jamais pris automatiquement depuis le contexte World.",
+      "La localisation marche change seulement apres GPS ou saisie d'une zone.",
+    ],
+    notificationsHint: "Les alertes couvrent inbox, offres, offres acceptees, histoires, paiements et securite.",
+    panelDetail: "Change langue, notifications, contexte World, stockage, localisation et securite.",
+    panelTitle: "Reglages accueil",
+  },
+  pt: {
+    accountTitle: "Seguranca da conta",
+    accountPoints: [
+      "A verificacao com World wallet protege a entrada confiavel.",
+      "Voce pode remover posts, anuncios, historico ou dados locais no perfil.",
+    ],
+    dataTitle: "Dados e armazenamento",
+    dataPoints: [
+      "Posts, anuncios e ofertas guardam primeiro uma copia local segura.",
+      "Recibos do backend entram quando o armazenamento cloud estiver configurado.",
+    ],
+    languageHint: "Escolha um idioma e Home, entrada, configuracoes e navegacao mudam juntos.",
+    locationTitle: "Localizacao do mercado proximo",
+    locationPoints: [
+      "GPS nunca e tirado automaticamente do contexto World.",
+      "A localizacao do mercado so muda quando o usuario toca GPS ou digita uma area.",
+    ],
+    notificationsHint: "Alertas cobrem inbox, ofertas, ofertas aceitas, historias, pagamentos e seguranca.",
+    panelDetail: "Altere idioma, notificacoes, contexto World, armazenamento, localizacao e seguranca.",
+    panelTitle: "Configuracoes do inicio",
+  },
+  sw: {
+    accountTitle: "Usalama wa akaunti",
+    accountPoints: [
+      "Uthibitisho wa World wallet hulinda kuingia kwa uaminifu.",
+      "Unaweza kufuta posts, listings, historia, au data ya ndani kwenye profile.",
+    ],
+    dataTitle: "Data na hifadhi",
+    dataPoints: [
+      "Posts, listings, na zabuni huweka kwanza nakala ya ndani salama.",
+      "Risiti za backend huongezwa cloud storage ikikamilika.",
+    ],
+    languageHint: "Chagua lugha moja na Home, kuingia, mipangilio, na navigation hubadilika pamoja.",
+    locationTitle: "Eneo la soko la karibu",
+    locationPoints: [
+      "GPS haichukuliwi moja kwa moja kutoka World context.",
+      "Eneo la soko hubadilika tu mtumiaji akibonyeza GPS au kuandika eneo.",
+    ],
+    notificationsHint: "Arifa zinahusu inbox, zabuni, ofa zilizokubaliwa, hadithi, malipo, na usalama.",
+    panelDetail: "Badilisha lugha, arifa, World context, hifadhi, eneo, na usalama.",
+    panelTitle: "Mipangilio ya home",
+  },
+};
+
 const marketplaceItems = [
   {
     title: "Samsung Galaxy A54",
@@ -6460,10 +6582,20 @@ function AppSettingsBar({
 }) {
   const [open, setOpen] = useState(false);
   const settingsCopy = activeLanguage.settings;
+  const essentials =
+    settingsEssentialsByLanguage[activeLanguage.code] ??
+    settingsEssentialsByLanguage.en;
   const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
 
   return (
     <section className="app-settings-bar" aria-label={settingsCopy.title}>
+      <div className="settings-card-heading">
+        <div>
+          <span>{essentials.panelTitle}</span>
+          <p>{essentials.panelDetail}</p>
+        </div>
+        <Settings size={18} />
+      </div>
       <button
         aria-expanded={open}
         className="settings-trigger"
@@ -6478,6 +6610,7 @@ function AppSettingsBar({
           <div className="settings-section">
             <strong>{settingsCopy.language}</strong>
             <span>{activeLanguage.name} {settingsCopy.selected}</span>
+            <p>{essentials.languageHint}</p>
             <div className="settings-language-row">
               {appLanguages.map((language) => (
                 <button
@@ -6501,9 +6634,27 @@ function AppSettingsBar({
             ))}
           </div>
           <div className="settings-section compact">
+            <strong>{essentials.dataTitle}</strong>
+            {essentials.dataPoints.map((point) => (
+              <p key={point}>{point}</p>
+            ))}
+          </div>
+          <div className="settings-section compact">
+            <strong>{essentials.locationTitle}</strong>
+            {essentials.locationPoints.map((point) => (
+              <p key={point}>{point}</p>
+            ))}
+          </div>
+          <div className="settings-section compact">
             <strong>{settingsCopy.worldContext}</strong>
             <span>{settingsCopy.openedFrom} {worldLaunchLabel}</span>
-            <span>{worldContext.deviceOS ?? "Device"} {settingsCopy.deviceReady}</span>
+            <span>{worldContext.deviceOS ?? activeLanguage.gate.deviceFallback} {settingsCopy.deviceReady}</span>
+          </div>
+          <div className="settings-section compact">
+            <strong>{essentials.accountTitle}</strong>
+            {essentials.accountPoints.map((point) => (
+              <p key={point}>{point}</p>
+            ))}
           </div>
           <button
             className="settings-notification"
@@ -6513,6 +6664,7 @@ function AppSettingsBar({
             <Bell size={15} />
             {notificationReady ? settingsCopy.notificationsReady : settingsCopy.allowNotifications}
           </button>
+          <p className="settings-notification-note">{essentials.notificationsHint}</p>
         </div>
       ) : null}
     </section>
