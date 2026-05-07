@@ -2292,6 +2292,20 @@ function scrollMiniAppToTop() {
   });
 }
 
+function isWorldPermissionGranted(result: unknown) {
+  const permissionResult = result as
+    | {
+        data?: { status?: string };
+        executedWith?: string;
+      }
+    | undefined;
+
+  return (
+    permissionResult?.executedWith !== "fallback" &&
+    ["success", "already_granted"].includes(permissionResult?.data?.status ?? "")
+  );
+}
+
 async function storeSafeData(
   kind: "post" | "marketplace-listing" | "marketplace-bid",
   id: number | string,
@@ -2623,7 +2637,16 @@ export default function HumanChainApp() {
 
   async function enableHumanChainNotifications(context = "login") {
     try {
-      await requestWorldPermission(Permission.Notifications);
+      const result = await requestWorldPermission(Permission.Notifications);
+
+      if (!isWorldPermissionGranted(result)) {
+        setToast({
+          title: "Open in World App",
+          detail: "Notification permission must be granted inside World App before alerts are marked ready.",
+        });
+        return;
+      }
+
       setNotificationReady(true);
       recordHistory({
         title: "Notifications enabled",
@@ -6284,11 +6307,19 @@ function MeView({
         <button
           onClick={async () => {
             try {
-              await requestWorldPermission(Permission.Notifications);
-              act(
-                "Notifications ready",
-                "World App can send functional alerts for inbox, bids, accepted offers, stories, payments, rewards, and safety. You can turn them off in World App settings.",
-              );
+              const result = await requestWorldPermission(Permission.Notifications);
+
+              if (isWorldPermissionGranted(result)) {
+                act(
+                  "Notifications ready",
+                  "World App can send functional alerts for inbox, bids, accepted offers, stories, payments, rewards, and safety. You can turn them off in World App settings.",
+                );
+              } else {
+                act(
+                  "Open in World App",
+                  "Notification permission must be granted inside World App before alerts are marked ready.",
+                );
+              }
             } catch (error) {
               act("Notification permission", error instanceof Error ? error.message : "Try again inside World App.");
             }
@@ -6544,14 +6575,22 @@ function MeView({
             <LockKeyhole size={17} />
             Open Deep Human Mirror
           </button>
-          <button onClick={async () => {
-            try {
-              await requestWorldPermission(Permission.Microphone);
-              act("Microphone ready", "Voice answers can request microphone access in World App.");
-            } catch (error) {
-              act("Microphone permission", error instanceof Error ? error.message : "Try again inside World App.");
-            }
-          }} type="button">
+          <button
+            onClick={async () => {
+              try {
+                const result = await requestWorldPermission(Permission.Microphone);
+
+                if (isWorldPermissionGranted(result)) {
+                  act("Microphone ready", "Voice answers can request microphone access in World App.");
+                } else {
+                  act("Open in World App", "Microphone permission must be granted inside World App.");
+                }
+              } catch (error) {
+                act("Microphone permission", error instanceof Error ? error.message : "Try again inside World App.");
+              }
+            }}
+            type="button"
+          >
             <Wallet size={17} />
             Enable voice access
           </button>
