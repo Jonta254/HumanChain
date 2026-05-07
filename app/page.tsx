@@ -1454,6 +1454,31 @@ const appLanguages = [
       allowNotifications: "Allow notifications",
       selected: "selected",
     },
+    gate: {
+      appLabel: "World Mini App",
+      headline: "Enter as one real human.",
+      intro:
+        "Ask, answer, publish, read, trade nearby, and build a visible chain of wisdom with World wallet authentication, World Chat, bid alerts, and verified-human trust.",
+      openedFrom: "Opened from",
+      deviceFallback: "Device",
+      deviceReady: "ready",
+      selected: "selected",
+      notificationsAllowed: "Notifications allowed",
+      allowNotificationsTitle: "Allow HumanChain notifications?",
+      notificationsDetail:
+        "Get functional alerts for inbox messages, bids, accepted offers, daily questions, story drops, payments, and account safety. You can skip this and still enter.",
+      ready: "Ready",
+      allow: "Allow",
+      checkingWallet: "Checking World wallet...",
+      continueWithWorld: "Continue with World App",
+      preview: "Preview HumanChain",
+      trustLabel: "HumanChain entry features",
+      trustCards: [
+        ["Human first", "Wallet auth protects the entry."],
+        ["WLD commerce", "Stories, boosts, listings, and ads use one payment flow."],
+        ["Permission clear", "Notifications ask in context and stay functional."],
+      ],
+    },
     title: "HumanChain Guide",
     points: [
       "Be a real human: use World wallet login for trusted access.",
@@ -1523,6 +1548,31 @@ const appLanguages = [
       notificationsReady: "Notificaciones listas",
       allowNotifications: "Permitir notificaciones",
       selected: "seleccionado",
+    },
+    gate: {
+      appLabel: "Mini app de World",
+      headline: "Entra como un humano real.",
+      intro:
+        "Pregunta, responde, publica, lee, comercia cerca y construye una cadena visible de sabiduria con World wallet, World Chat, alertas de pujas y confianza humana verificada.",
+      openedFrom: "Abierto desde",
+      deviceFallback: "Dispositivo",
+      deviceReady: "listo",
+      selected: "seleccionado",
+      notificationsAllowed: "Notificaciones permitidas",
+      allowNotificationsTitle: "Permitir notificaciones de HumanChain?",
+      notificationsDetail:
+        "Recibe alertas funcionales para mensajes, pujas, ofertas aceptadas, preguntas diarias, historias, pagos y seguridad de cuenta. Puedes omitir esto y entrar.",
+      ready: "Listo",
+      allow: "Permitir",
+      checkingWallet: "Comprobando World wallet...",
+      continueWithWorld: "Continuar con World App",
+      preview: "Previsualizar HumanChain",
+      trustLabel: "Funciones de entrada de HumanChain",
+      trustCards: [
+        ["Humano primero", "La autenticacion con wallet protege la entrada."],
+        ["Comercio WLD", "Historias, impulsos, listados y anuncios usan un solo flujo de pago."],
+        ["Permisos claros", "Las notificaciones se piden en contexto y son funcionales."],
+      ],
     },
     title: "Guia de HumanChain",
     points: [
@@ -1594,6 +1644,31 @@ const appLanguages = [
       allowNotifications: "Autoriser les notifications",
       selected: "selectionne",
     },
+    gate: {
+      appLabel: "Mini app World",
+      headline: "Entre comme un vrai humain.",
+      intro:
+        "Pose, reponds, publie, lis, commerce pres de toi et construis une chaine visible de sagesse avec World wallet, World Chat, alertes d'offres et confiance humaine verifiee.",
+      openedFrom: "Ouvert depuis",
+      deviceFallback: "Appareil",
+      deviceReady: "pret",
+      selected: "selectionne",
+      notificationsAllowed: "Notifications autorisees",
+      allowNotificationsTitle: "Autoriser les notifications HumanChain ?",
+      notificationsDetail:
+        "Recois des alertes fonctionnelles pour messages, offres, offres acceptees, questions quotidiennes, histoires, paiements et securite du compte. Tu peux ignorer et entrer.",
+      ready: "Pret",
+      allow: "Autoriser",
+      checkingWallet: "Verification de World wallet...",
+      continueWithWorld: "Continuer avec World App",
+      preview: "Apercu HumanChain",
+      trustLabel: "Fonctions d'entree HumanChain",
+      trustCards: [
+        ["Humain d'abord", "L'authentification wallet protege l'entree."],
+        ["Commerce WLD", "Histoires, boosts, annonces et pubs utilisent un seul flux de paiement."],
+        ["Permission claire", "Les notifications sont demandees en contexte et restent fonctionnelles."],
+      ],
+    },
     title: "Guide HumanChain",
     points: [
       "Entre comme humain verifie avec World wallet.",
@@ -1664,6 +1739,31 @@ const appLanguages = [
       allowNotifications: "Permitir notificacoes",
       selected: "selecionado",
     },
+    gate: {
+      appLabel: "Mini app World",
+      headline: "Entre como um humano real.",
+      intro:
+        "Pergunte, responda, publique, leia, negocie por perto e construa uma cadeia visivel de sabedoria com World wallet, World Chat, alertas de ofertas e confianca humana verificada.",
+      openedFrom: "Aberto de",
+      deviceFallback: "Dispositivo",
+      deviceReady: "pronto",
+      selected: "selecionado",
+      notificationsAllowed: "Notificacoes permitidas",
+      allowNotificationsTitle: "Permitir notificacoes do HumanChain?",
+      notificationsDetail:
+        "Receba alertas funcionais para mensagens, ofertas, ofertas aceitas, perguntas diarias, historias, pagamentos e seguranca da conta. Voce pode pular e entrar.",
+      ready: "Pronto",
+      allow: "Permitir",
+      checkingWallet: "Verificando World wallet...",
+      continueWithWorld: "Continuar com World App",
+      preview: "Prever HumanChain",
+      trustLabel: "Recursos de entrada do HumanChain",
+      trustCards: [
+        ["Humano primeiro", "A autenticacao da wallet protege a entrada."],
+        ["Comercio WLD", "Historias, boosts, anuncios e publicidade usam um fluxo de pagamento."],
+        ["Permissao clara", "Notificacoes pedem contexto e seguem funcionais."],
+      ],
+    },
     title: "Guia HumanChain",
     points: [
       "Entre como humano real com World wallet.",
@@ -1733,6 +1833,31 @@ const appLanguages = [
       notificationsReady: "Arifa ziko tayari",
       allowNotifications: "Ruhusu arifa",
       selected: "imechaguliwa",
+    },
+    gate: {
+      appLabel: "Mini App ya World",
+      headline: "Ingia kama binadamu halisi.",
+      intro:
+        "Uliza, jibu, chapisha, soma, fanya biashara karibu, na jenga mnyororo wa hekima kwa World wallet, World Chat, arifa za zabuni, na uaminifu wa binadamu waliothibitishwa.",
+      openedFrom: "Imefunguliwa kutoka",
+      deviceFallback: "Kifaa",
+      deviceReady: "tayari",
+      selected: "imechaguliwa",
+      notificationsAllowed: "Arifa zimeruhusiwa",
+      allowNotificationsTitle: "Ruhusu arifa za HumanChain?",
+      notificationsDetail:
+        "Pata arifa za ujumbe, zabuni, ofa zilizokubaliwa, maswali ya kila siku, hadithi, malipo, na usalama wa akaunti. Unaweza kuruka na bado uingie.",
+      ready: "Tayari",
+      allow: "Ruhusu",
+      checkingWallet: "Inakagua World wallet...",
+      continueWithWorld: "Endelea na World App",
+      preview: "Onyesha HumanChain",
+      trustLabel: "Vipengele vya kuingia HumanChain",
+      trustCards: [
+        ["Binadamu kwanza", "Uthibitisho wa wallet hulinda kuingia."],
+        ["Biashara ya WLD", "Hadithi, boosts, matangazo na listings hutumia malipo moja."],
+        ["Ruhusa wazi", "Arifa huombwa kwa muktadha na hubaki za kazi."],
+      ],
     },
     title: "Mwongozo wa HumanChain",
     points: [
@@ -2648,13 +2773,15 @@ function LoginGate({
   onVerify: () => void | Promise<void>;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
+  const gateCopy = appLanguage.gate;
+
   return (
     <div className="login-gate">
       <section className="gate-card">
         <div className="gate-brand">
           <img alt="HumanChain logo" src="/images/humanchain-logo.svg" />
           <div>
-            <span>World Mini App</span>
+            <span>{gateCopy.appLabel}</span>
             <strong>HumanChain</strong>
           </div>
         </div>
@@ -2663,55 +2790,44 @@ function LoginGate({
           <i />
           <b />
         </div>
-        <h1>Enter as one real human.</h1>
-        <p>
-          Ask, answer, publish, read, trade nearby, and build a visible chain
-          of wisdom with World wallet authentication, World Chat, bid alerts,
-          and verified-human trust.
-        </p>
+        <h1>{gateCopy.headline}</h1>
+        <p>{gateCopy.intro}</p>
         <div className="gate-context-strip">
-          <span>Opened from {worldContext.launchLocation ?? "World App preview"}</span>
-          <span>{worldContext.deviceOS ?? "Device"} ready</span>
-          <span>{appLanguage.name} selected</span>
+          <span>{gateCopy.openedFrom} {worldContext.launchLocation ?? "World App preview"}</span>
+          <span>{worldContext.deviceOS ?? gateCopy.deviceFallback} {gateCopy.deviceReady}</span>
+          <span>{appLanguage.name} {gateCopy.selected}</span>
         </div>
         <div className="gate-notification-prompt">
           <Bell size={18} />
           <div>
-            <strong>{notificationReady ? "Notifications allowed" : "Allow HumanChain notifications?"}</strong>
-            <span>
-              Get functional alerts for inbox messages, bids, accepted offers,
-              daily questions, story drops, payments, and account safety. You
-              can skip this and still enter.
-            </span>
+            <strong>{notificationReady ? gateCopy.notificationsAllowed : gateCopy.allowNotificationsTitle}</strong>
+            <span>{gateCopy.notificationsDetail}</span>
           </div>
           <button onClick={onEnableNotifications} type="button">
-            {notificationReady ? "Ready" : "Allow"}
+            {notificationReady ? gateCopy.ready : gateCopy.allow}
           </button>
         </div>
         <button className="gate-primary" disabled={busy} onClick={onVerify} type="button">
           <ShieldCheck size={19} />
-          {busy ? "Checking World wallet..." : "Continue with World App"}
+          {busy ? gateCopy.checkingWallet : gateCopy.continueWithWorld}
         </button>
         <button className="gate-secondary" onClick={onPreview} type="button">
-          Preview HumanChain
+          {gateCopy.preview}
         </button>
       </section>
-      <section className="gate-trust-grid" aria-label="HumanChain entry features">
-        <div>
-          <BadgeCheck size={18} />
-          <strong>Human first</strong>
-          <span>Wallet auth protects the entry.</span>
-        </div>
-        <div>
-          <CircleDollarSign size={18} />
-          <strong>WLD commerce</strong>
-          <span>Stories, boosts, listings, and ads use one payment flow.</span>
-        </div>
-        <div>
-          <Radio size={18} />
-          <strong>Permission clear</strong>
-          <span>Notifications ask in context and stay functional.</span>
-        </div>
+      <section className="gate-trust-grid" aria-label={gateCopy.trustLabel}>
+        {gateCopy.trustCards.map(([title, detail], index) => {
+          const icon =
+            index === 0 ? <BadgeCheck size={18} /> : index === 1 ? <CircleDollarSign size={18} /> : <Radio size={18} />;
+
+          return (
+            <div key={title}>
+              {icon}
+              <strong>{title}</strong>
+              <span>{detail}</span>
+            </div>
+          );
+        })}
       </section>
     </div>
   );
