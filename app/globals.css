@@ -56,7 +56,7 @@ button {
 .app-settings-bar {
   display: grid;
   gap: 10px;
-  margin-top: 14px;
+  margin: 14px 0 8px;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 20px;
@@ -68,8 +68,10 @@ button {
 
 .settings-trigger {
   min-height: 36px;
+  width: 100%;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   border: 1px solid rgba(232, 223, 210, 0.9);
   border-radius: 999px;

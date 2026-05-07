@@ -1404,6 +1404,56 @@ const appLanguages = [
       me: "Me",
       stories: "Stories",
     },
+    home: {
+      heroKicker: "Verified human network",
+      headline: "Where real humans carry wisdom forward.",
+      intro:
+        "Ask real people, read human stories, save field wisdom, trade with nearby humans, and build a visible chain of purpose inside World App.",
+      highlights: ["Daily human question", "Story vault", "Nearby marketplace", "Human points"],
+      actionsLabel: "Main actions",
+      actions: [
+        ["Ask The World", "Real answers from verified humans"],
+        ["Join Today's Chain", "Add one link to the world"],
+        ["Human Market", "Buy, sell, and promote nearby"],
+        ["Story Vault", "Monthly and paid human stories"],
+      ],
+      commandTitle: "Today on HumanChain",
+      commands: [
+        ["Answer", "Join the Daily Human Question before the verdict closes.", "Ask"],
+        ["Connect", "Add one chain link from your field or lived experience.", "Chains"],
+        ["Trade", "Check nearby verified listings and serious bid windows.", "Market"],
+      ],
+      streakKicker: "Human Streak",
+      streakTitle: "day chain alive",
+      streakDetail: "Add one meaningful action today to keep your chain growing.",
+      pointsKicker: "Human Points",
+      pointsDetail:
+        "Earn now by helping the network. Points will prepare early humans for future rewards after launch.",
+      dailyTitle: "HumanChain Daily",
+      dailyPlaceholder: "Write today's human answer...",
+      answeredAt: "Answered at",
+      answeredToday: "Answered Today",
+      answerDaily: "Answer Daily",
+      seeAnswers: "See answers",
+      trendingTitle: "Trending Verdict",
+      saveVerdict: "Save Verdict",
+      fieldsTitle: "Live human fields",
+      openQuoteRoom: "Open quote room",
+      pulseKicker: "Human Pulse",
+      pulseTitle: "What the world is feeling",
+      meters: ["Hope", "Love", "Stress", "Ambition"],
+    },
+    settings: {
+      title: "Mini app settings",
+      language: "Language",
+      guide: "Required guide",
+      worldContext: "World context",
+      openedFrom: "Opened from",
+      deviceReady: "ready",
+      notificationsReady: "Notifications ready",
+      allowNotifications: "Allow notifications",
+      selected: "selected",
+    },
     title: "HumanChain Guide",
     points: [
       "Be a real human: use World wallet login for trusted access.",
@@ -1424,6 +1474,55 @@ const appLanguages = [
       market: "Mercado",
       me: "Yo",
       stories: "Historias",
+    },
+    home: {
+      heroKicker: "Red humana verificada",
+      headline: "Donde humanos reales llevan sabiduria adelante.",
+      intro:
+        "Pregunta a personas reales, lee historias humanas, guarda sabiduria de campo, comercia cerca y construye una cadena visible dentro de World App.",
+      highlights: ["Pregunta humana diaria", "Boveda de historias", "Mercado cercano", "Puntos humanos"],
+      actionsLabel: "Acciones principales",
+      actions: [
+        ["Pregunta al mundo", "Respuestas reales de humanos verificados"],
+        ["Unete a la cadena", "Agrega un enlace al mundo"],
+        ["Mercado humano", "Compra, vende y promociona cerca"],
+        ["Boveda de historias", "Historias humanas mensuales y pagadas"],
+      ],
+      commandTitle: "Hoy en HumanChain",
+      commands: [
+        ["Responder", "Unete a la Pregunta Humana Diaria antes del cierre.", "Preguntar"],
+        ["Conectar", "Agrega un enlace desde tu experiencia real.", "Cadenas"],
+        ["Comerciar", "Mira listados cercanos y pujas serias.", "Mercado"],
+      ],
+      streakKicker: "Racha humana",
+      streakTitle: "dias de cadena viva",
+      streakDetail: "Agrega una accion significativa hoy para mantener tu cadena.",
+      pointsKicker: "Puntos humanos",
+      pointsDetail: "Gana ayudando a la red. Los puntos preparan a los primeros humanos para futuras recompensas.",
+      dailyTitle: "HumanChain Diario",
+      dailyPlaceholder: "Escribe tu respuesta humana de hoy...",
+      answeredAt: "Respondido a las",
+      answeredToday: "Respondido hoy",
+      answerDaily: "Responder diario",
+      seeAnswers: "Ver respuestas",
+      trendingTitle: "Veredicto tendencia",
+      saveVerdict: "Guardar veredicto",
+      fieldsTitle: "Campos humanos en vivo",
+      openQuoteRoom: "Abrir sala de citas",
+      pulseKicker: "Pulso humano",
+      pulseTitle: "Lo que siente el mundo",
+      meters: ["Esperanza", "Amor", "Estres", "Ambicion"],
+    },
+    settings: {
+      title: "Ajustes de la mini app",
+      language: "Idioma",
+      guide: "Guia requerida",
+      worldContext: "Contexto de World",
+      openedFrom: "Abierto desde",
+      deviceReady: "listo",
+      notificationsReady: "Notificaciones listas",
+      allowNotifications: "Permitir notificaciones",
+      selected: "seleccionado",
     },
     title: "Guia de HumanChain",
     points: [
@@ -1446,6 +1545,55 @@ const appLanguages = [
       me: "Moi",
       stories: "Histoires",
     },
+    home: {
+      heroKicker: "Reseau humain verifie",
+      headline: "La ou les vrais humains portent la sagesse.",
+      intro:
+        "Demande a de vraies personnes, lis des histoires humaines, garde la sagesse du terrain, echange pres de toi et construis une chaine visible dans World App.",
+      highlights: ["Question humaine du jour", "Coffre d'histoires", "Marche proche", "Points humains"],
+      actionsLabel: "Actions principales",
+      actions: [
+        ["Demander au monde", "Reponses reelles de humains verifies"],
+        ["Rejoindre la chaine", "Ajoute un lien au monde"],
+        ["Marche humain", "Acheter, vendre et promouvoir pres de toi"],
+        ["Coffre d'histoires", "Histoires humaines mensuelles et payantes"],
+      ],
+      commandTitle: "Aujourd'hui sur HumanChain",
+      commands: [
+        ["Repondre", "Rejoins la question humaine avant la fermeture.", "Demander"],
+        ["Connecter", "Ajoute un lien depuis ton experience vecue.", "Chaines"],
+        ["Echanger", "Consulte les annonces proches et les encheres serieuses.", "Marche"],
+      ],
+      streakKicker: "Serie humaine",
+      streakTitle: "jours de chaine active",
+      streakDetail: "Ajoute une action utile aujourd'hui pour garder la chaine active.",
+      pointsKicker: "Points humains",
+      pointsDetail: "Gagne en aidant le reseau. Les points preparent les premiers humains aux recompenses futures.",
+      dailyTitle: "HumanChain quotidien",
+      dailyPlaceholder: "Ecris ta reponse humaine du jour...",
+      answeredAt: "Repondu a",
+      answeredToday: "Repondu aujourd'hui",
+      answerDaily: "Repondre",
+      seeAnswers: "Voir les reponses",
+      trendingTitle: "Verdict tendance",
+      saveVerdict: "Garder le verdict",
+      fieldsTitle: "Champs humains en direct",
+      openQuoteRoom: "Ouvrir la salle",
+      pulseKicker: "Pouls humain",
+      pulseTitle: "Ce que ressent le monde",
+      meters: ["Espoir", "Amour", "Stress", "Ambition"],
+    },
+    settings: {
+      title: "Reglages de la mini app",
+      language: "Langue",
+      guide: "Guide requis",
+      worldContext: "Contexte World",
+      openedFrom: "Ouvert depuis",
+      deviceReady: "pret",
+      notificationsReady: "Notifications pretes",
+      allowNotifications: "Autoriser les notifications",
+      selected: "selectionne",
+    },
     title: "Guide HumanChain",
     points: [
       "Entre comme humain verifie avec World wallet.",
@@ -1467,6 +1615,55 @@ const appLanguages = [
       me: "Eu",
       stories: "Historias",
     },
+    home: {
+      heroKicker: "Rede humana verificada",
+      headline: "Onde humanos reais levam sabedoria adiante.",
+      intro:
+        "Pergunte a pessoas reais, leia historias humanas, salve sabedoria de campo, negocie por perto e construa uma cadeia visivel dentro do World App.",
+      highlights: ["Pergunta humana diaria", "Cofre de historias", "Mercado perto", "Pontos humanos"],
+      actionsLabel: "Acoes principais",
+      actions: [
+        ["Pergunte ao mundo", "Respostas reais de humanos verificados"],
+        ["Entrar na cadeia", "Adicione um link ao mundo"],
+        ["Mercado humano", "Compre, venda e promova por perto"],
+        ["Cofre de historias", "Historias humanas mensais e pagas"],
+      ],
+      commandTitle: "Hoje no HumanChain",
+      commands: [
+        ["Responder", "Entre na pergunta humana diaria antes de fechar.", "Perguntar"],
+        ["Conectar", "Adicione um link da sua experiencia real.", "Cadeias"],
+        ["Negociar", "Veja anuncios proximos e ofertas serias.", "Mercado"],
+      ],
+      streakKicker: "Sequencia humana",
+      streakTitle: "dias de cadeia viva",
+      streakDetail: "Adicione uma acao significativa hoje para manter sua cadeia.",
+      pointsKicker: "Pontos humanos",
+      pointsDetail: "Ganhe ajudando a rede. Pontos preparam humanos iniciais para recompensas futuras.",
+      dailyTitle: "HumanChain Diario",
+      dailyPlaceholder: "Escreva sua resposta humana de hoje...",
+      answeredAt: "Respondido as",
+      answeredToday: "Respondido hoje",
+      answerDaily: "Responder diario",
+      seeAnswers: "Ver respostas",
+      trendingTitle: "Veredito em alta",
+      saveVerdict: "Salvar veredito",
+      fieldsTitle: "Campos humanos ao vivo",
+      openQuoteRoom: "Abrir sala de citacoes",
+      pulseKicker: "Pulso humano",
+      pulseTitle: "O que o mundo sente",
+      meters: ["Esperanca", "Amor", "Estresse", "Ambicao"],
+    },
+    settings: {
+      title: "Configuracoes da mini app",
+      language: "Idioma",
+      guide: "Guia obrigatorio",
+      worldContext: "Contexto do World",
+      openedFrom: "Aberto de",
+      deviceReady: "pronto",
+      notificationsReady: "Notificacoes prontas",
+      allowNotifications: "Permitir notificacoes",
+      selected: "selecionado",
+    },
     title: "Guia HumanChain",
     points: [
       "Entre como humano real com World wallet.",
@@ -1487,6 +1684,55 @@ const appLanguages = [
       market: "Soko",
       me: "Mimi",
       stories: "Hadithi",
+    },
+    home: {
+      heroKicker: "Mtandao wa binadamu waliothibitishwa",
+      headline: "Mahali binadamu halisi hupeleka hekima mbele.",
+      intro:
+        "Uliza watu halisi, soma hadithi za binadamu, hifadhi hekima, fanya biashara karibu, na jenga mnyororo unaoonekana ndani ya World App.",
+      highlights: ["Swali la siku", "Hazina ya hadithi", "Soko la karibu", "Pointi za binadamu"],
+      actionsLabel: "Vitendo vikuu",
+      actions: [
+        ["Uliza Dunia", "Majibu halisi kutoka kwa binadamu waliothibitishwa"],
+        ["Jiunge na mnyororo", "Ongeza kiungo kimoja duniani"],
+        ["Soko la binadamu", "Nunua, uza, na tangaza karibu"],
+        ["Hazina ya hadithi", "Hadithi za kila mwezi na za kulipia"],
+      ],
+      commandTitle: "Leo kwenye HumanChain",
+      commands: [
+        ["Jibu", "Jiunge na Swali la Siku kabla halijafungwa.", "Uliza"],
+        ["Unganisha", "Ongeza kiungo kutoka uzoefu wako halisi.", "Minyororo"],
+        ["Biashara", "Angalia matangazo ya karibu na zabuni halisi.", "Soko"],
+      ],
+      streakKicker: "Mfululizo wa binadamu",
+      streakTitle: "siku za mnyororo hai",
+      streakDetail: "Ongeza kitendo kimoja chenye maana leo ili mnyororo ukue.",
+      pointsKicker: "Pointi za binadamu",
+      pointsDetail: "Pata pointi kwa kusaidia mtandao. Pointi zitatayarisha watumiaji wa mapema kwa zawadi zijazo.",
+      dailyTitle: "HumanChain ya kila siku",
+      dailyPlaceholder: "Andika jibu lako la leo...",
+      answeredAt: "Imejibiwa saa",
+      answeredToday: "Imejibiwa leo",
+      answerDaily: "Jibu leo",
+      seeAnswers: "Ona majibu",
+      trendingTitle: "Uamuzi unaovuma",
+      saveVerdict: "Hifadhi uamuzi",
+      fieldsTitle: "Sehemu hai za binadamu",
+      openQuoteRoom: "Fungua chumba cha nukuu",
+      pulseKicker: "Mapigo ya binadamu",
+      pulseTitle: "Dunia inahisi nini",
+      meters: ["Tumaini", "Upendo", "Msongo", "Nia"],
+    },
+    settings: {
+      title: "Mipangilio ya mini app",
+      language: "Lugha",
+      guide: "Mwongozo muhimu",
+      worldContext: "Muktadha wa World",
+      openedFrom: "Imefunguliwa kutoka",
+      deviceReady: "tayari",
+      notificationsReady: "Arifa ziko tayari",
+      allowNotifications: "Ruhusu arifa",
+      selected: "imechaguliwa",
     },
     title: "Mwongozo wa HumanChain",
     points: [
@@ -2511,6 +2757,8 @@ function HomeView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
+  const homeCopy = appLanguage.home;
+  const commandTabs: Tab[] = ["ask", "chains", "market"];
   const liveVerdicts = [
     {
       question: dailyHumanQuestion.title,
@@ -2532,46 +2780,42 @@ function HomeView({
         <div className="hero-brandline">
           <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.svg" />
           <div>
-            <span>Verified human network</span>
+            <span>{homeCopy.heroKicker}</span>
             <strong>HumanChain</strong>
           </div>
         </div>
-        <h1>Where real humans carry wisdom forward.</h1>
-        <p>
-          Ask real people, read human stories, save field wisdom, trade with
-          nearby humans, and build a visible chain of purpose inside World App.
-        </p>
+        <h1>{homeCopy.headline}</h1>
+        <p>{homeCopy.intro}</p>
         <div className="home-proof-grid" aria-label="HumanChain highlights">
-          <span>Daily human question</span>
-          <span>Story vault</span>
-          <span>Nearby marketplace</span>
-          <span>Human points</span>
+          {homeCopy.highlights.map((highlight) => (
+            <span key={highlight}>{highlight}</span>
+          ))}
         </div>
       </header>
 
-      <section className="quick-grid" aria-label="Main actions">
+      <section className="quick-grid" aria-label={homeCopy.actionsLabel}>
         <ActionButton
           icon={<MessageCircleQuestion size={20} />}
-          label="Ask The World"
-          detail="Real answers from verified humans"
+          label={homeCopy.actions[0][0]}
+          detail={homeCopy.actions[0][1]}
           onClick={() => setTab("ask")}
         />
         <ActionButton
           icon={<Sparkles size={20} />}
-          label="Join Today's Chain"
-          detail="Add one link to the world"
+          label={homeCopy.actions[1][0]}
+          detail={homeCopy.actions[1][1]}
           onClick={() => setTab("chains")}
         />
         <ActionButton
           icon={<Store size={20} />}
-          label="Human Market"
-          detail="Buy, sell, and promote nearby"
+          label={homeCopy.actions[2][0]}
+          detail={homeCopy.actions[2][1]}
           onClick={() => setTab("market")}
         />
         <ActionButton
           icon={<BookOpen size={20} />}
-          label="Story Vault"
-          detail="Monthly and paid human stories"
+          label={homeCopy.actions[3][0]}
+          detail={homeCopy.actions[3][1]}
           onClick={() => setTab("stories")}
         />
       </section>
@@ -2590,22 +2834,14 @@ function HomeView({
 
       <section className="panel home-command-center">
         <div className="section-heading">
-          <span>Today on HumanChain</span>
+          <span>{homeCopy.commandTitle}</span>
           <Radio size={18} />
         </div>
-        {[
-          ["Answer", "Join the Daily Human Question before the verdict closes.", "Ask"],
-          ["Connect", "Add one chain link from your field or lived experience.", "Chains"],
-          ["Trade", "Check nearby verified listings and serious bid windows.", "Market"],
-        ].map(([title, detail, action]) => (
+        {homeCopy.commands.map(([title, detail, action], index) => (
           <button
             className="home-command-row"
             key={title}
-            onClick={() => {
-              if (action === "Ask") setTab("ask");
-              if (action === "Chains") setTab("chains");
-              if (action === "Market") setTab("market");
-            }}
+            onClick={() => setTab(commandTabs[index])}
             type="button"
           >
             <div>
@@ -2619,9 +2855,9 @@ function HomeView({
 
       <section className="streak-card">
         <div>
-          <span className="section-kicker">Human Streak</span>
-          <h2>{streak}-day chain alive</h2>
-          <p>Add one meaningful action today to keep your chain growing.</p>
+          <span className="section-kicker">{homeCopy.streakKicker}</span>
+          <h2>{streak}-{homeCopy.streakTitle}</h2>
+          <p>{homeCopy.streakDetail}</p>
         </div>
         <button
           className="icon-action"
@@ -2636,12 +2872,9 @@ function HomeView({
 
       <section className="points-card">
         <div>
-          <span className="section-kicker">Human Points</span>
+          <span className="section-kicker">{homeCopy.pointsKicker}</span>
           <h2>{points.toLocaleString()} HP</h2>
-          <p>
-            Earn now by helping the network. Points will prepare early humans
-            for future rewards after launch.
-          </p>
+          <p>{homeCopy.pointsDetail}</p>
         </div>
         <div className="points-ring">
           <strong>{Math.min(100, Math.round(points / 10))}%</strong>
@@ -2651,7 +2884,7 @@ function HomeView({
 
       <section className="daily-card">
         <div className="section-heading">
-          <span>HumanChain Daily</span>
+          <span>{homeCopy.dailyTitle}</span>
           <CalendarCheck size={18} />
         </div>
         <span className="daily-reward">{dailyHumanQuestion.reward}</span>
@@ -2660,10 +2893,10 @@ function HomeView({
         <textarea
           disabled={dailyAnswered}
           onChange={(event) => setDailyDraft(event.target.value)}
-          placeholder="Write today's human answer..."
+          placeholder={homeCopy.dailyPlaceholder}
           value={
             dailyAnswered
-              ? `Answered at ${dailyAnsweredAt ?? "today"}`
+              ? `${homeCopy.answeredAt} ${dailyAnsweredAt ?? "today"}`
               : dailyDraft
           }
         />
@@ -2696,10 +2929,10 @@ function HomeView({
             }}
             type="button"
           >
-            {dailyAnswered ? "Answered Today" : "Answer Daily"}
+            {dailyAnswered ? homeCopy.answeredToday : homeCopy.answerDaily}
           </button>
           <button onClick={() => setTab("ask")} type="button">
-            See answers
+            {homeCopy.seeAnswers}
           </button>
         </div>
         <div className="daily-live">
@@ -2714,7 +2947,7 @@ function HomeView({
 
       <section className="panel">
         <div className="section-heading">
-          <span>Trending Verdict</span>
+          <span>{homeCopy.trendingTitle}</span>
           <Vote size={18} />
         </div>
         {liveVerdicts.map((verdict) => (
@@ -2729,7 +2962,7 @@ function HomeView({
               }
               type="button"
             >
-              Save Verdict
+              {homeCopy.saveVerdict}
             </button>
           </article>
         ))}
@@ -2737,7 +2970,7 @@ function HomeView({
 
       <section className="panel">
         <div className="section-heading">
-          <span>Live human fields</span>
+          <span>{homeCopy.fieldsTitle}</span>
           <Users size={18} />
         </div>
         <div className="field-strip">
@@ -2751,7 +2984,7 @@ function HomeView({
               type="button"
             >
               <strong>{field.name}</strong>
-              <span>Open quote room</span>
+              <span>{homeCopy.openQuoteRoom}</span>
             </button>
           ))}
         </div>
@@ -2759,14 +2992,14 @@ function HomeView({
 
       <section className="pulse-card">
         <div>
-          <span className="section-kicker">Human Pulse</span>
-          <h2>What the world is feeling</h2>
+          <span className="section-kicker">{homeCopy.pulseKicker}</span>
+          <h2>{homeCopy.pulseTitle}</h2>
         </div>
         <div className="pulse-bars">
-          <Meter label="Hope" value={32} />
-          <Meter label="Love" value={21} />
-          <Meter label="Stress" value={18} />
-          <Meter label="Ambition" value={16} />
+          <Meter label={homeCopy.meters[0]} value={32} />
+          <Meter label={homeCopy.meters[1]} value={21} />
+          <Meter label={homeCopy.meters[2]} value={18} />
+          <Meter label={homeCopy.meters[3]} value={16} />
         </div>
       </section>
 
@@ -6110,9 +6343,11 @@ function AppSettingsBar({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [open, setOpen] = useState(false);
+  const settingsCopy = activeLanguage.settings;
+  const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
 
   return (
-    <section className="app-settings-bar" aria-label="Mini app settings">
+    <section className="app-settings-bar" aria-label={settingsCopy.title}>
       <button
         aria-expanded={open}
         className="settings-trigger"
@@ -6125,7 +6360,8 @@ function AppSettingsBar({
       {open ? (
         <div className="settings-popover">
           <div className="settings-section">
-            <strong>Language / Lugha</strong>
+            <strong>{settingsCopy.language}</strong>
+            <span>{activeLanguage.name} {settingsCopy.selected}</span>
             <div className="settings-language-row">
               {appLanguages.map((language) => (
                 <button
@@ -6143,15 +6379,15 @@ function AppSettingsBar({
             </div>
           </div>
           <div className="settings-section">
-            <strong>{activeLanguage.title}</strong>
+            <strong>{settingsCopy.guide}</strong>
             {activeLanguage.points.map((point) => (
               <p key={point}>{point}</p>
             ))}
           </div>
           <div className="settings-section compact">
-            <strong>World context</strong>
-            <span>Opened from {worldContext.launchLocation ?? "World App preview"}</span>
-            <span>{worldContext.deviceOS ?? "Device"} ready</span>
+            <strong>{settingsCopy.worldContext}</strong>
+            <span>{settingsCopy.openedFrom} {worldLaunchLabel}</span>
+            <span>{worldContext.deviceOS ?? "Device"} {settingsCopy.deviceReady}</span>
           </div>
           <button
             className="settings-notification"
@@ -6159,7 +6395,7 @@ function AppSettingsBar({
             type="button"
           >
             <Bell size={15} />
-            {notificationReady ? "Notifications ready" : "Allow notifications"}
+            {notificationReady ? settingsCopy.notificationsReady : settingsCopy.allowNotifications}
           </button>
         </div>
       ) : null}
