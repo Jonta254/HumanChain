@@ -2278,6 +2278,20 @@ function saveJsonToStorage(key: string, value: unknown) {
   }
 }
 
+function scrollMiniAppToTop() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    window.scrollTo({
+      left: 0,
+      top: 0,
+      behavior: "auto",
+    });
+  });
+}
+
 async function storeSafeData(
   kind: "post" | "marketplace-listing" | "marketplace-bid",
   id: number | string,
@@ -2437,6 +2451,10 @@ export default function HumanChainApp() {
     },
   ]);
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
+
+  useEffect(() => {
+    scrollMiniAppToTop();
+  }, [tab, verifiedHuman]);
 
   useEffect(() => {
     getWorldPermissions()
@@ -3623,6 +3641,10 @@ function ChainsView({
     "images",
   );
 
+  useEffect(() => {
+    scrollMiniAppToTop();
+  }, [activeField, chainView]);
+
   function addLink() {
     const text =
       linkText.trim() || "I am still becoming, and today that is enough.";
@@ -4173,6 +4195,10 @@ function StoriesView({
   const activeTitle = publishedStory?.title ?? "The Door That Waited";
   const activePublisher = publishedStory?.publisher ?? "HumanChain Monthly";
   const activeAuthor = publishedStory?.author ?? "monthly human story";
+
+  useEffect(() => {
+    scrollMiniAppToTop();
+  }, [activePublishedStory, isReading, page]);
 
   function saveStory() {
     setSavedItems((value) => value + 1);
