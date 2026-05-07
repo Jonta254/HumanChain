@@ -1397,12 +1397,12 @@ const appLanguages = [
     code: "en",
     name: "English",
     nav: {
-      ask: "Preguntar",
-      chains: "Cadenas",
-      home: "Inicio",
-      market: "Mercado",
-      me: "Yo",
-      stories: "Historias",
+      ask: "Ask",
+      chains: "Chains",
+      home: "Home",
+      market: "Market",
+      me: "Me",
+      stories: "Stories",
     },
     title: "HumanChain Guide",
     points: [
@@ -1418,12 +1418,12 @@ const appLanguages = [
     code: "es",
     name: "Spanish",
     nav: {
-      ask: "Demander",
-      chains: "Chaines",
-      home: "Accueil",
-      market: "Marche",
-      me: "Moi",
-      stories: "Histoires",
+      ask: "Preguntar",
+      chains: "Cadenas",
+      home: "Inicio",
+      market: "Mercado",
+      me: "Yo",
+      stories: "Historias",
     },
     title: "Guia de HumanChain",
     points: [
@@ -1433,18 +1433,18 @@ const appLanguages = [
       "Usa Human Chat para hablar con vendedores y mantener acuerdos seguros.",
       "Puedes borrar mercado, publicaciones, historial o tu cuenta local cuando quieras.",
     ],
-    settingsTitle: "Settings",
+    settingsTitle: "Ajustes",
   },
   {
     code: "fr",
     name: "French",
     nav: {
-      ask: "Perguntar",
-      chains: "Cadeias",
-      home: "Inicio",
-      market: "Mercado",
-      me: "Eu",
-      stories: "Historias",
+      ask: "Demander",
+      chains: "Chaines",
+      home: "Accueil",
+      market: "Marche",
+      me: "Moi",
+      stories: "Histoires",
     },
     title: "Guide HumanChain",
     points: [
@@ -1454,18 +1454,18 @@ const appLanguages = [
       "Utilise Human Chat pour parler aux vendeurs et garder les echanges clairs.",
       "Tu peux effacer le marche, les posts, l'historique ou le compte local.",
     ],
-    settingsTitle: "Settings",
+    settingsTitle: "Reglages",
   },
   {
     code: "pt",
     name: "Portuguese",
     nav: {
-      ask: "Ask",
-      chains: "Chains",
-      home: "Home",
-      market: "Market",
-      me: "Me",
-      stories: "Stories",
+      ask: "Perguntar",
+      chains: "Cadeias",
+      home: "Inicio",
+      market: "Mercado",
+      me: "Eu",
+      stories: "Historias",
     },
     title: "Guia HumanChain",
     points: [
@@ -1475,7 +1475,28 @@ const appLanguages = [
       "Use Human Chat para conversar com vendedores e manter acordos claros.",
       "Voce pode limpar mercado, posts, historico ou a conta local quando quiser.",
     ],
-    settingsTitle: "Settings",
+    settingsTitle: "Configuracoes",
+  },
+  {
+    code: "sw",
+    name: "Swahili",
+    nav: {
+      ask: "Uliza",
+      chains: "Minyororo",
+      home: "Nyumbani",
+      market: "Soko",
+      me: "Mimi",
+      stories: "Hadithi",
+    },
+    title: "Mwongozo wa HumanChain",
+    points: [
+      "Ingia kama binadamu halisi kwa kutumia World wallet.",
+      "Uliza maswali yenye maana na jibu kutokana na uzoefu wa maisha.",
+      "Wanunuzi wanaweza kuvinjari bure; wauzaji hulipa ada ndogo kuchapisha au kuongeza mwonekano.",
+      "Tumia Human Chat kuzungumza na wauzaji na kuweka makubaliano salama.",
+      "Unaweza kufuta data ya soko, machapisho, historia, au akaunti ya ndani wakati wowote.",
+    ],
+    settingsTitle: "Mipangilio",
   },
 ];
 
@@ -1586,6 +1607,8 @@ const marketplaceChecklist = [
 ];
 
 type MarketplaceListing = {
+  dataReceiptUrl?: string;
+  dataStorageStatus?: "cloud-safe" | "local-safe";
   id: number;
   title: string;
   price: string;
@@ -1607,6 +1630,8 @@ type MarketBid = {
   amount: number;
   buyer: string;
   createdAt: string;
+  dataReceiptUrl?: string;
+  dataStorageStatus?: "cloud-safe" | "local-safe";
   id: number;
   note: string;
   status: "saved" | "sent";
@@ -1686,6 +1711,7 @@ type DailyResponse = {
 };
 
 type HumanPost = (typeof initialHumanPosts)[number] & {
+  dataReceiptUrl?: string;
   storageStatus?: "cloud-safe" | "local-safe";
 };
 
@@ -1707,12 +1733,25 @@ type AppMemory = {
   appLanguageCode: string;
   dailyAnswered: boolean;
   dailyAnsweredAt: string | null;
+  marketLocation: MarketLocationState;
   notificationReady: boolean;
   points: number;
   savedItems: number;
   streak: number;
   verifiedHuman: VerifiedHuman | null;
 };
+
+function formatWorldLaunchLocation(location?: string | null) {
+  const labels: Record<string, string> = {
+    "app-store": "App Store",
+    chat: "World Chat",
+    "deep-link": "deep link",
+    home: "World Home",
+    "wallet-tab": "wallet tab",
+  };
+
+  return location ? labels[location] ?? location : "World App preview";
+}
 
 const storageKeys = {
   appMemory: "humanchain_app_memory",
@@ -1743,6 +1782,37 @@ function saveJsonToStorage(key: string, value: unknown) {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function storeSafeData(
+  kind: "post" | "marketplace-listing" | "marketplace-bid",
+  id: number | string,
+  data: unknown,
+) {
+  try {
+    const response = await fetch("/api/data/store", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, id, kind }),
+    });
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      pendingSetup?: boolean;
+      url?: string;
+    };
+
+    return {
+      ok: Boolean(payload.ok && payload.url),
+      pendingSetup: Boolean(payload.pendingSetup),
+      url: payload.url,
+    };
+  } catch {
+    return {
+      ok: false,
+      pendingSetup: false,
+      url: undefined,
+    };
   }
 }
 
@@ -1801,16 +1871,29 @@ function loadStoredHistoryRecords(): HistoryRecord[] {
 }
 
 function loadStoredAppMemory(): AppMemory {
-  return loadJsonFromStorage<AppMemory>(storageKeys.appMemory, {
+  const fallback: AppMemory = {
     appLanguageCode: appLanguages[0].code,
     dailyAnswered: false,
     dailyAnsweredAt: null,
+    marketLocation: {
+      label: "Location not shared",
+      source: "not-requested",
+      status: "idle",
+    },
     notificationReady: false,
     points: 420,
     savedItems: 3,
     streak: 4,
     verifiedHuman: null,
-  });
+  };
+  const stored = loadJsonFromStorage<Partial<AppMemory>>(storageKeys.appMemory, fallback);
+
+  return {
+    ...fallback,
+    ...stored,
+    marketLocation: stored.marketLocation ?? fallback.marketLocation,
+    verifiedHuman: stored.verifiedHuman ?? fallback.verifiedHuman,
+  };
 }
 
 export default function HumanChainApp() {
@@ -1842,6 +1925,9 @@ export default function HumanChainApp() {
   const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>(
     loadStoredMarketplaceListings,
   );
+  const [marketLocation, setMarketLocation] = useState<MarketLocationState>(
+    storedAppMemory.marketLocation,
+  );
   const [historyRecords, setHistoryRecords] = useState<HistoryRecord[]>(
     loadStoredHistoryRecords,
   );
@@ -1862,6 +1948,7 @@ export default function HumanChainApp() {
   useEffect(() => {
     getWorldPermissions()
       .then((result) => {
+        setWorldContext(getWorldMiniAppContext());
         const permissions = result.data?.permissions as
           | { notifications?: boolean | { status?: string } }
           | undefined;
@@ -1875,6 +1962,9 @@ export default function HumanChainApp() {
         }
       })
       .catch(() => {
+        setWorldContext(getWorldMiniAppContext());
+      })
+      .finally(() => {
         setWorldContext(getWorldMiniAppContext());
       });
   }, []);
@@ -1896,6 +1986,7 @@ export default function HumanChainApp() {
       appLanguageCode: appLanguage.code,
       dailyAnswered,
       dailyAnsweredAt,
+      marketLocation,
       notificationReady,
       points,
       savedItems,
@@ -1906,6 +1997,7 @@ export default function HumanChainApp() {
     appLanguage,
     dailyAnswered,
     dailyAnsweredAt,
+    marketLocation,
     notificationReady,
     points,
     savedItems,
@@ -1987,6 +2079,11 @@ export default function HumanChainApp() {
     setAppLanguage(appLanguages[0]);
     setDailyAnswered(false);
     setDailyAnsweredAt(null);
+    setMarketLocation({
+      label: "Location not shared",
+      source: "not-requested",
+      status: "idle",
+    });
     setNotificationReady(false);
     setPoints(420);
     setSavedItems(3);
@@ -2106,6 +2203,22 @@ export default function HumanChainApp() {
         return;
       }
 
+      if ("pendingWorldApp" in result && result.pendingWorldApp) {
+        setToast({
+          title: "Open in World App",
+          detail: result.message,
+        });
+        return;
+      }
+
+      if ("ok" in result && !result.ok) {
+        setToast({
+          title: "Payment not confirmed",
+          detail: "World payments are only counted after backend verification.",
+        });
+        return;
+      }
+
       if ("error" in result && result.error) {
         setToast({
           title: "Payment not prepared",
@@ -2176,10 +2289,13 @@ export default function HumanChainApp() {
           <MarketplaceView
             act={act}
             earnPoints={earnPoints}
+            marketLocation={marketLocation}
             marketplaceListings={marketplaceListings}
             openPayment={openPayment}
             recordHistory={recordHistory}
+            setMarketLocation={setMarketLocation}
             setMarketplaceListings={setMarketplaceListings}
+            worldContext={worldContext}
           />
         );
       case "me":
@@ -2194,6 +2310,7 @@ export default function HumanChainApp() {
             historyRecords={historyRecords}
             humanPosts={humanPosts}
             marketplaceListings={marketplaceListings}
+            marketLocation={marketLocation}
             points={points}
             recordHistory={recordHistory}
             resetHistory={resetHistory}
@@ -2205,11 +2322,15 @@ export default function HumanChainApp() {
         return (
           <HomeView
             act={act}
+            appLanguage={appLanguage}
             dailyAnswered={dailyAnswered}
             dailyAnsweredAt={dailyAnsweredAt}
             dailyResponses={dailyResponses}
             earnPoints={earnPoints}
             links={links}
+            notificationReady={notificationReady}
+            onChangeLanguage={setAppLanguage}
+            onEnableNotifications={() => enableHumanChainNotifications("settings")}
             setDailyAnsweredAt={setDailyAnsweredAt}
             setActiveField={setActiveField}
             points={points}
@@ -2217,6 +2338,7 @@ export default function HumanChainApp() {
             setDailyResponses={setDailyResponses}
             setTab={setTab}
             streak={streak}
+            worldContext={worldContext}
           />
         );
     }
@@ -2225,13 +2347,6 @@ export default function HumanChainApp() {
   return (
     <main className="app-shell">
       <section className="phone-frame">
-        <AppSettingsBar
-          activeLanguage={appLanguage}
-          notificationReady={notificationReady}
-          onEnableNotifications={() => enableHumanChainNotifications("settings")}
-          onChange={setAppLanguage}
-          worldContext={worldContext}
-        />
         {verifiedHuman ? activeView : (
           <LoginGate
             appLanguage={appLanguage}
@@ -2358,11 +2473,15 @@ function LoginGate({
 
 function HomeView({
   act,
+  appLanguage,
   dailyAnswered,
   dailyAnsweredAt,
   dailyResponses,
   earnPoints,
   links,
+  notificationReady,
+  onChangeLanguage,
+  onEnableNotifications,
   points,
   setDailyAnsweredAt,
   setActiveField,
@@ -2370,13 +2489,18 @@ function HomeView({
   setDailyResponses,
   setTab,
   streak,
+  worldContext,
 }: {
   act: (title: string, detail: string) => void;
+  appLanguage: AppLanguage;
   dailyAnswered: boolean;
   dailyAnsweredAt: string | null;
   dailyResponses: DailyResponse[];
   earnPoints: EarnPoints;
   links: typeof initialLinks;
+  notificationReady: boolean;
+  onChangeLanguage: (language: AppLanguage) => void;
+  onEnableNotifications: () => void | Promise<void>;
   points: number;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
   setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
@@ -2384,6 +2508,7 @@ function HomeView({
   setDailyResponses: React.Dispatch<React.SetStateAction<DailyResponse[]>>;
   setTab: (tab: Tab) => void;
   streak: number;
+  worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
   const liveVerdicts = [
@@ -2644,6 +2769,14 @@ function HomeView({
           <Meter label="Ambition" value={16} />
         </div>
       </section>
+
+      <AppSettingsBar
+        activeLanguage={appLanguage}
+        notificationReady={notificationReady}
+        onEnableNotifications={onEnableNotifications}
+        onChange={onChangeLanguage}
+        worldContext={worldContext}
+      />
     </div>
   );
 }
@@ -3071,29 +3204,48 @@ function ChainsView({
       setIsPublishingPost(false);
     }
 
-    setHumanPosts((current) => [
-      {
-        id: Date.now(),
-        author: "@you",
-        caption,
-        image: imageUrl,
-        theme: "gold",
-        reactions: 0,
-        loves: 0,
-        tips: 0,
-        comments: [],
-        createdAt,
-        owner: true,
-        storageStatus,
-      },
-      ...current,
-    ]);
+    const post: HumanPost = {
+      id: Date.now(),
+      author: "@you",
+      caption,
+      image: imageUrl,
+      theme: "gold",
+      reactions: 0,
+      loves: 0,
+      tips: 0,
+      comments: [],
+      createdAt,
+      owner: true,
+      storageStatus,
+    };
+
+    setHumanPosts((current) => [post, ...current]);
+    void storeSafeData("post", post.id, post).then((receipt) => {
+      if (!receipt.ok) {
+        return;
+      }
+
+      setHumanPosts((current) =>
+        current.map((item) =>
+          item.id === post.id
+            ? {
+                ...item,
+                dataReceiptUrl: receipt.url,
+                storageStatus: "cloud-safe",
+              }
+            : item,
+        ),
+      );
+    });
     setPostCaption("");
     setPostImage(null);
     setPostFile(null);
     recordHistory({
       title: "Image post published",
-      detail: caption,
+      detail:
+        storageStatus === "cloud-safe"
+          ? `${caption} Image file stored safely. Post receipt is being saved.`
+          : `${caption} Saved locally now; backend receipt will attach when storage is configured.`,
       kind: "post",
     });
     earnPoints(16, "Your human image post joined the visual chain.");
@@ -4677,25 +4829,30 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 function MarketplaceView({
   act,
   earnPoints,
+  marketLocation,
   marketplaceListings,
   openPayment,
   recordHistory,
+  setMarketLocation,
   setMarketplaceListings,
+  worldContext,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
   openPayment: OpenPayment;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
+  setMarketLocation: React.Dispatch<React.SetStateAction<MarketLocationState>>;
   setMarketplaceListings: React.Dispatch<React.SetStateAction<MarketplaceListing[]>>;
+  worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [activeFilter, setActiveFilter] = useState("Near me");
-  const [manualArea, setManualArea] = useState("Nairobi");
-  const [marketLocation, setMarketLocation] = useState<MarketLocationState>({
-    label: "Location not shared",
-    source: "not-requested",
-    status: "idle",
-  });
+  const [manualArea, setManualArea] = useState(() =>
+    marketLocation.source === "manual"
+      ? marketLocation.label.replace(/^Manual area:\s*/, "")
+      : "Nairobi",
+  );
   const [bidDrafts, setBidDrafts] = useState<Record<string, string>>({});
   const [marketBids, setMarketBids] = useState<Record<string, MarketBid[]>>(() =>
     loadJsonFromStorage<Record<string, MarketBid[]>>(
@@ -4725,6 +4882,7 @@ function MarketplaceView({
     return true;
   });
   const locationReady = marketLocation.status === "ready";
+  const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.bids, marketBids);
@@ -4751,6 +4909,10 @@ function MarketplaceView({
   }
 
   function requestMarketplaceLocation() {
+    if (marketLocation.status === "requesting") {
+      return;
+    }
+
     setMarketLocation((current) => ({
       ...current,
       label: "Requesting browser location...",
@@ -4773,15 +4935,17 @@ function MarketplaceView({
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { accuracy, latitude, longitude } = position.coords;
+        const gpsLabel = `GPS shared: ${latitude.toFixed(3)}, ${longitude.toFixed(3)} (${Math.round(accuracy)}m)`;
 
         setMarketLocation({
           accuracy,
-          label: `GPS shared, about ${Math.round(accuracy)}m accuracy`,
+          label: gpsLabel,
           lat: latitude,
           lng: longitude,
           source: "browser-gps",
           status: "ready",
         });
+        updateListingDraft("area", gpsLabel);
         earnPoints(5, "Nearby marketplace is now ranked with your explicit browser location consent.");
       },
       (error) => {
@@ -4803,7 +4967,7 @@ function MarketplaceView({
     );
   }
 
-  function useManualMarketplaceArea() {
+  function applyManualMarketplaceArea() {
     const area = manualArea.trim();
 
     if (!area) {
@@ -4816,6 +4980,7 @@ function MarketplaceView({
       source: "manual",
       status: "ready",
     });
+    updateListingDraft("area", area);
     earnPoints(3, "Manual marketplace area connected without GPS.");
   }
 
@@ -4840,12 +5005,30 @@ function MarketplaceView({
         minute: "2-digit",
         month: "short",
       }).format(new Date()),
+      dataStorageStatus: "local-safe",
     };
 
     setMarketplaceListings((current) => [listing, ...current]);
+    void storeSafeData("marketplace-listing", listing.id, listing).then((receipt) => {
+      if (!receipt.ok) {
+        return;
+      }
+
+      setMarketplaceListings((current) =>
+        current.map((item) =>
+          item.id === listing.id
+            ? {
+                ...item,
+                dataReceiptUrl: receipt.url,
+                dataStorageStatus: "cloud-safe",
+              }
+            : item,
+        ),
+      );
+    });
     recordHistory({
       title: "Marketplace listing stored",
-      detail: `${title} saved with ${listingPhotos.length} photo${listingPhotos.length === 1 ? "" : "s"} and can be published after payment.`,
+      detail: `${title} saved with ${listingPhotos.length} photo${listingPhotos.length === 1 ? "" : "s"} and can be published after payment. A safe data receipt is being prepared.`,
       kind: "market",
     });
     earnPoints(10, "Your marketplace listing was stored in HumanChain history.");
@@ -4985,18 +5168,45 @@ function MarketplaceView({
         minute: "2-digit",
       }).format(new Date()),
       id: bidId,
-      note: nextBid >= item.bidding.target ? "Near seller target. Strong offer." : "Open offer for seller review.",
+      note:
+        nextBid >= item.bidding.target
+          ? "Meets seller target. Ready to accept."
+          : "Saved offer. Seller can accept or wait.",
       status: "saved",
+      dataStorageStatus: "local-safe",
     };
 
     setMarketBids((current) => ({
       ...current,
       [item.title]: [bid, ...(current[item.title] ?? [])],
     }));
+    void storeSafeData("marketplace-bid", `${item.title}-${bid.id}`, {
+      ...bid,
+      listing: item.title,
+      seller: item.seller,
+      sellerTarget: item.bidding.target,
+    }).then((receipt) => {
+      if (!receipt.ok) {
+        return;
+      }
+
+      setMarketBids((current) => ({
+        ...current,
+        [item.title]: (current[item.title] ?? []).map((offer) =>
+          offer.id === bidId
+            ? {
+                ...offer,
+                dataReceiptUrl: receipt.url,
+                dataStorageStatus: "cloud-safe",
+              }
+            : offer,
+        ),
+      }));
+    });
     setBidDrafts((current) => ({ ...current, [item.title]: "" }));
     recordHistory({
-      title: "Marketplace bid placed",
-      detail: `${nextBid} WLD bid placed on ${item.title}. Seller can accept the best offer before ${item.bidding.ends}.`,
+      title: nextBid >= item.bidding.target ? "Target bid placed" : "Marketplace bid placed",
+      detail: `${nextBid} WLD bid placed on ${item.title}. The bid is saved, ranked automatically, and sent to seller chat when available.`,
       kind: "market",
     });
 
@@ -5036,10 +5246,22 @@ function MarketplaceView({
           <div>
             <strong>{locationReady ? "Nearby market active" : "Connect nearby market"}</strong>
             <span>
-              {locationReady ? marketLocation.label : "World launch context is not GPS. Share browser location or enter an area."}
+              {locationReady ? marketLocation.label : "Share browser GPS or enter an area for nearby ranking."}
             </span>
+            <small>
+              {marketLocation.source === "browser-gps"
+                ? "GPS active after consent."
+                : marketLocation.source === "manual"
+                  ? "Manual area active and saved."
+                  : "No nearby location shared yet."}{" "}
+              Opened from {worldLaunchLabel}.
+            </small>
           </div>
-          <button onClick={requestMarketplaceLocation} type="button">
+          <button
+            disabled={marketLocation.status === "requesting"}
+            onClick={requestMarketplaceLocation}
+            type="button"
+          >
             {marketLocation.status === "requesting" ? "..." : "GPS"}
           </button>
         </div>
@@ -5047,16 +5269,21 @@ function MarketplaceView({
           <input
             aria-label="Manual marketplace area"
             onChange={(event) => setManualArea(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                applyManualMarketplaceArea();
+              }
+            }}
             placeholder="Area, e.g. Westlands"
             value={manualArea}
           />
-          <button onClick={useManualMarketplaceArea} type="button">
+          <button onClick={applyManualMarketplaceArea} type="button">
             Use area
           </button>
         </div>
         <small className="market-transparency-note">
-          Transparency: HumanChain uses World launch context for app entry and
-          browser/manual location for nearby ranking only after you choose it.
+          Transparency: World launch context says this session opened from {worldLaunchLabel}.
+          Nearby ranking uses browser GPS or manual area only after you choose it.
         </small>
       </section>
 
@@ -5235,7 +5462,7 @@ function MarketplaceView({
                   {listing.saleMode === "bidding"
                     ? `Bidding ${listing.duration}, floor ${listing.bidFloor || "not set"}`
                     : "Direct chat sale"}{" "}
-                  - {listing.area} - {listing.createdAt}
+                  - {listing.area} - {listing.createdAt} - {listing.dataStorageStatus === "cloud-safe" ? "safe receipt" : "local safe"}
                 </small>
               </div>
               <button
@@ -5313,7 +5540,8 @@ function MarketplaceView({
                     </div>
                     <p>
                       Seller target {item.bidding.target} WLD. Next bid must be
-                      at least {getMinimumNextBid(item)} WLD.
+                      at least {getMinimumNextBid(item)} WLD. No staff needed:
+                      the app ranks offers and opens seller chat.
                     </p>
                     <div className="quick-bid-row" aria-label={`Quick bids for ${item.title}`}>
                       {[getMinimumNextBid(item), item.bidding.target].map((amount) => (
@@ -5346,7 +5574,7 @@ function MarketplaceView({
                     <div className="bid-stack">
                       {(marketBids[item.title] ?? []).slice(0, 3).map((bid) => (
                         <span key={`${bid.id}-${bid.buyer}-${bid.amount}-${bid.note}`}>
-                          {bid.buyer}: {bid.amount} WLD - {bid.note} - {bid.status === "sent" ? "sent" : "saved"}
+                          {bid.buyer}: {bid.amount} WLD - {bid.note} - {bid.status === "sent" ? "sent" : "saved"} - {bid.dataStorageStatus === "cloud-safe" ? "safe receipt" : "local safe"}
                         </span>
                       ))}
                     </div>
@@ -5451,6 +5679,7 @@ function MeView({
   historyRecords,
   humanPosts,
   keepStreak,
+  marketLocation,
   marketplaceListings,
   points,
   recordHistory,
@@ -5466,6 +5695,7 @@ function MeView({
   historyRecords: HistoryRecord[];
   humanPosts: HumanPost[];
   keepStreak: (detail?: string) => void;
+  marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
@@ -5659,7 +5889,7 @@ function MeView({
                 <div>
                   <strong>{post.caption}</strong>
                   <span>
-                    {post.createdAt} - {post.loves} loves - {post.comments.length} comments
+                    {post.createdAt} - {post.loves} loves - {post.comments.length} comments - {post.storageStatus === "cloud-safe" ? "safe receipt" : "local safe"}
                   </span>
                 </div>
               </article>
@@ -5673,6 +5903,20 @@ function MeView({
           <span>Marketplace vault</span>
           <Store size={18} />
         </div>
+        <article className="market-vault-row">
+          <div>
+            <strong>Nearby market location</strong>
+            <span>{marketLocation.label}</span>
+            <small>
+              {marketLocation.status === "ready"
+                ? `Active by ${marketLocation.source === "browser-gps" ? "GPS consent" : "manual area"}`
+                : "Not active yet. Open Market and tap GPS or use area."}
+            </small>
+          </div>
+          <button onClick={() => act("Nearby market", marketLocation.label)} type="button">
+            View
+          </button>
+        </article>
         {marketplaceListings.length ? (
           marketplaceListings.slice(0, 5).map((listing) => (
             <article className="market-vault-row" key={listing.id}>
@@ -5687,6 +5931,7 @@ function MeView({
                     ? `Bid window ${listing.duration}, floor ${listing.bidFloor || "not set"}`
                     : "Direct inbox/chat sale"}
                 </small>
+                <small>{listing.dataStorageStatus === "cloud-safe" ? "Safe data receipt attached" : "Saved locally until backend receipt is available"}</small>
               </div>
               <button
                 onClick={() =>
@@ -5880,13 +6125,16 @@ function AppSettingsBar({
       {open ? (
         <div className="settings-popover">
           <div className="settings-section">
-            <strong>Language</strong>
+            <strong>Language / Lugha</strong>
             <div className="settings-language-row">
               {appLanguages.map((language) => (
                 <button
                   className={activeLanguage.code === language.code ? "active" : ""}
                   key={language.code}
-                  onClick={() => onChange(language)}
+                  onClick={() => {
+                    onChange(language);
+                    setOpen(false);
+                  }}
                   type="button"
                 >
                   {language.name}

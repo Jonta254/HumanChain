@@ -21,7 +21,7 @@ Why:
 
 ## Proof of Human
 
-Use IDKit for important one-human actions. World docs currently note that World ID verification is moving into IDKit for new apps.
+Use IDKit for important one-human actions. World docs state that World ID verification has moved into IDKit for new apps.
 
 HumanChain actions:
 
@@ -47,6 +47,7 @@ Rules:
 
 - Always create payment references server-side.
 - Always verify transaction status server-side.
+- Do not treat MiniKit fallback payments as completed World payments.
 - Do not present WLD features as gambling, yield, or guaranteed profit.
 - WLD should buy access, visibility, expression, convenience, or deeper perspective.
 
@@ -86,6 +87,7 @@ Required before live World features work:
 
 - `APP_ID`
 - `WORLD_RP_ID`
-- `WORLD_RP_SIGNING_SECRET`
+- `RP_SIGNING_KEY`
 - `DEV_PORTAL_API_KEY`
 - `NEXT_PUBLIC_HUMANCHAIN_TREASURY`
+- `BLOB_READ_WRITE_TOKEN`

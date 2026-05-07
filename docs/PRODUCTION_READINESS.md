@@ -8,7 +8,8 @@ needs durable services behind the interactive UI.
 - World wallet login route with nonce cookie validation.
 - WLD payment reference and confirmation routes.
 - World notification route with validation.
-- World ID proof route with validation.
+- World ID proof route with validation and server-generated RP signatures.
+- Safe data receipt route for posts, marketplace listings, and bids.
 - Basic API rate limiting.
 - No-store API responses.
 - Security headers.
@@ -25,20 +26,20 @@ NEXT_PUBLIC_APP_URL=
 DEV_PORTAL_API_KEY=
 NEXT_PUBLIC_HUMANCHAIN_TREASURY=
 WORLD_RP_ID=
-WORLD_RP_SIGNING_SECRET=
+RP_SIGNING_KEY=
 BLOB_READ_WRITE_TOKEN=
 DATABASE_URL=
 ```
 
 ## Before Public Launch
 
-- Add a real database using `DATABASE_URL` for posts, comments, reactions,
+- Add a real database using `DATABASE_URL` for searchable posts, comments, reactions,
   profile history, story saves, daily answers, and moderation status.
-- Keep Vercel Blob for uploaded images; store only Blob URLs in the database.
+- Keep Vercel Blob for uploaded images and receipt backups; store only Blob URLs in the database.
 - Replace in-memory rate limiting with Redis or another shared rate limiter so
   limits work across serverless instances.
 - Add moderation review tables for user stories and image posts.
-- Verify the final App ID, treasury wallet, and Developer Portal API key in a
+- Verify the final App ID, RP ID, RP signing key, treasury wallet, and Developer Portal API key in a
   preview deployment before Mini App Store submission.
 
 ## Verification

@@ -28,10 +28,14 @@ export function HumanVerifyButton({
   useEffect(() => {
     let isMounted = true;
 
-    fetch("/api/world/rp-context")
+    fetch("/api/world/rp-context", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    })
       .then((response) => response.json())
-      .then((data: { rpContext: RpContext }) => {
-        if (isMounted) setRpContext(data.rpContext);
+      .then((data: { rpContext?: RpContext }) => {
+        if (isMounted) setRpContext(data.rpContext ?? null);
       })
       .catch(() => {
         if (isMounted) setRpContext(null);
@@ -40,7 +44,7 @@ export function HumanVerifyButton({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [action]);
 
   async function handleVerify(proof: IDKitResult) {
     const response = await fetch("/api/world/verify-proof", {

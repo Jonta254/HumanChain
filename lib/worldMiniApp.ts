@@ -108,9 +108,20 @@ export async function authenticateHumanWallet() {
   const { nonce } = (await nonceResponse.json()) as { nonce: string };
 
   const result = await MiniKit.walletAuth<WalletAuthResult>({
+    expirationTime: new Date(Date.now() + 1000 * 60 * 10),
     nonce,
     statement: "Sign in to HumanChain as a verified human.",
   });
+
+  if (result.executedWith === "fallback") {
+    return {
+      result,
+      verification: {
+        ok: false,
+        error: "World wallet authentication must be completed inside World App.",
+      },
+    };
+  }
 
   const payload = result.data;
 
@@ -179,6 +190,15 @@ export async function payWithWorld({ amount, description, feature }: WorldPaymen
     }),
   });
 
+  if (payment.executedWith === "fallback") {
+    return {
+      ok: false,
+      pendingWorldApp: true,
+      payment,
+      message: "World payments must be completed inside World App before this is treated as paid.",
+    };
+  }
+
   const confirmationResponse = await fetch("/api/world/confirm-payment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -202,6 +222,7 @@ export async function payWithWorld({ amount, description, feature }: WorldPaymen
   }
 
   return {
+    ok: true,
     payment,
     confirmation,
   };

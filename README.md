@@ -29,6 +29,7 @@ Ask real humans. Get the world's verdict.
 - World Chat: direct seller inbox messages from Marketplace listing cards.
 - Share: native sharing for listings and business ads.
 - Request Permission: notifications and microphone access only when needed.
+- IDKit / World ID: proof requests use server-generated RP signatures.
 
 ## Mini App Guidelines
 
@@ -41,6 +42,8 @@ HumanChain stores preview activity locally so the app feels continuous while bac
 - `humanchain_posts`: image posts and comments.
 - `humanchain_marketplace`: stored marketplace listings, photos, prices, areas, links, and payment-ready status.
 - `humanchain_history`: profile, post, tip, and marketplace activity records.
+
+When `BLOB_READ_WRITE_TOKEN` is configured, posts, marketplace listings, and bids also request backend JSON receipts through `/api/data/store`.
 
 ## Local Development
 
@@ -78,4 +81,8 @@ Copy `.env.example` to `.env.local` and fill:
 APP_ID=
 DEV_PORTAL_API_KEY=
 NEXT_PUBLIC_HUMANCHAIN_TREASURY=
+NEXT_PUBLIC_WORLD_APP_ID=
+WORLD_RP_ID=
+RP_SIGNING_KEY=
+BLOB_READ_WRITE_TOKEN=
 ```
