@@ -2711,6 +2711,28 @@ export default function HumanChainApp() {
           "Daily questions, direct inbox, marketplace bids, story drops, payments, and account alerts can now notify this human.",
         kind: "profile",
       });
+
+      if (verifiedHuman?.wallet) {
+        void fetch("/api/world/send-notification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddresses: [verifiedHuman.wallet],
+            sector: "account",
+            title: "HumanChain ready",
+            message: "Notifications are active for HumanChain.",
+            path: "/",
+            localisations: [
+              {
+                language: "en",
+                title: "HumanChain ready",
+                message: "Notifications are active for HumanChain.",
+              },
+            ],
+          }),
+        });
+      }
+
       setToast({
         title: "Notifications ready",
         detail:
@@ -2910,11 +2932,13 @@ export default function HumanChainApp() {
             humanPosts={humanPosts}
             marketplaceListings={marketplaceListings}
             marketLocation={marketLocation}
+            notificationReady={notificationReady}
             points={points}
             recordHistory={recordHistory}
             resetHistory={resetHistory}
             savedItems={savedItems}
             streak={streak}
+            verifiedHuman={verifiedHuman}
           />
         );
       default:
@@ -2937,6 +2961,7 @@ export default function HumanChainApp() {
             setDailyResponses={setDailyResponses}
             setTab={setTab}
             streak={streak}
+            verifiedHuman={verifiedHuman}
             worldContext={worldContext}
           />
         );
@@ -3081,6 +3106,7 @@ function HomeView({
   setDailyResponses,
   setTab,
   streak,
+  verifiedHuman,
   worldContext,
 }: {
   act: (title: string, detail: string) => void;
@@ -3100,6 +3126,7 @@ function HomeView({
   setDailyResponses: React.Dispatch<React.SetStateAction<DailyResponse[]>>;
   setTab: (tab: Tab) => void;
   streak: number;
+  verifiedHuman: HumanIdentity | null;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
@@ -3138,6 +3165,21 @@ function HomeView({
           ))}
         </div>
       </header>
+
+      <section className={`home-notification-toggle ${notificationReady ? "active" : ""}`}>
+        <div>
+          <span>{notificationReady ? "Alerts active" : "Turn on alerts"}</span>
+          <p>
+            {notificationReady
+              ? `${verifiedHuman?.username ?? "Human"}, inbox, bids, payments, and account alerts are ready.`
+              : "Enable functional World App alerts for bids, replies, payments, daily questions, and account safety."}
+          </p>
+        </div>
+        <button onClick={onEnableNotifications} type="button">
+          <Bell size={17} />
+          {notificationReady ? "On" : "Enable"}
+        </button>
+      </section>
 
       <section className="quick-grid" aria-label={homeCopy.actionsLabel}>
         <ActionButton
@@ -6447,11 +6489,13 @@ function MeView({
   keepStreak,
   marketLocation,
   marketplaceListings,
+  notificationReady,
   points,
   recordHistory,
   resetHistory,
   savedItems,
   streak,
+  verifiedHuman,
 }: {
   act: (title: string, detail: string) => void;
   clearMarketplaceData: () => void;
@@ -6463,41 +6507,36 @@ function MeView({
   keepStreak: (detail?: string) => void;
   marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
+  notificationReady: boolean;
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   resetHistory: () => void;
   savedItems: number;
   streak: number;
+  verifiedHuman: HumanIdentity | null;
 }) {
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const displayUsername = verifiedHuman?.username ?? "@preview_human";
+  const walletLabel = verifiedHuman?.wallet
+    ? `${verifiedHuman.wallet.slice(0, 6)}...${verifiedHuman.wallet.slice(-4)}`
+    : "World wallet pending";
+  const ownedPosts = humanPosts.filter((post) => post.owner);
+  const chainScore = Math.round(points / 8 + streak * 9);
 
   return (
     <div className="screen">
-      <TopBar title="Treasure Profile" subtitle="Your verified human chain." />
-      <section className="chain-score-card">
-        <span className="section-kicker">Chain Score</span>
-        <h2>{Math.round(points / 8 + streak * 9)}</h2>
-        <p>
-          Built from points, streak, answers, saved stories, verified badges,
-          tips, and countries reached.
-        </p>
-        <div className="score-bars">
-          <Meter label="Helpfulness" value={76} />
-          <Meter label="Trust" value={68} />
-          <Meter label="Reach" value={54} />
-        </div>
-      </section>
+      <TopBar title="Me" subtitle="Verified profile, vault, and records." />
       <section className="treasure-profile">
         <div className="treasure-mark">
           <div className="avatar">
-            {profileImage ? <img alt="Uploaded profile" src={profileImage} /> : "J"}
+            {profileImage ? <img alt="Uploaded profile" src={profileImage} /> : displayUsername.slice(1, 2).toUpperCase()}
           </div>
           <BadgeCheck size={22} />
         </div>
         <div>
-          <span className="section-kicker">Human username</span>
-          <h2>@jonta254</h2>
-          <p>Verified Chain Keeper. {streak}-day Human Streak.</p>
+          <span className="section-kicker">Professional profile</span>
+          <h2>{displayUsername}</h2>
+          <p>{walletLabel}. Chain score {chainScore}. {notificationReady ? "Notifications active." : "Notifications off."}</p>
         </div>
         <button
           onClick={() => {
@@ -6538,10 +6577,17 @@ function MeView({
           />
         </label>
       </section>
+      <section className="profile-kpi-grid" aria-label="Profile metrics">
+        <Stat label="Score" value={String(chainScore)} />
+        <Stat label="Points" value={String(points)} />
+        <Stat label="Streak" value={`${streak}d`} />
+        <Stat label="Posts" value={String(ownedPosts.length)} />
+        <Stat label="Saved" value={String(savedItems)} />
+      </section>
       <section className="chain-id-card">
         <div>
           <span>Chain ID</span>
-          <strong>HC-JONTA-254</strong>
+          <strong>{verifiedHuman?.wallet ? `HC-${verifiedHuman.wallet.slice(2, 8).toUpperCase()}` : "HC-PREVIEW"}</strong>
         </div>
         <ShieldCheck size={28} />
         <p>
@@ -6549,110 +6595,13 @@ function MeView({
           public chain handle across questions, stories, tips, and fields.
         </p>
       </section>
-      <section className="profile-command-grid">
-        <button
-          onClick={async () => {
-            try {
-              const result = await requestWorldPermission(Permission.Notifications);
-
-              if (isWorldPermissionGranted(result)) {
-                act(
-                  "Notifications ready",
-                  "World App can send functional alerts for inbox, bids, accepted offers, stories, payments, rewards, and safety. You can turn them off in World App settings.",
-                );
-              } else {
-                act(
-                  "Open in World App",
-                  "Notification permission must be granted inside World App before alerts are marked ready.",
-                );
-              }
-            } catch (error) {
-              act("Notification permission", error instanceof Error ? error.message : "Try again inside World App.");
-            }
-          }}
-          type="button"
-        >
-          <Radio size={18} />
-          <span>Notifications</span>
-          <strong>Every sector ready</strong>
-        </button>
-        <button
-          onClick={async () => {
-            try {
-              const auth = await authenticateHumanWallet();
-              act(
-                auth.verification?.ok ? "Wallet connected" : "Wallet checked",
-                auth.verification?.address
-                  ? `${auth.verification.address.slice(0, 6)}...${auth.verification.address.slice(-4)} is ready for HumanChain.`
-                  : "Wallet auth is ready. Add App ID details before launch.",
-              );
-            } catch (error) {
-              act("Wallet auth failed", error instanceof Error ? error.message : "Try again inside World App.");
-            }
-          }}
-          type="button"
-        >
-          <Wallet size={18} />
-          <span>Creator wallet</span>
-          <strong>Connect</strong>
-        </button>
-      </section>
-      <section className="panel notification-sector-panel">
-        <div className="section-heading">
-          <span>Notification sectors</span>
-          <Bell size={18} />
-        </div>
-        {[
-          ["Direct inbox", "New World Chat messages from buyers, sellers, and chain replies."],
-          ["Marketplace", "New bids, higher competing bids, accepted offers, boosts, and listing expiry."],
-          ["Daily chain", "Daily question reminders, answer reactions, streak saves, and Human Points."],
-          ["Stories", "Monthly story drops, saved-story replies, tips, and reader milestones."],
-          ["Payments", "WLD payment prepared, confirmed, failed, refunded, or pending setup."],
-          ["Account safety", "Wallet login, permission changes, data controls, and verification events."],
-        ].map(([title, detail]) => (
-          <article className="notification-sector" key={title}>
-            <strong>{title}</strong>
-            <span>{detail}</span>
-          </article>
-        ))}
-        <p>
-          World requires notifications to be enabled in the Developer Portal,
-          allowed by the user through MiniKit, and sent only for relevant
-          functional mini-app activity.
-        </p>
-      </section>
-      <section className="panel notification-sector-panel">
-        <div className="section-heading">
-          <span>World app context</span>
-          <MapPin size={18} />
-        </div>
-        {[
-          ["Launch source", "HumanChain can read whether it opened from chat, home, app store, deep link, or wallet tab."],
-          ["Device metadata", "World App may provide OS, app version, and safe-area information for layout."],
-          ["Nearby market", "GPS is not taken from World context. The user must tap GPS or type an area."],
-          ["Privacy rule", "No analytics should be collected when World context says optional analytics is off."],
-        ].map(([title, detail]) => (
-          <article className="notification-sector" key={title}>
-            <strong>{title}</strong>
-            <span>{detail}</span>
-          </article>
-        ))}
-      </section>
-      <section className="stats-grid">
-        <Stat label="Points" value={String(points)} />
-        <Stat label="Questions" value="3" />
-        <Stat label="Answers" value="18" />
-        <Stat label="Links" value="9" />
-        <Stat label="Saved" value={String(savedItems)} />
-      </section>
       <section className="panel human-history-panel">
         <div className="section-heading">
           <span>My post history</span>
           <Library size={18} />
         </div>
-        {humanPosts.filter((post) => post.owner).length ? (
-          humanPosts
-            .filter((post) => post.owner)
+        {ownedPosts.length ? (
+          ownedPosts
             .map((post) => (
               <article className="history-post-card" key={post.id}>
                 {post.image ? (
@@ -6986,6 +6935,18 @@ function AppSettingsBar({
             <strong>{settingsCopy.worldContext}</strong>
             <span>{settingsCopy.openedFrom} {worldLaunchLabel}</span>
             <span>{worldContext.deviceOS ?? activeLanguage.gate.deviceFallback} {settingsCopy.deviceReady}</span>
+            <p>GPS is never read from World context. Nearby market uses only explicit GPS consent or a manual area.</p>
+          </div>
+          <div className="settings-section compact">
+            <strong>Notification sectors</strong>
+            {[
+              "Inbox replies and World Chat messages",
+              "Marketplace bids, accepted offers, boosts, and listing expiry",
+              "Daily questions, streaks, story drops, payments, and account safety",
+            ].map((point) => (
+              <p key={point}>{point}</p>
+            ))}
+            <p>World requires Developer Portal permission, MiniKit user consent, and functional-only messages.</p>
           </div>
           <div className="settings-section compact">
             <strong>{essentials.accountTitle}</strong>

@@ -180,6 +180,56 @@ button {
   width: 100%;
 }
 
+.home-notification-toggle {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(36, 107, 85, 0.14);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, #fffdf8, #f0f7f3),
+    radial-gradient(circle at 100% 0%, rgba(47, 111, 237, 0.08), transparent 7rem);
+}
+
+.home-notification-toggle.active {
+  border-color: rgba(36, 107, 85, 0.34);
+  background:
+    linear-gradient(135deg, #eef8f3, #fffdf8),
+    radial-gradient(circle at 100% 0%, rgba(36, 107, 85, 0.14), transparent 7rem);
+}
+
+.home-notification-toggle span {
+  display: block;
+  color: var(--green);
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.home-notification-toggle p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.34;
+}
+
+.home-notification-toggle button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 11px;
+  color: var(--paper-strong);
+  background: var(--green);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
 .login-gate {
   min-height: 100vh;
   display: grid;
@@ -2551,6 +2601,27 @@ button {
 
 .profile-upload input {
   display: none;
+}
+
+.profile-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.profile-kpi-grid .stat {
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: 16px;
+}
+
+.profile-kpi-grid .stat strong {
+  font-size: 0.92rem;
+}
+
+.profile-kpi-grid .stat span {
+  font-size: 0.68rem;
 }
 
 .treasure-mark {
