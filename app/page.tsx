@@ -48,7 +48,12 @@ import {
   requestWorldPermission,
   shareWithWorld,
 } from "@/lib/worldMiniApp";
-import { normalizePaymentFeature } from "@/lib/worldPayments";
+import {
+  defaultHumanChainPaymentToken,
+  humanChainPaymentTokens,
+  normalizePaymentFeature,
+  type HumanChainPaymentToken,
+} from "@/lib/worldPayments";
 
 const initialLinks = [
   {
@@ -2197,6 +2202,14 @@ type PaymentRequest = {
 
 type OpenPayment = (payment: PaymentRequest) => void;
 
+function parsePaymentAmount(amount: string) {
+  return Number.parseInt(amount, 10);
+}
+
+function formatPaymentAmount(amount: number, token: HumanChainPaymentToken) {
+  return `${amount} ${humanChainPaymentTokens[token].label}`;
+}
+
 type DailyResponse = {
   user: string;
   text: string;
@@ -2465,6 +2478,9 @@ export default function HumanChainApp() {
     },
   ]);
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
+  const [paymentToken, setPaymentToken] = useState<HumanChainPaymentToken>(
+    defaultHumanChainPaymentToken,
+  );
 
   useEffect(() => {
     scrollMiniAppToTop();
@@ -2719,7 +2735,7 @@ export default function HumanChainApp() {
       return;
     }
 
-    const amount = Number.parseInt(paymentPrompt.amount, 10);
+    const amount = parsePaymentAmount(paymentPrompt.amount);
     const feature = paymentPrompt.feature ?? normalizePaymentFeature(paymentPrompt.title);
 
     try {
@@ -2727,6 +2743,7 @@ export default function HumanChainApp() {
         amount,
         description: paymentPrompt.detail,
         feature,
+        token: paymentToken,
       });
 
       if ("pendingSetup" in result && result.pendingSetup) {
@@ -2775,7 +2792,7 @@ export default function HumanChainApp() {
     }
 
     setToast({
-      title: `${paymentPrompt.amount} prepared`,
+      title: `${formatPaymentAmount(amount, paymentToken)} prepared`,
       detail: paymentPrompt.success,
     });
     setPaymentPrompt(null);
@@ -2907,8 +2924,10 @@ export default function HumanChainApp() {
         {paymentPrompt ? (
           <PaymentSheet
             onCancel={() => setPaymentPrompt(null)}
+            onChangeToken={setPaymentToken}
             onConfirm={confirmPayment}
             payment={paymentPrompt}
+            selectedToken={paymentToken}
           />
         ) : null}
         {verifiedHuman ? (
@@ -6602,20 +6621,46 @@ function MeView({
 
 function PaymentSheet({
   onCancel,
+  onChangeToken,
   onConfirm,
   payment,
+  selectedToken,
 }: {
   onCancel: () => void;
+  onChangeToken: (token: HumanChainPaymentToken) => void;
   onConfirm: () => void | Promise<void>;
   payment: PaymentRequest;
+  selectedToken: HumanChainPaymentToken;
 }) {
+  const amount = parsePaymentAmount(payment.amount);
+
   return (
     <section className="payment-backdrop" role="dialog" aria-modal="true">
       <div className="payment-sheet">
         <span className="section-kicker">World App payment</span>
         <h2>{payment.title}</h2>
-        <strong>{payment.amount}</strong>
+        <strong>{formatPaymentAmount(amount, selectedToken)}</strong>
         <p>{payment.detail}</p>
+        <div className="payment-token-picker" aria-label="Choose payment currency">
+          <span>Pay with</span>
+          <div className="payment-token-grid">
+            {(Object.keys(humanChainPaymentTokens) as HumanChainPaymentToken[]).map((token) => (
+              <button
+                aria-pressed={selectedToken === token}
+                className={selectedToken === token ? "active" : ""}
+                key={token}
+                onClick={() => onChangeToken(token)}
+                type="button"
+              >
+                {humanChainPaymentTokens[token].label}
+              </button>
+            ))}
+          </div>
+          <small>
+            MiniKit Pay supports WLD and World App local stablecoins. Unsupported tokens
+            need a separate allowlisted transaction flow.
+          </small>
+        </div>
         {payment.points ? (
           <small>Confirming this also records +{payment.points} HP value.</small>
         ) : null}

@@ -3,13 +3,29 @@
 import { MiniKit } from "@worldcoin/minikit-js";
 import { Permission, Tokens, tokenToDecimals } from "@worldcoin/minikit-js/commands";
 import type { PayResult, WalletAuthResult } from "@worldcoin/minikit-js/commands";
+import { getHumanChainTreasury } from "@/lib/worldConfig";
+import {
+  defaultHumanChainPaymentToken,
+  isHumanChainPaymentToken,
+  type HumanChainPaymentToken,
+} from "@/lib/worldPayments";
 
-const treasuryAddress = process.env.NEXT_PUBLIC_HUMANCHAIN_TREASURY;
+const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
+  WLD: Tokens.WLD,
+  USDCE: Tokens.USDC,
+  EURC: Tokens.EURC,
+  WBRL: Tokens.WBRL,
+  WCOP: Tokens.WCOP,
+  WMXN: Tokens.WMXN,
+  WPEN: Tokens.WPEN,
+  WCLP: Tokens.WCLP,
+};
 
 type WorldPaymentInput = {
   amount: number;
   description: string;
   feature: string;
+  token?: HumanChainPaymentToken;
 };
 
 type WorldShareInput = {
@@ -149,7 +165,14 @@ export async function authenticateHumanWallet() {
   };
 }
 
-export async function payWithWorld({ amount, description, feature }: WorldPaymentInput) {
+export async function payWithWorld({
+  amount,
+  description,
+  feature,
+  token = defaultHumanChainPaymentToken,
+}: WorldPaymentInput) {
+  const treasuryAddress = getHumanChainTreasury();
+
   if (!treasuryAddress) {
     return {
       ok: false,
@@ -161,7 +184,7 @@ export async function payWithWorld({ amount, description, feature }: WorldPaymen
   const referenceResponse = await fetch("/api/world/payment-reference", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount, feature }),
+    body: JSON.stringify({ amount, feature, token }),
   });
 
   const referencePayload = (await referenceResponse.json()) as {
@@ -176,10 +199,19 @@ export async function payWithWorld({ amount, description, feature }: WorldPaymen
     };
   }
 
+  if (!isHumanChainPaymentToken(token)) {
+    return {
+      ok: false,
+      error: "Unsupported HumanChain payment token.",
+    };
+  }
+
+  const tokenSymbol = miniKitTokenBySymbol[token];
+
   const payment = await MiniKit.pay({
     reference: referencePayload.reference,
     to: treasuryAddress,
-    tokens: [{ symbol: Tokens.WLD, token_amount: tokenToDecimals(amount, Tokens.WLD).toString() }],
+    tokens: [{ symbol: tokenSymbol, token_amount: tokenToDecimals(amount, tokenSymbol).toString() }],
     description,
     fallback: () => ({
       transactionId: "web-preview-payment",
@@ -207,6 +239,7 @@ export async function payWithWorld({ amount, description, feature }: WorldPaymen
       feature,
       payload: payment.data,
       reference: referencePayload.reference,
+      token,
     }),
   });
 

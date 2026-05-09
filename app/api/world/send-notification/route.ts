@@ -7,6 +7,7 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
+import { getWorldAppId } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "send-notification", 10)) {
@@ -70,12 +71,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.APP_ID || !process.env.DEV_PORTAL_API_KEY) {
+  const appId = getWorldAppId();
+
+  if (!appId || !process.env.DEV_PORTAL_API_KEY) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
       message:
-        "Add APP_ID and DEV_PORTAL_API_KEY before sending World notifications.",
+        "Add DEV_PORTAL_API_KEY before sending World notifications.",
     });
   }
 
@@ -88,12 +91,12 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        app_id: process.env.APP_ID,
+        app_id: appId,
         wallet_addresses: walletAddresses,
         title: notificationTitle,
         message: notificationMessage,
         localisations,
-        mini_app_path: `worldapp://mini-app?app_id=${process.env.APP_ID}&path=${encodeURIComponent(notificationPath)}`,
+        mini_app_path: `worldapp://mini-app?app_id=${appId}&path=${encodeURIComponent(notificationPath)}`,
       }),
     },
   );

@@ -1,12 +1,13 @@
 "use client";
 
 import { MiniKitProvider } from "@worldcoin/minikit-js/minikit-provider";
+import { getWorldAppId } from "@/lib/worldConfig";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <MiniKitProvider
       props={{
-        appId: process.env.NEXT_PUBLIC_WORLD_APP_ID || undefined,
+        appId: getWorldAppId(),
       }}
     >
       {children}

@@ -3,7 +3,9 @@ import type { PayResult } from "@worldcoin/minikit-js/commands";
 import {
   humanChainPaymentFeatures,
   isHumanChainPaymentFeature,
+  isHumanChainPaymentToken,
   normalizePaymentFeature,
+  normalizePaymentToken,
 } from "@/lib/worldPayments";
 import {
   isRateLimited,
@@ -11,6 +13,7 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
+import { getWorldAppId } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "confirm-payment", 20)) {
@@ -22,6 +25,7 @@ export async function POST(req: NextRequest) {
     reference?: string;
     feature?: string;
     amount?: number;
+    token?: string;
   }>(req);
 
   if (!body) {
@@ -31,14 +35,17 @@ export async function POST(req: NextRequest) {
   const { payload, reference, feature, amount } = body;
 
   const normalizedFeature = normalizePaymentFeature(feature ?? "");
+  const normalizedToken = normalizePaymentToken(body.token);
 
   if (
     !payload?.transactionId ||
     !reference ||
+    payload.reference !== reference ||
     !normalizedFeature ||
     !isHumanChainPaymentFeature(normalizedFeature) ||
+    !isHumanChainPaymentToken(normalizedToken) ||
     amount !== humanChainPaymentFeatures[normalizedFeature] ||
-    !reference.startsWith(`humanchain:${normalizedFeature}:${amount}:`)
+    !reference.startsWith(`humanchain:${normalizedFeature}:${amount}:${normalizedToken}:`)
   ) {
     return noStoreJson(
       { error: "Missing payment confirmation data." },
@@ -46,17 +53,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.APP_ID || !process.env.DEV_PORTAL_API_KEY) {
+  const appId = getWorldAppId();
+
+  if (!appId || !process.env.DEV_PORTAL_API_KEY) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
       message:
-        "Add APP_ID and DEV_PORTAL_API_KEY before verifying World payments.",
+        "Add DEV_PORTAL_API_KEY before verifying World payments.",
     });
   }
 
   const response = await fetch(
-    `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transactionId}?app_id=${process.env.APP_ID}&type=payment`,
+    `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transactionId}?app_id=${appId}&type=payment`,
     {
       headers: {
         Authorization: `Bearer ${process.env.DEV_PORTAL_API_KEY}`,
@@ -84,6 +93,7 @@ export async function POST(req: NextRequest) {
     reference,
     feature: normalizedFeature,
     amount,
+    token: normalizedToken,
     transaction,
   });
 }

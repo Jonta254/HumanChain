@@ -5,6 +5,7 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
+import { getWorldRpId } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "verify-proof", 20)) {
@@ -30,7 +31,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.WORLD_RP_ID) {
+  const rpId = getWorldRpId();
+
+  if (!rpId) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
@@ -41,7 +44,7 @@ export async function POST(req: NextRequest) {
   }
 
   const response = await fetch(
-    `https://developer.world.org/api/v4/verify/${process.env.WORLD_RP_ID}`,
+    `https://developer.world.org/api/v4/verify/${rpId}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

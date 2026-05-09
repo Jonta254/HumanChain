@@ -23,6 +23,31 @@ export const humanChainPaymentFeatures = {
 } as const;
 
 export type HumanChainPaymentFeature = keyof typeof humanChainPaymentFeatures;
+export type HumanChainPaymentToken =
+  | "WLD"
+  | "USDCE"
+  | "EURC"
+  | "WBRL"
+  | "WCOP"
+  | "WMXN"
+  | "WPEN"
+  | "WCLP";
+
+export const defaultHumanChainPaymentToken: HumanChainPaymentToken = "WLD";
+
+export const humanChainPaymentTokens: Record<
+  HumanChainPaymentToken,
+  { label: string; note: string }
+> = {
+  WLD: { label: "WLD", note: "Worldcoin" },
+  USDCE: { label: "USDC.e", note: "US dollar stablecoin" },
+  EURC: { label: "EURC", note: "Euro stablecoin" },
+  WBRL: { label: "WBRL", note: "Brazil real stablecoin" },
+  WCOP: { label: "WCOP", note: "Colombia peso stablecoin" },
+  WMXN: { label: "WMXN", note: "Mexico peso stablecoin" },
+  WPEN: { label: "WPEN", note: "Peru sol stablecoin" },
+  WCLP: { label: "WCLP", note: "Chile peso stablecoin" },
+};
 
 export function normalizePaymentFeature(feature: string) {
   return feature
@@ -36,4 +61,14 @@ export function isHumanChainPaymentFeature(
   feature: string,
 ): feature is HumanChainPaymentFeature {
   return feature in humanChainPaymentFeatures;
+}
+
+export function normalizePaymentToken(token: string | undefined) {
+  return (token ?? defaultHumanChainPaymentToken).trim().toUpperCase();
+}
+
+export function isHumanChainPaymentToken(
+  token: string,
+): token is HumanChainPaymentToken {
+  return token in humanChainPaymentTokens;
 }

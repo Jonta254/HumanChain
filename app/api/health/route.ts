@@ -1,10 +1,11 @@
 import { noStoreJson } from "@/lib/serverApi";
+import { getWorldAppId } from "@/lib/worldConfig";
 
 export function GET() {
   return noStoreJson({
     ok: true,
     app: "HumanChain",
-    worldAppReady: Boolean(process.env.APP_ID),
+    worldAppReady: Boolean(getWorldAppId()),
     checkedAt: new Date().toISOString(),
   });
 }

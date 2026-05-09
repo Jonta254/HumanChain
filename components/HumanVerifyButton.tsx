@@ -7,6 +7,7 @@ import {
   type IDKitResult,
   type RpContext,
 } from "@worldcoin/idkit";
+import { getWorldAppId } from "@/lib/worldConfig";
 
 type HumanVerifyButtonProps = {
   action: string;
@@ -21,7 +22,7 @@ export function HumanVerifyButton({
   label,
   onVerified,
 }: HumanVerifyButtonProps) {
-  const appId = process.env.NEXT_PUBLIC_WORLD_APP_ID as `app_${string}`;
+  const appId = getWorldAppId() as `app_${string}`;
   const [isOpen, setIsOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
 

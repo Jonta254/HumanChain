@@ -3,7 +3,9 @@ import { NextRequest } from "next/server";
 import {
   humanChainPaymentFeatures,
   isHumanChainPaymentFeature,
+  isHumanChainPaymentToken,
   normalizePaymentFeature,
+  normalizePaymentToken,
 } from "@/lib/worldPayments";
 import {
   isRateLimited,
@@ -20,6 +22,7 @@ export async function POST(req: NextRequest) {
   const body = await readJsonBody<{
     feature?: string;
     amount?: number;
+    token?: string;
   }>(req);
 
   if (!body) {
@@ -29,10 +32,12 @@ export async function POST(req: NextRequest) {
   const { feature, amount } = body;
 
   const normalizedFeature = normalizePaymentFeature(feature ?? "");
+  const normalizedToken = normalizePaymentToken(body.token);
 
   if (
     !normalizedFeature ||
     !isHumanChainPaymentFeature(normalizedFeature) ||
+    !isHumanChainPaymentToken(normalizedToken) ||
     !amount ||
     amount !== humanChainPaymentFeatures[normalizedFeature]
   ) {
@@ -43,7 +48,8 @@ export async function POST(req: NextRequest) {
   }
 
   return noStoreJson({
-    reference: `humanchain:${normalizedFeature}:${amount}:${randomUUID()}`,
+    reference: `humanchain:${normalizedFeature}:${amount}:${normalizedToken}:${randomUUID()}`,
     feature: normalizedFeature,
+    token: normalizedToken,
   });
 }

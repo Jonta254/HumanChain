@@ -3421,6 +3421,39 @@ button {
   font-size: 0.78rem;
 }
 
+.payment-token-picker {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.payment-token-picker span {
+  color: rgba(255, 253, 248, 0.7);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.payment-token-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.payment-token-grid button {
+  min-height: 36px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  border-radius: 999px;
+  color: var(--paper-strong);
+  background: rgba(255, 253, 248, 0.1);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.payment-token-grid button.active {
+  color: var(--ink);
+  background: #fffdf8;
+}
+
 .payment-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
