@@ -1448,14 +1448,17 @@ button {
 }
 
 .image-chain-card img,
-.image-post img {
+.image-chain-card video,
+.image-post img,
+.image-post video {
   width: 100%;
   display: block;
   object-fit: cover;
   border-radius: 16px;
 }
 
-.image-chain-card img {
+.image-chain-card img,
+.image-chain-card video {
   max-height: 220px;
 }
 
@@ -1750,6 +1753,7 @@ button {
 }
 
 .image-post img,
+.image-post video,
 .generated-post-art {
   aspect-ratio: 16 / 10;
 }
@@ -2746,6 +2750,29 @@ button {
   background:
     linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(241, 247, 244, 0.92)),
     radial-gradient(circle at 100% 0%, rgba(47, 111, 237, 0.08), transparent 7rem);
+}
+
+.stored-market-row {
+  grid-template-columns: 54px 1fr auto auto auto;
+}
+
+.stored-market-media {
+  width: 54px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 14px;
+  color: #fffdf8;
+  background:
+    radial-gradient(circle at 28% 25%, rgba(255, 253, 248, 0.5), transparent 28%),
+    linear-gradient(135deg, var(--green), var(--ink));
+}
+
+.stored-market-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .market-vault-row strong,
@@ -3859,13 +3886,51 @@ button {
 
 .market-item {
   display: grid;
-  grid-template-columns: 58px 1fr;
+  grid-template-columns: 72px 1fr;
   gap: 10px;
   align-items: center;
   padding: 10px;
   border: 1px solid rgba(32, 35, 40, 0.08);
   border-radius: 18px;
   background: linear-gradient(135deg, #fffdf8, #f4efe6);
+}
+
+.market-thumb-stack {
+  position: relative;
+  width: 72px;
+  min-height: 84px;
+}
+
+.market-thumb-stack span {
+  position: absolute;
+  width: 54px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 2px solid #fffdf8;
+  border-radius: 15px;
+  color: #fffdf8;
+  box-shadow: 0 10px 20px rgba(62, 48, 31, 0.14);
+  font-size: 0.68rem;
+  font-weight: 950;
+}
+
+.market-thumb-stack span:nth-child(1) {
+  left: 0;
+  top: 0;
+  background: linear-gradient(135deg, var(--green), var(--ink));
+}
+
+.market-thumb-stack span:nth-child(2) {
+  right: 0;
+  top: 16px;
+  background: linear-gradient(135deg, var(--gold), #7b5a0f);
+}
+
+.market-thumb-stack span:nth-child(3) {
+  left: 9px;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--blue), var(--violet));
 }
 
 .market-item-art {
@@ -4037,7 +4102,7 @@ button {
 .market-card-actions {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 

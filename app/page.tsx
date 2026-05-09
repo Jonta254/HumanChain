@@ -2108,6 +2108,8 @@ type MarketplaceListing = {
   dataReceiptUrl?: string;
   dataStorageStatus?: "cloud-safe" | "local-safe";
   id: number;
+  seller: string;
+  sellerWallet?: string;
   title: string;
   price: string;
   bidFloor: string;
@@ -2118,6 +2120,8 @@ type MarketplaceListing = {
   link: string;
   details: string;
   photos: Array<{ id: number; name: string; src: string }>;
+  ratings: number;
+  tips: number;
   status: "draft" | "payment-ready";
   createdAt: string;
 };
@@ -2197,6 +2201,7 @@ type PaymentRequest = {
   detail: string;
   success: string;
   feature?: string;
+  onConfirmed?: () => void | Promise<void>;
   points?: number;
 };
 
@@ -2217,8 +2222,14 @@ type DailyResponse = {
 };
 
 type HumanPost = (typeof initialHumanPosts)[number] & {
+  authorWallet?: string;
   dataReceiptUrl?: string;
+  mediaType?: "image" | "video";
   storageStatus?: "cloud-safe" | "local-safe";
+  tipSplit?: {
+    creatorPercent: number;
+    platformPercent: number;
+  };
 };
 
 type HistoryRecord = {
@@ -2233,6 +2244,11 @@ type VerifiedHuman = {
   username: string;
   wallet?: string;
   mode: "world" | "preview";
+};
+
+type HumanIdentity = {
+  username: string;
+  wallet?: string;
 };
 
 type AppMemory = {
@@ -2263,6 +2279,7 @@ const storageKeys = {
   appMemory: "humanchain_app_memory",
   bids: "humanchain_market_bids",
   history: "humanchain_history",
+  marketRatings: "humanchain_market_ratings",
   marketplace: "humanchain_marketplace",
   posts: "humanchain_posts",
 } as const;
@@ -2377,7 +2394,30 @@ function loadStoredMarketplaceListings(): MarketplaceListing[] {
     return [];
   }
 
-  return loadJsonFromStorage<MarketplaceListing[]>(storageKeys.marketplace, []);
+  return loadJsonFromStorage<Partial<MarketplaceListing>[]>(
+    storageKeys.marketplace,
+    [],
+  ).map((listing) => ({
+    id: listing.id ?? Date.now(),
+    seller: listing.seller ?? "@you",
+    sellerWallet: listing.sellerWallet,
+    title: listing.title ?? "Untitled marketplace listing",
+    price: listing.price ?? "Price not set",
+    bidFloor: listing.bidFloor ?? "",
+    duration: listing.duration ?? "3 days",
+    saleMode: listing.saleMode ?? "direct",
+    condition: listing.condition ?? "Condition not set",
+    area: listing.area ?? "Nearby area not set",
+    link: listing.link ?? "",
+    details: listing.details ?? "",
+    photos: listing.photos ?? [],
+    ratings: listing.ratings ?? 0,
+    tips: listing.tips ?? 0,
+    status: listing.status ?? "payment-ready",
+    createdAt: listing.createdAt ?? "Stored locally",
+    dataReceiptUrl: listing.dataReceiptUrl,
+    dataStorageStatus: listing.dataStorageStatus ?? "local-safe",
+  }));
 }
 
 function loadStoredHistoryRecords(): HistoryRecord[] {
@@ -2581,6 +2621,7 @@ export default function HumanChainApp() {
 
   function clearMarketplaceData() {
     setMarketplaceListings([]);
+    window.localStorage.removeItem(storageKeys.marketRatings);
     recordHistory({
       title: "Marketplace data cleared",
       detail: "Stored listings, photos, links, and marketplace drafts were removed locally.",
@@ -2700,8 +2741,11 @@ export default function HumanChainApp() {
         return;
       }
 
+      const freshWorldContext = getWorldMiniAppContext();
+      const worldUsername = freshWorldContext.username ?? worldContext.username;
+
       setVerifiedHuman({
-        username: worldContext.username ? `@${worldContext.username}` : `@human_${address.slice(2, 8).toLowerCase()}`,
+        username: worldUsername ? `@${worldUsername}` : `@human_${address.slice(2, 8).toLowerCase()}`,
         wallet: address,
         mode: "world",
       });
@@ -2791,6 +2835,8 @@ export default function HumanChainApp() {
       setPoints((current) => current + earnedPoints);
     }
 
+    await paymentPrompt.onConfirmed?.();
+
     setToast({
       title: `${formatPaymentAmount(amount, paymentToken)} prepared`,
       detail: paymentPrompt.success,
@@ -2815,6 +2861,7 @@ export default function HumanChainApp() {
             activeField={activeField}
             act={act}
             earnPoints={earnPoints}
+            humanIdentity={verifiedHuman}
             humanPosts={humanPosts}
             keepStreak={keepStreak}
             links={links}
@@ -2840,6 +2887,7 @@ export default function HumanChainApp() {
           <MarketplaceView
             act={act}
             earnPoints={earnPoints}
+            humanIdentity={verifiedHuman}
             marketLocation={marketLocation}
             marketplaceListings={marketplaceListings}
             openPayment={openPayment}
@@ -3652,6 +3700,7 @@ function ChainsView({
   activeField,
   act,
   earnPoints,
+  humanIdentity,
   humanPosts,
   keepStreak,
   links,
@@ -3664,6 +3713,7 @@ function ChainsView({
   activeField: ChainField | null;
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  humanIdentity: HumanIdentity | null;
   humanPosts: HumanPost[];
   keepStreak: (detail?: string) => void;
   links: typeof initialLinks;
@@ -3675,8 +3725,9 @@ function ChainsView({
 }) {
   const [linkText, setLinkText] = useState("");
   const [postCaption, setPostCaption] = useState("");
-  const [postImage, setPostImage] = useState<string | null>(null);
+  const [postPreview, setPostPreview] = useState<string | null>(null);
   const [postFile, setPostFile] = useState<File | null>(null);
+  const [postMediaType, setPostMediaType] = useState<"image" | "video">("image");
   const [isPublishingPost, setIsPublishingPost] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
@@ -3696,7 +3747,7 @@ function ChainsView({
     keepStreak("Your link joined today's global chain.");
   }
 
-  async function publishImagePost() {
+  async function publishMediaPost() {
     const caption =
       postCaption.trim() ||
       "A real human moment I want the chain to remember today.";
@@ -3704,7 +3755,7 @@ function ChainsView({
       hour: "2-digit",
       minute: "2-digit",
     }).format(new Date());
-    let imageUrl = postImage;
+    let mediaUrl = postPreview;
     let storageStatus: HumanPost["storageStatus"] = "local-safe";
 
     setIsPublishingPost(true);
@@ -3727,7 +3778,7 @@ function ChainsView({
         };
 
         if (payload.ok && payload.url) {
-          imageUrl = payload.url;
+          mediaUrl = payload.url;
           storageStatus = "cloud-safe";
         } else if (!payload.pendingSetup) {
           act("Image upload failed", payload.error ?? "The post will still publish in your app.");
@@ -3741,9 +3792,11 @@ function ChainsView({
 
     const post: HumanPost = {
       id: Date.now(),
-      author: "@you",
+      author: humanIdentity?.username ?? "@you",
+      authorWallet: humanIdentity?.wallet,
       caption,
-      image: imageUrl,
+      image: mediaUrl,
+      mediaType: postMediaType,
       theme: "gold",
       reactions: 0,
       loves: 0,
@@ -3752,6 +3805,10 @@ function ChainsView({
       createdAt,
       owner: true,
       storageStatus,
+      tipSplit: {
+        creatorPercent: 80,
+        platformPercent: 20,
+      },
     };
 
     setHumanPosts((current) => [post, ...current]);
@@ -3773,18 +3830,36 @@ function ChainsView({
       );
     });
     setPostCaption("");
-    setPostImage(null);
+    setPostPreview(null);
     setPostFile(null);
+    setPostMediaType("image");
     recordHistory({
-      title: "Image post published",
+      title: postMediaType === "video" ? "Video post published" : "Image post published",
       detail:
         storageStatus === "cloud-safe"
-          ? `${caption} Image file stored safely. Post receipt is being saved.`
+          ? `${caption} ${postMediaType} file stored safely. Post receipt is being saved.`
           : `${caption} Saved locally now; backend receipt will attach when storage is configured.`,
       kind: "post",
     });
-    earnPoints(16, "Your human image post joined the visual chain.");
-    keepStreak("You posted a human image into today's chain.");
+    earnPoints(postMediaType === "video" ? 22 : 16, `Your human ${postMediaType} post joined the visual chain.`);
+    keepStreak(`You posted a human ${postMediaType} into today's chain.`);
+  }
+
+  function publishPostWithPaymentCheck() {
+    if (postMediaType === "video") {
+      openPayment({
+        title: "Video post",
+        amount: "2 WLD",
+        detail: "Publish one human video post. The media is stored locally first and gets a cloud receipt when storage is configured.",
+        success: "Video post payment confirmed. Your video is now in the chain.",
+        feature: "video-post",
+        points: 10,
+        onConfirmed: publishMediaPost,
+      });
+      return;
+    }
+
+    void publishMediaPost();
   }
 
   function reactToPost(postId: number, reaction: string, field: "reactions" | "loves" = "reactions") {
@@ -3815,7 +3890,7 @@ function ChainsView({
     setHumanPosts((current) =>
       current.map((post) =>
         post.id === postId
-          ? { ...post, comments: [`@you: ${comment}`, ...post.comments] }
+          ? { ...post, comments: [`${humanIdentity?.username ?? "@you"}: ${comment}`, ...post.comments] }
           : post,
       ),
     );
@@ -3826,6 +3901,37 @@ function ChainsView({
       kind: "comment",
     });
     earnPoints(7, "Your comment gave another human a real response.");
+  }
+
+  function tipPost(post: HumanPost) {
+    setHumanPosts((current) =>
+      current.map((currentPost) =>
+        currentPost.id === post.id
+          ? { ...currentPost, tips: currentPost.tips + 1 }
+          : currentPost,
+      ),
+    );
+    recordHistory({
+      title: "Post tip prepared",
+      detail: `1 WLD tip prepared for ${post.author}. Split receipt: 80% creator share, 20% HumanChain platform share. MiniKit Pay sends one transfer now; creator settlement needs the stored receipt or a future split contract.`,
+      kind: "tip",
+    });
+    void storeSafeData("post", `tip-${post.id}-${Date.now()}`, {
+      postId: post.id,
+      author: post.author,
+      authorWallet: post.authorWallet,
+      amount: 1,
+      token: "WLD",
+      split: post.tipSplit ?? { creatorPercent: 80, platformPercent: 20 },
+    });
+    openPayment({
+      title: post.mediaType === "video" ? "Tip video" : "Tip human",
+      amount: "1 WLD",
+      detail: `Send a thank-you tip for ${post.author}. HumanChain records an 80/20 creator-platform split receipt for settlement.`,
+      success: "Tip payment is confirmed and the split receipt is stored.",
+      feature: "tip-human",
+      points: 4,
+    });
   }
 
   function deletePost(postId: number) {
@@ -3899,12 +4005,16 @@ function ChainsView({
           Share a photo from your day with a short human message. Every reaction
           adds energy to the chain and awards Human Points.
         </p>
-        {postImage ? (
-          <img alt="Selected human post" src={postImage} />
+        {postPreview ? (
+          postMediaType === "video" ? (
+            <video controls src={postPreview} />
+          ) : (
+            <img alt="Selected human post" src={postPreview} />
+          )
         ) : (
           <div className="image-post-placeholder">
             <Upload size={22} />
-            <span>Your image stays inside this post preview.</span>
+            <span>Your image or paid video stays inside this post preview.</span>
           </div>
         )}
         <textarea
@@ -3917,15 +4027,21 @@ function ChainsView({
             <Upload size={17} />
             Add image
             <input
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (file) {
                   const reader = new FileReader();
                   reader.onload = () => {
-                    setPostImage(String(reader.result));
+                    setPostPreview(String(reader.result));
                     setPostFile(file);
-                    act("Image selected", "Add a caption, then publish it.");
+                    setPostMediaType(file.type.startsWith("video/") ? "video" : "image");
+                    act(
+                      file.type.startsWith("video/") ? "Video selected" : "Image selected",
+                      file.type.startsWith("video/")
+                        ? "Video posting uses a small World payment before publishing."
+                        : "Add a caption, then publish it.",
+                    );
                   };
                   reader.readAsDataURL(file);
                 }
@@ -3933,8 +4049,12 @@ function ChainsView({
               type="file"
             />
           </label>
-          <button disabled={isPublishingPost} onClick={publishImagePost} type="button">
-            {isPublishingPost ? "Publishing..." : "Publish post"}
+          <button disabled={isPublishingPost} onClick={publishPostWithPaymentCheck} type="button">
+            {isPublishingPost
+              ? "Publishing..."
+              : postMediaType === "video"
+                ? "Pay and publish video"
+                : "Publish image"}
           </button>
         </div>
       </section>
@@ -4026,7 +4146,11 @@ function ChainsView({
           {humanPosts.map((post) => (
             <article className="image-post" key={post.id}>
               {post.image ? (
-                <img alt={post.caption} src={post.image} />
+                post.mediaType === "video" ? (
+                  <video controls src={post.image} />
+                ) : (
+                  <img alt={post.caption} src={post.image} />
+                )
               ) : (
                 <div className={`generated-post-art ${post.theme}`}>
                   <span />
@@ -4062,27 +4186,7 @@ function ChainsView({
                     Love
                   </button>
                   <button
-                    onClick={() => {
-                      setHumanPosts((current) =>
-                        current.map((currentPost) =>
-                          currentPost.id === post.id
-                            ? { ...currentPost, tips: currentPost.tips + 1 }
-                            : currentPost,
-                        ),
-                      );
-                      recordHistory({
-                        title: "Post tip prepared",
-                        detail: `You prepared a WLD tip for ${post.author}.`,
-                        kind: "tip",
-                      });
-                      openPayment({
-                        title: "Tip human",
-                        amount: "1 WLD",
-                        detail: "Send a small thank-you to this human image post.",
-                        success: "Post tip is ready for World App payment.",
-                        points: 4,
-                      });
-                    }}
+                    onClick={() => tipPost(post)}
                     type="button"
                   >
                     Tip
@@ -5368,6 +5472,7 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 function MarketplaceView({
   act,
   earnPoints,
+  humanIdentity,
   marketLocation,
   marketplaceListings,
   openPayment,
@@ -5378,6 +5483,7 @@ function MarketplaceView({
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  humanIdentity: HumanIdentity | null;
   marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
   openPayment: OpenPayment;
@@ -5397,6 +5503,12 @@ function MarketplaceView({
     loadJsonFromStorage<Record<string, MarketBid[]>>(
       storageKeys.bids,
       getInitialMarketBids(),
+    ),
+  );
+  const [marketRatings, setMarketRatings] = useState<Record<string, { rating: number; tips: number }>>(() =>
+    loadJsonFromStorage<Record<string, { rating: number; tips: number }>>(
+      storageKeys.marketRatings,
+      {},
     ),
   );
   const [listingPhotos, setListingPhotos] = useState<
@@ -5426,6 +5538,10 @@ function MarketplaceView({
   useEffect(() => {
     saveJsonToStorage(storageKeys.bids, marketBids);
   }, [marketBids]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.marketRatings, marketRatings);
+  }, [marketRatings]);
 
   function publishListing(plan: (typeof marketplacePlans)[number]) {
     openPayment({
@@ -5527,6 +5643,8 @@ function MarketplaceView({
     const title = listingDraft.title.trim() || "Untitled marketplace listing";
     const listing: MarketplaceListing = {
       id: Date.now(),
+      seller: humanIdentity?.username ?? "@you",
+      sellerWallet: humanIdentity?.wallet,
       title,
       price: listingDraft.price.trim() || "Price not set",
       bidFloor: listingDraft.bidFloor.trim(),
@@ -5537,6 +5655,8 @@ function MarketplaceView({
       link: listingDraft.link.trim(),
       details: listingDraft.details.trim(),
       photos: listingPhotos,
+      ratings: 0,
+      tips: 0,
       status: "payment-ready",
       createdAt: new Intl.DateTimeFormat("en", {
         day: "2-digit",
@@ -5623,6 +5743,83 @@ function MarketplaceView({
     }
   }
 
+  function getMarketVisuals(item: MarketplaceItem) {
+    return [0, 1, 2].map((slot) => ({
+      label: `${item.tag.slice(0, 2).toUpperCase()}${slot + 1}`,
+      tone: `${item.tone}-${slot}`,
+    }));
+  }
+
+  function rateMarketItem(item: MarketplaceItem | MarketplaceListing, label: string) {
+    const isStoredListing = "id" in item;
+    const key = isStoredListing ? `stored:${item.id}` : `${item.seller}:${item.title}`;
+
+    if (isStoredListing) {
+      setMarketplaceListings((current) =>
+        current.map((listing) =>
+          listing.id === item.id
+            ? { ...listing, ratings: (listing.ratings ?? 0) + 1 }
+            : listing,
+        ),
+      );
+    } else {
+      setMarketRatings((current) => ({
+        ...current,
+        [key]: {
+          rating: (current[key]?.rating ?? 0) + 1,
+          tips: current[key]?.tips ?? 0,
+        },
+      }));
+    }
+
+    earnPoints(3, `You rated ${label}'s look and helped buyers scan the market.`);
+  }
+
+  function tipMarketItem(item: MarketplaceItem | MarketplaceListing, label: string) {
+    const seller = item.seller;
+    const isStoredListing = "id" in item;
+    const key = isStoredListing ? `stored:${item.id}` : `${item.seller}:${item.title}`;
+
+    if (isStoredListing) {
+      setMarketplaceListings((current) =>
+        current.map((listing) =>
+          listing.id === item.id
+            ? { ...listing, tips: (listing.tips ?? 0) + 1 }
+            : listing,
+        ),
+      );
+    } else {
+      setMarketRatings((current) => ({
+        ...current,
+        [key]: {
+          rating: current[key]?.rating ?? 0,
+          tips: (current[key]?.tips ?? 0) + 1,
+        },
+      }));
+    }
+
+    recordHistory({
+      title: "Marketplace item tip prepared",
+      detail: `1 WLD tip prepared for ${seller}. Split receipt: 80% seller share, 20% HumanChain platform share.`,
+      kind: "tip",
+    });
+    void storeSafeData("marketplace-listing", `tip-${key}-${Date.now()}`, {
+      item: label,
+      seller,
+      amount: 1,
+      token: "WLD",
+      split: { creatorPercent: 80, platformPercent: 20 },
+    });
+    openPayment({
+      title: "Tip market item",
+      amount: "1 WLD",
+      detail: `Tip ${seller} for making ${label} worth noticing. HumanChain stores the 80/20 split receipt.`,
+      success: "Market item tip confirmed and receipt stored.",
+      feature: "tip-market-item",
+      points: 4,
+    });
+  }
+
   async function shareMarketItem(item: MarketplaceItem) {
     try {
       await shareWithWorld({
@@ -5701,7 +5898,7 @@ function MarketplaceView({
     const bidId = (marketBids[item.title]?.length ?? 0) + 1;
     const bid: MarketBid = {
       amount: nextBid,
-      buyer: "@you",
+      buyer: humanIdentity?.username ?? "@you",
       createdAt: new Intl.DateTimeFormat("en", {
         hour: "2-digit",
         minute: "2-digit",
@@ -5992,18 +6189,31 @@ function MarketplaceView({
           </div>
           {marketplaceListings.slice(0, 4).map((listing) => (
             <article className="stored-market-row" key={listing.id}>
+              <div className="stored-market-media">
+                {listing.photos[0] ? (
+                  <img alt={listing.photos[0].name} src={listing.photos[0].src} />
+                ) : (
+                  <Tag size={18} />
+                )}
+              </div>
               <div>
                 <strong>{listing.title}</strong>
                 <span>
-                  {listing.price} - {listing.condition} - {listing.photos.length} photos
+                  {listing.price} - {listing.condition} - seller {listing.seller}
                 </span>
                 <small>
                   {listing.saleMode === "bidding"
                     ? `Bidding ${listing.duration}, floor ${listing.bidFloor || "not set"}`
                     : "Direct chat sale"}{" "}
-                  - {listing.area} - {listing.createdAt} - {listing.dataStorageStatus === "cloud-safe" ? "safe receipt" : "local safe"}
+                  - {listing.area} - {listing.createdAt} - {listing.ratings ?? 0} look votes - {listing.tips ?? 0} tips - {listing.dataStorageStatus === "cloud-safe" ? "safe receipt" : "local safe"}
                 </small>
               </div>
+              <button onClick={() => rateMarketItem(listing, listing.title)} type="button">
+                Rate
+              </button>
+              <button onClick={() => tipMarketItem(listing, listing.title)} type="button">
+                Tip
+              </button>
               <button
                 onClick={() => {
                   publishListing(marketplacePlans[2]);
@@ -6046,10 +6256,18 @@ function MarketplaceView({
           ))}
         </div>
         <div className="market-list">
-          {filteredItems.map((item) => (
+          {filteredItems.map((item) => {
+            const ratingKey = `${item.seller}:${item.title}`;
+            const itemSocial = marketRatings[ratingKey] ?? { rating: 0, tips: 0 };
+
+            return (
             <article className={`market-item ${item.tone}`} key={item.title}>
-              <div className="market-item-art">
-                <Tag size={22} />
+              <div className="market-thumb-stack" aria-label={`${item.photos} listing images`}>
+                {getMarketVisuals(item).map((visual) => (
+                  <span className={visual.tone} key={visual.tone}>
+                    {visual.label}
+                  </span>
+                ))}
               </div>
               <div>
                 <div className="market-item-top">
@@ -6064,6 +6282,8 @@ function MarketplaceView({
                   <span>{item.tag}</span>
                   <span>{item.photos} photos</span>
                   <span>{item.trust}</span>
+                  <span>{itemSocial.rating} look votes</span>
+                  <span>{itemSocial.tips} tips</span>
                 </div>
                 <small>{item.quality}</small>
                 {item.bidding ? (
@@ -6125,6 +6345,12 @@ function MarketplaceView({
                 )}
               </div>
               <div className="market-card-actions">
+                <button onClick={() => rateMarketItem(item, item.title)} type="button">
+                  Rate look
+                </button>
+                <button onClick={() => tipMarketItem(item, item.title)} type="button">
+                  Tip item
+                </button>
                 <button
                   onClick={() => {
                     void openSellerChat(item);
@@ -6143,7 +6369,8 @@ function MarketplaceView({
                 </button>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
 

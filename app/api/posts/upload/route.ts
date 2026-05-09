@@ -6,8 +6,15 @@ import {
   rateLimitResponse,
 } from "@/lib/serverApi";
 
-const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-const maxImageSize = 4 * 1024 * 1024;
+const allowedMediaTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+]);
+const maxMediaSize = 24 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "post-upload", 12)) {
@@ -18,7 +25,7 @@ export async function POST(req: NextRequest) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
-      message: "Add BLOB_READ_WRITE_TOKEN before durable image uploads.",
+      message: "Add BLOB_READ_WRITE_TOKEN before durable image and video uploads.",
     });
   }
 
@@ -26,12 +33,12 @@ export async function POST(req: NextRequest) {
   const file = formData.get("file");
 
   if (!(file instanceof File)) {
-    return noStoreJson({ error: "Missing image file." }, { status: 400 });
+    return noStoreJson({ error: "Missing media file." }, { status: 400 });
   }
 
-  if (!allowedImageTypes.has(file.type) || file.size > maxImageSize) {
+  if (!allowedMediaTypes.has(file.type) || file.size > maxMediaSize) {
     return noStoreJson(
-      { error: "Use a JPG, PNG, or WebP image under 4 MB." },
+      { error: "Use a JPG, PNG, WebP, MP4, WebM, or MOV file under 24 MB." },
       { status: 400 },
     );
   }
