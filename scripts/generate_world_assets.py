@@ -81,6 +81,8 @@ def draw_logo(draw, cx, cy, r, scale=1.0):
 def draw_phone_chrome(draw, w, h, active="Home"):
     nav_h = 122
     rounded(draw, (22, 22, w - 22, h - 22), 46, PAPER, outline=LINE, width=2)
+    if h <= 1200:
+        return
     draw.rectangle((24, h - nav_h - 22, w - 24, h - 24), fill=(252, 248, 241))
     items = [("⌂", "Home"), ("?", "Ask"), ("✧", "Chains"), ("⌑", "Market"), ("▭", "Stories"), ("○", "Me")]
     step = (w - 70) / len(items)
@@ -105,134 +107,123 @@ def app_icon():
 
 
 def content_card():
-    w, h = 1035, 720
+    w, h = 345, 240
     img = gradient((w, h), GREEN_DARK, GREEN_MID).convert("RGBA")
     d = ImageDraw.Draw(img)
-    for r in [460, 300]:
-        d.ellipse((w - r, -r // 2, w + r // 4, r), outline=(255, 253, 248, 42), width=3)
-    for x in range(-120, 330, 40):
-        d.line((x, h, x + 280, h - 280), fill=(255, 253, 248, 24), width=15)
-    draw_logo(d, 132, 124, 58, 1.0)
-    d.text((218, 88), "Verified human network", fill=(232, 226, 214), font=font(32, True))
-    d.text((218, 130), "HumanChain", fill=(255, 253, 248), font=font(44, True))
-    d.text((64, 250), "Ask people, not algorithms.", fill=(255, 253, 248), font=font(72, True))
-    copy = "Real questions, human stories, nearby trade, and simple bids inside World App."
-    y = 348
-    for line in wrap_text(d, copy, font(38), 760):
-        d.text((64, y), line, fill=(255, 253, 248), font=font(38))
-        y += 52
-    # Required foreground blur/quiet zone at bottom 94px.
-    overlay = Image.new("RGBA", (w, 282), (0, 0, 0, 0))
+    draw_logo(d, 48, 45, 26, 0.46)
+    d.text((88, 28), "HumanChain", fill=(255, 253, 248), font=font(25, True))
+    d.text((22, 88), "Ask real humans.", fill=(255, 253, 248), font=font(30, True))
+    d.text((22, 122), "Get the world's verdict.", fill=(255, 253, 248), font=font(25, True))
+    copy = "Questions · stories · nearby market · simple bids"
+    y = 158
+    for line in wrap_text(d, copy, font(17), 286):
+        d.text((22, y), line, fill=(232, 226, 214), font=font(17))
+        y += 20
+    rounded(d, (22, 202, 142, 228), 13, (255, 253, 248))
+    d.text((82, 215), "Open", fill=INK, font=font(15, True), anchor="mm")
+    overlay = Image.new("RGBA", (w, 72), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
-    od.rounded_rectangle((0, 0, w, 282), radius=88, fill=(20, 34, 35, 190))
-    overlay = overlay.filter(ImageFilter.GaussianBlur(28))
-    img.alpha_composite(overlay, (0, h - 240))
-    img.save(OUT / "humanchain-tag-content-card-1035x720.png")
+    od.rounded_rectangle((0, 0, w, 72), radius=26, fill=(20, 34, 35, 34))
+    overlay = overlay.filter(ImageFilter.GaussianBlur(8))
+    img.alpha_composite(overlay, (0, h - 64))
+    img.save(OUT / "humanchain-tag-content-card-345x240.png")
 
 
 def showcase_home():
-    w, h = 1080, 1920
+    w, h = 1080, 1080
     img = Image.new("RGB", (w, h), (246, 240, 231))
     d = ImageDraw.Draw(img)
     draw_phone_chrome(d, w, h, "Home")
-    x0, y0, x1 = 46, 70, w - 46
-    rounded(d, (x0, y0, x1, 650), 60, GREEN_DARK)
+    x0, y0, x1 = 46, 56, w - 46
+    rounded(d, (x0, y0, x1, 430), 48, GREEN_DARK)
     d.ellipse((760, -90, 1120, 270), outline=(255, 253, 248, 58), width=3)
-    draw_logo(d, 142, 160, 62)
-    d.text((236, 120), "Verified human network", fill=(227, 221, 211), font=font(30, True))
-    d.text((236, 166), "HumanChain", fill=(255, 253, 248), font=font(42, True))
-    d.text((78, 270), "Where real humans\ncarry wisdom forward.", fill=(255, 253, 248), font=font(74, True), spacing=8)
+    draw_logo(d, 126, 138, 50)
+    d.text((206, 106), "Verified human network", fill=(227, 221, 211), font=font(28, True))
+    d.text((206, 146), "HumanChain", fill=(255, 253, 248), font=font(40, True))
+    d.text((78, 236), "Where real humans\ncarry wisdom forward.", fill=(255, 253, 248), font=font(58, True), spacing=6)
     copy = "Ask real people, read human stories, save field wisdom, trade with nearby humans, and build a visible chain of purpose."
-    y = 440
-    for line in wrap_text(d, copy, font(35), 840):
-        d.text((78, y), line, fill=(255, 253, 248), font=font(35))
-        y += 50
+    y = 348
+    for line in wrap_text(d, copy, font(25), 850)[:2]:
+        d.text((78, y), line, fill=(255, 253, 248), font=font(25))
+        y += 36
     chips = ["Daily human question", "Story vault", "Nearby marketplace", "Human points"]
     for i, chip in enumerate(chips):
         cx = 78 + (i % 2) * 465
-        cy = 690 + (i // 2) * 86
-        rounded(d, (cx, cy, cx + 420, cy + 62), 26, (76, 127, 104), outline=(132, 170, 151), width=2)
-        d.text((cx + 28, cy + 18), chip, fill=(255, 253, 248), font=font(27, True))
+        cy = 462 + (i // 2) * 68
+        rounded(d, (cx, cy, cx + 420, cy + 48), 24, (76, 127, 104), outline=(132, 170, 151), width=2)
+        d.text((cx + 28, cy + 12), chip, fill=(255, 253, 248), font=font(24, True))
     cards = [("Ask The\nWorld", "Real answers\nfrom verified\nhumans"), ("Join Today's\nChain", "Add one link to\nthe world"), ("Human\nMarket", "Buy, sell, and\npromote nearby"), ("Story Vault", "Monthly stories\nfrom real people")]
     for i, (title, text) in enumerate(cards):
         cx = 34 + (i % 3) * 342
-        cy = 930 + (i // 3) * 360
-        rounded(d, (cx, cy, cx + 304, cy + 320), 28, PAPER_STRONG, outline=LINE, width=2)
-        d.text((cx + 32, cy + 82), title, fill=INK, font=font(36, True), spacing=4)
-        d.text((cx + 32, cy + 194), text, fill=(120, 119, 111), font=font(29), spacing=6)
-    img.save(OUT / "humanchain-showcase-1-home-1080x1920.png")
+        cy = 635 + (i // 3) * 230
+        rounded(d, (cx, cy, cx + 304, cy + 205), 28, PAPER_STRONG, outline=LINE, width=2)
+        d.text((cx + 32, cy + 52), title, fill=INK, font=font(31, True), spacing=3)
+        d.text((cx + 32, cy + 130), text, fill=(120, 119, 111), font=font(21), spacing=4)
+    img.save(OUT / "humanchain-showcase-1-home-1080x1080.png")
 
 
 def showcase_ask():
-    w, h = 1080, 1920
+    w, h = 1080, 1080
     img = Image.new("RGB", (w, h), (246, 240, 231))
     d = ImageDraw.Draw(img)
     draw_phone_chrome(d, w, h, "Ask")
-    rounded(d, (42, 64, w - 42, 360), 46, (76, 104, 159))
-    d.text((84, 86), "Ask people, not algorithms.", fill=(255, 253, 248), font=font(60, True))
-    d.text((84, 166), "Publish one honest question and watch real answers form into a living verdict.", fill=(232, 236, 245), font=font(36), spacing=5)
-    rounded(d, (42, 402, w - 42, 1260), 40, PAPER_STRONG, outline=LINE, width=2)
-    d.text((84, 462), "What do you want to ask humanity?", fill=INK, font=font(38, True))
-    rounded(d, (84, 538, w - 84, 820), 32, (255, 252, 246), outline=LINE, width=2)
-    d.text((120, 590), "Example: Should I leave my job and start\nmy own business?", fill=(126, 126, 123), font=font(34), spacing=10)
+    rounded(d, (42, 58, w - 42, 270), 42, (76, 104, 159))
+    d.text((84, 88), "Ask people, not algorithms.", fill=(255, 253, 248), font=font(52, True))
+    d.text((84, 160), "Publish one honest question and watch real answers form.", fill=(232, 236, 245), font=font(30), spacing=5)
+    rounded(d, (42, 318, w - 42, 850), 38, PAPER_STRONG, outline=LINE, width=2)
+    d.text((84, 368), "What do you want to ask humanity?", fill=INK, font=font(36, True))
+    rounded(d, (84, 438, w - 84, 622), 30, (255, 252, 246), outline=LINE, width=2)
+    d.text((120, 490), "Example: Should I leave my job and start\nmy own business?", fill=(126, 126, 123), font=font(30), spacing=8)
     modes = [("Text", "Public question", True), ("Voice", "Hear my tone", False), ("Private", "Hide identity", False), ("Deep Verdict", "Human report", False)]
     for i, (a, b, active) in enumerate(modes):
         cx = 84 + (i % 2) * 464
-        cy = 870 + (i // 2) * 170
-        rounded(d, (cx, cy, cx + 430, cy + 128), 26, GREEN if active else PAPER_STRONG, outline=LINE, width=2)
-        d.text((cx + 28, cy + 28), a, fill=(255, 253, 248) if active else INK, font=font(35, True))
-        d.text((cx + 28, cy + 78), b, fill=(232, 226, 214) if active else GOLD, font=font(26, True))
+        cy = 665 + (i // 2) * 108
+        rounded(d, (cx, cy, cx + 430, cy + 82), 24, GREEN if active else PAPER_STRONG, outline=LINE, width=2)
+        d.text((cx + 28, cy + 14), a, fill=(255, 253, 248) if active else INK, font=font(30, True))
+        d.text((cx + 28, cy + 52), b, fill=(232, 226, 214) if active else GOLD, font=font(22, True))
     topics = ["Life", "Love", "Money", "Business", "Family"]
     x = 84
     for i, t in enumerate(topics):
         tw = d.textbbox((0, 0), t, font=font(26))[2] + 52
-        rounded(d, (x, 1092, x + tw, 1160), 34, GREEN if i == 0 else PAPER_STRONG, outline=LINE, width=2)
-        d.text((x + tw / 2, 1126), t, fill=(255, 253, 248) if i == 0 else INK, font=font(26), anchor="mm")
+        rounded(d, (x, 856, x + tw, 906), 25, GREEN if i == 0 else PAPER_STRONG, outline=LINE, width=2)
+        d.text((x + tw / 2, 881), t, fill=(255, 253, 248) if i == 0 else INK, font=font(24), anchor="mm")
         x += tw + 16
-    rounded(d, (84, 1188, w - 84, 1292), 52, INK)
-    d.text((w // 2, 1240), "Ask Verified Humans", fill=(255, 253, 248), font=font(39, True), anchor="mm")
-    d.text((42, 1325), "Live Human Questions", fill=(102, 109, 101), font=font(32, True))
-    for i in range(2):
-        cy = 1385 + i * 175
-        rounded(d, (42, cy, w - 42, cy + 138), 28, PAPER_STRONG, outline=LINE, width=2)
-        d.text((84, cy + 32), ["Is discipline love for my future self?", "How do I repair trust after silence?"][i], fill=INK, font=font(30, True))
-        d.text((84, cy + 84), ["18 answers forming", "42 humans joined"][i], fill=GOLD, font=font(24, True))
-    img.save(OUT / "humanchain-showcase-2-ask-1080x1920.png")
+    rounded(d, (84, 920, w - 84, 986), 33, INK)
+    d.text((w // 2, 953), "Ask Verified Humans", fill=(255, 253, 248), font=font(34, True), anchor="mm")
+    img.save(OUT / "humanchain-showcase-2-ask-1080x1080.png")
 
 
 def showcase_market():
-    w, h = 1080, 1920
+    w, h = 1080, 1080
     img = Image.new("RGB", (w, h), (246, 240, 231))
     d = ImageDraw.Draw(img)
     draw_phone_chrome(d, w, h, "Market")
-    rounded(d, (42, 60, w - 42, 430), 48, (30, 78, 91))
-    d.text((84, 112), "HumanChain Market", fill=(232, 226, 214), font=font(30, True))
-    d.text((84, 164), "Simple bids.\nReal nearby humans.", fill=(255, 253, 248), font=font(70, True), spacing=8)
-    d.text((84, 330), "Buy, sell, and promote nearby with safe receipts.", fill=(234, 239, 237), font=font(34))
-    rounded(d, (42, 470, w - 42, 605), 30, PAPER_STRONG, outline=LINE, width=2)
-    d.text((88, 512), "Nearby market active", fill=INK, font=font(34, True))
-    d.text((88, 558), "Westlands · Browser/manual location only", fill=MUTED, font=font(27))
+    rounded(d, (42, 58, w - 42, 292), 44, (30, 78, 91))
+    d.text((84, 104), "HumanChain Market", fill=(232, 226, 214), font=font(30, True))
+    d.text((84, 154), "Simple bids.\nReal nearby humans.", fill=(255, 253, 248), font=font(50, True), spacing=2)
+    d.text((84, 252), "Buy, sell, and promote nearby with safe receipts.", fill=(234, 239, 237), font=font(26))
+    rounded(d, (42, 330, w - 42, 436), 28, PAPER_STRONG, outline=LINE, width=2)
+    d.text((88, 366), "Nearby market active", fill=INK, font=font(32, True))
+    d.text((88, 408), "Westlands - Browser/manual location only", fill=MUTED, font=font(25))
     items = [("Samsung Galaxy A54", "22 WLD target", "Best 20 WLD", "Next bid 20.5 WLD", True), ("Canvas tote bags", "4 WLD target", "Best 3.5 WLD", "Next bid 4 WLD", True), ("Restaurant launch poster", "Sponsored", "Direct inbox", "Marketing link", False)]
     for i, (title, price, best, nextbid, bidding) in enumerate(items):
-        cy = 650 + i * 300
-        rounded(d, (42, cy, w - 42, cy + 260), 34, PAPER_STRONG, outline=LINE, width=2)
-        rounded(d, (84, cy + 42, 198, cy + 156), 28, BLUE if i == 0 else GOLD if i == 1 else GREEN)
-        d.text((226, cy + 42), title, fill=INK, font=font(34, True))
-        d.text((226, cy + 88), price, fill=GOLD, font=font(28, True))
-        d.text((226, cy + 130), best, fill=MUTED, font=font(26))
+        cy = 470 + i * 174
+        rounded(d, (42, cy, w - 42, cy + 150), 30, PAPER_STRONG, outline=LINE, width=2)
+        rounded(d, (84, cy + 28, 170, cy + 114), 22, BLUE if i == 0 else GOLD if i == 1 else GREEN)
+        d.text((206, cy + 28), title, fill=INK, font=font(31, True))
+        d.text((206, cy + 70), price, fill=GOLD, font=font(25, True))
+        d.text((206, cy + 105), best, fill=MUTED, font=font(23))
         if bidding:
-            rounded(d, (226, cy + 178, 488, cy + 226), 24, (239, 245, 255), outline=(196, 211, 247), width=2)
-            d.text((357, cy + 202), nextbid, fill=BLUE, font=font(24, True), anchor="mm")
-            rounded(d, (w - 286, cy + 170, w - 84, cy + 232), 31, INK)
-            d.text((w - 185, cy + 201), "Place bid", fill=PAPER_STRONG, font=font(25, True), anchor="mm")
+            rounded(d, (w - 286, cy + 54, w - 84, cy + 112), 29, INK)
+            d.text((w - 185, cy + 83), "Place bid", fill=PAPER_STRONG, font=font(25, True), anchor="mm")
         else:
-            rounded(d, (226, cy + 178, 530, cy + 226), 24, (237, 247, 242), outline=(192, 221, 207), width=2)
-            d.text((378, cy + 202), "Open seller chat", fill=GREEN, font=font(24, True), anchor="mm")
-    img.save(OUT / "humanchain-showcase-3-market-1080x1920.png")
+            rounded(d, (w - 330, cy + 54, w - 84, cy + 112), 29, (237, 247, 242), outline=(192, 221, 207), width=2)
+            d.text((w - 207, cy + 83), "Seller chat", fill=GREEN, font=font(24, True), anchor="mm")
+    img.save(OUT / "humanchain-showcase-3-market-1080x1080.png")
 
 
 def meta_image():
-    w, h = 1200, 630
+    w, h = 1200, 600
     img = gradient((w, h), GREEN_DARK, GREEN_MID).convert("RGBA")
     d = ImageDraw.Draw(img)
     for r in [520, 340]:
@@ -243,7 +234,7 @@ def meta_image():
     d.text((76, 440), "Verified questions · human stories · nearby market · simple bids", fill=(237, 231, 220), font=font(34))
     rounded(d, (76, 510, 360, 572), 31, (255, 253, 248))
     d.text((218, 541), "Open HumanChain", fill=INK, font=font(28, True), anchor="mm")
-    img.save(OUT / "humanchain-meta-image-1200x630.png")
+    img.save(OUT / "humanchain-meta-image-1200x600.png")
 
 
 if __name__ == "__main__":
