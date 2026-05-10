@@ -2923,9 +2923,6 @@ export default function HumanChainApp() {
         return (
           <MeView
             act={act}
-            clearMarketplaceData={clearMarketplaceData}
-            clearPostData={clearPostData}
-            deleteLocalAccount={deleteLocalAccount}
             earnPoints={earnPoints}
             keepStreak={keepStreak}
             historyRecords={historyRecords}
@@ -2935,7 +2932,6 @@ export default function HumanChainApp() {
             notificationReady={notificationReady}
             points={points}
             recordHistory={recordHistory}
-            resetHistory={resetHistory}
             savedItems={savedItems}
             streak={streak}
             verifiedHuman={verifiedHuman}
@@ -2946,9 +2942,12 @@ export default function HumanChainApp() {
           <HomeView
             act={act}
             appLanguage={appLanguage}
+            clearMarketplaceData={clearMarketplaceData}
+            clearPostData={clearPostData}
             dailyAnswered={dailyAnswered}
             dailyAnsweredAt={dailyAnsweredAt}
             dailyResponses={dailyResponses}
+            deleteLocalAccount={deleteLocalAccount}
             earnPoints={earnPoints}
             links={links}
             notificationReady={notificationReady}
@@ -2960,6 +2959,7 @@ export default function HumanChainApp() {
             setDailyAnswered={setDailyAnswered}
             setDailyResponses={setDailyResponses}
             setTab={setTab}
+            resetHistory={resetHistory}
             streak={streak}
             verifiedHuman={verifiedHuman}
             worldContext={worldContext}
@@ -3091,15 +3091,19 @@ function LoginGate({
 function HomeView({
   act,
   appLanguage,
+  clearMarketplaceData,
+  clearPostData,
   dailyAnswered,
   dailyAnsweredAt,
   dailyResponses,
+  deleteLocalAccount,
   earnPoints,
   links,
   notificationReady,
   onChangeLanguage,
   onEnableNotifications,
   points,
+  resetHistory,
   setDailyAnsweredAt,
   setActiveField,
   setDailyAnswered,
@@ -3111,15 +3115,19 @@ function HomeView({
 }: {
   act: (title: string, detail: string) => void;
   appLanguage: AppLanguage;
+  clearMarketplaceData: () => void;
+  clearPostData: () => void;
   dailyAnswered: boolean;
   dailyAnsweredAt: string | null;
   dailyResponses: DailyResponse[];
+  deleteLocalAccount: () => void;
   earnPoints: EarnPoints;
   links: typeof initialLinks;
   notificationReady: boolean;
   onChangeLanguage: (language: AppLanguage) => void;
   onEnableNotifications: () => void | Promise<void>;
   points: number;
+  resetHistory: () => void;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
   setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
   setDailyAnswered: React.Dispatch<React.SetStateAction<boolean>>;
@@ -3167,17 +3175,20 @@ function HomeView({
       </header>
 
       <section className={`home-notification-toggle ${notificationReady ? "active" : ""}`}>
+        <div className="home-notification-icon" aria-hidden="true">
+          <Bell size={18} />
+          <i />
+        </div>
         <div>
-          <span>{notificationReady ? "Alerts active" : "Turn on alerts"}</span>
+          <strong>{notificationReady ? "World alerts active" : "World alerts"}</strong>
           <p>
             {notificationReady
-              ? `${verifiedHuman?.username ?? "Human"}, inbox, bids, payments, and account alerts are ready.`
-              : "Enable functional World App alerts for bids, replies, payments, daily questions, and account safety."}
+              ? `${verifiedHuman?.username ?? "Human"} is ready for inbox, bids, payments, and daily questions.`
+              : "Inbox, bids, payments, and daily questions."}
           </p>
         </div>
         <button onClick={onEnableNotifications} type="button">
-          <Bell size={17} />
-          {notificationReady ? "On" : "Enable"}
+          {notificationReady ? "Manage" : "Enable"}
         </button>
       </section>
 
@@ -3393,9 +3404,13 @@ function HomeView({
 
       <AppSettingsBar
         activeLanguage={appLanguage}
+        clearMarketplaceData={clearMarketplaceData}
+        clearPostData={clearPostData}
+        deleteLocalAccount={deleteLocalAccount}
         notificationReady={notificationReady}
         onEnableNotifications={onEnableNotifications}
         onChange={onChangeLanguage}
+        resetHistory={resetHistory}
         worldContext={worldContext}
       />
     </div>
@@ -6480,9 +6495,6 @@ function MarketplaceView({
 
 function MeView({
   act,
-  clearMarketplaceData,
-  clearPostData,
-  deleteLocalAccount,
   earnPoints,
   historyRecords,
   humanPosts,
@@ -6492,15 +6504,11 @@ function MeView({
   notificationReady,
   points,
   recordHistory,
-  resetHistory,
   savedItems,
   streak,
   verifiedHuman,
 }: {
   act: (title: string, detail: string) => void;
-  clearMarketplaceData: () => void;
-  clearPostData: () => void;
-  deleteLocalAccount: () => void;
   earnPoints: EarnPoints;
   historyRecords: HistoryRecord[];
   humanPosts: HumanPost[];
@@ -6510,11 +6518,11 @@ function MeView({
   notificationReady: boolean;
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
-  resetHistory: () => void;
   savedItems: number;
   streak: number;
   verifiedHuman: HumanIdentity | null;
 }) {
+  const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const displayUsername = verifiedHuman?.username ?? "@preview_human";
   const walletLabel = verifiedHuman?.wallet
@@ -6525,7 +6533,7 @@ function MeView({
 
   return (
     <div className="screen">
-      <TopBar title="Me" subtitle="Verified profile, vault, and records." />
+      <TopBar title="Me" subtitle="Identity, vault, and activity." />
       <section className="treasure-profile">
         <div className="treasure-mark">
           <div className="avatar">
@@ -6534,7 +6542,7 @@ function MeView({
           <BadgeCheck size={22} />
         </div>
         <div>
-          <span className="section-kicker">Professional profile</span>
+          <span className="section-kicker">World verified human</span>
           <h2>{displayUsername}</h2>
           <p>{walletLabel}. Chain score {chainScore}. {notificationReady ? "Notifications active." : "Notifications off."}</p>
         </div>
@@ -6577,6 +6585,26 @@ function MeView({
           />
         </label>
       </section>
+      <nav className="me-view-tabs" aria-label="Me sections">
+        <button
+          aria-pressed={profileView === "overview"}
+          className={profileView === "overview" ? "active" : ""}
+          onClick={() => setProfileView("overview")}
+          type="button"
+        >
+          Overview
+        </button>
+        <button
+          aria-pressed={profileView === "activity"}
+          className={profileView === "activity" ? "active" : ""}
+          onClick={() => setProfileView("activity")}
+          type="button"
+        >
+          Activity
+        </button>
+      </nav>
+      {profileView === "overview" ? (
+        <>
       <section className="profile-kpi-grid" aria-label="Profile metrics">
         <Stat label="Score" value={String(chainScore)} />
         <Stat label="Points" value={String(points)} />
@@ -6673,66 +6701,6 @@ function MeView({
           <p>Your stored marketplace listings, business ads, and paid boosts will appear here.</p>
         )}
       </section>
-      <section className="panel human-history-panel">
-        <div className="section-heading">
-          <span>Human activity record</span>
-          <Radio size={18} />
-        </div>
-        {historyRecords.slice(0, 8).map((record) => (
-          <article className={`history-record ${record.kind}`} key={record.id}>
-            <span>{record.time}</span>
-            <div>
-              <strong>{record.title}</strong>
-              <p>{record.detail}</p>
-            </div>
-          </article>
-        ))}
-      </section>
-      <section className="panel points-ledger">
-        <div className="section-heading">
-          <span>Point rules</span>
-          <Star size={18} />
-        </div>
-        {pointRules.map(([action, reward]) => (
-          <div className="point-rule" key={action}>
-            <span>{action}</span>
-            <strong>{reward}</strong>
-          </div>
-        ))}
-        <p>
-          Human Points are not withdrawable yet. They track early value so real
-          contributors can be recognized when HumanChain launches rewards.
-        </p>
-      </section>
-      <section className="panel account-control-panel">
-        <div className="section-heading">
-          <span>Data and account controls</span>
-          <LockKeyhole size={18} />
-        </div>
-        <p>
-          HumanChain stores preview data on this device until backend storage is
-          connected. You can remove stored listings, posts, history, or the
-          whole local account view.
-        </p>
-        <div className="account-control-grid">
-          <button onClick={clearMarketplaceData} type="button">
-            <Store size={17} />
-            <span>Clear marketplace</span>
-          </button>
-          <button onClick={clearPostData} type="button">
-            <Upload size={17} />
-            <span>Clear posts</span>
-          </button>
-          <button onClick={resetHistory} type="button">
-            <Radio size={17} />
-            <span>Reset history</span>
-          </button>
-          <button className="danger" onClick={deleteLocalAccount} type="button">
-            <LockKeyhole size={17} />
-            <span>Delete local account</span>
-          </button>
-        </div>
-      </section>
       <section className="badge-cloud">
         {profileBadges.map((badge) => (
           <span key={badge}>{badge}</span>
@@ -6791,6 +6759,46 @@ function MeView({
           </button>
         </div>
       </section>
+        </>
+      ) : (
+        <>
+          <section className="panel human-history-panel activity-panel">
+            <div className="section-heading">
+              <span>Human activity record</span>
+              <Radio size={18} />
+            </div>
+            {historyRecords.length ? (
+              historyRecords.slice(0, 16).map((record) => (
+                <article className={`history-record ${record.kind}`} key={record.id}>
+                  <span>{record.time}</span>
+                  <div>
+                    <strong>{record.title}</strong>
+                    <p>{record.detail}</p>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <p>Your actions, payments, posts, bids, and notification changes will appear here.</p>
+            )}
+          </section>
+          <section className="panel points-ledger">
+            <div className="section-heading">
+              <span>Point rules</span>
+              <Star size={18} />
+            </div>
+            {pointRules.map(([action, reward]) => (
+              <div className="point-rule" key={action}>
+                <span>{action}</span>
+                <strong>{reward}</strong>
+              </div>
+            ))}
+            <p>
+              Human Points are not withdrawable yet. They track early value so real
+              contributors can be recognized when HumanChain launches rewards.
+            </p>
+          </section>
+        </>
+      )}
     </div>
   );
 }
@@ -6855,15 +6863,23 @@ function PaymentSheet({
 
 function AppSettingsBar({
   activeLanguage,
+  clearMarketplaceData,
+  clearPostData,
+  deleteLocalAccount,
   notificationReady,
   onEnableNotifications,
   onChange,
+  resetHistory,
   worldContext,
 }: {
   activeLanguage: AppLanguage;
+  clearMarketplaceData: () => void;
+  clearPostData: () => void;
+  deleteLocalAccount: () => void;
   notificationReady: boolean;
   onEnableNotifications: () => void | Promise<void>;
   onChange: (language: AppLanguage) => void;
+  resetHistory: () => void;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [open, setOpen] = useState(false);
@@ -6953,6 +6969,32 @@ function AppSettingsBar({
             {essentials.accountPoints.map((point) => (
               <p key={point}>{point}</p>
             ))}
+          </div>
+          <div className="settings-section compact settings-account-controls">
+            <strong>Data and account controls</strong>
+            <p>
+              HumanChain stores preview data on this device until backend storage
+              is connected. Remove stored listings, posts, history, or the whole
+              local account view from here.
+            </p>
+            <div className="settings-control-grid">
+              <button onClick={clearMarketplaceData} type="button">
+                <Store size={16} />
+                Clear marketplace
+              </button>
+              <button onClick={clearPostData} type="button">
+                <Upload size={16} />
+                Clear posts
+              </button>
+              <button onClick={resetHistory} type="button">
+                <Radio size={16} />
+                Reset history
+              </button>
+              <button className="danger" onClick={deleteLocalAccount} type="button">
+                <LockKeyhole size={16} />
+                Delete local account
+              </button>
+            </div>
           </div>
           <button
             className="settings-notification"
