@@ -61,6 +61,12 @@ export type WorldMiniAppContext = {
   worldAppVersion?: number;
 };
 
+export type WorldUserProfile = {
+  profilePictureUrl?: string;
+  username?: string;
+  walletAddress?: string;
+};
+
 export function isWorldMiniAppReady() {
   return MiniKit.isInstalled();
 }
@@ -97,6 +103,20 @@ export function getWorldMiniAppContext(): WorldMiniAppContext {
     walletAddress: user?.walletAddress,
     worldAppVersion: deviceProperties?.worldAppVersion,
   };
+}
+
+export async function getWorldUserByAddress(
+  address?: string,
+): Promise<WorldUserProfile | null> {
+  if (!address) {
+    return null;
+  }
+
+  try {
+    return await MiniKit.getUserByAddress(address);
+  } catch {
+    return null;
+  }
 }
 
 export async function getWorldPermissions() {

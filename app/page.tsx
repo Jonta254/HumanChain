@@ -42,6 +42,7 @@ import {
   chatWithWorld,
   getWorldMiniAppContext,
   getWorldPermissions,
+  getWorldUserByAddress,
   humanHaptic,
   payWithWorld,
   Permission,
@@ -2875,24 +2876,40 @@ export default function HumanChainApp() {
       }
 
       const freshWorldContext = getWorldMiniAppContext();
+      const worldUser = await getWorldUserByAddress(address);
+      const nextWorldContext = getWorldMiniAppContext();
       const worldUsername = normalizeWorldUsername(
-        freshWorldContext.username ?? worldContext.username,
+        nextWorldContext.username ??
+          worldUser?.username ??
+          freshWorldContext.username ??
+          worldContext.username,
       );
+      const worldProfilePictureUrl =
+        nextWorldContext.profilePictureUrl ??
+        worldUser?.profilePictureUrl ??
+        freshWorldContext.profilePictureUrl;
 
-      setWorldContext(freshWorldContext);
+      setWorldContext({
+        ...freshWorldContext,
+        ...nextWorldContext,
+        profilePictureUrl: worldProfilePictureUrl,
+        username: worldUsername,
+        walletAddress: address,
+      });
 
       setVerifiedHuman({
-        deviceOS: freshWorldContext.deviceOS,
+        deviceOS: nextWorldContext.deviceOS ?? freshWorldContext.deviceOS,
         lastSeenAt: new Date().toISOString(),
-        launchLocation: freshWorldContext.launchLocation,
-        profilePictureUrl: freshWorldContext.profilePictureUrl,
+        launchLocation:
+          nextWorldContext.launchLocation ?? freshWorldContext.launchLocation,
+        profilePictureUrl: worldProfilePictureUrl,
         username: worldUsername ?? `@human_${address.slice(2, 8).toLowerCase()}`,
         wallet: address,
         mode: "world",
       });
       setToast({
         title: "Verified human entered",
-        detail: `${address.slice(0, 6)}...${address.slice(-4)} is ready. Notification, location, chat, and payment actions stay user controlled.`,
+        detail: `${worldUsername ?? `${address.slice(0, 6)}...${address.slice(-4)}`} is ready. Notification, location, chat, and payment actions stay user controlled.`,
       });
     } catch (error) {
       setToast({
