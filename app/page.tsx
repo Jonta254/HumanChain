@@ -6533,16 +6533,20 @@ function MeView({
 
   return (
     <div className="screen">
-      <TopBar title="Me" subtitle="Identity, vault, and activity." />
+      <TopBar title="HumanChain Profile" subtitle="Identity, vault, and activity." />
       <section className="treasure-profile">
         <div className="treasure-mark">
           <div className="avatar">
-            {profileImage ? <img alt="Uploaded profile" src={profileImage} /> : displayUsername.slice(1, 2).toUpperCase()}
+            {profileImage ? (
+              <img alt="Uploaded profile" src={profileImage} />
+            ) : (
+              <img alt="HumanChain H profile mark" src="/images/humanchain-logo.svg" />
+            )}
           </div>
           <BadgeCheck size={22} />
         </div>
         <div>
-          <span className="section-kicker">World verified human</span>
+          <span className="section-kicker">Verified HumanChain profile</span>
           <h2>{displayUsername}</h2>
           <p>{walletLabel}. Chain score {chainScore}. {notificationReady ? "Notifications active." : "Notifications off."}</p>
         </div>

@@ -23,5 +23,6 @@
     <circle cx="349" cy="264" r="22" fill="#d6a33a" stroke="#fff8e9" stroke-width="10"/>
     <circle cx="441" cy="211" r="22" fill="#d6a33a" stroke="#fff8e9" stroke-width="10"/>
     <path d="M216 186c5-36 20-60 40-60s35 24 40 60M216 326c5 36 20 60 40 60s35-24 40-60" fill="none" stroke="#fff8e9" stroke-opacity=".82" stroke-width="18" stroke-linecap="round"/>
+    <path d="M206 178h43v58h54v-58h43v156h-43v-63h-54v63h-43z" fill="#fff8e9"/>
   </g>
 </svg>

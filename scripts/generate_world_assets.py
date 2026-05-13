@@ -98,11 +98,9 @@ def app_icon():
     s = 1024
     img = gradient((s, s), GREEN_DARK, GREEN_MID).convert("RGBA")
     d = ImageDraw.Draw(img)
-    for r, alpha in [(660, 32), (420, 42), (240, 38)]:
-        d.ellipse((s - r * 0.8, -r * 0.25, s + r * 0.35, r * 0.9), outline=(255, 253, 248, alpha), width=4)
-    for i in range(-220, 820, 58):
-        d.line((i, s + 80, i + 360, s - 280), fill=(255, 253, 248, 18), width=13)
-    draw_logo(d, s // 2, s // 2, 318, 4)
+    for r, alpha in [(560, 26), (360, 32), (210, 24)]:
+        d.ellipse((s - r * 0.72, -r * 0.22, s + r * 0.28, r * 0.78), outline=(255, 253, 248, alpha), width=3)
+    draw_logo(d, s // 2, s // 2, 392, 4.8)
     img.save(OUT / "humanchain-profile-icon-1024.png")
 
 

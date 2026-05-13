@@ -2611,6 +2611,8 @@ button {
 }
 
 .treasure-profile {
+  position: relative;
+  overflow: hidden;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 14px;
@@ -2620,9 +2622,44 @@ button {
   border-radius: 24px;
   color: var(--paper-strong);
   background:
-    linear-gradient(135deg, rgba(32, 35, 40, 0.94), rgba(185, 130, 24, 0.72)),
-    radial-gradient(circle at 16% 10%, rgba(255, 253, 248, 0.28), transparent 34%);
+    radial-gradient(circle at 92% 10%, rgba(185, 130, 24, 0.38), transparent 34%),
+    radial-gradient(circle at 14% 12%, rgba(255, 253, 248, 0.22), transparent 28%),
+    linear-gradient(135deg, #132827, #246b55 56%, #17312f);
   box-shadow: var(--shadow);
+}
+
+.treasure-profile::before,
+.treasure-profile::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+}
+
+.treasure-profile::before {
+  right: -42px;
+  top: -52px;
+  width: 132px;
+  height: 132px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  box-shadow: inset 0 0 0 28px rgba(255, 253, 248, 0.04);
+}
+
+.treasure-profile::after {
+  left: -36px;
+  bottom: -56px;
+  width: 138px;
+  height: 138px;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(255, 253, 248, 0.08) 0 8px,
+    transparent 8px 18px
+  );
+}
+
+.treasure-profile > * {
+  position: relative;
+  z-index: 1;
 }
 
 .treasure-profile p {
@@ -2698,22 +2735,30 @@ button {
   margin-top: 12px;
 }
 
-.profile-kpi-grid .stat {
+.profile-kpi-grid .stat-card {
   min-width: 0;
   padding: 10px 8px;
   border-radius: 16px;
 }
 
-.profile-kpi-grid .stat strong {
+.profile-kpi-grid .stat-card strong {
   font-size: 0.92rem;
 }
 
-.profile-kpi-grid .stat span {
+.profile-kpi-grid .stat-card span {
   font-size: 0.68rem;
 }
 
 .treasure-mark {
   position: relative;
+}
+
+.treasure-mark .avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  background: #17312f;
+  box-shadow: 0 14px 28px rgba(7, 18, 17, 0.28);
 }
 
 .treasure-mark svg {
