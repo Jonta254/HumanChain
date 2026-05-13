@@ -3034,7 +3034,7 @@ function LoginGate({
     <div className="login-gate">
       <section className="gate-card">
         <div className="gate-brand">
-          <img alt="HumanChain logo" src="/images/humanchain-logo.svg" />
+          <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
           <div>
             <span>{gateCopy.appLabel}</span>
             <strong>HumanChain</strong>
@@ -3159,7 +3159,7 @@ function HomeView({
     <div className="screen">
       <header className="hero">
         <div className="hero-brandline">
-          <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.svg" />
+          <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.png" />
           <div>
             <span>{homeCopy.heroKicker}</span>
             <strong>HumanChain</strong>
@@ -6540,7 +6540,7 @@ function MeView({
             {profileImage ? (
               <img alt="Uploaded profile" src={profileImage} />
             ) : (
-              <img alt="HumanChain H profile mark" src="/images/humanchain-logo.svg" />
+              <img alt="HumanChain H profile mark" src="/images/humanchain-logo.png" />
             )}
           </div>
           <BadgeCheck size={22} />

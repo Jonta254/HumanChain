@@ -12,9 +12,9 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#246b55",
     icons: [
       {
-        src: "/images/humanchain-logo.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/images/humanchain-logo.png",
+        sizes: "1024x1024",
+        type: "image/png",
       },
     ],
   };

@@ -12,8 +12,8 @@ export const metadata: Metadata = {
     "Ask real humans, join daily chains, read stories, and trade in a verified nearby marketplace.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/images/humanchain-logo.svg",
-    apple: "/images/humanchain-logo.svg",
+    icon: "/images/humanchain-logo.png",
+    apple: "/images/humanchain-logo.png",
   },
   openGraph: {
     title: "HumanChain",
