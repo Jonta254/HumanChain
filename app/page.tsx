@@ -56,7 +56,14 @@ import {
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
 
-const initialLinks = [
+type ChainLink = {
+  country: string;
+  id?: number;
+  owner?: boolean;
+  text: string;
+};
+
+const initialLinks: ChainLink[] = [
   {
     country: "Kenya",
     text: "Start before life feels perfect.",
@@ -818,6 +825,8 @@ const answerQueue = [
 const starterAskThreads = [
   {
     question: "How do I start again after losing confidence?",
+    author: "@humanchain",
+    owner: false,
     topic: "Life",
     mode: "Text",
     answers: [
@@ -835,6 +844,8 @@ const starterAskThreads = [
   },
   {
     question: "Should I chase money first or build skill first?",
+    author: "@humanchain",
+    owner: false,
     topic: "Money",
     mode: "Country",
     answers: [
@@ -851,6 +862,8 @@ const starterAskThreads = [
     ],
   },
 ];
+
+type AskThread = (typeof starterAskThreads)[number];
 
 const chainFields = [
   {
@@ -2297,8 +2310,10 @@ function normalizeWorldUsername(username?: string) {
 
 const storageKeys = {
   appMemory: "humanchain_app_memory",
+  askThreads: "humanchain_ask_threads",
   bids: "humanchain_market_bids",
   history: "humanchain_history",
+  links: "humanchain_links",
   marketRatings: "humanchain_market_ratings",
   marketplace: "humanchain_marketplace",
   posts: "humanchain_posts",
@@ -2440,6 +2455,31 @@ function loadStoredMarketplaceListings(): MarketplaceListing[] {
   }));
 }
 
+function loadStoredAskThreads() {
+  if (typeof window === "undefined") {
+    return starterAskThreads;
+  }
+
+  return loadJsonFromStorage<Partial<AskThread>[]>(storageKeys.askThreads, starterAskThreads).map(
+    (thread) => ({
+      answers: thread.answers ?? [],
+      author: thread.author ?? "@humanchain",
+      mode: thread.mode ?? "Text",
+      owner: Boolean(thread.owner),
+      question: thread.question ?? "Untitled question",
+      topic: thread.topic ?? "Life",
+    }),
+  );
+}
+
+function loadStoredChainLinks() {
+  if (typeof window === "undefined") {
+    return initialLinks;
+  }
+
+  return loadJsonFromStorage<typeof initialLinks>(storageKeys.links, initialLinks);
+}
+
 function loadStoredHistoryRecords(): HistoryRecord[] {
   if (typeof window === "undefined") {
     return [
@@ -2522,7 +2562,7 @@ export default function HumanChainApp() {
       appLanguages[0],
   );
   const [streak, setStreak] = useState(storedAppMemory.streak);
-  const [links, setLinks] = useState(initialLinks);
+  const [links, setLinks] = useState(loadStoredChainLinks);
   const [savedItems, setSavedItems] = useState(storedAppMemory.savedItems);
   const [points, setPoints] = useState(storedAppMemory.points);
   const [dailyAnswered, setDailyAnswered] = useState(storedAppMemory.dailyAnswered);
@@ -2608,6 +2648,10 @@ export default function HumanChainApp() {
   useEffect(() => {
     saveJsonToStorage(storageKeys.posts, humanPosts);
   }, [humanPosts]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.links, links);
+  }, [links]);
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.marketplace, marketplaceListings);
@@ -2706,8 +2750,11 @@ export default function HumanChainApp() {
     window.localStorage.removeItem(storageKeys.marketplace);
     window.localStorage.removeItem(storageKeys.history);
     window.localStorage.removeItem(storageKeys.bids);
+    window.localStorage.removeItem(storageKeys.askThreads);
+    window.localStorage.removeItem(storageKeys.links);
     window.localStorage.removeItem(storageKeys.appMemory);
     setHumanPosts(initialHumanPosts);
+    setLinks(initialLinks);
     setMarketplaceListings([]);
     setHistoryRecords([
       {
@@ -2959,6 +3006,7 @@ export default function HumanChainApp() {
           <AskView
             act={act}
             earnPoints={earnPoints}
+            humanIdentity={verifiedHuman}
             keepStreak={keepStreak}
             openPayment={openPayment}
           />
@@ -3495,11 +3543,13 @@ function HomeView({
 function AskView({
   act,
   earnPoints,
+  humanIdentity,
   keepStreak,
   openPayment,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  humanIdentity: HumanIdentity | null;
   keepStreak: (detail?: string) => void;
   openPayment: OpenPayment;
 }) {
@@ -3507,8 +3557,12 @@ function AskView({
   const [selectedMode, setSelectedMode] = useState("Text");
   const [selectedTopic, setSelectedTopic] = useState("Life");
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
-  const [threads, setThreads] = useState(starterAskThreads);
+  const [threads, setThreads] = useState(loadStoredAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.askThreads, threads);
+  }, [threads]);
 
   function publishQuestion() {
     const cleanQuestion =
@@ -3516,6 +3570,8 @@ function AskView({
     setThreads((current) => [
       {
         question: cleanQuestion,
+        author: humanIdentity?.username ?? "@you",
+        owner: true,
         topic: selectedTopic,
         mode: selectedMode,
         answers: [
@@ -3545,7 +3601,7 @@ function AskView({
               ...thread,
               answers: [
                 {
-                  user: "@jonta254",
+                  user: humanIdentity?.username ?? "@you",
                   country: "Verified human",
                   text: draft,
                 },
@@ -3558,6 +3614,13 @@ function AskView({
     setAnswerDrafts((current) => ({ ...current, [questionText]: "" }));
     earnPoints(15, "Your answer helped another verified human.");
     keepStreak("Your answer joined the Human Ask board.");
+  }
+
+  function deleteQuestion(questionText: string) {
+    setThreads((current) =>
+      current.filter((thread) => !(thread.question === questionText && thread.owner)),
+    );
+    act("Question deleted", "Your Ask post was removed from this device.");
   }
 
   return (
@@ -3665,7 +3728,7 @@ function AskView({
         {threads.map((thread, index) => (
           <article className="ask-thread" key={`${thread.question}-${index}`}>
             <div className="ask-thread-top">
-              <span>{thread.topic}</span>
+              <span>{thread.topic} - {thread.author}</span>
               <small>{thread.mode} route</small>
             </div>
             <h3>{thread.question}</h3>
@@ -3694,6 +3757,15 @@ function AskView({
               <button onClick={() => answerThread(thread.question)} type="button">
                 Answer
               </button>
+              {thread.owner ? (
+                <button
+                  className="danger"
+                  onClick={() => deleteQuestion(thread.question)}
+                  type="button"
+                >
+                  Delete
+                </button>
+              ) : null}
               <button
                 onClick={() =>
                   openPayment({
@@ -3873,7 +3945,15 @@ function ChainsView({
   function addLink() {
     const text =
       linkText.trim() || "I am still becoming, and today that is enough.";
-    setLinks((current) => [{ country: "Verified Human", text }, ...current]);
+    setLinks((current) => [
+      {
+        country: humanIdentity?.username ?? "Verified Human",
+        id: Date.now(),
+        owner: true,
+        text,
+      },
+      ...current,
+    ]);
     setLinkText("");
     earnPoints(12, "Your chain link added value to today's field.");
     keepStreak("Your link joined today's global chain.");
@@ -3975,6 +4055,19 @@ function ChainsView({
     });
     earnPoints(postMediaType === "video" ? 22 : 16, `Your human ${postMediaType} post joined the visual chain.`);
     keepStreak(`You posted a human ${postMediaType} into today's chain.`);
+  }
+
+  function deleteLink(link: ChainLink) {
+    if (!link.owner) {
+      return;
+    }
+
+    setLinks((current) =>
+      current.filter((currentLink) =>
+        link.id ? currentLink.id !== link.id : currentLink.text !== link.text,
+      ),
+    );
+    act("Chain link deleted", "Your link was removed from this device.");
   }
 
   function publishPostWithPaymentCheck() {
@@ -4439,6 +4532,15 @@ function ChainsView({
                   >
                     Tip human
                   </button>
+                  {link.owner ? (
+                    <button
+                      className="danger"
+                      onClick={() => deleteLink(link)}
+                      type="button"
+                    >
+                      Delete
+                    </button>
+                  ) : null}
                 </div>
               </div>
             </article>
@@ -5655,6 +5757,9 @@ function MarketplaceView({
   const [listingPhotos, setListingPhotos] = useState<
     Array<{ id: number; name: string; src: string }>
   >([]);
+  const [activeMarketItem, setActiveMarketItem] = useState<
+    MarketplaceItem | MarketplaceListing | null
+  >(null);
   const [listingDraft, setListingDraft] = useState({
     area: "",
     bidFloor: "",
@@ -5676,6 +5781,37 @@ function MarketplaceView({
   const locationReady = marketLocation.status === "ready";
   const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
   const sellerHandle = humanIdentity?.username ?? "@preview_human";
+
+  function getMarketItemImages(item: MarketplaceItem | MarketplaceListing): string[] {
+    if ("id" in item && item.photos.length) {
+      return item.photos.slice(0, 3).map((photo) => photo.src);
+    }
+
+    if ("image" in item) {
+      return [item.image, item.image, item.image];
+    }
+
+    return [];
+  }
+
+  function getMarketItemInfo(item: MarketplaceItem | MarketplaceListing) {
+    const isStoredListing = "id" in item;
+
+    return {
+      area: isStoredListing ? item.area : item.location,
+      condition: item.condition,
+      detail: isStoredListing ? item.details || "No extra details added." : item.quality,
+      price: item.price,
+      seller: item.seller,
+      title: item.title,
+      trade:
+        "saleMode" in item && item.saleMode === "bidding"
+          ? `Bidding ${item.duration}, floor ${item.bidFloor || "not set"}`
+          : "bidding" in item && item.bidding
+            ? `Bidding closes ${item.bidding.ends}, target ${item.bidding.target} WLD`
+            : "Direct chat sale",
+    };
+  }
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.bids, marketBids);
@@ -6101,6 +6237,62 @@ function MarketplaceView({
     }
   }
 
+  if (activeMarketItem) {
+    const itemInfo = getMarketItemInfo(activeMarketItem);
+    const images = getMarketItemImages(activeMarketItem);
+
+    return (
+      <div className="screen market-detail-screen">
+        <button
+          className="market-detail-back"
+          onClick={() => setActiveMarketItem(null)}
+          type="button"
+        >
+          Back to market
+        </button>
+        <section className="market-detail-gallery" aria-label={`${itemInfo.title} images`}>
+          {images.length ? (
+            images.map((image, index) => (
+              <img
+                alt={`${itemInfo.title} image ${index + 1}`}
+                key={`${itemInfo.title}-${index}`}
+                src={image}
+              />
+            ))
+          ) : (
+            <div className="market-detail-empty">
+              <Tag size={24} />
+            </div>
+          )}
+        </section>
+        <section className="market-detail-info">
+          <span className="section-kicker">Marketplace item</span>
+          <h1>{itemInfo.title}</h1>
+          <strong>{itemInfo.price}</strong>
+          <p>{itemInfo.detail}</p>
+          <dl>
+            <div>
+              <dt>Seller</dt>
+              <dd>{itemInfo.seller}</dd>
+            </div>
+            <div>
+              <dt>Condition</dt>
+              <dd>{itemInfo.condition}</dd>
+            </div>
+            <div>
+              <dt>Area</dt>
+              <dd>{itemInfo.area}</dd>
+            </div>
+            <div>
+              <dt>Sale</dt>
+              <dd>{itemInfo.trade}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="screen marketplace-screen">
       <section className="market-hero">
@@ -6335,13 +6527,18 @@ function MarketplaceView({
           </div>
           {marketplaceListings.slice(0, 4).map((listing) => (
             <article className="stored-market-row" key={listing.id}>
-              <div className="stored-market-media">
+              <button
+                aria-label={`View ${listing.title}`}
+                className="stored-market-media"
+                onClick={() => setActiveMarketItem(listing)}
+                type="button"
+              >
                 {listing.photos[0] ? (
                   <img alt={listing.photos[0].name} src={listing.photos[0].src} />
                 ) : (
                   <Tag size={18} />
                 )}
-              </div>
+              </button>
               <div>
                 <strong>{listing.title}</strong>
                 <span>
@@ -6408,12 +6605,20 @@ function MarketplaceView({
 
             return (
             <article className={`market-item ${item.tone}`} key={item.title}>
-              <div className="market-thumb-stack" aria-label={`${item.photos} listing images`}>
-                <img alt={`${item.title} listing preview`} src={item.image} />
-                <span>1</span>
-                <span>2</span>
-                <span>{item.photos}</span>
-              </div>
+              <button
+                aria-label={`View ${item.title}`}
+                className="market-thumb-stack"
+                onClick={() => setActiveMarketItem(item)}
+                type="button"
+              >
+                {getMarketItemImages(item).map((image, index) => (
+                  <img
+                    alt={`${item.title} image ${index + 1}`}
+                    key={`${item.title}-${index}`}
+                    src={image}
+                  />
+                ))}
+              </button>
               <div>
                 <div className="market-item-top">
                   <strong>{item.title}</strong>
