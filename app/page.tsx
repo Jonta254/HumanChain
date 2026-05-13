@@ -51,6 +51,7 @@ import {
 import {
   defaultHumanChainPaymentToken,
   humanChainPaymentTokens,
+  isValidHumanChainPaymentAmount,
   normalizePaymentFeature,
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
@@ -763,29 +764,6 @@ const wldActions = [
   ["private", "Ask privately as a verified human"],
   ["voice", "Request voice answers"],
   ["verdict", "Unlock Deep Human Verdict"],
-];
-
-const premiumServices = [
-  {
-    title: "Ask real humans",
-    detail: "Paid questions with country, voice, and private answer modes.",
-    price: "1-6 WLD",
-  },
-  {
-    title: "Human Stories",
-    detail: "Monthly story, public short stories, and paid human submissions.",
-    price: "2 WLD+",
-  },
-  {
-    title: "Chain Fields",
-    detail: "Live rooms where verified humans build purpose around identity.",
-    price: "Free + tips",
-  },
-  {
-    title: "Deep Verdict",
-    detail: "A premium synthesis from verified answers across the world.",
-    price: "6 WLD",
-  },
 ];
 
 const storyShelf = [
@@ -1907,8 +1885,8 @@ const settingsEssentialsByLanguage: Record<
     languageHint: "Choose one language and the Home, entry, settings, and navigation copy update together.",
     locationTitle: "Nearby market location",
     locationPoints: [
-      "GPS is never taken from World context automatically.",
-      "Market location only changes after the user taps GPS or enters an area.",
+      "World MiniKit provides launch/device context, not automatic GPS.",
+      "Market location uses the World App WebView permission prompt or your manual area.",
     ],
     notificationsHint: "Functional alerts cover inbox, bids, accepted offers, stories, payments, and account safety.",
     panelDetail: "Change language, notification permission, World context, storage, location, and account safety.",
@@ -1928,8 +1906,8 @@ const settingsEssentialsByLanguage: Record<
     languageHint: "Elige un idioma y Home, entrada, ajustes y navegacion cambian juntos.",
     locationTitle: "Ubicacion del mercado cercano",
     locationPoints: [
-      "El GPS nunca se toma automaticamente del contexto de World.",
-      "La ubicacion del mercado solo cambia cuando el usuario toca GPS o escribe un area.",
+      "MiniKit da contexto de inicio/dispositivo, no GPS automatico.",
+      "La ubicacion usa permiso del WebView de World App o area manual.",
     ],
     notificationsHint: "Las alertas cubren inbox, pujas, ofertas aceptadas, historias, pagos y seguridad.",
     panelDetail: "Cambia idioma, notificaciones, contexto de World, almacenamiento, ubicacion y seguridad.",
@@ -1949,8 +1927,8 @@ const settingsEssentialsByLanguage: Record<
     languageHint: "Choisis une langue et Home, entree, reglages et navigation changent ensemble.",
     locationTitle: "Localisation du marche proche",
     locationPoints: [
-      "Le GPS n'est jamais pris automatiquement depuis le contexte World.",
-      "La localisation marche change seulement apres GPS ou saisie d'une zone.",
+      "MiniKit donne le contexte de lancement/appareil, pas le GPS automatique.",
+      "La localisation utilise la permission WebView World App ou une zone manuelle.",
     ],
     notificationsHint: "Les alertes couvrent inbox, offres, offres acceptees, histoires, paiements et securite.",
     panelDetail: "Change langue, notifications, contexte World, stockage, localisation et securite.",
@@ -1970,8 +1948,8 @@ const settingsEssentialsByLanguage: Record<
     languageHint: "Escolha um idioma e Home, entrada, configuracoes e navegacao mudam juntos.",
     locationTitle: "Localizacao do mercado proximo",
     locationPoints: [
-      "GPS nunca e tirado automaticamente do contexto World.",
-      "A localizacao do mercado so muda quando o usuario toca GPS ou digita uma area.",
+      "MiniKit da contexto de abertura/dispositivo, nao GPS automatico.",
+      "A localizacao usa permissao do WebView World App ou area manual.",
     ],
     notificationsHint: "Alertas cobrem inbox, ofertas, ofertas aceitas, historias, pagamentos e seguranca.",
     panelDetail: "Altere idioma, notificacoes, contexto World, armazenamento, localizacao e seguranca.",
@@ -1991,8 +1969,8 @@ const settingsEssentialsByLanguage: Record<
     languageHint: "Chagua lugha moja na Home, kuingia, mipangilio, na navigation hubadilika pamoja.",
     locationTitle: "Eneo la soko la karibu",
     locationPoints: [
-      "GPS haichukuliwi moja kwa moja kutoka World context.",
-      "Eneo la soko hubadilika tu mtumiaji akibonyeza GPS au kuandika eneo.",
+      "MiniKit hutoa context ya kufungua/kifaa, si GPS moja kwa moja.",
+      "Eneo hutumia ruhusa ya World App WebView au eneo uliloandika.",
     ],
     notificationsHint: "Arifa zinahusu inbox, zabuni, ofa zilizokubaliwa, hadithi, malipo, na usalama.",
     panelDetail: "Badilisha lugha, arifa, World context, hifadhi, eneo, na usalama.",
@@ -2012,6 +1990,7 @@ const marketplaceItems = [
     trust: "World ID seller",
     tone: "blue",
     photos: 3,
+    image: "/images/market/samsung-galaxy-a54.svg",
     quality: "Clean front, back, and screen photos",
     bidding: {
       target: 22,
@@ -2034,6 +2013,7 @@ const marketplaceItems = [
     trust: "3 verified buyers",
     tone: "gold",
     photos: 4,
+    image: "/images/market/ankara-tote.svg",
     quality: "Styled product photos and size detail",
     bidding: {
       target: 4,
@@ -2055,6 +2035,7 @@ const marketplaceItems = [
     trust: "Business link allowed",
     tone: "green",
     photos: 2,
+    image: "/images/market/restaurant-poster.svg",
     quality: "Menu preview and shop-front image",
     bidding: null,
   },
@@ -2069,6 +2050,7 @@ const marketplaceItems = [
     trust: "Pickup only",
     tone: "violet",
     photos: 3,
+    image: "/images/market/study-desk.svg",
     quality: "Wide photo plus scratches disclosed",
     bidding: {
       target: 7,
@@ -2082,7 +2064,7 @@ const marketplaceItems = [
 ];
 
 const marketplacePlans = [
-  ["Quick listing", "1 WLD", "Publish one item with 3 included photos."],
+  ["Quick listing", "2 WLD", "Publish one item with 3 included photos."],
   ["Extra photo pack", "2 WLD", "Add up to 3 more photos to one listing."],
   ["Local boost", "2 WLD", "Push a listing higher in nearby discovery."],
   ["Business ad", "4 WLD", "Market a shop, service, event, or link."],
@@ -2196,19 +2178,22 @@ type Toast = {
 type EarnPoints = (amount: number, reason: string) => void;
 
 type PaymentRequest = {
+  allowCustomAmount?: boolean;
   title: string;
   amount: string;
   detail: string;
+  maxAmount?: number;
+  minAmount?: number;
   success: string;
   feature?: string;
-  onConfirmed?: () => void | Promise<void>;
+  onConfirmed?: (amount: number) => void | Promise<void>;
   points?: number;
 };
 
 type OpenPayment = (payment: PaymentRequest) => void;
 
 function parsePaymentAmount(amount: string) {
-  return Number.parseInt(amount, 10);
+  return Number.parseFloat(amount);
 }
 
 function formatPaymentAmount(amount: number, token: HumanChainPaymentToken) {
@@ -2241,6 +2226,10 @@ type HistoryRecord = {
 };
 
 type VerifiedHuman = {
+  deviceOS?: string;
+  lastSeenAt?: string;
+  launchLocation?: string | null;
+  profilePictureUrl?: string;
   username: string;
   wallet?: string;
   mode: "world" | "preview";
@@ -2255,6 +2244,9 @@ type AppMemory = {
   appLanguageCode: string;
   dailyAnswered: boolean;
   dailyAnsweredAt: string | null;
+  dailyAnsweredDate: string | null;
+  lastCheckInAt: string | null;
+  lastCheckInDate: string | null;
   marketLocation: MarketLocationState;
   notificationReady: boolean;
   points: number;
@@ -2273,6 +2265,34 @@ function formatWorldLaunchLocation(location?: string | null) {
   };
 
   return location ? labels[location] ?? location : "World App preview";
+}
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatCheckInTime(date = new Date()) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function formatShortTime(date = new Date()) {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function normalizeWorldUsername(username?: string) {
+  const normalized = username?.trim().replace(/^@+/, "");
+
+  return normalized ? `@${normalized}` : undefined;
 }
 
 const storageKeys = {
@@ -2449,6 +2469,9 @@ function loadStoredAppMemory(): AppMemory {
     appLanguageCode: appLanguages[0].code,
     dailyAnswered: false,
     dailyAnsweredAt: null,
+    dailyAnsweredDate: null,
+    lastCheckInAt: null,
+    lastCheckInDate: null,
     marketLocation: {
       label: "Location not shared",
       source: "not-requested",
@@ -2465,6 +2488,18 @@ function loadStoredAppMemory(): AppMemory {
   return {
     ...fallback,
     ...stored,
+    dailyAnswered:
+      stored.dailyAnsweredDate === getLocalDateKey()
+        ? Boolean(stored.dailyAnswered)
+        : false,
+    dailyAnsweredAt:
+      stored.dailyAnsweredDate === getLocalDateKey()
+        ? stored.dailyAnsweredAt ?? null
+        : null,
+    dailyAnsweredDate:
+      stored.dailyAnsweredDate === getLocalDateKey()
+        ? stored.dailyAnsweredDate
+        : null,
     marketLocation: stored.marketLocation ?? fallback.marketLocation,
     verifiedHuman: stored.verifiedHuman ?? fallback.verifiedHuman,
   };
@@ -2493,6 +2528,15 @@ export default function HumanChainApp() {
   const [dailyAnswered, setDailyAnswered] = useState(storedAppMemory.dailyAnswered);
   const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(
     storedAppMemory.dailyAnsweredAt,
+  );
+  const [dailyAnsweredDate, setDailyAnsweredDate] = useState<string | null>(
+    storedAppMemory.dailyAnsweredDate,
+  );
+  const [lastCheckInAt, setLastCheckInAt] = useState<string | null>(
+    storedAppMemory.lastCheckInAt,
+  );
+  const [lastCheckInDate, setLastCheckInDate] = useState<string | null>(
+    storedAppMemory.lastCheckInDate,
   );
   const [activeField, setActiveField] = useState<ChainField | null>(null);
   const [humanPosts, setHumanPosts] = useState<HumanPost[]>(loadStoredHumanPosts);
@@ -2525,6 +2569,17 @@ export default function HumanChainApp() {
   useEffect(() => {
     scrollMiniAppToTop();
   }, [tab, verifiedHuman]);
+
+  useEffect(() => {
+    const safeAreaInsets = worldContext.safeAreaInsets;
+    const root = document.documentElement;
+
+    root.dataset.worldMiniApp = worldContext.deviceOS ? "true" : "false";
+    root.style.setProperty("--world-safe-top", `${safeAreaInsets?.top ?? 0}px`);
+    root.style.setProperty("--world-safe-right", `${safeAreaInsets?.right ?? 0}px`);
+    root.style.setProperty("--world-safe-bottom", `${safeAreaInsets?.bottom ?? 0}px`);
+    root.style.setProperty("--world-safe-left", `${safeAreaInsets?.left ?? 0}px`);
+  }, [worldContext]);
 
   useEffect(() => {
     getWorldPermissions()
@@ -2567,6 +2622,9 @@ export default function HumanChainApp() {
       appLanguageCode: appLanguage.code,
       dailyAnswered,
       dailyAnsweredAt,
+      dailyAnsweredDate,
+      lastCheckInAt,
+      lastCheckInDate,
       marketLocation,
       notificationReady,
       points,
@@ -2578,6 +2636,9 @@ export default function HumanChainApp() {
     appLanguage,
     dailyAnswered,
     dailyAnsweredAt,
+    dailyAnsweredDate,
+    lastCheckInAt,
+    lastCheckInDate,
     marketLocation,
     notificationReady,
     points,
@@ -2661,6 +2722,9 @@ export default function HumanChainApp() {
     setAppLanguage(appLanguages[0]);
     setDailyAnswered(false);
     setDailyAnsweredAt(null);
+    setDailyAnsweredDate(null);
+    setLastCheckInAt(null);
+    setLastCheckInDate(null);
     setMarketLocation({
       label: "Location not shared",
       source: "not-requested",
@@ -2764,10 +2828,18 @@ export default function HumanChainApp() {
       }
 
       const freshWorldContext = getWorldMiniAppContext();
-      const worldUsername = freshWorldContext.username ?? worldContext.username;
+      const worldUsername = normalizeWorldUsername(
+        freshWorldContext.username ?? worldContext.username,
+      );
+
+      setWorldContext(freshWorldContext);
 
       setVerifiedHuman({
-        username: worldUsername ? `@${worldUsername}` : `@human_${address.slice(2, 8).toLowerCase()}`,
+        deviceOS: freshWorldContext.deviceOS,
+        lastSeenAt: new Date().toISOString(),
+        launchLocation: freshWorldContext.launchLocation,
+        profilePictureUrl: freshWorldContext.profilePictureUrl,
+        username: worldUsername ?? `@human_${address.slice(2, 8).toLowerCase()}`,
         wallet: address,
         mode: "world",
       });
@@ -2787,6 +2859,10 @@ export default function HumanChainApp() {
 
   function enterPreview() {
     setVerifiedHuman({
+      deviceOS: worldContext.deviceOS,
+      lastSeenAt: new Date().toISOString(),
+      launchLocation: worldContext.launchLocation,
+      profilePictureUrl: worldContext.profilePictureUrl,
       username: "@preview_human",
       mode: "preview",
     });
@@ -2796,13 +2872,23 @@ export default function HumanChainApp() {
     });
   }
 
-  async function confirmPayment() {
+  async function confirmPayment(customAmount?: number) {
     if (!paymentPrompt) {
       return;
     }
 
-    const amount = parsePaymentAmount(paymentPrompt.amount);
+    const amount = customAmount ?? parsePaymentAmount(paymentPrompt.amount);
     const feature = paymentPrompt.feature ?? normalizePaymentFeature(paymentPrompt.title);
+
+    if (!isValidHumanChainPaymentAmount(feature, amount)) {
+      setToast({
+        title: "Payment amount",
+        detail: paymentPrompt.allowCustomAmount
+          ? "Choose a tip between 0.1 and 100 WLD, using up to two decimals."
+          : "This premium action has a fixed World App price.",
+      });
+      return;
+    }
 
     try {
       const result = await payWithWorld({
@@ -2857,7 +2943,7 @@ export default function HumanChainApp() {
       setPoints((current) => current + earnedPoints);
     }
 
-    await paymentPrompt.onConfirmed?.();
+    await paymentPrompt.onConfirmed?.(amount);
 
     setToast({
       title: `${formatPaymentAmount(amount, paymentToken)} prepared`,
@@ -2924,17 +3010,38 @@ export default function HumanChainApp() {
           <MeView
             act={act}
             earnPoints={earnPoints}
-            keepStreak={keepStreak}
             historyRecords={historyRecords}
             humanPosts={humanPosts}
             marketplaceListings={marketplaceListings}
             marketLocation={marketLocation}
             notificationReady={notificationReady}
             points={points}
+            lastCheckInAt={lastCheckInAt}
+            lastCheckInDate={lastCheckInDate}
+            onCheckIn={() => {
+              const now = new Date();
+              const today = getLocalDateKey(now);
+
+              if (lastCheckInDate === today) {
+                act("Already checked in", `Your HumanChain check-in is sealed for ${formatCheckInTime(now)}.`);
+                return;
+              }
+
+              setLastCheckInDate(today);
+              setLastCheckInAt(formatCheckInTime(now));
+              recordHistory({
+                title: "Daily check-in",
+                detail: `HumanChain check-in completed at ${formatCheckInTime(now)}.`,
+                kind: "profile",
+              });
+              earnPoints(10, "Daily check-in recorded with your device calendar and time.");
+              keepStreak("Daily check-in sealed your Human Chain for today.");
+            }}
             recordHistory={recordHistory}
             savedItems={savedItems}
             streak={streak}
             verifiedHuman={verifiedHuman}
+            worldContext={worldContext}
           />
         );
       default:
@@ -2954,6 +3061,7 @@ export default function HumanChainApp() {
             onChangeLanguage={setAppLanguage}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             setDailyAnsweredAt={setDailyAnsweredAt}
+            setDailyAnsweredDate={setDailyAnsweredDate}
             setActiveField={setActiveField}
             points={points}
             setDailyAnswered={setDailyAnswered}
@@ -3105,6 +3213,7 @@ function HomeView({
   points,
   resetHistory,
   setDailyAnsweredAt,
+  setDailyAnsweredDate,
   setActiveField,
   setDailyAnswered,
   setDailyResponses,
@@ -3129,17 +3238,17 @@ function HomeView({
   points: number;
   resetHistory: () => void;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
+  setDailyAnsweredDate: React.Dispatch<React.SetStateAction<string | null>>;
   setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
   setDailyAnswered: React.Dispatch<React.SetStateAction<boolean>>;
   setDailyResponses: React.Dispatch<React.SetStateAction<DailyResponse[]>>;
   setTab: (tab: Tab) => void;
   streak: number;
-  verifiedHuman: HumanIdentity | null;
+  verifiedHuman: VerifiedHuman | null;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
   const homeCopy = appLanguage.home;
-  const commandTabs: Tab[] = ["ask", "chains", "market"];
   const liveVerdicts = [
     {
       question: dailyHumanQuestion.title,
@@ -3219,39 +3328,6 @@ function HomeView({
         />
       </section>
 
-      <section className="premium-grid" aria-label="HumanChain services">
-        {premiumServices.map((service) => (
-          <article className="service-card" key={service.title}>
-            <div>
-              <span>Core path</span>
-              <h3>{service.title}</h3>
-            </div>
-            <p>{service.detail}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="panel home-command-center">
-        <div className="section-heading">
-          <span>{homeCopy.commandTitle}</span>
-          <Radio size={18} />
-        </div>
-        {homeCopy.commands.map(([title, detail, action], index) => (
-          <button
-            className="home-command-row"
-            key={title}
-            onClick={() => setTab(commandTabs[index])}
-            type="button"
-          >
-            <div>
-              <strong>{title}</strong>
-              <span>{detail}</span>
-            </div>
-            <b>{action}</b>
-          </button>
-        ))}
-      </section>
-
       <section className="streak-card">
         <div>
           <span className="section-kicker">{homeCopy.streakKicker}</span>
@@ -3309,14 +3385,13 @@ function HomeView({
               }
 
               setDailyAnswered(true);
-              const time = new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
+              const now = new Date();
+              const time = formatShortTime(now);
               setDailyAnsweredAt(time);
+              setDailyAnsweredDate(getLocalDateKey(now));
               setDailyResponses((current) => [
                 {
-                  user: "@jonta254",
+                  user: verifiedHuman?.username ?? "@human",
                   text:
                     dailyDraft.trim() ||
                     "Life taught me that a real answer can carry another human.",
@@ -3961,32 +4036,35 @@ function ChainsView({
   }
 
   function tipPost(post: HumanPost) {
-    setHumanPosts((current) =>
-      current.map((currentPost) =>
-        currentPost.id === post.id
-          ? { ...currentPost, tips: currentPost.tips + 1 }
-          : currentPost,
-      ),
-    );
-    recordHistory({
-      title: "Post tip prepared",
-      detail: `1 WLD tip prepared for ${post.author}. Split receipt: 80% creator share, 20% HumanChain platform share. MiniKit Pay sends one transfer now; creator settlement needs the stored receipt or a future split contract.`,
-      kind: "tip",
-    });
-    void storeSafeData("post", `tip-${post.id}-${Date.now()}`, {
-      postId: post.id,
-      author: post.author,
-      authorWallet: post.authorWallet,
-      amount: 1,
-      token: "WLD",
-      split: post.tipSplit ?? { creatorPercent: 80, platformPercent: 20 },
-    });
     openPayment({
       title: post.mediaType === "video" ? "Tip video" : "Tip human",
       amount: "1 WLD",
+      allowCustomAmount: true,
       detail: `Send a thank-you tip for ${post.author}. HumanChain records an 80/20 creator-platform split receipt for settlement.`,
       success: "Tip payment is confirmed and the split receipt is stored.",
       feature: "tip-human",
+      onConfirmed: (tipAmount) => {
+        setHumanPosts((current) =>
+          current.map((currentPost) =>
+            currentPost.id === post.id
+              ? { ...currentPost, tips: currentPost.tips + 1 }
+              : currentPost,
+          ),
+        );
+        recordHistory({
+          title: "Post tip confirmed",
+          detail: `${tipAmount} WLD tip confirmed for ${post.author}. Split receipt: 80% creator share, 20% HumanChain platform share.`,
+          kind: "tip",
+        });
+        void storeSafeData("post", `tip-${post.id}-${Date.now()}`, {
+          postId: post.id,
+          author: post.author,
+          authorWallet: post.authorWallet,
+          amount: tipAmount,
+          token: "WLD",
+          split: post.tipSplit ?? { creatorPercent: 80, platformPercent: 20 },
+        });
+      },
       points: 4,
     });
   }
@@ -4350,8 +4428,10 @@ function ChainsView({
                       openPayment({
                         title: "Tip chain link",
                         amount: "1 WLD",
+                        allowCustomAmount: true,
                         detail: "Send a small thank-you to this verified human.",
                         success: "Tip is ready for World App payment.",
+                        feature: "tip-chain-link",
                         points: 4,
                       })
                     }
@@ -4431,8 +4511,10 @@ function StoriesView({
               openPayment({
                 title: "Tip storyteller",
                 amount: "1 WLD",
+                allowCustomAmount: true,
                 detail: "Support the human behind this story.",
                 success: "Story tip is prepared for World App.",
+                feature: "tip-storyteller",
                 points: 4,
               })
             }
@@ -4709,8 +4791,10 @@ function StoriesView({
               openPayment({
                 title: "Tip storyteller",
                 amount: "1 WLD",
+                allowCustomAmount: true,
                 detail: "Support the writer behind this story.",
                 success: "Storyteller tip is prepared for World App.",
+                feature: "tip-storyteller",
                 points: 4,
               })
             }
@@ -5591,6 +5675,7 @@ function MarketplaceView({
   });
   const locationReady = marketLocation.status === "ready";
   const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
+  const sellerHandle = humanIdentity?.username ?? "@preview_human";
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.bids, marketBids);
@@ -5602,9 +5687,9 @@ function MarketplaceView({
 
   function publishListing(plan: (typeof marketplacePlans)[number]) {
     openPayment({
-      title: `${plan[0]} marketplace fee`,
+      title: `${plan[0]} premium marketplace fee`,
       amount: plan[1],
-      detail: `${plan[2]} Payment stays small so humans can do business without heavy publishing friction.`,
+      detail: `${plan[2]} World App opens a MiniKit Pay request and HumanChain verifies the transaction before unlocking the premium marketplace action.`,
       success: `${plan[0]} is ready. Add your item, photos, location, and contact link after wallet setup.`,
       feature: normalizePaymentFeature(`marketplace-${plan[0]}`),
       points: 12,
@@ -5639,7 +5724,7 @@ function MarketplaceView({
       });
       act(
         "Location unavailable",
-        "World MiniKit does not provide GPS. This device/browser has no geolocation, so use manual area matching.",
+        "World App exposes location through the WebView permission prompt. This device/browser did not provide it, so use manual area matching.",
       );
       return;
     }
@@ -5800,13 +5885,6 @@ function MarketplaceView({
     }
   }
 
-  function getMarketVisuals(item: MarketplaceItem) {
-    return [0, 1, 2].map((slot) => ({
-      label: `${item.tag.slice(0, 2).toUpperCase()}${slot + 1}`,
-      tone: `${item.tone}-${slot}`,
-    }));
-  }
-
   function rateMarketItem(item: MarketplaceItem | MarketplaceListing, label: string) {
     const isStoredListing = "id" in item;
     const key = isStoredListing ? `stored:${item.id}` : `${item.seller}:${item.title}`;
@@ -5837,42 +5915,45 @@ function MarketplaceView({
     const isStoredListing = "id" in item;
     const key = isStoredListing ? `stored:${item.id}` : `${item.seller}:${item.title}`;
 
-    if (isStoredListing) {
-      setMarketplaceListings((current) =>
-        current.map((listing) =>
-          listing.id === item.id
-            ? { ...listing, tips: (listing.tips ?? 0) + 1 }
-            : listing,
-        ),
-      );
-    } else {
-      setMarketRatings((current) => ({
-        ...current,
-        [key]: {
-          rating: current[key]?.rating ?? 0,
-          tips: (current[key]?.tips ?? 0) + 1,
-        },
-      }));
-    }
-
-    recordHistory({
-      title: "Marketplace item tip prepared",
-      detail: `1 WLD tip prepared for ${seller}. Split receipt: 80% seller share, 20% HumanChain platform share.`,
-      kind: "tip",
-    });
-    void storeSafeData("marketplace-listing", `tip-${key}-${Date.now()}`, {
-      item: label,
-      seller,
-      amount: 1,
-      token: "WLD",
-      split: { creatorPercent: 80, platformPercent: 20 },
-    });
     openPayment({
       title: "Tip market item",
       amount: "1 WLD",
+      allowCustomAmount: true,
       detail: `Tip ${seller} for making ${label} worth noticing. HumanChain stores the 80/20 split receipt.`,
       success: "Market item tip confirmed and receipt stored.",
       feature: "tip-market-item",
+      onConfirmed: (tipAmount) => {
+        if (isStoredListing) {
+          setMarketplaceListings((current) =>
+            current.map((listing) =>
+              listing.id === item.id
+                ? { ...listing, tips: (listing.tips ?? 0) + 1 }
+                : listing,
+            ),
+          );
+        } else {
+          setMarketRatings((current) => ({
+            ...current,
+            [key]: {
+              rating: current[key]?.rating ?? 0,
+              tips: (current[key]?.tips ?? 0) + 1,
+            },
+          }));
+        }
+
+        recordHistory({
+          title: "Marketplace item tip confirmed",
+          detail: `${tipAmount} WLD tip confirmed for ${seller}. Split receipt: 80% seller share, 20% HumanChain platform share.`,
+          kind: "tip",
+        });
+        void storeSafeData("marketplace-listing", `tip-${key}-${Date.now()}`, {
+          item: label,
+          seller,
+          amount: tipAmount,
+          token: "WLD",
+          split: { creatorPercent: 80, platformPercent: 20 },
+        });
+      },
       points: 4,
     });
   }
@@ -6034,49 +6115,57 @@ function MarketplaceView({
           A verified human marketplace for new items, second-hand goods,
           services, business links, and local discovery inside World App.
         </p>
+        <div className="market-identity-strip">
+          <UserRound size={17} />
+          <span>Seller account</span>
+          <strong>{sellerHandle}</strong>
+        </div>
         <div className="market-location-card">
           <MapPin size={18} />
           <div>
             <strong>{locationReady ? "Nearby market active" : "Connect nearby market"}</strong>
             <span>
-              {locationReady ? marketLocation.label : "Share browser GPS or enter an area for nearby ranking."}
+              {locationReady ? marketLocation.label : "Allow location in World App or enter an area for nearby ranking."}
             </span>
             <small>
               {marketLocation.source === "browser-gps"
-                ? "GPS active after consent."
+                ? "Location active after your World App WebView permission."
                 : marketLocation.source === "manual"
                   ? "Manual area active and saved."
                   : "No nearby location shared yet."}{" "}
               Opened from {worldLaunchLabel}.
             </small>
           </div>
-          <button
-            disabled={marketLocation.status === "requesting"}
-            onClick={requestMarketplaceLocation}
-            type="button"
-          >
-            {marketLocation.status === "requesting" ? "..." : "GPS"}
-          </button>
+          {!locationReady ? (
+            <button
+              disabled={marketLocation.status === "requesting"}
+              onClick={requestMarketplaceLocation}
+              type="button"
+            >
+              {marketLocation.status === "requesting" ? "..." : "GPS"}
+            </button>
+          ) : null}
         </div>
-        <div className="manual-location-row">
-          <input
-            aria-label="Manual marketplace area"
-            onChange={(event) => setManualArea(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                applyManualMarketplaceArea();
-              }
-            }}
-            placeholder="Area, e.g. Westlands"
-            value={manualArea}
-          />
-          <button onClick={applyManualMarketplaceArea} type="button">
-            Use area
-          </button>
-        </div>
+        {!locationReady ? (
+          <div className="manual-location-row">
+            <input
+              aria-label="Manual marketplace area"
+              onChange={(event) => setManualArea(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  applyManualMarketplaceArea();
+                }
+              }}
+              placeholder="Area, e.g. Westlands"
+              value={manualArea}
+            />
+            <button onClick={applyManualMarketplaceArea} type="button">
+              Use area
+            </button>
+          </div>
+        ) : null}
         <small className="market-transparency-note">
-          Transparency: World launch context says this session opened from {worldLaunchLabel}.
-          Nearby ranking uses browser GPS or manual area only after you choose it.
+          World MiniKit identifies launch and device context; nearby ranking uses the World App WebView location permission only after you choose it.
         </small>
       </section>
 
@@ -6087,7 +6176,7 @@ function MarketplaceView({
         >
           <PlusCircle size={19} />
           <span>Sell item</span>
-          <strong>1 WLD</strong>
+          <strong>2 WLD</strong>
         </button>
         <button
           onClick={() => publishListing(marketplacePlans[3])}
@@ -6234,7 +6323,7 @@ function MarketplaceView({
           }}
           type="button"
         >
-          Store and publish - 1 WLD
+          Store and publish - 2 WLD
         </button>
       </section>
 
@@ -6320,11 +6409,10 @@ function MarketplaceView({
             return (
             <article className={`market-item ${item.tone}`} key={item.title}>
               <div className="market-thumb-stack" aria-label={`${item.photos} listing images`}>
-                {getMarketVisuals(item).map((visual) => (
-                  <span className={visual.tone} key={visual.tone}>
-                    {visual.label}
-                  </span>
-                ))}
+                <img alt={`${item.title} listing preview`} src={item.image} />
+                <span>1</span>
+                <span>2</span>
+                <span>{item.photos}</span>
               </div>
               <div>
                 <div className="market-item-top">
@@ -6498,33 +6586,42 @@ function MeView({
   earnPoints,
   historyRecords,
   humanPosts,
-  keepStreak,
+  lastCheckInAt,
+  lastCheckInDate,
   marketLocation,
   marketplaceListings,
   notificationReady,
+  onCheckIn,
   points,
   recordHistory,
   savedItems,
   streak,
   verifiedHuman,
+  worldContext,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   historyRecords: HistoryRecord[];
   humanPosts: HumanPost[];
-  keepStreak: (detail?: string) => void;
+  lastCheckInAt: string | null;
+  lastCheckInDate: string | null;
   marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
   notificationReady: boolean;
+  onCheckIn: () => void;
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   savedItems: number;
   streak: number;
-  verifiedHuman: HumanIdentity | null;
+  verifiedHuman: VerifiedHuman | null;
+  worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const displayUsername = verifiedHuman?.username ?? "@preview_human";
+  const todayKey = getLocalDateKey();
+  const checkedInToday = lastCheckInDate === todayKey;
+  const worldProfileImage = verifiedHuman?.profilePictureUrl ?? worldContext.profilePictureUrl;
   const walletLabel = verifiedHuman?.wallet
     ? `${verifiedHuman.wallet.slice(0, 6)}...${verifiedHuman.wallet.slice(-4)}`
     : "World wallet pending";
@@ -6539,6 +6636,8 @@ function MeView({
           <div className="avatar">
             {profileImage ? (
               <img alt="Uploaded profile" src={profileImage} />
+            ) : worldProfileImage ? (
+              <img alt={`${displayUsername} World profile`} src={worldProfileImage} />
             ) : (
               <img alt="HumanChain H profile mark" src="/images/humanchain-logo.png" />
             )}
@@ -6551,15 +6650,16 @@ function MeView({
           <p>{walletLabel}. Chain score {chainScore}. {notificationReady ? "Notifications active." : "Notifications off."}</p>
         </div>
         <button
-          onClick={() => {
-            earnPoints(10, "Daily check-in points added before launch.");
-            keepStreak("Daily check-in sealed your Human Chain.");
-          }}
+          disabled={checkedInToday}
+          onClick={onCheckIn}
           type="button"
         >
           <CalendarCheck size={17} />
-          Check in
+          {checkedInToday ? "Checked in" : "Check in"}
         </button>
+        <p className="check-in-stamp">
+          {lastCheckInAt ? `Last check-in: ${lastCheckInAt}` : "Calendar and time check-in ready."}
+        </p>
         <label className="profile-upload">
           <Upload size={16} />
           Upload profile image
@@ -6816,19 +6916,49 @@ function PaymentSheet({
 }: {
   onCancel: () => void;
   onChangeToken: (token: HumanChainPaymentToken) => void;
-  onConfirm: () => void | Promise<void>;
+  onConfirm: (amount?: number) => void | Promise<void>;
   payment: PaymentRequest;
   selectedToken: HumanChainPaymentToken;
 }) {
-  const amount = parsePaymentAmount(payment.amount);
+  const [customAmount, setCustomAmount] = useState(() =>
+    parsePaymentAmount(payment.amount).toString(),
+  );
+  const amount = payment.allowCustomAmount
+    ? Number.parseFloat(customAmount)
+    : parsePaymentAmount(payment.amount);
+  const amountValid = isValidHumanChainPaymentAmount(
+    payment.feature ?? normalizePaymentFeature(payment.title),
+    amount,
+  );
 
   return (
     <section className="payment-backdrop" role="dialog" aria-modal="true">
       <div className="payment-sheet">
         <span className="section-kicker">World App payment</span>
         <h2>{payment.title}</h2>
-        <strong>{formatPaymentAmount(amount, selectedToken)}</strong>
+        <strong>
+          {Number.isFinite(amount)
+            ? formatPaymentAmount(amount, selectedToken)
+            : `0 ${humanChainPaymentTokens[selectedToken].label}`}
+        </strong>
         <p>{payment.detail}</p>
+        {payment.allowCustomAmount ? (
+          <label className="payment-amount-field">
+            <span>Tip amount</span>
+            <input
+              aria-label="Tip amount in WLD"
+              inputMode="decimal"
+              min={payment.minAmount ?? 0.1}
+              max={payment.maxAmount ?? 100}
+              onChange={(event) => setCustomAmount(event.target.value)}
+              placeholder="Enter WLD amount"
+              step="0.1"
+              type="number"
+              value={customAmount}
+            />
+            <small>Choose 0.1-100 WLD. HumanChain records the selected tip amount in the receipt.</small>
+          </label>
+        ) : null}
         <div className="payment-token-picker" aria-label="Choose payment currency">
           <span>Pay with</span>
           <div className="payment-token-grid">
@@ -6856,7 +6986,7 @@ function PaymentSheet({
           <button onClick={onCancel} type="button">
             Cancel
           </button>
-          <button onClick={onConfirm} type="button">
+          <button disabled={!amountValid} onClick={() => onConfirm(amount)} type="button">
             Prepare Payment
           </button>
         </div>
@@ -6955,7 +7085,7 @@ function AppSettingsBar({
             <strong>{settingsCopy.worldContext}</strong>
             <span>{settingsCopy.openedFrom} {worldLaunchLabel}</span>
             <span>{worldContext.deviceOS ?? activeLanguage.gate.deviceFallback} {settingsCopy.deviceReady}</span>
-            <p>GPS is never read from World context. Nearby market uses only explicit GPS consent or a manual area.</p>
+            <p>World MiniKit provides launch and device context. Nearby market asks for World App WebView location permission only when you tap GPS, or uses your manual area.</p>
           </div>
           <div className="settings-section compact">
             <strong>Notification sectors</strong>

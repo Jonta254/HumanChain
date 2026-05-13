@@ -50,6 +50,12 @@ export type WorldMiniAppContext = {
   launchLocation?: string | null;
   permissions?: WorldPermissionSnapshot;
   profilePictureUrl?: string;
+  safeAreaInsets?: {
+    bottom: number;
+    left: number;
+    right: number;
+    top: number;
+  };
   username?: string;
   walletAddress?: string;
   worldAppVersion?: number;
@@ -72,6 +78,12 @@ export function getWorldMiniAppContext(): WorldMiniAppContext {
   } | null>("user");
   const deviceProperties = readMiniKitValue<{
     deviceOS?: string;
+    safeAreaInsets?: {
+      bottom: number;
+      left: number;
+      right: number;
+      top: number;
+    };
     worldAppVersion?: number;
   } | null>("deviceProperties");
 
@@ -80,6 +92,7 @@ export function getWorldMiniAppContext(): WorldMiniAppContext {
     launchLocation: readMiniKitValue<string | null>("location") ?? null,
     permissions: user?.permissions,
     profilePictureUrl: user?.profilePictureUrl,
+    safeAreaInsets: deviceProperties?.safeAreaInsets,
     username: user?.username,
     walletAddress: user?.walletAddress,
     worldAppVersion: deviceProperties?.worldAppVersion,

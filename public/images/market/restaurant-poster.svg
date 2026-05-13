@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" role="img" aria-labelledby="title desc">
+  <title id="title">Restaurant launch poster listing photo</title>
+  <desc id="desc">A sponsored restaurant launch poster preview with menu and storefront cues.</desc>
+  <rect width="240" height="280" fill="#edf7f2"/>
+  <rect x="28" y="24" width="184" height="232" rx="20" fill="#ffffff"/>
+  <rect x="44" y="42" width="152" height="64" rx="14" fill="#246b55"/>
+  <text x="120" y="73" fill="#fffdf8" font-family="Arial, sans-serif" font-size="22" font-weight="800" text-anchor="middle">TASTE 254</text>
+  <text x="120" y="92" fill="#ffdc7a" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Launch Weekend</text>
+  <circle cx="83" cy="153" r="36" fill="#ef7d69"/>
+  <circle cx="84" cy="153" r="26" fill="#fff0df"/>
+  <path d="M64 154c18-18 39-17 40 7" fill="none" stroke="#b98218" stroke-width="6" stroke-linecap="round"/>
+  <rect x="130" y="127" width="52" height="10" rx="5" fill="#202328"/>
+  <rect x="130" y="149" width="44" height="10" rx="5" fill="#6f746f"/>
+  <rect x="130" y="171" width="58" height="10" rx="5" fill="#6f746f"/>
+  <rect x="54" y="216" width="132" height="18" rx="9" fill="#246b55" opacity=".14"/>
+  <text x="120" y="229" fill="#246b55" font-family="Arial, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Menu + shop-front image</text>
+</svg>

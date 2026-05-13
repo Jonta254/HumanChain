@@ -10,6 +10,10 @@
   --green: #246b55;
   --violet: #6657d9;
   --shadow: 0 18px 55px rgba(50, 40, 28, 0.12);
+  --world-safe-top: 0px;
+  --world-safe-right: 0px;
+  --world-safe-bottom: 0px;
+  --world-safe-left: 0px;
 }
 
 * {
@@ -19,11 +23,13 @@
 html,
 body {
   margin: 0;
+  width: 100%;
   min-height: 100%;
   background: #efe8dc;
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
+  overflow-x: hidden;
 }
 
 button,
@@ -37,7 +43,9 @@ button {
 }
 
 .app-shell {
+  width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   background:
@@ -48,9 +56,23 @@ button {
 .phone-frame {
   width: min(100%, 430px);
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   background: var(--paper);
   box-shadow: var(--shadow);
+}
+
+html[data-world-mini-app="true"] .app-shell {
+  display: block;
+  min-height: 100dvh;
+  background: var(--paper);
+}
+
+html[data-world-mini-app="true"] .phone-frame {
+  width: 100%;
+  max-width: none;
+  min-height: 100dvh;
+  box-shadow: none;
 }
 
 .app-settings-bar {
@@ -533,7 +555,12 @@ button {
 
 .screen {
   min-height: 100vh;
-  padding: 18px 16px 96px;
+  min-height: 100dvh;
+  padding:
+    calc(18px + var(--world-safe-top))
+    max(12px, calc(16px + var(--world-safe-right)))
+    calc(96px + var(--world-safe-bottom))
+    max(12px, calc(16px + var(--world-safe-left)));
 }
 
 .hero {
@@ -2682,6 +2709,18 @@ button {
   font-weight: 850;
 }
 
+.treasure-profile button:disabled {
+  cursor: default;
+  color: rgba(255, 253, 248, 0.78);
+  border: 1px solid rgba(255, 253, 248, 0.22);
+  background: rgba(255, 253, 248, 0.12);
+}
+
+.check-in-stamp {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+}
+
 .profile-upload {
   grid-column: 1 / -1;
   min-height: 42px;
@@ -3662,6 +3701,28 @@ button {
   margin-top: 12px;
 }
 
+.payment-amount-field {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.payment-amount-field span {
+  color: rgba(255, 253, 248, 0.7);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.payment-amount-field input {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid rgba(255, 253, 248, 0.18);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--paper-strong);
+  background: rgba(255, 253, 248, 0.1);
+}
+
 .payment-token-picker span {
   color: rgba(255, 253, 248, 0.7);
   font-size: 0.76rem;
@@ -3711,6 +3772,12 @@ button {
 .payment-actions button:last-child {
   color: var(--ink);
   background: #fffdf8;
+}
+
+.payment-actions button:disabled {
+  cursor: not-allowed;
+  color: rgba(255, 253, 248, 0.54);
+  background: rgba(255, 253, 248, 0.12);
 }
 
 .payment-hub p {
@@ -3765,6 +3832,29 @@ button {
 .market-hero-top {
   justify-content: space-between;
   gap: 14px;
+}
+
+.market-identity-strip {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.1);
+}
+
+.market-identity-strip span {
+  color: rgba(255, 253, 248, 0.72);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.market-identity-strip strong {
+  margin-left: auto;
+  color: #fffdf8;
+  font-size: 0.88rem;
 }
 
 .market-hero h1 {
@@ -4109,35 +4199,49 @@ button {
   min-height: 84px;
 }
 
+.market-thumb-stack img {
+  width: 72px;
+  height: 84px;
+  display: block;
+  object-fit: cover;
+  border: 2px solid #fffdf8;
+  border-radius: 16px;
+  box-shadow: 0 12px 22px rgba(62, 48, 31, 0.16);
+}
+
 .market-thumb-stack span {
   position: absolute;
-  width: 54px;
-  aspect-ratio: 1;
+  width: 24px;
+  height: 24px;
   display: grid;
   place-items: center;
   border: 2px solid #fffdf8;
-  border-radius: 15px;
+  border-radius: 999px;
   color: #fffdf8;
-  box-shadow: 0 10px 20px rgba(62, 48, 31, 0.14);
+  box-shadow: 0 8px 16px rgba(62, 48, 31, 0.16);
   font-size: 0.68rem;
   font-weight: 950;
 }
 
 .market-thumb-stack span:nth-child(1) {
-  left: 0;
-  top: 0;
-  background: linear-gradient(135deg, var(--green), var(--ink));
+  display: none;
 }
 
 .market-thumb-stack span:nth-child(2) {
-  right: 0;
-  top: 16px;
-  background: linear-gradient(135deg, var(--gold), #7b5a0f);
+  left: -5px;
+  top: -5px;
+  background: linear-gradient(135deg, var(--green), var(--ink));
 }
 
 .market-thumb-stack span:nth-child(3) {
-  left: 9px;
-  bottom: 0;
+  right: -5px;
+  top: 18px;
+  background: linear-gradient(135deg, var(--gold), #7b5a0f);
+}
+
+.market-thumb-stack span:nth-child(4) {
+  left: 24px;
+  bottom: -5px;
   background: linear-gradient(135deg, var(--blue), var(--violet));
 }
 
@@ -4409,6 +4513,14 @@ button {
   background: rgba(255, 253, 248, 0.94);
   backdrop-filter: blur(18px);
   transform: translateX(-50%);
+}
+
+html[data-world-mini-app="true"] .bottom-nav {
+  left: var(--world-safe-left);
+  right: var(--world-safe-right);
+  width: auto;
+  max-width: none;
+  transform: none;
 }
 
 .bottom-nav button {

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" role="img" aria-labelledby="title desc">
+  <title id="title">Ankara tote listing photo</title>
+  <desc id="desc">A bright handmade tote bag marketplace preview.</desc>
+  <rect width="240" height="280" fill="#fff7e8"/>
+  <rect x="28" y="28" width="184" height="224" rx="22" fill="#fffdf8"/>
+  <path d="M78 92c4-38 80-38 84 0" fill="none" stroke="#7a4b0b" stroke-width="11" stroke-linecap="round"/>
+  <path d="M62 94h116l20 132H42L62 94z" fill="#d79a22"/>
+  <path d="M62 94h116l8 54H54l8-54z" fill="#246b55" opacity=".9"/>
+  <path d="M54 150h132l7 45H47l7-45z" fill="#ef7d69"/>
+  <path d="M48 196h144l5 30H43l5-30z" fill="#2f6fed"/>
+  <g fill="none" stroke="#fff6d6" stroke-width="5">
+    <path d="M72 112l24 22 24-22 24 22 24-22"/>
+    <path d="M66 168l20-14 20 14 20-14 20 14 20-14"/>
+    <path d="M64 211h112"/>
+  </g>
+  <text x="120" y="244" fill="#7a4b0b" font-family="Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">New handmade batch</text>
+</svg>

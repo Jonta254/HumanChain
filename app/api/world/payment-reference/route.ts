@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 import { NextRequest } from "next/server";
 import {
-  humanChainPaymentFeatures,
   isHumanChainPaymentFeature,
   isHumanChainPaymentToken,
+  isValidHumanChainPaymentAmount,
   normalizePaymentFeature,
   normalizePaymentToken,
 } from "@/lib/worldPayments";
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     !isHumanChainPaymentFeature(normalizedFeature) ||
     !isHumanChainPaymentToken(normalizedToken) ||
     !amount ||
-    amount !== humanChainPaymentFeatures[normalizedFeature]
+    !isValidHumanChainPaymentAmount(normalizedFeature, amount)
   ) {
     return noStoreJson(
       { error: "Invalid HumanChain payment feature." },

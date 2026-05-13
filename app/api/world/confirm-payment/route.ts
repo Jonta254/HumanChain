@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import type { PayResult } from "@worldcoin/minikit-js/commands";
 import {
-  humanChainPaymentFeatures,
   isHumanChainPaymentFeature,
   isHumanChainPaymentToken,
+  isValidHumanChainPaymentAmount,
   normalizePaymentFeature,
   normalizePaymentToken,
 } from "@/lib/worldPayments";
@@ -44,7 +44,8 @@ export async function POST(req: NextRequest) {
     !normalizedFeature ||
     !isHumanChainPaymentFeature(normalizedFeature) ||
     !isHumanChainPaymentToken(normalizedToken) ||
-    amount !== humanChainPaymentFeatures[normalizedFeature] ||
+    !amount ||
+    !isValidHumanChainPaymentAmount(normalizedFeature, amount) ||
     !reference.startsWith(`humanchain:${normalizedFeature}:${amount}:${normalizedToken}:`)
   ) {
     return noStoreJson(

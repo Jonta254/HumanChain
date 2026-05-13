@@ -10,7 +10,7 @@ export const humanChainPaymentFeatures = {
   "marketplace-business-ad": 4,
   "marketplace-extra-photo-pack": 2,
   "marketplace-local-boost": 2,
-  "marketplace-quick-listing": 1,
+  "marketplace-quick-listing": 2,
   "private-question": 4,
   "private-reach": 4,
   "video-post": 2,
@@ -63,6 +63,25 @@ export function isHumanChainPaymentFeature(
   feature: string,
 ): feature is HumanChainPaymentFeature {
   return feature in humanChainPaymentFeatures;
+}
+
+export function isTipPaymentFeature(feature: string) {
+  return feature.startsWith("tip-") || feature.endsWith("-tip");
+}
+
+export function isValidHumanChainPaymentAmount(feature: string, amount: number) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return false;
+  }
+
+  if (isTipPaymentFeature(feature)) {
+    return amount >= 0.1 && amount <= 100 && Number(amount.toFixed(2)) === amount;
+  }
+
+  return (
+    isHumanChainPaymentFeature(feature) &&
+    amount === humanChainPaymentFeatures[feature]
+  );
 }
 
 export function normalizePaymentToken(token: string | undefined) {
