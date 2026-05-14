@@ -62,8 +62,18 @@ type ChainLink = {
   country: string;
   id?: number;
   owner?: boolean;
+  pinned?: boolean;
+  pinnedAt?: string;
   reactions?: number;
   text: string;
+};
+
+type ChainPremiumState = {
+  circleCreated: boolean;
+  circleName?: string;
+  circlePaidAt?: string;
+  pulsePaidAt?: string;
+  pulseUnlocked: boolean;
 };
 
 const chainLinkHandleBySource: Record<string, string> = {
@@ -2280,6 +2290,8 @@ type HumanPost = (typeof initialHumanPosts)[number] & {
   authorWallet?: string;
   dataReceiptUrl?: string;
   mediaType?: "image" | "video";
+  pinned?: boolean;
+  pinnedAt?: string;
   storageStatus?: "cloud-safe" | "local-safe";
   tipSplit?: {
     creatorPercent: number;
@@ -2369,6 +2381,7 @@ const storageKeys = {
   appMemory: "humanchain_app_memory",
   askThreads: "humanchain_ask_threads",
   bids: "humanchain_market_bids",
+  chainPremium: "humanchain_chain_premium",
   history: "humanchain_history",
   links: "humanchain_links",
   marketRatings: "humanchain_market_ratings",
@@ -2559,6 +2572,13 @@ function loadStoredHistoryRecords(): HistoryRecord[] {
       kind: "profile",
     },
   ]);
+}
+
+function loadStoredChainPremium(): ChainPremiumState {
+  return loadJsonFromStorage<ChainPremiumState>(storageKeys.chainPremium, {
+    circleCreated: false,
+    pulseUnlocked: false,
+  });
 }
 
 function loadStoredAppMemory(): AppMemory {
@@ -2877,6 +2897,7 @@ export default function HumanChainApp() {
     window.localStorage.removeItem(storageKeys.marketplace);
     window.localStorage.removeItem(storageKeys.history);
     window.localStorage.removeItem(storageKeys.bids);
+    window.localStorage.removeItem(storageKeys.chainPremium);
     window.localStorage.removeItem(storageKeys.askThreads);
     window.localStorage.removeItem(storageKeys.links);
     window.localStorage.removeItem(storageKeys.appMemory);
@@ -4080,10 +4101,29 @@ function ChainsView({
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
   );
+  const [activeChainTool, setActiveChainTool] = useState<
+    "circle" | "pulse" | "pin" | null
+  >(null);
+  const [chainPremium, setChainPremium] = useState(loadStoredChainPremium);
+
+  const visiblePosts = [...humanPosts].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return 0;
+  });
+  const visibleLinks = [...links].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return 0;
+  });
 
   useEffect(() => {
     scrollMiniAppToTop();
   }, [activeField, chainView]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.chainPremium, chainPremium);
+  }, [chainPremium]);
 
   function addLink() {
     const text =
@@ -4324,6 +4364,93 @@ function ChainsView({
     act("Post deleted", "The post was removed from your image chain and history remains recorded.");
   }
 
+  function unlockCircle() {
+    openPayment({
+      title: "Create Chain Circle",
+      amount: "3 WLD",
+      detail: "Create one premium group for 12 verified humans with a topic room, invite slots, pinned prompt, and member activity pulse.",
+      success: "Your 12-human Circle is live. Invite members and run the topic room.",
+      feature: "chain-circle",
+      points: 24,
+      onConfirmed: () => {
+        const paidAt = formatCheckInTime(new Date());
+        setChainPremium((current) => ({
+          ...current,
+          circleCreated: true,
+          circleName: current.circleName ?? "Human Circle",
+          circlePaidAt: paidAt,
+        }));
+        recordHistory({
+          title: "Chain Circle created",
+          detail: "3 WLD confirmed. A 12-human premium group is ready with invite slots, pinned prompt, activity pulse, and quote room.",
+          kind: "profile",
+        });
+        setActiveChainTool("circle");
+      },
+    });
+  }
+
+  function unlockWorldPulse() {
+    openPayment({
+      title: "Unique World Pulse",
+      amount: "1 WLD",
+      detail: "Unlock the premium pulse for live link sentiment, strongest human quote, active field, and who is moving the chain today.",
+      success: "World Pulse unlocked for this chain.",
+      feature: "world-pulse",
+      points: 12,
+      onConfirmed: () => {
+        setChainPremium((current) => ({
+          ...current,
+          pulsePaidAt: formatCheckInTime(new Date()),
+          pulseUnlocked: true,
+        }));
+        recordHistory({
+          title: "World Pulse unlocked",
+          detail: "1 WLD confirmed. Unique pulse insights are visible in Chains.",
+          kind: "profile",
+        });
+        setActiveChainTool("pulse");
+      },
+    });
+  }
+
+  function payToPin(item: { id?: number; kind: "link" | "post"; label: string; text: string }) {
+    openPayment({
+      title: "Pin Chain Item",
+      amount: "4 WLD",
+      detail: `Pin "${item.label}" to the top of Chains with a premium badge and priority placement.`,
+      success: "Pinned item is now prioritized at the top of Chains.",
+      feature: "pin-chain-item",
+      points: 18,
+      onConfirmed: () => {
+        const pinnedAt = formatShortTime(new Date());
+
+        if (item.kind === "link") {
+          setLinks((current) =>
+            current.map((link) =>
+              (item.id ? link.id === item.id : link.text === item.text)
+                ? { ...link, pinned: true, pinnedAt }
+                : link,
+            ),
+          );
+        } else {
+          setHumanPosts((current) =>
+            current.map((post) =>
+              post.id === item.id ? { ...post, pinned: true, pinnedAt } : post,
+            ),
+          );
+        }
+
+        recordHistory({
+          title: "Chain item pinned",
+          detail: `4 WLD confirmed. ${item.label} now appears at the top with premium placement.`,
+          kind: "profile",
+        });
+        setActiveChainTool("pin");
+      },
+    });
+  }
+
   async function copyQuote(text: string, source: string) {
     const quote = `${text} - ${source}`;
     try {
@@ -4450,34 +4577,115 @@ function ChainsView({
       <section className="chain-tools">
         <button
           onClick={() => {
-            earnPoints(6, "Starting a circle grows field activity.");
-            act("Chain Circle", "Invite 12 verified humans around one topic.");
+            setActiveChainTool((current) => current === "circle" ? null : "circle");
+            act("Circle guide opened", "Create a 12-human premium group after the 3 WLD payment.");
           }}
           type="button"
         >
           <Users size={17} />
           Circle
         </button>
-        <button onClick={() => act("Chain Pulse", "See what this field is feeling today.")} type="button">
+        <button
+          onClick={() => {
+            setActiveChainTool((current) => current === "pulse" ? null : "pulse");
+            act("Pulse guide opened", "Unlock the unique World Pulse after the 1 WLD payment.");
+          }}
+          type="button"
+        >
           <HeartHandshake size={17} />
           Pulse
         </button>
         <button
-          onClick={() =>
-            openPayment({
-              title: "Golden Link",
-              amount: "2 WLD",
-              detail: "Pin your best chain link so more verified humans see it.",
-              success: "Golden Link boost is prepared for World App.",
-              points: 8,
-            })
-          }
+          onClick={() => {
+            setActiveChainTool((current) => current === "pin" ? null : "pin");
+            act("Pin guide opened", "Choose a link or post, pay 4 WLD, and it moves to the top.");
+          }}
           type="button"
         >
           <Star size={17} />
           Pin
         </button>
       </section>
+      {activeChainTool ? (
+        <section className={`chain-premium-panel ${activeChainTool}`}>
+          {activeChainTool === "circle" ? (
+            <>
+              <span className="section-kicker">Premium Circle - 3 WLD</span>
+              <h2>Build a private group of 12 verified humans.</h2>
+              <p>
+                A Circle gives the creator invite slots, a pinned topic prompt,
+                member reactions, group quote room access, and a cleaner place
+                to grow one serious human discussion.
+              </p>
+              <div className="premium-benefit-grid">
+                {[
+                  "12 verified-human seats",
+                  "Creator badge and pinned prompt",
+                  "Group pulse and activity score",
+                  "Best links rise inside the Circle",
+                ].map((benefit) => (
+                  <span key={benefit}>{benefit}</span>
+                ))}
+              </div>
+              {chainPremium.circleCreated ? (
+                <div className="circle-room">
+                  <strong>{chainPremium.circleName ?? "Human Circle"}</strong>
+                  <small>Created {chainPremium.circlePaidAt}. 12 invite seats ready.</small>
+                  <div>
+                    {Array.from({ length: 12 }).map((_, index) => (
+                      <span key={index}>{index === 0 ? "You" : `Seat ${index + 1}`}</span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <button className="primary-command" onClick={unlockCircle} type="button">
+                  Create Circle - 3 WLD
+                </button>
+              )}
+            </>
+          ) : null}
+          {activeChainTool === "pulse" ? (
+            <>
+              <span className="section-kicker">Unique World Pulse - 1 WLD</span>
+              <h2>See what the chain is feeling right now.</h2>
+              <p>
+                Pulse turns live links and reactions into a premium snapshot:
+                strongest human quote, active field, energy level, and the
+                handle moving today&apos;s chain.
+              </p>
+              {chainPremium.pulseUnlocked ? (
+                <div className="world-pulse-card">
+                  <strong>World Pulse: rising</strong>
+                  <span>{visibleLinks.length} live links scanned</span>
+                  <span>Strongest quote: {visibleLinks[0]?.text ?? "Add a link to start the pulse."}</span>
+                  <span>Top human: {visibleLinks[0] ? getChainLinkAuthor(visibleLinks[0]) : humanIdentity?.username ?? "@you"}</span>
+                  <small>Unlocked {chainPremium.pulsePaidAt}</small>
+                </div>
+              ) : (
+                <button className="primary-command" onClick={unlockWorldPulse} type="button">
+                  Unlock Pulse - 1 WLD
+                </button>
+              )}
+            </>
+          ) : null}
+          {activeChainTool === "pin" ? (
+            <>
+              <span className="section-kicker">Premium Pin - 4 WLD each</span>
+              <h2>Pin any link or post to the top of Chains.</h2>
+              <p>
+                Pick the link or post that deserves attention. After payment it
+                gets a premium badge, stays above normal content, and records
+                the pin in your activity history.
+              </p>
+              <div className="pin-guide-grid">
+                <span>1. Choose a link or image post</span>
+                <span>2. Confirm 4 WLD in World App</span>
+                <span>3. Pinned item moves to the top</span>
+              </div>
+            </>
+          ) : null}
+        </section>
+      ) : null}
       <section className="chain-map">
         <span className="section-kicker">World field</span>
         <h2>Post images, follow live links, or enter quote rooms.</h2>
@@ -4516,8 +4724,8 @@ function ChainsView({
             <span>Human image posts</span>
             <p>Photos and captions shared by verified humans. Reactions add Human Points and show what the chain is feeling.</p>
           </div>
-          {humanPosts.map((post) => (
-            <article className="image-post" key={post.id}>
+          {visiblePosts.map((post) => (
+            <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
               {post.image ? (
                 post.mediaType === "video" ? (
                   <video controls src={post.image} />
@@ -4534,9 +4742,10 @@ function ChainsView({
               <div>
                 <div className="post-head">
                   <div>
-                    <strong>{post.author}</strong>
+                    <strong>{post.pinned ? "Pinned - " : ""}{post.author}</strong>
                     <small>{post.createdAt}</small>
                   </div>
+                  {post.pinned ? <span className="pin-badge">Top chain</span> : null}
                   {post.owner ? (
                     <button
                       className="delete-post-button"
@@ -4555,6 +4764,19 @@ function ChainsView({
                   <span>{post.comments.length} comments</span>
                 </div>
                 <div className="reaction-row social-actions">
+                  <button
+                    onClick={() =>
+                      payToPin({
+                        id: post.id,
+                        kind: "post",
+                        label: post.caption.slice(0, 42),
+                        text: post.caption,
+                      })
+                    }
+                    type="button"
+                  >
+                    Pin 4 WLD
+                  </button>
                   <button onClick={() => reactToPost(post.id, "Love", "loves")} type="button">
                     Love
                   </button>
@@ -4648,28 +4870,42 @@ function ChainsView({
             <span>Live chain quotes</span>
             <p>Live handles, fresh reactions, and human links from Today&apos;s main chain. Add your link above and it appears here first.</p>
           </div>
-          {links.map((link, index) => {
+          {visibleLinks.map((link, index) => {
             const author = getChainLinkAuthor(link, humanIdentity?.username ?? "@verified_human");
             const pulse = getChainLinkPulse(link, index);
 
             return (
-            <article className="thread-item lively" key={`${author}-${link.text}-${index}`}>
+            <article className={`thread-item lively ${link.pinned ? "pinned" : ""}`} key={`${author}-${link.text}-${index}`}>
               <span className="thread-dot" aria-hidden="true" />
               <div className="thread-body">
                 <div className="thread-author-row">
                   <span className="thread-avatar">{author.slice(1, 3).toUpperCase()}</span>
                   <div>
-                    <strong>{author}</strong>
-                    <small>{pulse.createdAt} - {pulse.reactions} felt this - live link</small>
+                    <strong>{link.pinned ? "Pinned - " : ""}{author}</strong>
+                    <small>{pulse.createdAt} - {pulse.reactions} felt this - {link.pinned ? `top chain since ${link.pinnedAt}` : "live link"}</small>
                   </div>
+                  {link.pinned ? <span className="pin-badge">Top</span> : null}
                 </div>
                 <p>{link.text}</p>
                 <div className="reaction-row">
                   <button
+                    onClick={() =>
+                      payToPin({
+                        id: link.id,
+                        kind: "link",
+                        label: `${author} link`,
+                        text: link.text,
+                      })
+                    }
+                    type="button"
+                  >
+                    Pin 4 WLD
+                  </button>
+                  <button
                     onClick={() => {
                       setLinks((current) =>
-                        current.map((currentLink, currentIndex) =>
-                          currentIndex === index
+                        current.map((currentLink) =>
+                          (link.id ? currentLink.id === link.id : currentLink.text === link.text)
                             ? { ...currentLink, reactions: (currentLink.reactions ?? pulse.reactions) + 1 }
                             : currentLink,
                         ),

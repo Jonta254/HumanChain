@@ -1789,6 +1789,15 @@ button.danger {
   padding: 12px 12px 14px 0;
 }
 
+.thread-item.pinned .thread-body,
+.image-post.pinned {
+  border-color: rgba(185, 130, 24, 0.34);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 1), rgba(255, 247, 224, 0.94)),
+    radial-gradient(circle at 100% 0%, rgba(185, 130, 24, 0.2), transparent 8rem);
+  box-shadow: 0 18px 38px rgba(185, 130, 24, 0.14);
+}
+
 .thread-dot {
   flex: 0 0 auto;
   width: 13px;
@@ -1830,6 +1839,11 @@ button.danger {
   margin-bottom: 8px;
 }
 
+.thread-author-row > div {
+  min-width: 0;
+  flex: 1;
+}
+
 .thread-avatar {
   width: 34px;
   height: 34px;
@@ -1864,6 +1878,20 @@ button.danger {
   line-height: 1.25;
 }
 
+.pin-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #fffdf8;
+  background: linear-gradient(135deg, var(--gold), var(--coral));
+  font-size: 0.68rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
 .thread-item p {
   margin: 0 0 9px;
   font-size: 0.96rem;
@@ -1889,6 +1917,107 @@ button.danger {
   gap: 6px;
   align-items: center;
   justify-content: center;
+}
+
+.chain-premium-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid rgba(32, 35, 40, 0.08);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, #fffdf8, #eef6f2),
+    radial-gradient(circle at 92% 0%, rgba(185, 130, 24, 0.18), transparent 9rem);
+  box-shadow: 0 14px 34px rgba(62, 48, 31, 0.08);
+}
+
+.chain-premium-panel.pulse {
+  background:
+    linear-gradient(135deg, #fffdf8, #f1f6ff),
+    radial-gradient(circle at 92% 0%, rgba(47, 111, 237, 0.18), transparent 9rem);
+}
+
+.chain-premium-panel.pin {
+  background:
+    linear-gradient(135deg, #fffdf8, #fbf1ec),
+    radial-gradient(circle at 92% 0%, rgba(239, 125, 105, 0.16), transparent 9rem);
+}
+
+.chain-premium-panel h2,
+.chain-premium-panel p {
+  margin: 0;
+}
+
+.chain-premium-panel h2 {
+  font-size: 1.28rem;
+  line-height: 1.12;
+}
+
+.chain-premium-panel p {
+  color: var(--muted);
+  line-height: 1.42;
+}
+
+.premium-benefit-grid,
+.pin-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.premium-benefit-grid span,
+.pin-guide-grid span {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid rgba(36, 107, 85, 0.1);
+  border-radius: 14px;
+  color: var(--green);
+  background: rgba(255, 253, 248, 0.86);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.circle-room,
+.world-pulse-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(47, 111, 237, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.86);
+}
+
+.circle-room strong,
+.world-pulse-card strong {
+  color: var(--ink);
+}
+
+.circle-room small,
+.world-pulse-card small,
+.world-pulse-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.32;
+}
+
+.circle-room div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.circle-room div span {
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--blue);
+  background: rgba(47, 111, 237, 0.08);
+  font-size: 0.7rem;
+  font-weight: 900;
 }
 
 .chain-tabs {
