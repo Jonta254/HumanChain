@@ -3612,8 +3612,11 @@ function HomeView({
         <p>{homeCopy.intro}</p>
         <div className="hero-live-track" aria-label="Live HumanChain activity track">
           {trackItems.map((item) => (
-            <span key={item.label}>
-              <small>{item.label}</small>
+            <span data-live="Live" key={item.label}>
+              <small>
+                <i aria-hidden="true" />
+                {item.label}
+              </small>
               <strong>{item.value}</strong>
               <em>{item.detail}</em>
             </span>
