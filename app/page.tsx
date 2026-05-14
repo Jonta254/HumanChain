@@ -4099,7 +4099,7 @@ function ChainsView({
   const [isPublishingPost, setIsPublishingPost] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
-    "images",
+    "groups",
   );
   const [activeChainTool, setActiveChainTool] = useState<
     "circle" | "pulse" | "pin" | null
@@ -4498,82 +4498,6 @@ function ChainsView({
   return (
     <div className="screen">
       <TopBar title="Human Fields" subtitle="Living chains for real humans." />
-      <section className="image-chain-card">
-        <span className="section-kicker">Human Image Chain</span>
-        <h2>Post a real moment. Let humans react.</h2>
-        <p>
-          Share a photo from your day with a short human message. Every reaction
-          adds energy to the chain and awards Human Points.
-        </p>
-        {postPreview ? (
-          postMediaType === "video" ? (
-            <video controls src={postPreview} />
-          ) : (
-            <img alt="Selected human post" src={postPreview} />
-          )
-        ) : (
-          <div className="image-post-placeholder">
-            <Upload size={22} />
-            <span>Your image or paid video stays inside this post preview.</span>
-          </div>
-        )}
-        <textarea
-          onChange={(event) => setPostCaption(event.target.value)}
-          placeholder="Write what this image means..."
-          value={postCaption}
-        />
-        <div className="image-post-actions">
-          <label>
-            <Upload size={17} />
-            Add image
-            <input
-              accept="image/*,video/*"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setPostPreview(String(reader.result));
-                    setPostFile(file);
-                    setPostMediaType(file.type.startsWith("video/") ? "video" : "image");
-                    act(
-                      file.type.startsWith("video/") ? "Video selected" : "Image selected",
-                      file.type.startsWith("video/")
-                        ? "Video posting uses a small World payment before publishing."
-                        : "Add a caption, then publish it.",
-                    );
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-              type="file"
-            />
-          </label>
-          <button disabled={isPublishingPost} onClick={publishPostWithPaymentCheck} type="button">
-            {isPublishingPost
-              ? "Publishing..."
-              : postMediaType === "video"
-                ? "Pay and publish video"
-                : "Publish image"}
-          </button>
-        </div>
-      </section>
-      <section className="today-chain">
-        <span className="section-kicker">Today&apos;s main chain</span>
-        <h2>What truth should the world carry today?</h2>
-        <p>
-          Add one useful link: a lesson, memory, warning, prayer, business
-          truth, cultural wisdom, or voice thought another human may need.
-        </p>
-        <textarea
-          onChange={(event) => setLinkText(event.target.value)}
-          placeholder="Write your link..."
-          value={linkText}
-        />
-        <button onClick={addLink} type="button">
-          Add My Link
-        </button>
-      </section>
       <section className="chain-tools">
         <button
           onClick={() => {
@@ -4720,6 +4644,66 @@ function ChainsView({
       </div>
       {chainView === "images" ? (
         <section className="image-post-grid">
+          <section className="image-chain-card">
+            <span className="section-kicker">Human Image Chain</span>
+            <h2>Post a real moment. Let humans react.</h2>
+            <p>
+              Share a photo from your day with a short human message. Every reaction
+              adds energy to the chain and awards Human Points.
+            </p>
+            {postPreview ? (
+              postMediaType === "video" ? (
+                <video controls src={postPreview} />
+              ) : (
+                <img alt="Selected human post" src={postPreview} />
+              )
+            ) : (
+              <div className="image-post-placeholder">
+                <Upload size={22} />
+                <span>Your image or paid video stays inside this post preview.</span>
+              </div>
+            )}
+            <textarea
+              onChange={(event) => setPostCaption(event.target.value)}
+              placeholder="Write what this image means..."
+              value={postCaption}
+            />
+            <div className="image-post-actions">
+              <label>
+                <Upload size={17} />
+                Add image
+                <input
+                  accept="image/*,video/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setPostPreview(String(reader.result));
+                        setPostFile(file);
+                        setPostMediaType(file.type.startsWith("video/") ? "video" : "image");
+                        act(
+                          file.type.startsWith("video/") ? "Video selected" : "Image selected",
+                          file.type.startsWith("video/")
+                            ? "Video posting uses a small World payment before publishing."
+                            : "Add a caption, then publish it.",
+                        );
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  type="file"
+                />
+              </label>
+              <button disabled={isPublishingPost} onClick={publishPostWithPaymentCheck} type="button">
+                {isPublishingPost
+                  ? "Publishing..."
+                  : postMediaType === "video"
+                    ? "Pay and publish video"
+                    : "Publish image"}
+              </button>
+            </div>
+          </section>
           <div className="chain-section-note">
             <span>Human image posts</span>
             <p>Photos and captions shared by verified humans. Reactions add Human Points and show what the chain is feeling.</p>
@@ -4866,6 +4850,22 @@ function ChainsView({
         </section>
       ) : (
         <section className="thread-list" aria-label="Human thread">
+          <section className="today-chain">
+            <span className="section-kicker">Today&apos;s main chain</span>
+            <h2>What truth should the world carry today?</h2>
+            <p>
+              Add one useful link: a lesson, memory, warning, prayer, business
+              truth, cultural wisdom, or voice thought another human may need.
+            </p>
+            <textarea
+              onChange={(event) => setLinkText(event.target.value)}
+              placeholder="Write your link..."
+              value={linkText}
+            />
+            <button onClick={addLink} type="button">
+              Add My Link
+            </button>
+          </section>
           <div className="chain-section-note live-note">
             <span>Live chain quotes</span>
             <p>Live handles, fresh reactions, and human links from Today&apos;s main chain. Add your link above and it appears here first.</p>

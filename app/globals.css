@@ -2074,6 +2074,10 @@ button.danger {
   margin: 0 0 12px -18px;
 }
 
+.thread-list .today-chain {
+  margin: 0 0 12px -18px;
+}
+
 .image-post {
   display: grid;
   gap: 10px;
