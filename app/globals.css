@@ -569,9 +569,9 @@ html[data-world-mini-app="true"] .phone-frame {
   border-radius: 28px;
   color: var(--paper-strong);
   background:
-    radial-gradient(circle at 14% 18%, rgba(255, 253, 248, 0.22), transparent 18%),
-    radial-gradient(circle at 86% 18%, rgba(214, 163, 58, 0.32), transparent 22%),
-    linear-gradient(135deg, #132827, #246b55 58%, #17312f);
+    radial-gradient(circle at 12% 16%, rgba(214, 163, 58, 0.24), transparent 18%),
+    radial-gradient(circle at 84% 20%, rgba(255, 204, 92, 0.26), transparent 20%),
+    linear-gradient(138deg, #0a2321 0%, #123d35 42%, #2c7055 72%, #102b2a 100%);
   background-size: cover;
   background-position: center;
   overflow: hidden;
@@ -610,6 +610,51 @@ html[data-world-mini-app="true"] .phone-frame {
 .hero > * {
   position: relative;
   z-index: 1;
+}
+
+.hero-network-mark {
+  position: absolute;
+  right: -10px;
+  top: -16px;
+  width: 192px;
+  height: 192px;
+  opacity: 0.8;
+  z-index: 0;
+}
+
+.hero-network-mark span,
+.hero-network-mark i,
+.hero-network-mark b {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.hero-network-mark span {
+  inset: 24px;
+  border: 1px solid rgba(255, 253, 248, 0.22);
+  box-shadow:
+    inset 0 0 0 34px rgba(255, 253, 248, 0.04),
+    0 0 48px rgba(214, 163, 58, 0.1);
+}
+
+.hero-network-mark i {
+  width: 12px;
+  height: 12px;
+  right: 48px;
+  top: 70px;
+  background: #fffdf8;
+  box-shadow:
+    -68px 46px 0 var(--gold),
+    -24px 92px 0 rgba(255, 253, 248, 0.86);
+}
+
+.hero-network-mark b {
+  left: 64px;
+  top: 85px;
+  width: 92px;
+  height: 1px;
+  background: rgba(255, 253, 248, 0.28);
+  transform: rotate(34deg);
 }
 
 .hero-brandline {
@@ -672,6 +717,23 @@ html[data-world-mini-app="true"] .phone-frame {
   line-height: 1.45;
 }
 
+.hero-live-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.hero-live-strip span {
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 253, 248, 0.18);
+  border-radius: 999px;
+  color: rgba(255, 253, 248, 0.86);
+  background: rgba(4, 15, 14, 0.22);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
 .home-proof-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -694,7 +756,7 @@ html[data-world-mini-app="true"] .phone-frame {
 
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
   margin: 14px 0;
 }
@@ -1226,8 +1288,8 @@ button.danger {
   align-items: center;
   color: var(--paper-strong);
   background:
-    linear-gradient(135deg, rgba(32, 35, 40, 0.94), rgba(47, 111, 237, 0.72)),
-    radial-gradient(circle at 20% 20%, rgba(255, 253, 248, 0.22), transparent 36%);
+    radial-gradient(circle at 82% 20%, rgba(185, 130, 24, 0.34), transparent 28%),
+    linear-gradient(135deg, rgba(9, 28, 31, 0.96), rgba(33, 89, 86, 0.9) 58%, rgba(32, 35, 40, 0.95));
 }
 
 .ask-hero h2,
@@ -1261,6 +1323,34 @@ button.danger {
   color: var(--ink);
   background: #fffdf8;
   box-shadow: 0 0 0 8px rgba(255, 253, 248, 0.12);
+}
+
+.ask-signal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.ask-signal-grid span {
+  min-height: 64px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid rgba(36, 107, 85, 0.14);
+  border-radius: 16px;
+  color: var(--muted);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.92), rgba(244, 237, 225, 0.74)),
+    radial-gradient(circle at 80% 10%, rgba(47, 111, 237, 0.08), transparent 4rem);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.ask-signal-grid strong {
+  color: var(--green);
+  font-size: 0.98rem;
 }
 
 .ask-box label {
@@ -1322,6 +1412,71 @@ button.danger {
   font-weight: 800;
 }
 
+.ask-route-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid rgba(47, 111, 237, 0.12);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, #fffdf8, #eef6f2),
+    radial-gradient(circle at 100% 0%, rgba(47, 111, 237, 0.08), transparent 7rem);
+}
+
+.ask-route-panel > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.ask-route-panel strong {
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.ask-route-panel span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.34;
+}
+
+.ask-route-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.ask-route-row button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  display: inline-grid;
+  align-content: center;
+  gap: 1px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: #fffcf6;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.ask-route-row button.active {
+  color: #fffdf8;
+  border-color: rgba(36, 107, 85, 0.34);
+  background: linear-gradient(135deg, var(--ink), var(--green));
+}
+
+.ask-route-row small {
+  color: var(--gold);
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.ask-route-row button.active small {
+  color: rgba(255, 253, 248, 0.72);
+}
+
 .ask-board {
   display: grid;
   gap: 12px;
@@ -1335,7 +1490,7 @@ button.danger {
   border: 1px solid var(--line);
   border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(244, 237, 225, 0.94)),
+    linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(238, 246, 242, 0.94)),
     radial-gradient(circle at 88% 10%, rgba(185, 130, 24, 0.12), transparent 28%);
   box-shadow: 0 10px 24px rgba(62, 48, 31, 0.06);
 }
@@ -1391,6 +1546,15 @@ button.danger {
   color: var(--ink);
   font-size: 0.92rem;
   line-height: 1.42;
+}
+
+.answer-card.waiting {
+  border-style: dashed;
+  background: rgba(36, 107, 85, 0.06);
+}
+
+.answer-card.waiting strong {
+  color: var(--gold);
 }
 
 .answer-input {
@@ -1576,7 +1740,9 @@ button.danger {
 .image-chain-card {
   display: grid;
   gap: 12px;
-  background: linear-gradient(135deg, #fffdf8, #f6efe2);
+  background:
+    radial-gradient(circle at 92% 10%, rgba(47, 111, 237, 0.12), transparent 9rem),
+    linear-gradient(135deg, #fffdf8, #eef6f2 54%, #f6efe2);
 }
 
 .image-chain-card h2 {
@@ -1589,6 +1755,24 @@ button.danger {
   margin: 0;
   color: var(--muted);
   line-height: 1.42;
+}
+
+.recent-moment-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.recent-moment-strip span {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(36, 107, 85, 0.12);
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(255, 253, 248, 0.72);
+  font-size: 0.74rem;
+  font-weight: 900;
 }
 
 .image-chain-card img,
@@ -1607,10 +1791,12 @@ button.danger {
 }
 
 .image-post-placeholder {
+  position: relative;
   min-height: 150px;
   display: grid;
   place-items: center;
   gap: 8px;
+  overflow: hidden;
   border: 1px dashed rgba(36, 107, 85, 0.32);
   border-radius: 18px;
   color: var(--green);
@@ -1620,6 +1806,42 @@ button.danger {
   text-align: center;
   font-size: 0.84rem;
   font-weight: 850;
+}
+
+.image-post-placeholder > svg,
+.image-post-placeholder > span {
+  position: relative;
+  z-index: 1;
+}
+
+.moment-lens {
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(36, 107, 85, 0.18);
+  border-radius: 22px;
+}
+
+.moment-lens span,
+.moment-lens i {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.moment-lens span {
+  right: 20px;
+  top: 16px;
+  width: 86px;
+  height: 86px;
+  border: 2px solid rgba(36, 107, 85, 0.18);
+}
+
+.moment-lens i {
+  left: 24px;
+  bottom: 22px;
+  width: 68px;
+  height: 12px;
+  background: rgba(185, 130, 24, 0.32);
+  transform: rotate(-12deg);
 }
 
 .image-chain-card textarea {
@@ -2085,7 +2307,7 @@ button.danger {
   border: 1px solid var(--line);
   border-radius: 22px;
   background:
-    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(246, 240, 230, 0.94)),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(238, 246, 242, 0.9)),
     radial-gradient(circle at 88% 8%, rgba(47, 111, 237, 0.12), transparent 9rem);
   box-shadow: 0 14px 36px rgba(34, 27, 18, 0.08);
   overflow: hidden;
@@ -2094,7 +2316,7 @@ button.danger {
 .image-post img,
 .image-post video,
 .generated-post-art {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
 }
 
 .generated-post-art {

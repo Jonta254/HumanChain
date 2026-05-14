@@ -880,6 +880,8 @@ const answerQueue = [
   "What is one truth about love people learn too late?",
 ];
 
+const askCountryRoutes = ["Kenya", "Brazil", "India", "Ghana", "Japan", "South Africa"];
+
 const starterAskThreads = [
   {
     question: "How do I start again after losing confidence?",
@@ -3497,6 +3499,11 @@ function HomeView({
   return (
     <div className="screen">
       <header className="hero">
+        <div className="hero-network-mark" aria-hidden="true">
+          <span />
+          <i />
+          <b />
+        </div>
         <div className="hero-brandline">
           <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.png" />
           <div>
@@ -3506,6 +3513,11 @@ function HomeView({
         </div>
         <h1>{homeCopy.headline}</h1>
         <p>{homeCopy.intro}</p>
+        <div className="hero-live-strip">
+          <span>{verifiedHuman?.username ?? "@verified_human"}</span>
+          <span>{dailyResponses.length} daily answers</span>
+          <span>{links.length} live links</span>
+        </div>
         <div className="home-proof-grid" aria-label="HumanChain highlights">
           {homeCopy.highlights.map((highlight) => (
             <span key={highlight}>{highlight}</span>
@@ -3738,6 +3750,8 @@ function AskView({
   const [question, setQuestion] = useState("");
   const [selectedMode, setSelectedMode] = useState("Text");
   const [selectedTopic, setSelectedTopic] = useState("Life");
+  const [selectedCountryRoute, setSelectedCountryRoute] = useState("World");
+  const [paidCountryRoutes, setPaidCountryRoutes] = useState<string[]>([]);
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
   const [threads, setThreads] = useState(loadStoredAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
@@ -3755,14 +3769,8 @@ function AskView({
         author: humanIdentity?.username ?? "@you",
         owner: true,
         topic: selectedTopic,
-        mode: selectedMode,
-        answers: [
-          {
-            user: "@humanchain_ai",
-            country: "World",
-            text: "Your question is live. Verified humans will answer from experience, not from guessing.",
-          },
-        ],
+        mode: selectedCountryRoute === "World" ? selectedMode : `${selectedCountryRoute} route`,
+        answers: [],
       },
       ...current,
     ]);
@@ -3810,11 +3818,11 @@ function AskView({
       <TopBar title="Ask The World" subtitle="One question. Verified human answers." />
       <section className="ask-hero">
         <div>
-          <span className="section-kicker">Human Ask</span>
-          <h2>Ask people, not algorithms.</h2>
+          <span className="section-kicker">Human signal desk</span>
+          <h2>Ask the world free, route deeper when it matters.</h2>
           <p>
-            Choose a human route, publish one honest question, and watch real
-            answers form into a living verdict.
+            Publish one honest question to verified humans. No bot answers are
+            seeded here; the thread waits for real people to reply.
           </p>
         </div>
         <button
@@ -3833,6 +3841,20 @@ function AskView({
         >
           <Mic size={24} />
         </button>
+      </section>
+      <section className="ask-signal-grid" aria-label="Ask network status">
+        <span>
+          <strong>Free</strong>
+          Ask The World
+        </span>
+        <span>
+          <strong>2 WLD</strong>
+          Country route
+        </span>
+        <span>
+          <strong>Live</strong>
+          Human replies only
+        </span>
       </section>
       <section className="ask-box">
         <label htmlFor="question">What do you want to ask humanity?</label>
@@ -3870,6 +3892,12 @@ function AskView({
                         ? "Hide your public identity while verified humans answer."
                         : "Turn answers into most-said, best answer, country differences, hard truth, and final verdict.",
                   success: `${mode} flow is prepared for World App payment.`,
+                  feature:
+                    mode === "Voice"
+                      ? "voice-question"
+                      : mode === "Private"
+                        ? "private-question"
+                        : "deep-verdict-question",
                   points: mode === "Deep Verdict" ? 12 : 6,
                 });
               }}
@@ -3879,6 +3907,65 @@ function AskView({
               <span>{label}</span>
             </button>
           ))}
+        </div>
+        <div className="ask-route-panel">
+          <div>
+            <strong>Choose who should hear it first</strong>
+            <span>
+              Ask The World stays free. A specific country route opens a 2 WLD
+              World App payment before that routing is active.
+            </span>
+          </div>
+          <div className="ask-route-row">
+            <button
+              aria-pressed={selectedCountryRoute === "World"}
+              className={selectedCountryRoute === "World" ? "active" : ""}
+              onClick={() => {
+                setSelectedCountryRoute("World");
+                act("Ask The World", "Your question will be free and open to all verified humans.");
+              }}
+              type="button"
+            >
+              World free
+            </button>
+            {askCountryRoutes.map((country) => {
+              const paid = paidCountryRoutes.includes(country);
+
+              return (
+                <button
+                  aria-pressed={selectedCountryRoute === country}
+                  className={selectedCountryRoute === country ? "active" : ""}
+                  key={country}
+                  onClick={() => {
+                    if (paid) {
+                      setSelectedCountryRoute(country);
+                      act(`${country} selected`, "Your question will prioritize verified humans from this route.");
+                      return;
+                    }
+
+                    openPayment({
+                      title: `${country} Ask route`,
+                      amount: "2 WLD",
+                      detail: `Prioritize verified humans connected to ${country} for this Ask thread. Ask The World remains free.`,
+                      success: `${country} route unlocked for Ask.`,
+                      feature: "country-answer",
+                      points: 10,
+                      onConfirmed: () => {
+                        setPaidCountryRoutes((current) =>
+                          current.includes(country) ? current : [...current, country],
+                        );
+                        setSelectedCountryRoute(country);
+                      },
+                    });
+                  }}
+                  type="button"
+                >
+                  {country}
+                  <small>{paid ? "unlocked" : "2 WLD"}</small>
+                </button>
+              );
+            })}
+          </div>
         </div>
         <div className="chip-row">
           {["Life", "Love", "Money", "Business", "Family", "Culture", "Faith"].map((chip) => (
@@ -3898,7 +3985,7 @@ function AskView({
         </div>
         <button className="primary-command" onClick={publishQuestion} type="button">
           <Send size={18} />
-          Ask Verified Humans
+          {selectedCountryRoute === "World" ? "Ask The World Free" : `Ask ${selectedCountryRoute}`}
         </button>
       </section>
 
@@ -3916,12 +4003,17 @@ function AskView({
             <h3>{thread.question}</h3>
             <Meter label={`${thread.answers.length} answers`} value={Math.min(92, 22 + thread.answers.length * 18)} />
             <div className="answer-stack">
-              {thread.answers.map((answer) => (
+              {thread.answers.length ? thread.answers.map((answer) => (
                 <div className="answer-card" key={`${thread.question}-${answer.user}-${answer.text}`}>
                   <strong>{answer.user} · {answer.country}</strong>
                   <p>{answer.text}</p>
                 </div>
-              ))}
+              )) : (
+                <div className="answer-card waiting">
+                  <strong>Waiting for verified humans</strong>
+                  <p>No automatic answer is added. The first response must come from a real HumanChain user.</p>
+                </div>
+              )}
             </div>
             <textarea
               aria-label={`Answer ${thread.question}`}
@@ -4664,11 +4756,16 @@ function ChainsView({
         <section className="image-post-grid">
           <section className="image-chain-card">
             <span className="section-kicker">Human Image Chain</span>
-            <h2>Post a real moment. Let humans react.</h2>
+            <h2>Post a recent moment. Make the chain feel alive.</h2>
             <p>
-              Share a photo from your day with a short human message. Every reaction
-              adds energy to the chain and awards Human Points.
+              Share what just happened, what you saw, built, cooked, fixed, felt,
+              or survived today. Recent moments carry more human energy.
             </p>
+            <div className="recent-moment-strip">
+              <span>Now</span>
+              <span>Real photo</span>
+              <span>Human caption</span>
+            </div>
             {postPreview ? (
               postMediaType === "video" ? (
                 <video controls src={postPreview} />
@@ -4677,8 +4774,12 @@ function ChainsView({
               )
             ) : (
               <div className="image-post-placeholder">
+                <div className="moment-lens" aria-hidden="true">
+                  <span />
+                  <i />
+                </div>
                 <Upload size={22} />
-                <span>Your image or paid video stays inside this post preview.</span>
+                <span>Recent image preview appears here before it enters the chain.</span>
               </div>
             )}
             <textarea
@@ -4723,8 +4824,8 @@ function ChainsView({
             </div>
           </section>
           <div className="chain-section-note">
-            <span>Human image posts</span>
-            <p>Photos and captions shared by verified humans. Reactions add Human Points and show what the chain is feeling.</p>
+            <span>Recent human moments</span>
+            <p>Photos and captions from verified humans. Reactions, comments, tips, and pins keep the best moments moving.</p>
           </div>
           {visiblePosts.map((post) => (
             <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
