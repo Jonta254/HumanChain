@@ -2272,6 +2272,28 @@ type Toast = {
   detail: string;
 };
 
+const importantToastTerms = [
+  "confirmed",
+  "payment",
+  "failed",
+  "error",
+  "unavailable",
+  "denied",
+  "required",
+  "deleted",
+  "cleared",
+  "stored",
+  "published",
+  "uploaded",
+  "sent",
+  "verified",
+  "connected",
+  "world chat",
+  "local account",
+  "notifications active",
+  "open in world app",
+];
+
 type EarnPoints = (amount: number, reason: string) => void;
 
 type PaymentRequest = {
@@ -2856,7 +2878,17 @@ export default function HumanChainApp() {
     verifiedHuman,
   ]);
 
+  function shouldShowToast(title: string, detail: string) {
+    const text = `${title} ${detail}`.toLowerCase();
+
+    return importantToastTerms.some((term) => text.includes(term));
+  }
+
   function act(title: string, detail: string) {
+    if (!shouldShowToast(title, detail)) {
+      return;
+    }
+
     setToast({ title, detail });
   }
 
@@ -2955,16 +2987,16 @@ export default function HumanChainApp() {
     });
   }
 
-  function keepStreak(detail = "Your Human Streak is alive for today.") {
+  function keepStreak(_detail = "Your Human Streak is alive for today.") {
+    void _detail;
     void humanHaptic("light");
     setStreak((current) => current + 1);
-    act("Streak kept", detail);
   }
 
-  function earnPoints(amount: number, reason: string) {
+  function earnPoints(amount: number, _reason: string) {
+    void _reason;
     void humanHaptic("light");
     setPoints((current) => current + amount);
-    act(`+${amount} Human Points`, reason);
   }
 
   function openPayment(payment: PaymentRequest) {
