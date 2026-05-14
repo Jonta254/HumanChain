@@ -2647,6 +2647,76 @@ export default function HumanChainApp() {
   }, []);
 
   useEffect(() => {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function refreshStoredWorldProfile() {
+      const wallet = verifiedHuman?.wallet;
+
+      if (!wallet) {
+        return;
+      }
+
+      const beforeLookupContext = getWorldMiniAppContext();
+      const worldUser = await getWorldUserByAddress(wallet);
+      const afterLookupContext = getWorldMiniAppContext();
+      const username = normalizeWorldUsername(
+        afterLookupContext.username ??
+          worldUser?.username ??
+          beforeLookupContext.username,
+      );
+      const profilePictureUrl =
+        afterLookupContext.profilePictureUrl ??
+        worldUser?.profilePictureUrl ??
+        beforeLookupContext.profilePictureUrl;
+
+      if (cancelled || (!username && !profilePictureUrl)) {
+        return;
+      }
+
+      setWorldContext({
+        ...beforeLookupContext,
+        ...afterLookupContext,
+        profilePictureUrl,
+        username,
+        walletAddress: wallet,
+      });
+
+      setVerifiedHuman((current) => {
+        if (!current || current.wallet !== wallet) {
+          return current;
+        }
+
+        const nextUsername = username ?? current.username;
+        const nextProfilePictureUrl = profilePictureUrl ?? current.profilePictureUrl;
+
+        if (
+          nextUsername === current.username &&
+          nextProfilePictureUrl === current.profilePictureUrl
+        ) {
+          return current;
+        }
+
+        return {
+          ...current,
+          lastSeenAt: new Date().toISOString(),
+          profilePictureUrl: nextProfilePictureUrl,
+          username: nextUsername,
+        };
+      });
+    }
+
+    void refreshStoredWorldProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [verifiedHuman?.mode, verifiedHuman?.username, verifiedHuman?.wallet]);
+
+  useEffect(() => {
     saveJsonToStorage(storageKeys.posts, humanPosts);
   }, [humanPosts]);
 
@@ -6840,7 +6910,10 @@ function MeView({
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const displayUsername = verifiedHuman?.username ?? "@preview_human";
+  const displayUsername =
+    normalizeWorldUsername(worldContext.username) ??
+    verifiedHuman?.username ??
+    "@preview_human";
   const todayKey = getLocalDateKey();
   const checkedInToday = lastCheckInDate === todayKey;
   const worldProfileImage = verifiedHuman?.profilePictureUrl ?? worldContext.profilePictureUrl;
