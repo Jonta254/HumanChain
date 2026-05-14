@@ -866,13 +866,6 @@ const storyShelf = [
   },
 ];
 
-const publishSteps = [
-  "Upload PDF, TXT, or write inside HumanChain",
-  "Pay review and publishing fee",
-  "HumanChain formats it into pages with a cover",
-  "Readers can like, rate, save, and tip",
-];
-
 const answerQueue = [
   "What helped you keep going when nobody saw you struggling?",
   "What belief from your culture made you stronger?",
@@ -2218,6 +2211,24 @@ type MarketHold = {
   status: "held" | "notified" | "local";
 };
 
+type UserStory = {
+  author: string;
+  authorWallet?: string;
+  coverImage?: string;
+  createdAt: string;
+  dataReceiptUrl?: string;
+  fileDataUrl?: string;
+  fileName?: string;
+  fileText?: string;
+  fileType?: string;
+  id: number;
+  kind: "file" | "micro";
+  owner: boolean;
+  storageStatus: "cloud-safe" | "local-safe";
+  text: string;
+  title: string;
+};
+
 type MarketLocationState = {
   accuracy?: number;
   label: string;
@@ -2343,7 +2354,7 @@ type HistoryRecord = {
   title: string;
   detail: string;
   time: string;
-  kind: "post" | "reaction" | "comment" | "tip" | "delete" | "profile" | "market";
+  kind: "post" | "reaction" | "comment" | "tip" | "delete" | "profile" | "market" | "story";
 };
 
 type VerifiedHuman = {
@@ -2427,6 +2438,7 @@ const storageKeys = {
   marketRatings: "humanchain_market_ratings",
   marketplace: "humanchain_marketplace",
   posts: "humanchain_posts",
+  userStories: "humanchain_user_stories",
 } as const;
 
 function loadJsonFromStorage<T>(key: string, fallback: T): T {
@@ -2482,7 +2494,7 @@ function isWorldPermissionGranted(result: unknown) {
 }
 
 async function storeSafeData(
-  kind: "post" | "marketplace-listing" | "marketplace-bid",
+  kind: "post" | "marketplace-listing" | "marketplace-bid" | "story",
   id: number | string,
   data: unknown,
 ) {
@@ -2953,6 +2965,7 @@ export default function HumanChainApp() {
     window.localStorage.removeItem(storageKeys.links);
     window.localStorage.removeItem(storageKeys.marketHolds);
     window.localStorage.removeItem(storageKeys.appMemory);
+    window.localStorage.removeItem(storageKeys.userStories);
     setHumanPosts(initialHumanPosts);
     setLinks(initialLinks);
     setMarketplaceListings([]);
@@ -3246,13 +3259,15 @@ export default function HumanChainApp() {
         );
       case "stories":
         return (
-          <StoriesView
-            act={act}
-            earnPoints={earnPoints}
-            keepStreak={keepStreak}
-            openPayment={openPayment}
-            setSavedItems={setSavedItems}
-          />
+            <StoriesView
+              act={act}
+              earnPoints={earnPoints}
+              humanIdentity={verifiedHuman}
+              keepStreak={keepStreak}
+              openPayment={openPayment}
+              recordHistory={recordHistory}
+              setSavedItems={setSavedItems}
+            />
         );
       case "market":
         return (
@@ -5145,22 +5160,42 @@ function ChainsView({
 function StoriesView({
   act,
   earnPoints,
+  humanIdentity,
   keepStreak,
   openPayment,
+  recordHistory,
   setSavedItems,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  humanIdentity: HumanIdentity | null;
   keepStreak: (detail?: string) => void;
   openPayment: OpenPayment;
+  recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   setSavedItems: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const [isReading, setIsReading] = useState(false);
   const [activePublishedStory, setActivePublishedStory] =
     useState<PublishedStoryKey | null>(null);
+  const [activeUserStory, setActiveUserStory] = useState<UserStory | null>(null);
   const [page, setPage] = useState(0);
   const [liked, setLiked] = useState(false);
   const [rating, setRating] = useState(0);
+  const [userStories, setUserStories] = useState<UserStory[]>(() =>
+    loadJsonFromStorage<UserStory[]>(storageKeys.userStories, []),
+  );
+  const [fileDraft, setFileDraft] = useState<{
+    dataUrl?: string;
+    fileName?: string;
+    fileText?: string;
+    fileType?: string;
+    title: string;
+  }>({ title: "" });
+  const [microDraft, setMicroDraft] = useState({
+    coverImage: "",
+    text: "",
+    title: "",
+  });
   const publishedStory = activePublishedStory
     ? publishedStoryCollection[activePublishedStory]
     : null;
@@ -5171,15 +5206,199 @@ function StoriesView({
   const activeTitle = publishedStory?.title ?? "The Door That Waited";
   const activePublisher = publishedStory?.publisher ?? "HumanChain Monthly";
   const activeAuthor = publishedStory?.author ?? "monthly human story";
+  const microCharacters = microDraft.text.length;
 
   useEffect(() => {
     scrollMiniAppToTop();
-  }, [activePublishedStory, isReading, page]);
+  }, [activePublishedStory, activeUserStory, isReading, page]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.userStories, userStories);
+  }, [userStories]);
 
   function saveStory() {
     setSavedItems((value) => value + 1);
     earnPoints(8, "Saved stories improve your Human Points record.");
     keepStreak("The monthly Human Story was saved to your library.");
+  }
+
+  function saveStoryReceipt(story: UserStory) {
+    void storeSafeData("story", story.id, story).then((receipt) => {
+      if (!receipt.ok) {
+        return;
+      }
+
+      setUserStories((current) =>
+        current.map((item) =>
+          item.id === story.id
+            ? {
+                ...item,
+                dataReceiptUrl: receipt.url,
+                storageStatus: "cloud-safe",
+              }
+            : item,
+        ),
+      );
+    });
+  }
+
+  function publishUserStory(story: UserStory) {
+    setUserStories((current) => [story, ...current]);
+    saveStoryReceipt(story);
+    recordHistory({
+      title: story.kind === "file" ? "Story file published" : "200-character story published",
+      detail: `${story.title} was stored by ${story.author}.`,
+      kind: "story",
+    });
+    earnPoints(story.kind === "file" ? 24 : 14, "Your story was stored in HumanChain.");
+    keepStreak("Your story joined HumanChain.");
+    act("Story published", `${story.title} is stored and ready for readers.`);
+  }
+
+  function publishFileStory() {
+    if (!fileDraft.dataUrl && !fileDraft.fileText) {
+      act("Story file required", "Upload a PDF or text file before paying to publish.");
+      return;
+    }
+
+    const title = fileDraft.title.trim() || fileDraft.fileName || "HumanChain story file";
+
+    openPayment({
+      title: "Publish story file",
+      amount: "4 WLD",
+      detail: "Publish one PDF or text story file with a readable preview and stored HumanChain receipt.",
+      success: "Story file payment confirmed. Your story is now published.",
+      feature: "story-file-publish",
+      points: 18,
+      onConfirmed: () => {
+        const story: UserStory = {
+          author: humanIdentity?.username ?? "@you",
+          authorWallet: humanIdentity?.wallet,
+          createdAt: formatShortTime(),
+          fileDataUrl: fileDraft.dataUrl,
+          fileName: fileDraft.fileName,
+          fileText: fileDraft.fileText,
+          fileType: fileDraft.fileType,
+          id: Date.now(),
+          kind: "file",
+          owner: true,
+          storageStatus: "local-safe",
+          text: "Published file story. Open the preview to read it.",
+          title,
+        };
+
+        publishUserStory(story);
+        setFileDraft({ title: "" });
+      },
+    });
+  }
+
+  function publishMicroStory() {
+    const title = microDraft.title.trim() || "200-character HumanChain story";
+
+    if (microCharacters !== 200) {
+      act("Exact length required", `Write exactly 200 characters. Current count: ${microCharacters}.`);
+      return;
+    }
+
+    if (!microDraft.coverImage) {
+      act("Cover image required", "Add a cover image before publishing this free story.");
+      return;
+    }
+
+    const story: UserStory = {
+      author: humanIdentity?.username ?? "@you",
+      authorWallet: humanIdentity?.wallet,
+      coverImage: microDraft.coverImage,
+      createdAt: formatShortTime(),
+      id: Date.now(),
+      kind: "micro",
+      owner: true,
+      storageStatus: "local-safe",
+      text: microDraft.text,
+      title,
+    };
+
+    publishUserStory(story);
+    setMicroDraft({ coverImage: "", text: "", title: "" });
+  }
+
+  function deleteUserStory(storyId: number) {
+    const story = userStories.find((item) => item.id === storyId);
+
+    if (!story?.owner) {
+      act("Only your story", "Only the human who published this story can delete it.");
+      return;
+    }
+
+    setUserStories((current) => current.filter((item) => item.id !== storyId));
+    recordHistory({
+      title: "Story deleted",
+      detail: story.title,
+      kind: "delete",
+    });
+    act("Story deleted", "Your published story was removed from this device.");
+  }
+
+  if (activeUserStory) {
+    return (
+      <div className="screen story-reader-screen">
+        <section className="reader-top">
+          <button onClick={() => setActiveUserStory(null)} type="button">
+            Stories
+          </button>
+          <span>{activeUserStory.kind === "file" ? "File story" : "200-character story"}</span>
+          <button
+            onClick={() =>
+              openPayment({
+                title: "Tip storyteller",
+                amount: "1 WLD",
+                allowCustomAmount: true,
+                detail: `Support ${activeUserStory.author}.`,
+                success: "Story tip is prepared for World App.",
+                feature: "tip-storyteller",
+                points: 4,
+              })
+            }
+            type="button"
+          >
+            Tip
+          </button>
+        </section>
+        <article className="story-page user-story-page">
+          <header className="reader-masthead">
+            <span>{activeUserStory.author} - {activeUserStory.createdAt}</span>
+            <h1>{activeUserStory.title}</h1>
+            <small>{activeUserStory.storageStatus === "cloud-safe" ? "Cloud-safe story receipt" : "Local-safe story receipt"}</small>
+          </header>
+          {activeUserStory.coverImage ? (
+            <img alt={`${activeUserStory.title} cover`} className="user-story-cover" src={activeUserStory.coverImage} />
+          ) : null}
+          {activeUserStory.kind === "file" ? (
+            <div className="story-file-preview">
+              <strong>{activeUserStory.fileName ?? "Uploaded story file"}</strong>
+              {activeUserStory.fileType === "application/pdf" && activeUserStory.fileDataUrl ? (
+                <object
+                  aria-label={`${activeUserStory.title} PDF preview`}
+                  data={activeUserStory.fileDataUrl}
+                  type="application/pdf"
+                >
+                  <a href={activeUserStory.fileDataUrl}>Open PDF story</a>
+                </object>
+              ) : activeUserStory.fileText ? (
+                <pre>{activeUserStory.fileText}</pre>
+              ) : activeUserStory.fileDataUrl ? (
+                <a href={activeUserStory.fileDataUrl}>Open uploaded story file</a>
+              ) : (
+                <p>Story file preview is unavailable on this device.</p>
+              )}
+            </div>
+          ) : (
+            <p>{activeUserStory.text}</p>
+          )}
+        </article>
+      </div>
+    );
   }
 
   if (isReading || activePublishedStory) {
@@ -5371,34 +5590,174 @@ function StoriesView({
           );
         })}
       </section>
+      {userStories.length ? (
+        <section className="panel story-market">
+          <div className="section-heading">
+            <span>Your published stories</span>
+            <BookOpen size={18} />
+          </div>
+          {userStories.map((story) => (
+            <article className="shelf-row user-story-row" key={story.id}>
+              {story.coverImage ? (
+                <img alt={`${story.title} cover`} className="story-thumb-image" src={story.coverImage} />
+              ) : (
+                <div className="story-file-thumb">
+                  <Library size={19} />
+                </div>
+              )}
+              <div>
+                <span>{story.kind === "file" ? "Paid file story" : "Free 200-character story"}</span>
+                <h3>{story.title}</h3>
+                <small>{story.author} - {story.createdAt} - {story.storageStatus === "cloud-safe" ? "safe receipt" : "local safe"}</small>
+                <p>{story.kind === "file" ? story.fileName ?? "Uploaded story file" : story.text}</p>
+              </div>
+              <div className="story-row-actions">
+                <button onClick={() => setActiveUserStory(story)} type="button">
+                  Read
+                </button>
+                {story.owner ? (
+                  <button className="danger" onClick={() => deleteUserStory(story.id)} type="button">
+                    Delete
+                  </button>
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </section>
+      ) : null}
       <section className="publish-card">
         <div>
           <span className="section-kicker">Publish to humans</span>
           <h2>Your life can become a chain.</h2>
           <p>
-            Writers can upload a PDF or write inside the mini app. HumanChain
-            formats it into a readable story, adds a cover, then opens likes,
-            ratings, saves, and WLD tips.
+            Upload a PDF/text story for 4 WLD, or publish a free 200-character
+            story with a cover image. Every published story is stored and only
+            its owner can delete it.
           </p>
         </div>
-        <label className="upload-drop">
-          <Upload size={20} />
-          Upload PDF or text
-          <input
-            accept=".pdf,.txt,.doc,.docx"
-            onChange={() => {
-              earnPoints(25, "Story submission draft started.");
-              act("Story file selected", "Review and publish flow is ready.");
-            }}
-            type="file"
-          />
-        </label>
-        <div className="publish-steps">
-          {publishSteps.map((step, index) => (
-            <span key={step}>
-              {index + 1}. {step}
-            </span>
-          ))}
+        <div className="story-publish-grid">
+          <div className="story-publish-panel">
+            <strong>File story - 4 WLD</strong>
+            <input
+              aria-label="Story file title"
+              onChange={(event) =>
+                setFileDraft((current) => ({ ...current, title: event.target.value }))
+              }
+              placeholder="Story title"
+              value={fileDraft.title}
+            />
+            <label className="upload-drop">
+              <Upload size={20} />
+              {fileDraft.fileName ?? "Upload PDF or text"}
+              <input
+                accept=".pdf,.txt,text/plain,application/pdf"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+
+                  if (!file) {
+                    return;
+                  }
+
+                  if (file.type === "text/plain" || file.name.toLowerCase().endsWith(".txt")) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setFileDraft((current) => ({
+                        ...current,
+                        dataUrl: undefined,
+                        fileName: file.name,
+                        fileText: String(reader.result).slice(0, 12000),
+                        fileType: "text/plain",
+                      }));
+                      act("Story file selected", "Text story preview is ready.");
+                    };
+                    reader.readAsText(file);
+                    return;
+                  }
+
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setFileDraft((current) => ({
+                      ...current,
+                      dataUrl: String(reader.result),
+                      fileName: file.name,
+                      fileText: undefined,
+                      fileType: file.type || "application/pdf",
+                    }));
+                    act("Story file selected", "PDF story preview is ready.");
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                type="file"
+              />
+            </label>
+            {fileDraft.fileType === "application/pdf" && fileDraft.dataUrl ? (
+              <object aria-label="PDF story preview" className="draft-pdf-preview" data={fileDraft.dataUrl} type="application/pdf">
+                PDF preview ready.
+              </object>
+            ) : fileDraft.fileText ? (
+              <pre className="draft-text-preview">{fileDraft.fileText}</pre>
+            ) : null}
+            <button className="primary-command" onClick={publishFileStory} type="button">
+              Publish file - 4 WLD
+            </button>
+          </div>
+          <div className="story-publish-panel">
+            <strong>Free 200-character story</strong>
+            <input
+              aria-label="Short story title"
+              onChange={(event) =>
+                setMicroDraft((current) => ({ ...current, title: event.target.value }))
+              }
+              placeholder="Story title"
+              value={microDraft.title}
+            />
+            <label className="upload-drop cover-drop">
+              {microDraft.coverImage ? (
+                <img alt="Short story cover preview" src={microDraft.coverImage} />
+              ) : (
+                <>
+                  <Upload size={20} />
+                  Add cover image
+                </>
+              )}
+              <input
+                accept="image/*"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+
+                  if (!file) {
+                    return;
+                  }
+
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setMicroDraft((current) => ({
+                      ...current,
+                      coverImage: String(reader.result),
+                    }));
+                    act("Cover image uploaded", "Short story cover is ready.");
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                type="file"
+              />
+            </label>
+            <textarea
+              aria-label="Exact 200 character story"
+              maxLength={200}
+              onChange={(event) =>
+                setMicroDraft((current) => ({ ...current, text: event.target.value }))
+              }
+              placeholder="Write exactly 200 characters..."
+              value={microDraft.text}
+            />
+            <small className={microCharacters === 200 ? "exact-count ready" : "exact-count"}>
+              {microCharacters}/200 characters
+            </small>
+            <button className="primary-command" onClick={publishMicroStory} type="button">
+              Publish free story
+            </button>
+          </div>
         </div>
       </section>
       <section className="panel creator-card">
@@ -5449,6 +5808,11 @@ function StoriesView({
               key={value}
               onClick={() => {
                 setRating(value);
+                recordHistory({
+                  title: "Story rating stored",
+                  detail: `${value}/5 added to the monthly story.`,
+                  kind: "story",
+                });
                 act("Story rated", `${value}/5 added to this monthly story.`);
               }}
               type="button"
@@ -5461,6 +5825,11 @@ function StoriesView({
           className={liked ? "like-button active" : "like-button"}
           onClick={() => {
             setLiked((value) => !value);
+            recordHistory({
+              title: liked ? "Story like removed" : "Story like stored",
+              detail: liked ? "Monthly story like removed." : "Monthly story like saved.",
+              kind: "story",
+            });
             act(
               liked ? "Like removed" : "Story liked",
               liked

@@ -18,6 +18,7 @@ export const humanChainPaymentFeatures = {
   "private-reach": 4,
   "video-post": 2,
   "story-tip": 1,
+  "story-file-publish": 4,
   "storyteller-tip": 1,
   "tip-market-item": 1,
   "tip-chain-link": 1,

@@ -7,7 +7,12 @@ import {
   readJsonBody,
 } from "@/lib/serverApi";
 
-const allowedKinds = new Set(["post", "marketplace-listing", "marketplace-bid"]);
+const allowedKinds = new Set([
+  "post",
+  "marketplace-listing",
+  "marketplace-bid",
+  "story",
+]);
 
 type StorePayload = {
   data?: unknown;
