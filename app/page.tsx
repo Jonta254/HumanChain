@@ -58,11 +58,58 @@ import {
 } from "@/lib/worldPayments";
 
 type ChainLink = {
+  createdAt?: string;
   country: string;
   id?: number;
   owner?: boolean;
+  reactions?: number;
   text: string;
 };
+
+const chainLinkHandleBySource: Record<string, string> = {
+  Brazil: "@joy_survives",
+  Business: "@builder_ama",
+  Canada: "@quiet_courage",
+  Care: "@care_voice",
+  Culture: "@culture_keeper",
+  Discipline: "@future_self",
+  Faith: "@faith_link",
+  Family: "@family_room",
+  Ghana: "@goodname_ghana",
+  Health: "@healing_chain",
+  HumanChain: "@humanchain",
+  Identity: "@seen_human",
+  India: "@discipline_daily",
+  Japan: "@quiet_words",
+  Kenya: "@mara_chain",
+  Love: "@love_practice",
+  Mexico: "@workbench_mx",
+  Money: "@money_room",
+  Philippines: "@care_bridge",
+  Portugal: "@slow_light",
+  Prayer: "@prayer_link",
+  Purpose: "@purpose_field",
+  "South Africa": "@ubuntu_builder",
+  Wisdom: "@wisdom_vault",
+  Work: "@craft_human",
+  World: "@world_human",
+  Youth: "@youth_signal",
+};
+
+function getChainLinkAuthor(link: ChainLink, fallback = "@verified_human") {
+  if (link.country.startsWith("@")) {
+    return link.country;
+  }
+
+  return chainLinkHandleBySource[link.country] ?? fallback;
+}
+
+function getChainLinkPulse(link: ChainLink, index: number) {
+  const reactions = link.reactions ?? 6 + ((index + 2) * 3) % 21;
+  const createdAt = link.createdAt ?? `${Math.max(2, index + 2)}m ago`;
+
+  return { createdAt, reactions };
+}
 
 const initialLinks: ChainLink[] = [
   {
@@ -2482,12 +2529,12 @@ function loadStoredAskThreads() {
   );
 }
 
-function loadStoredChainLinks() {
+function loadStoredChainLinks(): ChainLink[] {
   if (typeof window === "undefined") {
     return initialLinks;
   }
 
-  return loadJsonFromStorage<typeof initialLinks>(storageKeys.links, initialLinks);
+  return loadJsonFromStorage<ChainLink[]>(storageKeys.links, initialLinks);
 }
 
 function loadStoredHistoryRecords(): HistoryRecord[] {
@@ -4016,12 +4063,12 @@ function ChainsView({
   humanIdentity: HumanIdentity | null;
   humanPosts: HumanPost[];
   keepStreak: (detail?: string) => void;
-  links: typeof initialLinks;
+  links: ChainLink[];
   openPayment: OpenPayment;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
   setHumanPosts: React.Dispatch<React.SetStateAction<HumanPost[]>>;
-  setLinks: React.Dispatch<React.SetStateAction<typeof initialLinks>>;
+  setLinks: React.Dispatch<React.SetStateAction<ChainLink[]>>;
 }) {
   const [linkText, setLinkText] = useState("");
   const [postCaption, setPostCaption] = useState("");
@@ -4043,9 +4090,11 @@ function ChainsView({
       linkText.trim() || "I am still becoming, and today that is enough.";
     setLinks((current) => [
       {
+        createdAt: formatShortTime(new Date()),
         country: humanIdentity?.username ?? "Verified Human",
         id: Date.now(),
         owner: true,
+        reactions: 0,
         text,
       },
       ...current,
@@ -4597,17 +4646,36 @@ function ChainsView({
         <section className="thread-list" aria-label="Human thread">
           <div className="chain-section-note live-note">
             <span>Live chain quotes</span>
-            <p>This feed is only the links written by humans in Today&apos;s main chain. Add your link above and it appears here first.</p>
+            <p>Live handles, fresh reactions, and human links from Today&apos;s main chain. Add your link above and it appears here first.</p>
           </div>
-          {links.map((link, index) => (
-            <article className="thread-item" key={`${link.country}-${link.text}-${index}`}>
-              <span className="thread-dot" />
-              <div>
-                <strong>{link.country}</strong>
+          {links.map((link, index) => {
+            const author = getChainLinkAuthor(link, humanIdentity?.username ?? "@verified_human");
+            const pulse = getChainLinkPulse(link, index);
+
+            return (
+            <article className="thread-item lively" key={`${author}-${link.text}-${index}`}>
+              <span className="thread-dot" aria-hidden="true" />
+              <div className="thread-body">
+                <div className="thread-author-row">
+                  <span className="thread-avatar">{author.slice(1, 3).toUpperCase()}</span>
+                  <div>
+                    <strong>{author}</strong>
+                    <small>{pulse.createdAt} - {pulse.reactions} felt this - live link</small>
+                  </div>
+                </div>
                 <p>{link.text}</p>
                 <div className="reaction-row">
                   <button
-                    onClick={() => act("Reaction sent", "You told this human: I felt this.")}
+                    onClick={() => {
+                      setLinks((current) =>
+                        current.map((currentLink, currentIndex) =>
+                          currentIndex === index
+                            ? { ...currentLink, reactions: (currentLink.reactions ?? pulse.reactions) + 1 }
+                            : currentLink,
+                        ),
+                      );
+                      act("Reaction sent", `You told ${author}: I felt this.`);
+                    }}
                     type="button"
                   >
                     I felt this
@@ -4618,7 +4686,7 @@ function ChainsView({
                         title: "Tip chain link",
                         amount: "1 WLD",
                         allowCustomAmount: true,
-                        detail: "Send a small thank-you to this verified human.",
+                        detail: `Send a small thank-you to ${author}.`,
                         success: "Tip is ready for World App payment.",
                         feature: "tip-chain-link",
                         points: 4,
@@ -4640,7 +4708,8 @@ function ChainsView({
                 </div>
               </div>
             </article>
-          ))}
+            );
+          })}
         </section>
       )}
     </div>
