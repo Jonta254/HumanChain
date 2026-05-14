@@ -2754,6 +2754,28 @@ export default function HumanChainApp() {
   }, [tab, verifiedHuman]);
 
   useEffect(() => {
+    const root = document.documentElement;
+
+    function syncViewportHeight() {
+      const height = window.visualViewport?.height ?? window.innerHeight;
+      root.style.setProperty("--app-height", `${Math.round(height)}px`);
+    }
+
+    syncViewportHeight();
+    window.addEventListener("resize", syncViewportHeight);
+    window.addEventListener("orientationchange", syncViewportHeight);
+    window.visualViewport?.addEventListener("resize", syncViewportHeight);
+    window.visualViewport?.addEventListener("scroll", syncViewportHeight);
+
+    return () => {
+      window.removeEventListener("resize", syncViewportHeight);
+      window.removeEventListener("orientationchange", syncViewportHeight);
+      window.visualViewport?.removeEventListener("resize", syncViewportHeight);
+      window.visualViewport?.removeEventListener("scroll", syncViewportHeight);
+    };
+  }, []);
+
+  useEffect(() => {
     const safeAreaInsets = worldContext.safeAreaInsets;
     const root = document.documentElement;
 
@@ -3553,12 +3575,12 @@ function HomeView({
     verifiedHuman?.mode === "world"
       ? verifiedHuman.username
       : verifiedHuman?.wallet
-        ? `${verifiedHuman.wallet.slice(0, 6)}...${verifiedHuman.wallet.slice(-4)}`
+        ? "World username syncing"
         : "World account pending";
   const userPostCount = humanPosts.filter((post) => post.owner).length;
   const trackItems = [
     {
-      detail: verifiedHuman?.mode === "world" ? "World username live" : "Connect World username",
+      detail: verifiedHuman?.mode === "world" ? "World username live" : "Wallet connected, username next",
       label: "Account",
       value: worldHandle,
     },
@@ -8079,9 +8101,12 @@ function MeView({
   const todayKey = getLocalDateKey();
   const checkedInToday = lastCheckInDate === todayKey;
   const worldProfileImage = verifiedHuman?.profilePictureUrl ?? worldContext.profilePictureUrl;
-  const walletLabel = verifiedHuman?.wallet
-    ? `${verifiedHuman.wallet.slice(0, 6)}...${verifiedHuman.wallet.slice(-4)}`
-    : "World wallet pending";
+  const identityLabel =
+    verifiedHuman?.mode === "world"
+      ? "World username verified"
+      : verifiedHuman?.wallet
+        ? "World username syncing"
+        : "World account pending";
   const ownedPosts = humanPosts.filter((post) => post.owner);
   const chainScore = Math.round(points / 8 + streak * 9);
 
@@ -8104,7 +8129,7 @@ function MeView({
         <div>
           <span className="section-kicker">Verified HumanChain profile</span>
           <h2>{displayUsername}</h2>
-          <p>{walletLabel}. Chain score {chainScore}. {notificationReady ? "Notifications active." : "Notifications off."}</p>
+          <p>{identityLabel}. Chain score {chainScore}. {notificationReady ? "Notifications active." : "Notifications off."}</p>
         </div>
         <button
           disabled={checkedInToday}

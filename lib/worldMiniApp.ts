@@ -67,6 +67,23 @@ export type WorldUserProfile = {
   walletAddress?: string;
 };
 
+type RawWorldAppContext = {
+  device_os?: string;
+  location?: {
+    open_origin?: string;
+  } | null;
+  pending_notifications?: number;
+  preferred_currency?: string;
+  safe_area_insets?: {
+    bottom: number;
+    left: number;
+    right: number;
+    top: number;
+  };
+  wallet_address?: string;
+  world_app_version?: number;
+};
+
 export function isWorldMiniAppReady() {
   return MiniKit.isInstalled();
 }
@@ -76,6 +93,10 @@ function readMiniKitValue<T>(key: string): T | undefined {
 }
 
 export function getWorldMiniAppContext(): WorldMiniAppContext {
+  const rawWorldApp =
+    typeof window === "undefined"
+      ? undefined
+      : (window as unknown as { WorldApp?: RawWorldAppContext }).WorldApp;
   const user = readMiniKitValue<{
     permissions?: WorldPermissionSnapshot;
     profilePictureUrl?: string;
@@ -94,14 +115,17 @@ export function getWorldMiniAppContext(): WorldMiniAppContext {
   } | null>("deviceProperties");
 
   return {
-    deviceOS: deviceProperties?.deviceOS,
-    launchLocation: readMiniKitValue<string | null>("location") ?? null,
+    deviceOS: deviceProperties?.deviceOS ?? rawWorldApp?.device_os,
+    launchLocation:
+      readMiniKitValue<string | null>("location") ??
+      rawWorldApp?.location?.open_origin ??
+      null,
     permissions: user?.permissions,
     profilePictureUrl: user?.profilePictureUrl,
-    safeAreaInsets: deviceProperties?.safeAreaInsets,
+    safeAreaInsets: deviceProperties?.safeAreaInsets ?? rawWorldApp?.safe_area_insets,
     username: user?.username,
-    walletAddress: user?.walletAddress,
-    worldAppVersion: deviceProperties?.worldAppVersion,
+    walletAddress: user?.walletAddress ?? rawWorldApp?.wallet_address,
+    worldAppVersion: deviceProperties?.worldAppVersion ?? rawWorldApp?.world_app_version,
   };
 }
 
