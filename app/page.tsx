@@ -2160,10 +2160,10 @@ const marketplaceChecklist = [
 ];
 
 const marketplaceTrustRails = [
-  ["Verified humans", "Seller handles come from World username or wallet-backed HumanChain identity."],
-  ["Receipt trail", "Listings, bids, boosts, and tips keep a local-safe record and upgrade to cloud-safe when storage is configured."],
-  ["Chat-first trade", "Buyers confirm item condition, pickup, delivery, and payment details with the seller before meeting."],
-  ["Safer payments", "Premium marketplace fees and tips open a World App payment sheet and are counted only after backend verification."],
+  ["Verified humans", "Trade with visible World usernames and saved HumanChain records."],
+  ["Strict location", "Distance appears only from a connected market location."],
+  ["Chat-first trade", "Confirm condition, pickup, and payment before meeting."],
+  ["Receipt trail", "Listings, holds, bids, boosts, and tips keep a local record."],
 ];
 
 type MarketplaceListing = {
@@ -2199,6 +2199,21 @@ type MarketBid = {
   id: number;
   note: string;
   status: "saved" | "sent";
+};
+
+type MarketHold = {
+  area: string;
+  buyer: string;
+  buyerWallet?: string;
+  createdAt: string;
+  distance: string;
+  id: number;
+  itemKey: string;
+  itemTitle: string;
+  note: string;
+  seller: string;
+  sellerWallet?: string;
+  status: "held" | "notified" | "local";
 };
 
 type MarketLocationState = {
@@ -2384,6 +2399,7 @@ const storageKeys = {
   chainPremium: "humanchain_chain_premium",
   history: "humanchain_history",
   links: "humanchain_links",
+  marketHolds: "humanchain_market_holds",
   marketRatings: "humanchain_market_ratings",
   marketplace: "humanchain_marketplace",
   posts: "humanchain_posts",
@@ -2873,10 +2889,11 @@ export default function HumanChainApp() {
 
   function clearMarketplaceData() {
     setMarketplaceListings([]);
+    window.localStorage.removeItem(storageKeys.marketHolds);
     window.localStorage.removeItem(storageKeys.marketRatings);
     recordHistory({
       title: "Marketplace data cleared",
-      detail: "Stored listings, photos, links, and marketplace drafts were removed locally.",
+      detail: "Stored listings, holds, photos, links, and marketplace drafts were removed locally.",
       kind: "market",
     });
     act("Marketplace cleared", "Your local marketplace listings were removed from this device.");
@@ -2900,6 +2917,7 @@ export default function HumanChainApp() {
     window.localStorage.removeItem(storageKeys.chainPremium);
     window.localStorage.removeItem(storageKeys.askThreads);
     window.localStorage.removeItem(storageKeys.links);
+    window.localStorage.removeItem(storageKeys.marketHolds);
     window.localStorage.removeItem(storageKeys.appMemory);
     setHumanPosts(initialHumanPosts);
     setLinks(initialLinks);
@@ -6155,6 +6173,9 @@ function MarketplaceView({
       {},
     ),
   );
+  const [marketHolds, setMarketHolds] = useState<MarketHold[]>(() =>
+    loadJsonFromStorage<MarketHold[]>(storageKeys.marketHolds, []),
+  );
   const [listingPhotos, setListingPhotos] = useState<
     Array<{ id: number; name: string; src: string }>
   >([]);
@@ -6183,6 +6204,10 @@ function MarketplaceView({
   const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
   const sellerHandle = humanIdentity?.username ?? "@preview_human";
 
+  function getMarketItemKey(item: MarketplaceItem | MarketplaceListing) {
+    return "id" in item ? `stored:${item.id}` : `seed:${item.seller}:${item.title}`;
+  }
+
   function getMarketItemImages(item: MarketplaceItem | MarketplaceListing): string[] {
     if ("id" in item && item.photos.length) {
       return item.photos.slice(0, 3).map((photo) => photo.src);
@@ -6197,11 +6222,24 @@ function MarketplaceView({
 
   function getMarketItemInfo(item: MarketplaceItem | MarketplaceListing) {
     const isStoredListing = "id" in item;
+    const area = isStoredListing ? item.area : item.location;
+    const sellerWallet = isStoredListing ? item.sellerWallet : undefined;
+    const distance = !locationReady
+      ? "Connect location to see strict distance"
+      : "distance" in item
+        ? `${item.distance} from your active market area`
+        : marketLocation.source === "browser-gps"
+          ? `Seller area: ${area}. Exact distance is shown only when seller GPS is available.`
+          : `Seller area: ${area}. Manual area match active.`;
 
     return {
-      area: isStoredListing ? item.area : item.location,
+      area,
       condition: item.condition,
+      createdAt: isStoredListing ? item.createdAt : "Verified seed listing",
       detail: isStoredListing ? item.details || "No extra details added." : item.quality,
+      distance,
+      link: isStoredListing ? item.link : "",
+      photos: isStoredListing ? item.photos.length : item.photos,
       receipt: isStoredListing
         ? item.dataStorageStatus === "cloud-safe"
           ? "Cloud-safe listing receipt"
@@ -6209,7 +6247,7 @@ function MarketplaceView({
         : "Seed listing with visible trust signals",
       price: item.price,
       seller: item.seller,
-      sellerWallet: isStoredListing ? item.sellerWallet : undefined,
+      sellerWallet,
       title: item.title,
       trade:
         "saleMode" in item && item.saleMode === "bidding"
@@ -6227,6 +6265,10 @@ function MarketplaceView({
   useEffect(() => {
     saveJsonToStorage(storageKeys.marketRatings, marketRatings);
   }, [marketRatings]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.marketHolds, marketHolds);
+  }, [marketHolds]);
 
   function publishListing(plan: (typeof marketplacePlans)[number]) {
     openPayment({
@@ -6514,23 +6556,105 @@ function MarketplaceView({
     }
   }
 
-  async function openSellerChat(item: MarketplaceItem) {
-    const sellerUsername = item.seller.replace(/^@/, "");
+  async function notifyMarketplaceSeller(
+    item: MarketplaceItem | MarketplaceListing,
+    message: string,
+  ) {
+    const itemInfo = getMarketItemInfo(item);
+
+    if (!itemInfo.sellerWallet) {
+      return false;
+    }
+
+    const response = await fetch("/api/world/send-notification", {
+      body: JSON.stringify({
+        message,
+        path: "/?tab=market",
+        sector: "marketplace",
+        title: "Market item interest",
+        walletAddresses: [itemInfo.sellerWallet],
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+
+    return response.ok;
+  }
+
+  async function openSellerChat(item: MarketplaceItem | MarketplaceListing, intent = "interest") {
+    const itemInfo = getMarketItemInfo(item);
+    const sellerUsername = itemInfo.seller.replace(/^@/, "");
+    const message =
+      intent === "hold"
+        ? `Hi ${itemInfo.seller}, I want to hold ${itemInfo.title} on HumanChain Market. My active market location is ${marketLocation.label}. Is it still available?`
+        : `Hi ${itemInfo.seller}, I saw ${itemInfo.title} on HumanChain Market. Is it still available near ${itemInfo.area}?`;
 
     try {
       await chatWithWorld({
-        message: `Hi ${item.seller}, I saw ${item.title} on HumanChain Market. Is it still available near ${item.location}?`,
+        message,
         to: [sellerUsername],
       });
       recordHistory({
         title: "Marketplace chat opened",
-        detail: `World Chat opened for ${item.title} with ${item.seller}.`,
+        detail: `World Chat opened for ${itemInfo.title} with ${itemInfo.seller}.`,
         kind: "market",
       });
-      act("World Chat opened", `${item.seller}'s Human Chat inbox is ready for this listing.`);
+      act("World Chat opened", `${itemInfo.seller}'s Human Chat inbox is ready for this listing.`);
     } catch (error) {
       act("Chat unavailable", error instanceof Error ? error.message : "Try opening the seller from World App.");
     }
+  }
+
+  async function bookMarketItem(item: MarketplaceItem | MarketplaceListing) {
+    if (!locationReady) {
+      act(
+        "Location required",
+        "Connect GPS or a manual market area before holding an item. HumanChain does not guess distance without permission.",
+      );
+      return;
+    }
+
+    const itemInfo = getMarketItemInfo(item);
+    const itemKey = getMarketItemKey(item);
+    const hold: MarketHold = {
+      area: itemInfo.area,
+      buyer: humanIdentity?.username ?? "@you",
+      buyerWallet: humanIdentity?.wallet,
+      createdAt: formatShortTime(),
+      distance: itemInfo.distance,
+      id: Date.now(),
+      itemKey,
+      itemTitle: itemInfo.title,
+      note: `Buyer requested a hold from ${marketLocation.label}.`,
+      seller: itemInfo.seller,
+      sellerWallet: itemInfo.sellerWallet,
+      status: itemInfo.sellerWallet ? "notified" : "local",
+    };
+
+    setMarketHolds((current) => [hold, ...current.filter((entry) => entry.itemKey !== itemKey)]);
+    recordHistory({
+      title: "Marketplace hold started",
+      detail: `${itemInfo.title} was held for ${hold.buyer}. Seller ${itemInfo.seller} can continue in World Chat.`,
+      kind: "market",
+    });
+    void storeSafeData("marketplace-bid", `hold-${itemKey}-${hold.id}`, hold);
+
+    const notificationMessage = `${hold.buyer} wants to hold ${itemInfo.title}. Location: ${marketLocation.label}.`;
+    const notificationSent = await notifyMarketplaceSeller(item, notificationMessage).catch(() => false);
+    await openSellerChat(item, "hold");
+    setMarketHolds((current) =>
+      current.map((entry) =>
+        entry.id === hold.id
+          ? { ...entry, status: notificationSent ? "notified" : entry.status }
+          : entry,
+      ),
+    );
+    act(
+      notificationSent ? "Hold sent" : "Hold saved",
+      notificationSent
+        ? "The seller received a marketplace notification and World Chat is ready."
+        : "The hold is saved locally and World Chat is ready when available.",
+    );
   }
 
   function getTopBid(item: MarketplaceItem) {
@@ -6647,6 +6771,9 @@ function MarketplaceView({
   if (activeMarketItem) {
     const itemInfo = getMarketItemInfo(activeMarketItem);
     const images = getMarketItemImages(activeMarketItem);
+    const activeHold = marketHolds.find(
+      (hold) => hold.itemKey === getMarketItemKey(activeMarketItem),
+    );
 
     return (
       <div className="screen market-detail-screen">
@@ -6691,6 +6818,17 @@ function MarketplaceView({
               Chat before payment
             </span>
           </div>
+          {activeHold ? (
+            <div className="market-detail-hold">
+              <strong>Hold active</strong>
+              <span>
+                {activeHold.status === "notified"
+                  ? "Seller notification sent."
+                  : "Saved locally. Continue in World Chat."}{" "}
+                Created {activeHold.createdAt}.
+              </span>
+            </div>
+          ) : null}
           <dl>
             <div>
               <dt>Seller</dt>
@@ -6705,14 +6843,44 @@ function MarketplaceView({
               <dd>{itemInfo.area}</dd>
             </div>
             <div>
+              <dt>Distance</dt>
+              <dd>{itemInfo.distance}</dd>
+            </div>
+            <div>
               <dt>Sale</dt>
               <dd>{itemInfo.trade}</dd>
             </div>
+            <div>
+              <dt>Photos</dt>
+              <dd>{itemInfo.photos} image{itemInfo.photos === 1 ? "" : "s"} attached</dd>
+            </div>
+            <div>
+              <dt>Listed</dt>
+              <dd>{itemInfo.createdAt}</dd>
+            </div>
+            {itemInfo.link ? (
+              <div>
+                <dt>Seller link</dt>
+                <dd>{itemInfo.link}</dd>
+              </div>
+            ) : null}
             <div>
               <dt>Safety</dt>
               <dd>Inspect photos, confirm in World Chat, and avoid off-app prepayment pressure.</dd>
             </div>
           </dl>
+          <div className="market-detail-actions">
+            <button onClick={() => void bookMarketItem(activeMarketItem)} type="button">
+              Book / hold item
+            </button>
+            <button
+              className="secondary"
+              onClick={() => void openSellerChat(activeMarketItem)}
+              type="button"
+            >
+              Message seller
+            </button>
+          </div>
         </section>
       </div>
     );
@@ -6817,40 +6985,6 @@ function MarketplaceView({
           <span>Market business</span>
           <strong>4 WLD</strong>
         </button>
-      </section>
-
-      <section className="market-panel market-trust-panel">
-        <div className="section-heading">
-          <span>HumanChain buyer protection</span>
-          <ShieldCheck size={18} />
-        </div>
-        <div className="market-trust-grid">
-          {marketplaceTrustRails.map(([title, detail]) => (
-            <article key={title}>
-              <BadgeCheck size={17} />
-              <strong>{title}</strong>
-              <span>{detail}</span>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="market-panel market-flow-panel">
-        <div className="section-heading">
-          <span>Premium trade flow</span>
-          <Gavel size={18} />
-        </div>
-        {[
-          ["List with proof", "Add 3 real photos, condition, pickup area, and seller handle before publishing."],
-          ["Chat before money", "Buyer confirms details in Human Chat and avoids off-app prepayment pressure."],
-          ["Bid with receipt", "Timed bids are saved locally and can receive cloud-safe receipts when storage is active."],
-          ["Close cleanly", "Seller and buyer confirm pickup, delivery, and payment path before the deal leaves the app."],
-        ].map(([title, detail]) => (
-          <article className="market-flow-step" key={title}>
-            <strong>{title}</strong>
-            <span>{detail}</span>
-          </article>
-        ))}
       </section>
 
       <section className="market-panel listing-studio">
@@ -7254,6 +7388,22 @@ function MarketplaceView({
           >
             Share ad preview
           </button>
+        </div>
+      </section>
+
+      <section className="market-panel market-guidelines-panel">
+        <div className="section-heading">
+          <span>Market guidelines</span>
+          <ShieldCheck size={18} />
+        </div>
+        <div className="market-guidelines-grid">
+          {marketplaceTrustRails.map(([title, detail]) => (
+            <article key={title}>
+              <BadgeCheck size={16} />
+              <strong>{title}</strong>
+              <span>{detail}</span>
+            </article>
+          ))}
         </div>
       </section>
     </div>

@@ -4281,6 +4281,45 @@ button.danger {
   line-height: 1.34;
 }
 
+.market-guidelines-panel {
+  margin-bottom: 10px;
+  background:
+    linear-gradient(135deg, #fffdf8, #f6f2e8),
+    radial-gradient(circle at 100% 0%, rgba(36, 107, 85, 0.1), transparent 9rem);
+}
+
+.market-guidelines-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.market-guidelines-grid article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(36, 107, 85, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.78);
+}
+
+.market-guidelines-grid svg {
+  grid-row: span 2;
+  color: var(--green);
+}
+
+.market-guidelines-grid strong {
+  color: var(--ink);
+  font-size: 0.84rem;
+}
+
+.market-guidelines-grid span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.32;
+}
+
 .market-detail-screen {
   background:
     radial-gradient(circle at 92% 5%, rgba(47, 111, 237, 0.1), transparent 11rem),
@@ -4399,6 +4438,48 @@ button.danger {
   color: var(--ink);
   font-size: 0.88rem;
   font-weight: 850;
+}
+
+.market-detail-hold {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  border: 1px solid rgba(185, 130, 24, 0.22);
+  border-radius: 16px;
+  background: rgba(185, 130, 24, 0.1);
+}
+
+.market-detail-hold strong {
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+
+.market-detail-hold span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.market-detail-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 9px;
+}
+
+.market-detail-actions button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 13px;
+  color: #fffdf8;
+  background: var(--ink);
+  font-weight: 900;
+}
+
+.market-detail-actions button.secondary {
+  border: 1px solid var(--line);
+  color: var(--green);
+  background: #fffdf8;
 }
 
 .market-signal-grid {
