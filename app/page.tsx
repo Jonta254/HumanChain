@@ -2085,19 +2085,28 @@ const marketplacePlans = [
 ];
 
 const marketplaceSignals = [
-  "Location-first discovery",
-  "3 photos included per listing",
-  "Timed bidding near seller price",
-  "New and second-hand items",
-  "World Chat seller inbox",
-  "Business links and campaigns",
+  "Verified World usernames",
+  "Photo-first listings",
+  "Saved bid receipts",
+  "World Chat before meetup",
+  "Clear price and condition",
+  "No hidden GPS sharing",
 ];
 
 const marketplaceChecklist = [
-  "Clear cover photo",
+  "3 real item photos",
   "Price and condition",
   "Pickup area or delivery note",
-  "Seller link or chat",
+  "Defects or warranty note",
+  "Seller chat enabled",
+  "No off-app prepayment pressure",
+];
+
+const marketplaceTrustRails = [
+  ["Verified humans", "Seller handles come from World username or wallet-backed HumanChain identity."],
+  ["Receipt trail", "Listings, bids, boosts, and tips keep a local-safe record and upgrade to cloud-safe when storage is configured."],
+  ["Chat-first trade", "Buyers confirm item condition, pickup, delivery, and payment details with the seller before meeting."],
+  ["Safer payments", "Premium marketplace fees and tips open a World App payment sheet and are counted only after backend verification."],
 ];
 
 type MarketplaceListing = {
@@ -5888,8 +5897,14 @@ function MarketplaceView({
       area: isStoredListing ? item.area : item.location,
       condition: item.condition,
       detail: isStoredListing ? item.details || "No extra details added." : item.quality,
+      receipt: isStoredListing
+        ? item.dataStorageStatus === "cloud-safe"
+          ? "Cloud-safe listing receipt"
+          : "Local-safe listing receipt"
+        : "Seed listing with visible trust signals",
       price: item.price,
       seller: item.seller,
+      sellerWallet: isStoredListing ? item.sellerWallet : undefined,
       title: item.title,
       trade:
         "saleMode" in item && item.saleMode === "bidding"
@@ -6353,10 +6368,24 @@ function MarketplaceView({
           )}
         </section>
         <section className="market-detail-info">
-          <span className="section-kicker">Marketplace item</span>
+          <span className="section-kicker">Verified market listing</span>
           <h1>{itemInfo.title}</h1>
           <strong>{itemInfo.price}</strong>
           <p>{itemInfo.detail}</p>
+          <div className="market-detail-trust" aria-label="Listing trust details">
+            <span>
+              <ShieldCheck size={15} />
+              {itemInfo.seller} verified handle
+            </span>
+            <span>
+              <LockKeyhole size={15} />
+              {itemInfo.receipt}
+            </span>
+            <span>
+              <MessageCircleQuestion size={15} />
+              Chat before payment
+            </span>
+          </div>
           <dl>
             <div>
               <dt>Seller</dt>
@@ -6373,6 +6402,10 @@ function MarketplaceView({
             <div>
               <dt>Sale</dt>
               <dd>{itemInfo.trade}</dd>
+            </div>
+            <div>
+              <dt>Safety</dt>
+              <dd>Inspect photos, confirm in World Chat, and avoid off-app prepayment pressure.</dd>
             </div>
           </dl>
         </section>
@@ -6396,8 +6429,22 @@ function MarketplaceView({
         </p>
         <div className="market-identity-strip">
           <UserRound size={17} />
-          <span>Seller account</span>
+          <span>Verified seller account</span>
           <strong>{sellerHandle}</strong>
+        </div>
+        <div className="market-premium-strip" aria-label="Marketplace trust status">
+          <span>
+            <ShieldCheck size={15} />
+            Human verified
+          </span>
+          <span>
+            <LockKeyhole size={15} />
+            Receipts saved
+          </span>
+          <span>
+            <MessageCircleQuestion size={15} />
+            Chat-first deals
+          </span>
         </div>
         <div className="market-location-card">
           <MapPin size={18} />
@@ -6467,16 +6514,32 @@ function MarketplaceView({
         </button>
       </section>
 
+      <section className="market-panel market-trust-panel">
+        <div className="section-heading">
+          <span>HumanChain buyer protection</span>
+          <ShieldCheck size={18} />
+        </div>
+        <div className="market-trust-grid">
+          {marketplaceTrustRails.map(([title, detail]) => (
+            <article key={title}>
+              <BadgeCheck size={17} />
+              <strong>{title}</strong>
+              <span>{detail}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="market-panel market-flow-panel">
         <div className="section-heading">
-          <span>Marketplace flow</span>
+          <span>Premium trade flow</span>
           <Gavel size={18} />
         </div>
         {[
-          ["Seller publishes", "Pay the small listing fee, add photos, set direct sale or timed bidding."],
-          ["Buyer interacts", "Browse freely, open Human Chat, share listing, or place a bid near the seller target."],
-          ["Seller chooses", "Seller accepts the best serious offer or continues the listing until the duration ends."],
-          ["Humans confirm", "Final meetup, delivery, and payment confirmation stay transparent in chat/history."],
+          ["List with proof", "Add 3 real photos, condition, pickup area, and seller handle before publishing."],
+          ["Chat before money", "Buyer confirms details in Human Chat and avoids off-app prepayment pressure."],
+          ["Bid with receipt", "Timed bids are saved locally and can receive cloud-safe receipts when storage is active."],
+          ["Close cleanly", "Seller and buyer confirm pickup, delivery, and payment path before the deal leaves the app."],
         ].map(([title, detail]) => (
           <article className="market-flow-step" key={title}>
             <strong>{title}</strong>
@@ -6582,7 +6645,7 @@ function MarketplaceView({
           <textarea
             aria-label="Listing details"
             onChange={(event) => updateListingDraft("details", event.target.value)}
-            placeholder="Short details: size, defects, warranty, delivery, why buyers should trust it."
+            placeholder="Premium details: size, defects, warranty, delivery route, receipt, pickup safety, why buyers should trust it."
             value={listingDraft.details}
           />
         </div>
@@ -6602,7 +6665,7 @@ function MarketplaceView({
           }}
           type="button"
         >
-          Store and publish - 2 WLD
+          Store verified listing - 2 WLD
         </button>
       </section>
 
@@ -6637,6 +6700,11 @@ function MarketplaceView({
                     : "Direct chat sale"}{" "}
                   - {listing.area} - {listing.createdAt} - {listing.ratings ?? 0} look votes - {listing.tips ?? 0} tips - {listing.dataStorageStatus === "cloud-safe" ? "safe receipt" : "local safe"}
                 </small>
+                <div className="stored-market-trust">
+                  <span>Verified seller</span>
+                  <span>3-photo proof</span>
+                  <span>Chat before payment</span>
+                </div>
               </div>
               <button onClick={() => rateMarketItem(listing, listing.title)} type="button">
                 Rate
@@ -6722,6 +6790,20 @@ function MarketplaceView({
                   <span>{itemSocial.rating} look votes</span>
                   <span>{itemSocial.tips} tips</span>
                 </div>
+                <div className="market-trust-row">
+                  <span>
+                    <ShieldCheck size={13} />
+                    Verified seller
+                  </span>
+                  <span>
+                    <LockKeyhole size={13} />
+                    Receipt-ready bid
+                  </span>
+                  <span>
+                    <MessageCircleQuestion size={13} />
+                    Inspect before pay
+                  </span>
+                </div>
                 <small>{item.quality}</small>
                 {item.bidding ? (
                   <div className="bid-console">
@@ -6736,8 +6818,8 @@ function MarketplaceView({
                     </div>
                     <p>
                       Seller target {item.bidding.target} WLD. Next bid must be
-                      at least {getMinimumNextBid(item)} WLD. No staff needed:
-                      the app ranks offers and opens seller chat.
+                      at least {getMinimumNextBid(item)} WLD. HumanChain ranks
+                      serious offers, stores the bid trail, and opens seller chat.
                     </p>
                     <div className="quick-bid-row" aria-label={`Quick bids for ${item.title}`}>
                       {[getMinimumNextBid(item), item.bidding.target].map((amount) => (
@@ -6777,7 +6859,7 @@ function MarketplaceView({
                   </div>
                 ) : (
                   <div className="direct-chat-note">
-                    Direct inbox sale. Buyers use Human Chat or the listing link.
+                    Direct inbox sale. Confirm item condition, delivery, and payment path in Human Chat before buying.
                   </div>
                 )}
               </div>
