@@ -717,21 +717,56 @@ html[data-world-mini-app="true"] .phone-frame {
   line-height: 1.45;
 }
 
-.hero-live-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
+.hero-live-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   margin-top: 14px;
 }
 
-.hero-live-strip span {
-  padding: 7px 9px;
+.hero-live-track::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(214, 163, 58, 0.8), rgba(255, 253, 248, 0.22));
+  transform: translateY(-50%);
+  z-index: -1;
+}
+
+.hero-live-track span {
+  min-height: 72px;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 9px 10px;
   border: 1px solid rgba(255, 253, 248, 0.18);
-  border-radius: 999px;
+  border-radius: 16px;
   color: rgba(255, 253, 248, 0.86);
-  background: rgba(4, 15, 14, 0.22);
-  font-size: 0.72rem;
-  font-weight: 850;
+  background: rgba(4, 15, 14, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 253, 248, 0.08);
+}
+
+.hero-live-track small {
+  color: rgba(255, 253, 248, 0.64);
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.hero-live-track strong {
+  color: #fffdf8;
+  font-size: 0.78rem;
+  line-height: 1.12;
+}
+
+.hero-live-track em {
+  color: rgba(255, 253, 248, 0.7);
+  font-size: 0.66rem;
+  font-style: normal;
+  line-height: 1.2;
 }
 
 .home-proof-grid {

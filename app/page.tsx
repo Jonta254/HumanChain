@@ -3320,7 +3320,9 @@ export default function HumanChainApp() {
             dailyResponses={dailyResponses}
             deleteLocalAccount={deleteLocalAccount}
             earnPoints={earnPoints}
+            humanPosts={humanPosts}
             links={links}
+            marketplaceListings={marketplaceListings}
             notificationReady={notificationReady}
             onChangeLanguage={setAppLanguage}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
@@ -3470,7 +3472,9 @@ function HomeView({
   dailyResponses,
   deleteLocalAccount,
   earnPoints,
+  humanPosts,
   links,
+  marketplaceListings,
   notificationReady,
   onChangeLanguage,
   onEnableNotifications,
@@ -3495,7 +3499,9 @@ function HomeView({
   dailyResponses: DailyResponse[];
   deleteLocalAccount: () => void;
   earnPoints: EarnPoints;
+  humanPosts: HumanPost[];
   links: typeof initialLinks;
+  marketplaceListings: MarketplaceListing[];
   notificationReady: boolean;
   onChangeLanguage: (language: AppLanguage) => void;
   onEnableNotifications: () => void | Promise<void>;
@@ -3513,6 +3519,35 @@ function HomeView({
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
   const homeCopy = appLanguage.home;
+  const worldHandle =
+    verifiedHuman?.mode === "world"
+      ? verifiedHuman.username
+      : verifiedHuman?.wallet
+        ? `${verifiedHuman.wallet.slice(0, 6)}...${verifiedHuman.wallet.slice(-4)}`
+        : "World account pending";
+  const userPostCount = humanPosts.filter((post) => post.owner).length;
+  const trackItems = [
+    {
+      detail: verifiedHuman?.mode === "world" ? "World username live" : "Connect World username",
+      label: "Account",
+      value: worldHandle,
+    },
+    {
+      detail: `${dailyResponses.length} human answer${dailyResponses.length === 1 ? "" : "s"} recorded`,
+      label: "Today",
+      value: dailyAnswered ? "Checked in" : "Open",
+    },
+    {
+      detail: `${userPostCount} post${userPostCount === 1 ? "" : "s"} by you`,
+      label: "Posts",
+      value: `${humanPosts.length} total`,
+    },
+    {
+      detail: `${marketplaceListings.length} stored listing${marketplaceListings.length === 1 ? "" : "s"}`,
+      label: "Chain",
+      value: `${links.length} live link${links.length === 1 ? "" : "s"}`,
+    },
+  ];
   const liveVerdicts = [
     {
       question: dailyHumanQuestion.title,
@@ -3545,10 +3580,14 @@ function HomeView({
         </div>
         <h1>{homeCopy.headline}</h1>
         <p>{homeCopy.intro}</p>
-        <div className="hero-live-strip">
-          <span>{verifiedHuman?.username ?? "@verified_human"}</span>
-          <span>{dailyResponses.length} daily answers</span>
-          <span>{links.length} live links</span>
+        <div className="hero-live-track" aria-label="Live HumanChain activity track">
+          {trackItems.map((item) => (
+            <span key={item.label}>
+              <small>{item.label}</small>
+              <strong>{item.value}</strong>
+              <em>{item.detail}</em>
+            </span>
+          ))}
         </div>
         <div className="home-proof-grid" aria-label="HumanChain highlights">
           {homeCopy.highlights.map((highlight) => (
