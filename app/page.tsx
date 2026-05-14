@@ -873,8 +873,6 @@ const answerQueue = [
   "What is one truth about love people learn too late?",
 ];
 
-const askCountryRoutes = ["Kenya", "Brazil", "India", "Ghana", "Japan", "South Africa"];
-
 const starterAskThreads = [
   {
     question: "How do I start again after losing confidence?",
@@ -882,6 +880,7 @@ const starterAskThreads = [
     owner: false,
     topic: "Life",
     mode: "Text",
+    targetCountry: "World",
     answers: [
       {
         user: "@mara_chain",
@@ -901,6 +900,7 @@ const starterAskThreads = [
     owner: false,
     topic: "Money",
     mode: "Country",
+    targetCountry: "World",
     answers: [
       {
         user: "@builder_ama",
@@ -916,7 +916,19 @@ const starterAskThreads = [
   },
 ];
 
-type AskThread = (typeof starterAskThreads)[number];
+type AskThread = {
+  answers: Array<{
+    country: string;
+    text: string;
+    user: string;
+  }>;
+  author: string;
+  mode: string;
+  owner: boolean;
+  question: string;
+  targetCountry: string;
+  topic: string;
+};
 
 const chainFields = [
   {
@@ -2429,6 +2441,7 @@ function normalizeWorldUsername(username?: string) {
 
 const storageKeys = {
   appMemory: "humanchain_app_memory",
+  askCountryRoutes: "humanchain_ask_country_routes",
   askThreads: "humanchain_ask_threads",
   bids: "humanchain_market_bids",
   chainPremium: "humanchain_chain_premium",
@@ -2589,6 +2602,7 @@ function loadStoredAskThreads() {
       mode: thread.mode ?? "Text",
       owner: Boolean(thread.owner),
       question: thread.question ?? "Untitled question",
+      targetCountry: thread.targetCountry ?? "World",
       topic: thread.topic ?? "Life",
     }),
   );
@@ -2962,6 +2976,7 @@ export default function HumanChainApp() {
     window.localStorage.removeItem(storageKeys.bids);
     window.localStorage.removeItem(storageKeys.chainPremium);
     window.localStorage.removeItem(storageKeys.askThreads);
+    window.localStorage.removeItem(storageKeys.askCountryRoutes);
     window.localStorage.removeItem(storageKeys.links);
     window.localStorage.removeItem(storageKeys.marketHolds);
     window.localStorage.removeItem(storageKeys.appMemory);
@@ -3837,7 +3852,10 @@ function AskView({
   const [selectedMode, setSelectedMode] = useState("Text");
   const [selectedTopic, setSelectedTopic] = useState("Life");
   const [selectedCountryRoute, setSelectedCountryRoute] = useState("World");
-  const [paidCountryRoutes, setPaidCountryRoutes] = useState<string[]>([]);
+  const [countryRouteDraft, setCountryRouteDraft] = useState("");
+  const [paidCountryRoutes, setPaidCountryRoutes] = useState<string[]>(() =>
+    loadJsonFromStorage<string[]>(storageKeys.askCountryRoutes, []),
+  );
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
   const [threads, setThreads] = useState(loadStoredAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
@@ -3845,6 +3863,51 @@ function AskView({
   useEffect(() => {
     saveJsonToStorage(storageKeys.askThreads, threads);
   }, [threads]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.askCountryRoutes, paidCountryRoutes);
+  }, [paidCountryRoutes]);
+
+  function getAskThreadTargetCountry(thread: AskThread) {
+    return thread.targetCountry || "World";
+  }
+
+  function unlockEnteredCountryRoute() {
+    const country = countryRouteDraft.trim().replace(/\s+/g, " ");
+    const existingRoute = paidCountryRoutes.find(
+      (route) => route.toLowerCase() === country.toLowerCase(),
+    );
+
+    if (!country) {
+      act("Country required", "Enter the country you want verified humans from before unlocking the route.");
+      return;
+    }
+
+    if (existingRoute) {
+      setSelectedCountryRoute(existingRoute);
+      setCountryRouteDraft(existingRoute);
+      act(`${existingRoute} selected`, "Your Ask question will track only this selected country route.");
+      return;
+    }
+
+    openPayment({
+      title: `${country} Ask route`,
+      amount: "2 WLD",
+      detail: `Prioritize and track verified HumanChain answers from ${country} only. Ask The World remains free.`,
+      success: `${country} route unlocked for Ask.`,
+      feature: "country-answer",
+      points: 10,
+      onConfirmed: () => {
+        setPaidCountryRoutes((current) =>
+          current.some((route) => route.toLowerCase() === country.toLowerCase())
+            ? current
+            : [...current, country],
+        );
+        setSelectedCountryRoute(country);
+        setCountryRouteDraft(country);
+      },
+    });
+  }
 
   function publishQuestion() {
     const cleanQuestion =
@@ -3856,6 +3919,7 @@ function AskView({
         owner: true,
         topic: selectedTopic,
         mode: selectedCountryRoute === "World" ? selectedMode : `${selectedCountryRoute} route`,
+        targetCountry: selectedCountryRoute,
         answers: [],
       },
       ...current,
@@ -3878,7 +3942,10 @@ function AskView({
               answers: [
                 {
                   user: humanIdentity?.username ?? "@you",
-                  country: "Verified human",
+                  country:
+                    getAskThreadTargetCountry(thread) === "World"
+                      ? "Verified human"
+                      : getAskThreadTargetCountry(thread),
                   text: draft,
                 },
                 ...thread.answers,
@@ -3996,13 +4063,29 @@ function AskView({
         </div>
         <div className="ask-route-panel">
           <div>
-            <strong>Choose who should hear it first</strong>
+            <strong>Route to a country</strong>
             <span>
-              Ask The World stays free. A specific country route opens a 2 WLD
-              World App payment before that routing is active.
+              Ask The World stays free. To ask one specific country, enter it
+              here and unlock that exact route for 2 WLD.
             </span>
           </div>
-          <div className="ask-route-row">
+          <div className="ask-route-control">
+            <input
+              aria-label="Country to ask"
+              onChange={(event) => setCountryRouteDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  unlockEnteredCountryRoute();
+                }
+              }}
+              placeholder="Country, e.g. Kenya"
+              value={countryRouteDraft}
+            />
+            <button onClick={unlockEnteredCountryRoute} type="button">
+              Unlock route - 2 WLD
+            </button>
+          </div>
+          <div className="ask-route-status">
             <button
               aria-pressed={selectedCountryRoute === "World"}
               className={selectedCountryRoute === "World" ? "active" : ""}
@@ -4014,44 +4097,24 @@ function AskView({
             >
               World free
             </button>
-            {askCountryRoutes.map((country) => {
-              const paid = paidCountryRoutes.includes(country);
-
-              return (
-                <button
-                  aria-pressed={selectedCountryRoute === country}
-                  className={selectedCountryRoute === country ? "active" : ""}
-                  key={country}
-                  onClick={() => {
-                    if (paid) {
-                      setSelectedCountryRoute(country);
-                      act(`${country} selected`, "Your question will prioritize verified humans from this route.");
-                      return;
-                    }
-
-                    openPayment({
-                      title: `${country} Ask route`,
-                      amount: "2 WLD",
-                      detail: `Prioritize verified humans connected to ${country} for this Ask thread. Ask The World remains free.`,
-                      success: `${country} route unlocked for Ask.`,
-                      feature: "country-answer",
-                      points: 10,
-                      onConfirmed: () => {
-                        setPaidCountryRoutes((current) =>
-                          current.includes(country) ? current : [...current, country],
-                        );
-                        setSelectedCountryRoute(country);
-                      },
-                    });
-                  }}
-                  type="button"
-                >
-                  {country}
-                  <small>{paid ? "unlocked" : "2 WLD"}</small>
-                </button>
-              );
-            })}
+            {paidCountryRoutes.map((country) => (
+              <button
+                aria-pressed={selectedCountryRoute === country}
+                className={selectedCountryRoute === country ? "active" : ""}
+                key={country}
+                onClick={() => {
+                  setSelectedCountryRoute(country);
+                  act(`${country} selected`, "Your Ask question will track only this selected country route.");
+                }}
+                type="button"
+              >
+                {country}
+              </button>
+            ))}
           </div>
+          <small className="ask-route-current">
+            Tracking: {selectedCountryRoute === "World" ? "all verified humans" : `${selectedCountryRoute} only`}
+          </small>
         </div>
         <div className="chip-row">
           {["Life", "Love", "Money", "Business", "Family", "Culture", "Faith"].map((chip) => (
@@ -4080,16 +4143,29 @@ function AskView({
           <span>Live Human Questions</span>
           <MessageCircleQuestion size={18} />
         </div>
-        {threads.map((thread, index) => (
+        {threads.map((thread, index) => {
+          const targetCountry = getAskThreadTargetCountry(thread);
+          const visibleAnswers =
+            targetCountry === "World"
+              ? thread.answers
+              : thread.answers.filter((answer) => answer.country === targetCountry);
+
+          return (
           <article className="ask-thread" key={`${thread.question}-${index}`}>
             <div className="ask-thread-top">
               <span>{thread.topic} - {thread.author}</span>
-              <small>{thread.mode} route</small>
+              <small>{targetCountry === "World" ? thread.mode : targetCountry} route</small>
             </div>
             <h3>{thread.question}</h3>
-            <Meter label={`${thread.answers.length} answers`} value={Math.min(92, 22 + thread.answers.length * 18)} />
+            {targetCountry !== "World" ? (
+              <div className="ask-country-lock">
+                <strong>{targetCountry}</strong>
+                <span>Only {targetCountry}-routed answers are tracked on this question.</span>
+              </div>
+            ) : null}
+            <Meter label={`${visibleAnswers.length} tracked answer${visibleAnswers.length === 1 ? "" : "s"}`} value={Math.min(92, 22 + visibleAnswers.length * 18)} />
             <div className="answer-stack">
-              {thread.answers.length ? thread.answers.map((answer) => (
+              {visibleAnswers.length ? visibleAnswers.map((answer) => (
                 <div className="answer-card" key={`${thread.question}-${answer.user}-${answer.text}`}>
                   <strong>{answer.user} · {answer.country}</strong>
                   <p>{answer.text}</p>
@@ -4097,7 +4173,11 @@ function AskView({
               )) : (
                 <div className="answer-card waiting">
                   <strong>Waiting for verified humans</strong>
-                  <p>No automatic answer is added. The first response must come from a real HumanChain user.</p>
+                  <p>
+                    {targetCountry === "World"
+                      ? "No automatic answer is added. The first response must come from a real HumanChain user."
+                      : `No ${targetCountry}-routed answer is recorded yet. Other countries are not counted here.`}
+                  </p>
                 </div>
               )}
             </div>
@@ -4156,7 +4236,8 @@ function AskView({
               </button>
             </div>
           </article>
-        ))}
+          );
+        })}
       </section>
 
       <section className="panel payment-hub">

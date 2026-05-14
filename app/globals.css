@@ -1475,13 +1475,38 @@ button.danger {
   line-height: 1.34;
 }
 
-.ask-route-row {
+.ask-route-control {
+  display: grid;
+  gap: 8px;
+}
+
+.ask-route-control input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: #fffcf6;
+  font-size: 0.88rem;
+}
+
+.ask-route-control button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  color: #fffdf8;
+  background: var(--ink);
+  font-weight: 900;
+}
+
+.ask-route-status {
   display: flex;
   gap: 8px;
   overflow-x: auto;
 }
 
-.ask-route-row button {
+.ask-route-status button {
   flex: 0 0 auto;
   min-height: 42px;
   display: inline-grid;
@@ -1496,20 +1521,16 @@ button.danger {
   font-weight: 900;
 }
 
-.ask-route-row button.active {
+.ask-route-status button.active {
   color: #fffdf8;
   border-color: rgba(36, 107, 85, 0.34);
   background: linear-gradient(135deg, var(--ink), var(--green));
 }
 
-.ask-route-row small {
-  color: var(--gold);
-  font-size: 0.66rem;
+.ask-route-current {
+  color: var(--green);
+  font-size: 0.76rem;
   font-weight: 900;
-}
-
-.ask-route-row button.active small {
-  color: rgba(255, 253, 248, 0.72);
 }
 
 .ask-board {
@@ -1555,6 +1576,29 @@ button.danger {
   margin: 0;
   font-size: 1.08rem;
   line-height: 1.2;
+}
+
+.ask-country-lock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid rgba(185, 130, 24, 0.24);
+  border-radius: 14px;
+  background: rgba(185, 130, 24, 0.1);
+}
+
+.ask-country-lock strong {
+  color: var(--gold);
+  font-size: 0.82rem;
+}
+
+.ask-country-lock span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  text-align: right;
 }
 
 .answer-stack {
