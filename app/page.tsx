@@ -2570,6 +2570,15 @@ type HistoryRecord = {
   kind: "post" | "reaction" | "comment" | "tip" | "delete" | "profile" | "market" | "story";
 };
 
+type NotificationItem = {
+  id: number;
+  title: string;
+  detail: string;
+  time: string;
+  sector: "welcome" | "inbox" | "marketplace" | "daily" | "stories" | "payments" | "account";
+  read: boolean;
+};
+
 type VerifiedHuman = {
   deviceOS?: string;
   lastSeenAt?: string;
@@ -2594,6 +2603,7 @@ type AppMemory = {
   lastCheckInDate: string | null;
   marketLocation: MarketLocationState;
   notificationReady: boolean;
+  notificationWelcomeSent: boolean;
   points: number;
   savedItems: number;
   streak: number;
@@ -2668,6 +2678,7 @@ const storageKeys = {
   marketHolds: "humanchain_market_holds",
   marketRatings: "humanchain_market_ratings",
   marketplace: "humanchain_marketplace",
+  notifications: "humanchain_notifications",
   posts: "humanchain_posts",
   userStories: "humanchain_user_stories",
 } as const;
@@ -2866,6 +2877,27 @@ function loadStoredHistoryRecords(): HistoryRecord[] {
   ]);
 }
 
+function loadStoredNotifications(): NotificationItem[] {
+  return loadJsonFromStorage<NotificationItem[]>(storageKeys.notifications, [
+    {
+      id: 1,
+      title: "Welcome to HumanChain",
+      detail: "Start with the guide, ask one honest question, follow live chains, and trade only with verified humans.",
+      time: "Now",
+      sector: "welcome",
+      read: false,
+    },
+    {
+      id: 2,
+      title: "Professional user guide",
+      detail: "Use Ask for human replies, Chains for live wisdom, Market for verified trade, Stories for longer records, and Me for your vault.",
+      time: "Now",
+      sector: "account",
+      read: false,
+    },
+  ]);
+}
+
 function loadStoredChainPremium(): ChainPremiumState {
   return loadJsonFromStorage<ChainPremiumState>(storageKeys.chainPremium, {
     circleCreated: false,
@@ -2887,6 +2919,7 @@ function loadStoredAppMemory(): AppMemory {
       status: "idle",
     },
     notificationReady: false,
+    notificationWelcomeSent: false,
     points: 420,
     savedItems: 3,
     streak: 4,
@@ -2910,6 +2943,7 @@ function loadStoredAppMemory(): AppMemory {
         ? stored.dailyAnsweredDate
         : null,
     marketLocation: stored.marketLocation ?? fallback.marketLocation,
+    notificationWelcomeSent: Boolean(stored.notificationWelcomeSent),
     verifiedHuman: stored.verifiedHuman ?? fallback.verifiedHuman,
   };
 }
@@ -2918,12 +2952,20 @@ export default function HumanChainApp() {
   const [storedAppMemory] = useState(loadStoredAppMemory);
   const [tab, setTab] = useState<Tab>("home");
   const [toast, setToast] = useState<Toast | null>(null);
+  const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
+  const [notificationPromptDismissed, setNotificationPromptDismissed] = useState(false);
   const [verifiedHuman, setVerifiedHuman] = useState<VerifiedHuman | null>(
     storedAppMemory.verifiedHuman,
   );
   const [gateBusy, setGateBusy] = useState(false);
   const [notificationReady, setNotificationReady] = useState(
     storedAppMemory.notificationReady,
+  );
+  const [notificationWelcomeSent, setNotificationWelcomeSent] = useState(
+    storedAppMemory.notificationWelcomeSent,
+  );
+  const [notifications, setNotifications] = useState<NotificationItem[]>(
+    loadStoredNotifications,
   );
   const [worldContext, setWorldContext] = useState(getWorldMiniAppContext);
   const [appLanguage, setAppLanguage] = useState<AppLanguage>(
@@ -3170,6 +3212,10 @@ export default function HumanChainApp() {
   }, [historyRecords]);
 
   useEffect(() => {
+    saveJsonToStorage(storageKeys.notifications, notifications.slice(0, 60));
+  }, [notifications]);
+
+  useEffect(() => {
     saveJsonToStorage(storageKeys.appMemory, {
       appLanguageCode: appLanguage.code,
       dailyAnswered,
@@ -3179,6 +3225,7 @@ export default function HumanChainApp() {
       lastCheckInDate,
       marketLocation,
       notificationReady,
+      notificationWelcomeSent,
       points,
       savedItems,
       streak,
@@ -3193,6 +3240,7 @@ export default function HumanChainApp() {
     lastCheckInDate,
     marketLocation,
     notificationReady,
+    notificationWelcomeSent,
     points,
     savedItems,
     streak,
@@ -3213,6 +3261,65 @@ export default function HumanChainApp() {
     setToast({ title, detail });
   }
 
+  function addNotification(
+    title: string,
+    detail: string,
+    sector: NotificationItem["sector"] = "account",
+  ) {
+    const time = formatShortTime();
+
+    setNotifications((current) => [
+      {
+        id: Date.now(),
+        title,
+        detail,
+        sector,
+        time,
+        read: false,
+      },
+      ...current,
+    ].slice(0, 60));
+  }
+
+  async function sendWorldUserNotification({
+    detail,
+    path = "/",
+    sector,
+    title,
+  }: {
+    detail: string;
+    path?: string;
+    sector: NotificationItem["sector"];
+    title: string;
+  }) {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") {
+      return false;
+    }
+
+    const response = await fetch("/api/world/send-notification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        walletAddresses: [verifiedHuman.wallet],
+        sector,
+        title,
+        message: detail,
+        path,
+        localisations: [
+          {
+            language: "en",
+            title,
+            message: detail,
+          },
+        ],
+      }),
+    });
+
+    const payload = await response.json().catch(() => null);
+
+    return response.ok && payload?.ok !== false;
+  }
+
   function recordHistory(record: Omit<HistoryRecord, "id" | "time">) {
     const time = new Intl.DateTimeFormat("en", {
       hour: "2-digit",
@@ -3227,6 +3334,19 @@ export default function HumanChainApp() {
       },
       ...current,
     ]);
+
+    const sectorByKind: Record<HistoryRecord["kind"], NotificationItem["sector"]> = {
+      comment: "inbox",
+      delete: "account",
+      market: "marketplace",
+      post: "account",
+      profile: "account",
+      reaction: "inbox",
+      story: "stories",
+      tip: "payments",
+    };
+
+    addNotification(record.title, record.detail, sectorByKind[record.kind]);
   }
 
   function resetHistory() {
@@ -3245,6 +3365,7 @@ export default function HumanChainApp() {
   function clearMarketplaceData() {
     setMarketplaceListings([]);
     window.localStorage.removeItem(storageKeys.marketHolds);
+    window.localStorage.removeItem(storageKeys.notifications);
     window.localStorage.removeItem(storageKeys.marketRatings);
     recordHistory({
       title: "Marketplace data cleared",
@@ -3301,6 +3422,8 @@ export default function HumanChainApp() {
       status: "idle",
     });
     setNotificationReady(false);
+    setNotificationWelcomeSent(false);
+    setNotifications(loadStoredNotifications());
     setPoints(420);
     setSavedItems(3);
     setStreak(4);
@@ -3339,6 +3462,8 @@ export default function HumanChainApp() {
       }
 
       setNotificationReady(true);
+      setNotificationPromptDismissed(true);
+      setNotificationCenterOpen(true);
       recordHistory({
         title: "Notifications enabled",
         detail:
@@ -3346,25 +3471,25 @@ export default function HumanChainApp() {
         kind: "profile",
       });
 
-      if (verifiedHuman?.wallet) {
-        void fetch("/api/world/send-notification", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            walletAddresses: [verifiedHuman.wallet],
-            sector: "account",
-            title: "HumanChain ready",
-            message: "Notifications are active for HumanChain.",
-            path: "/",
-            localisations: [
-              {
-                language: "en",
-                title: "HumanChain ready",
-                message: "Notifications are active for HumanChain.",
-              },
-            ],
-          }),
+      if (!notificationWelcomeSent) {
+        const welcomeTitle = "Welcome to HumanChain";
+        const welcomeDetail =
+          "You are part of a verified human network. Start with the guide, ask honestly, trade safely, and help real wisdom move through World.";
+
+        addNotification(welcomeTitle, welcomeDetail, "welcome");
+        addNotification(
+          "User guide ready",
+          "Home is your dashboard, Ask routes human replies, Chains keeps live wisdom, Market supports verified trade, Stories stores long records, and Me is your vault.",
+          "account",
+        );
+
+        await sendWorldUserNotification({
+          title: welcomeTitle,
+          detail: welcomeDetail,
+          sector: "account",
+          path: "/",
         });
+        setNotificationWelcomeSent(true);
       }
 
       setToast({
@@ -3652,8 +3777,10 @@ export default function HumanChainApp() {
             links={links}
             marketplaceListings={marketplaceListings}
             notificationReady={notificationReady}
+            notificationUnreadCount={notifications.filter((notification) => !notification.read).length}
             onChangeLanguage={setAppLanguage}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
+            onOpenNotifications={() => setNotificationCenterOpen(true)}
             setDailyAnsweredAt={setDailyAnsweredAt}
             setDailyAnsweredDate={setDailyAnsweredDate}
             setActiveField={setActiveField}
@@ -3703,6 +3830,26 @@ export default function HumanChainApp() {
             onConfirm={confirmPayment}
             payment={paymentPrompt}
             selectedToken={paymentToken}
+          />
+        ) : null}
+        {notificationCenterOpen ? (
+          <NotificationCenter
+            notificationReady={notificationReady}
+            notifications={notifications}
+            onClose={() => setNotificationCenterOpen(false)}
+            onEnable={() => enableHumanChainNotifications("center")}
+            onMarkAllRead={() =>
+              setNotifications((current) =>
+                current.map((notification) => ({ ...notification, read: true })),
+              )
+            }
+          />
+        ) : null}
+        {verifiedHuman && !notificationReady && !notificationPromptDismissed ? (
+          <NotificationPermissionPrompt
+            onClose={() => setNotificationPromptDismissed(true)}
+            onEnable={() => enableHumanChainNotifications("prompt")}
+            username={getWorldDisplayUsername(worldContext, verifiedHuman)}
           />
         ) : null}
         {verifiedHuman ? (
@@ -3790,6 +3937,99 @@ function LoginGate({
   );
 }
 
+function NotificationPermissionPrompt({
+  onClose,
+  onEnable,
+  username,
+}: {
+  onClose: () => void;
+  onEnable: () => void | Promise<void>;
+  username: string;
+}) {
+  return (
+    <section className="notification-prompt-backdrop" role="dialog" aria-modal="true">
+      <div className="notification-prompt-card">
+        <div className="notification-prompt-icon">
+          <Bell size={24} />
+          <i />
+        </div>
+        <span className="section-kicker">HumanChain alerts</span>
+        <h2>Stay connected to real human activity.</h2>
+        <p>
+          {username} can receive useful World App alerts for replies, marketplace holds,
+          payments, story drops, daily questions, and account safety.
+        </p>
+        <div className="notification-guide-list">
+          <span>Welcome message and user guide</span>
+          <span>Inbox, bids, tips, and payment receipts</span>
+          <span>Daily chain prompts and important account alerts</span>
+        </div>
+        <div className="notification-prompt-actions">
+          <button onClick={onEnable} type="button">
+            Enable notifications
+          </button>
+          <button className="secondary" onClick={onClose} type="button">
+            Not now
+          </button>
+        </div>
+        <small>World requires Developer Portal setup and user permission before push alerts are sent.</small>
+      </div>
+    </section>
+  );
+}
+
+function NotificationCenter({
+  notificationReady,
+  notifications,
+  onClose,
+  onEnable,
+  onMarkAllRead,
+}: {
+  notificationReady: boolean;
+  notifications: NotificationItem[];
+  onClose: () => void;
+  onEnable: () => void | Promise<void>;
+  onMarkAllRead: () => void;
+}) {
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
+
+  return (
+    <section className="notification-center-backdrop" role="dialog" aria-modal="true">
+      <div className="notification-center">
+        <div className="notification-center-head">
+          <div>
+            <span className="section-kicker">Notification center</span>
+            <h2>HumanChain alerts</h2>
+            <p>
+              {notificationReady
+                ? "World App notifications are connected for important HumanChain activity."
+                : "Enable World App notifications to receive important HumanChain activity outside this screen."}
+            </p>
+          </div>
+          <button onClick={onClose} type="button">
+            Close
+          </button>
+        </div>
+        <div className="notification-center-actions">
+          <button onClick={notificationReady ? onMarkAllRead : onEnable} type="button">
+            {notificationReady ? `Mark ${unreadCount || "all"} read` : "Enable World alerts"}
+          </button>
+        </div>
+        <div className="notification-feed">
+          {notifications.map((notification) => (
+            <article className={notification.read ? "read" : ""} key={notification.id}>
+              <span>{notification.sector}</span>
+              <strong>{notification.title}</strong>
+              <p>{notification.detail}</p>
+              <small>{notification.time}</small>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HomeView({
   act,
   appLanguage,
@@ -3804,8 +4044,10 @@ function HomeView({
   links,
   marketplaceListings,
   notificationReady,
+  notificationUnreadCount,
   onChangeLanguage,
   onEnableNotifications,
+  onOpenNotifications,
   points,
   resetHistory,
   setDailyAnsweredAt,
@@ -3831,8 +4073,10 @@ function HomeView({
   links: typeof initialLinks;
   marketplaceListings: MarketplaceListing[];
   notificationReady: boolean;
+  notificationUnreadCount: number;
   onChangeLanguage: (language: AppLanguage) => void;
   onEnableNotifications: () => void | Promise<void>;
+  onOpenNotifications: () => void;
   points: number;
   resetHistory: () => void;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
@@ -3889,6 +4133,14 @@ function HomeView({
   return (
     <div className="screen">
       <header className="hero">
+        <button
+          aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
+          className={`home-bell-button ${notificationUnreadCount > 0 || !notificationReady ? "has-dot" : ""}`}
+          onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
+          type="button"
+        >
+          <Bell size={20} />
+        </button>
         <div className="hero-network-mark" aria-hidden="true">
           <span />
           <i />
@@ -3921,24 +4173,6 @@ function HomeView({
           ))}
         </div>
       </header>
-
-      <section className={`home-notification-toggle ${notificationReady ? "active" : ""}`}>
-        <div className="home-notification-icon" aria-hidden="true">
-          <Bell size={18} />
-          <i />
-        </div>
-        <div>
-          <strong>{notificationReady ? "World alerts active" : "World alerts"}</strong>
-          <p>
-            {notificationReady
-              ? `${verifiedHuman?.username ?? "Human"} is ready for inbox, bids, payments, and daily questions.`
-              : "Inbox, bids, payments, and daily questions."}
-          </p>
-        </div>
-        <button onClick={onEnableNotifications} type="button">
-          {notificationReady ? "Manage" : "Enable"}
-        </button>
-      </section>
 
       <section className="quick-grid" aria-label={homeCopy.actionsLabel}>
         <ActionButton
