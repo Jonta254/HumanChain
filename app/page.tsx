@@ -2439,6 +2439,23 @@ function normalizeWorldUsername(username?: string) {
   return normalized ? `@${normalized}` : undefined;
 }
 
+function isGeneratedHumanUsername(username?: string) {
+  return Boolean(username?.startsWith("@human_"));
+}
+
+function getWorldDisplayUsername(
+  worldContext: ReturnType<typeof getWorldMiniAppContext>,
+  verifiedHuman?: VerifiedHuman | null,
+) {
+  return (
+    normalizeWorldUsername(worldContext.username) ??
+    (isGeneratedHumanUsername(verifiedHuman?.username)
+      ? undefined
+      : verifiedHuman?.username) ??
+    (verifiedHuman?.wallet ? "World username syncing" : "World account pending")
+  );
+}
+
 const storageKeys = {
   appMemory: "humanchain_app_memory",
   askCountryRoutes: "humanchain_ask_country_routes",
@@ -3152,13 +3169,13 @@ export default function HumanChainApp() {
         launchLocation:
           nextWorldContext.launchLocation ?? freshWorldContext.launchLocation,
         profilePictureUrl: worldProfilePictureUrl,
-        username: worldUsername ?? `@human_${address.slice(2, 8).toLowerCase()}`,
+        username: worldUsername ?? "World username syncing",
         wallet: address,
         mode: "world",
       });
       setToast({
         title: "Verified human entered",
-        detail: `${worldUsername ?? `${address.slice(0, 6)}...${address.slice(-4)}`} is ready. Notification, location, chat, and payment actions stay user controlled.`,
+        detail: `${worldUsername ?? "World username syncing"} is ready. Notification, location, chat, and payment actions stay user controlled.`,
       });
     } catch (error) {
       setToast({
@@ -3571,12 +3588,7 @@ function HomeView({
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
   const homeCopy = appLanguage.home;
-  const worldHandle =
-    verifiedHuman?.mode === "world"
-      ? verifiedHuman.username
-      : verifiedHuman?.wallet
-        ? "World username syncing"
-        : "World account pending";
+  const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const userPostCount = humanPosts.filter((post) => post.owner).length;
   const trackItems = [
     {
@@ -8094,10 +8106,7 @@ function MeView({
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const displayUsername =
-    normalizeWorldUsername(worldContext.username) ??
-    verifiedHuman?.username ??
-    "@preview_human";
+  const displayUsername = getWorldDisplayUsername(worldContext, verifiedHuman);
   const todayKey = getLocalDateKey();
   const checkedInToday = lastCheckInDate === todayKey;
   const worldProfileImage = verifiedHuman?.profilePictureUrl ?? worldContext.profilePictureUrl;
@@ -8200,8 +8209,8 @@ function MeView({
       </section>
       <section className="chain-id-card">
         <div>
-          <span>Chain ID</span>
-          <strong>{verifiedHuman?.wallet ? `HC-${verifiedHuman.wallet.slice(2, 8).toUpperCase()}` : "HC-PREVIEW"}</strong>
+          <span>World username</span>
+          <strong>{displayUsername}</strong>
         </div>
         <ShieldCheck size={28} />
         <p>
