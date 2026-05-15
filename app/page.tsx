@@ -1348,42 +1348,133 @@ const fieldQuoteRooms = {
 
 const initialHumanPosts = [
   {
-    id: 1,
+    id: 101,
     author: "@mara_chain",
-    caption: "A quiet desk, one cup, and the sentence that helped me start again.",
-    image: null as string | null,
+    caption: "Morning tea, open notebook, one honest sentence before work.",
+    image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=900&q=82" as string | null,
     theme: "gold",
-    reactions: 18,
-    loves: 11,
-    tips: 3,
-    comments: ["This feels like my Monday.", "The cup detail stayed with me."],
-    createdAt: "Today, 08:20",
+    reactions: 58,
+    loves: 34,
+    tips: 7,
+    comments: ["This feels like my Monday.", "The notebook made it real.", "Small starts count."],
+    createdAt: "Live camera - 08:20",
     owner: false,
   },
   {
-    id: 2,
+    id: 102,
     author: "@worldbuilder",
-    caption: "Today I built one small thing before fear could explain why not.",
-    image: null as string | null,
+    caption: "I fixed the table corner before opening my laptop. Order first, ambition second.",
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=82",
     theme: "green",
-    reactions: 31,
-    loves: 19,
-    tips: 6,
-    comments: ["Needed this.", "Small things count."],
-    createdAt: "Today, 09:02",
+    reactions: 71,
+    loves: 42,
+    tips: 9,
+    comments: ["Needed this.", "A clean desk changes the mind.", "Build anyway."],
+    createdAt: "Live camera - 09:02",
     owner: false,
   },
   {
-    id: 3,
+    id: 103,
     author: "@faith_worker",
-    caption: "Morning light on my notebook before work. One prayer, one plan, one step.",
-    image: null as string | null,
+    caption: "First light through the kitchen window. One prayer, one plan, one step.",
+    image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=82",
     theme: "gold",
-    reactions: 24,
-    loves: 14,
+    reactions: 49,
+    loves: 31,
+    tips: 6,
+    comments: ["One prayer, one plan is strong.", "This has peace in it."],
+    createdAt: "Live camera - 09:28",
+    owner: false,
+  },
+  {
+    id: 104,
+    author: "@amina_makes",
+    caption: "Finished stitching the last tote handle. Real work has fingerprints.",
+    image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=900&q=82",
+    theme: "gold",
+    reactions: 83,
+    loves: 51,
+    tips: 13,
+    comments: ["Craft is beautiful.", "The colors feel alive.", "Would buy this."],
+    createdAt: "Live camera - 10:11",
+    owner: false,
+  },
+  {
+    id: 105,
+    author: "@taste254",
+    caption: "Lunch rush before the rain. Food can carry a whole neighborhood.",
+    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=82",
+    theme: "green",
+    reactions: 66,
+    loves: 39,
+    tips: 8,
+    comments: ["I can smell this photo.", "Neighborhood food is memory."],
+    createdAt: "Live camera - 12:37",
+    owner: false,
+  },
+  {
+    id: 106,
+    author: "@repair_juma",
+    caption: "A cracked screen, a steady hand, and a customer waiting with hope.",
+    image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=900&q=82",
+    theme: "green",
+    reactions: 52,
+    loves: 27,
+    tips: 5,
+    comments: ["Repair is dignity.", "This is real work."],
+    createdAt: "Live camera - 13:18",
+    owner: false,
+  },
+  {
+    id: 107,
+    author: "@market_mama",
+    caption: "Fresh tomatoes at closing time. The day was long, but the stall still smiled.",
+    image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=900&q=82",
+    theme: "gold",
+    reactions: 77,
+    loves: 44,
+    tips: 11,
+    comments: ["This feels like home.", "Markets carry stories."],
+    createdAt: "Live camera - 16:05",
+    owner: false,
+  },
+  {
+    id: 108,
+    author: "@student_chain",
+    caption: "Study desk after midnight. I am tired, but future me is watching.",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=82",
+    theme: "green",
+    reactions: 64,
+    loves: 37,
     tips: 4,
-    comments: ["One prayer, one plan is strong."],
-    createdAt: "Yesterday, 18:44",
+    comments: ["Future you will thank you.", "This is discipline."],
+    createdAt: "Live camera - 00:14",
+    owner: false,
+  },
+  {
+    id: 109,
+    author: "@quiet_courage",
+    caption: "Bus stop rain, two missed calls, and still I kept moving.",
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=82",
+    theme: "green",
+    reactions: 69,
+    loves: 41,
+    tips: 6,
+    comments: ["Kept moving is enough.", "Rain days count too."],
+    createdAt: "Live camera - Yesterday",
+    owner: false,
+  },
+  {
+    id: 110,
+    author: "@family_room",
+    caption: "Small hands helped set the table. Family is built in ordinary minutes.",
+    image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=900&q=82",
+    theme: "gold",
+    reactions: 91,
+    loves: 58,
+    tips: 12,
+    comments: ["Ordinary minutes are sacred.", "This one is warm."],
+    createdAt: "Live camera - Yesterday",
     owner: false,
   },
 ];
@@ -2114,7 +2205,72 @@ const marketplaceItems = [
     tone: "green",
     photos: 2,
     image: "/images/market/restaurant-poster.svg",
+    gallery: [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=700&q=82",
+    ],
     quality: "Menu preview and shop-front image",
+    bidding: null,
+  },
+  {
+    title: "GlowBarber weekend offer",
+    seller: "@glowbarber_ke",
+    condition: "Sponsored",
+    price: "Book slot",
+    distance: "1.9 km",
+    location: "Kilimani",
+    tag: "Marketing",
+    trust: "Verified service owner",
+    tone: "gold",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=700&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1512690459411-b9245aed614b?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=700&q=82",
+    ],
+    quality: "Shop-front, chair setup, and finished cut photos",
+    bidding: null,
+  },
+  {
+    title: "Mama Nia lunch bowls",
+    seller: "@mamania_eats",
+    condition: "Sponsored",
+    price: "KES 450",
+    distance: "2.7 km",
+    location: "Westlands",
+    tag: "Marketing",
+    trust: "Repeat local buyers",
+    tone: "green",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=700&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=700&q=82",
+    ],
+    quality: "Food close-up, packaging, and pickup counter photos",
+    bidding: null,
+  },
+  {
+    title: "Studio Kitenge photoshoot",
+    seller: "@studio_kitenge",
+    condition: "Sponsored",
+    price: "WLD 6",
+    distance: "5.2 km",
+    location: "CBD",
+    tag: "Marketing",
+    trust: "Portfolio link allowed",
+    tone: "violet",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=700&q=82",
+    ],
+    quality: "Portfolio sample, studio corner, and camera setup photos",
     bidding: null,
   },
   {
@@ -2164,6 +2320,36 @@ const marketplaceChecklist = [
   "Defects or warranty note",
   "Seller chat enabled",
   "No off-app prepayment pressure",
+];
+
+const marketplaceBusinessAds = [
+  {
+    title: "Mama Nia lunch bowls",
+    owner: "@mamania_eats",
+    area: "Westlands",
+    offer: "Fresh lunch bowls, office delivery, 11:30-14:30.",
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=82",
+    tag: "Food",
+    signal: "18 saved this week",
+  },
+  {
+    title: "GlowBarber weekend slots",
+    owner: "@glowbarber_ke",
+    area: "Kilimani",
+    offer: "Haircuts, beard lineups, and clean chair photos before booking.",
+    image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=900&q=82",
+    tag: "Service",
+    signal: "Open slots today",
+  },
+  {
+    title: "Studio Kitenge portraits",
+    owner: "@studio_kitenge",
+    area: "CBD",
+    offer: "Portrait sessions for founders, families, products, and events.",
+    image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=82",
+    tag: "Creative",
+    signal: "Portfolio verified",
+  },
 ];
 
 const marketplaceTrustRails = [
@@ -2573,7 +2759,15 @@ function loadStoredHumanPosts() {
     return initialHumanPosts;
   }
 
-  return loadJsonFromStorage<HumanPost[]>(storageKeys.posts, initialHumanPosts);
+  const storedPosts = loadJsonFromStorage<HumanPost[]>(storageKeys.posts, []);
+  const ownedPosts = storedPosts.filter((post) => post.owner);
+  const customPublicPosts = storedPosts.filter(
+    (post) =>
+      !post.owner &&
+      !initialHumanPosts.some((starterPost) => starterPost.id === post.id),
+  );
+
+  return [...ownedPosts, ...initialHumanPosts, ...customPublicPosts];
 }
 
 function loadStoredMarketplaceListings(): MarketplaceListing[] {
@@ -5118,23 +5312,26 @@ function ChainsView({
           </section>
           <div className="chain-section-note">
             <span>Recent human moments</span>
-            <p>Photos and captions from verified humans. Reactions, comments, tips, and pins keep the best moments moving.</p>
+            <p>Live camera-style posts from different verified humans. Reactions, comments, tips, and pins keep the best moments moving.</p>
           </div>
           {visiblePosts.map((post) => (
             <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
-              {post.image ? (
-                post.mediaType === "video" ? (
-                  <video controls src={post.image} />
+              <div className="image-post-media">
+                {post.image ? (
+                  post.mediaType === "video" ? (
+                    <video controls src={post.image} />
+                  ) : (
+                    <img alt={post.caption} src={post.image} />
+                  )
                 ) : (
-                  <img alt={post.caption} src={post.image} />
-                )
-              ) : (
-                <div className={`generated-post-art ${post.theme}`}>
-                  <span />
-                  <i />
-                  <b />
-                </div>
-              )}
+                  <div className={`generated-post-art ${post.theme}`}>
+                    <span />
+                    <i />
+                    <b />
+                  </div>
+                )}
+                <span className="live-photo-badge">Live camera</span>
+              </div>
               <div>
                 <div className="post-head">
                   <div>
@@ -6961,6 +7158,10 @@ function MarketplaceView({
       return item.photos.slice(0, 3).map((photo) => photo.src);
     }
 
+    if ("gallery" in item && Array.isArray(item.gallery) && item.gallery.length) {
+      return item.gallery.slice(0, 3);
+    }
+
     if ("image" in item) {
       return [item.image, item.image, item.image];
     }
@@ -7733,6 +7934,39 @@ function MarketplaceView({
           <span>Market business</span>
           <strong>4 WLD</strong>
         </button>
+      </section>
+
+      <section className="market-panel business-ad-showcase">
+        <div className="section-heading">
+          <span>Live business ads</span>
+          <Send size={18} />
+        </div>
+        <div className="business-ad-grid">
+          {marketplaceBusinessAds.map((ad) => (
+            <article className="business-ad-card" key={ad.title}>
+              <img alt={`${ad.title} business ad`} src={ad.image} />
+              <div>
+                <span>{ad.tag} - {ad.area}</span>
+                <strong>{ad.title}</strong>
+                <p>{ad.offer}</p>
+                <small>{ad.owner} - {ad.signal}</small>
+              </div>
+              <button
+                onClick={() => {
+                  recordHistory({
+                    title: "Business ad opened",
+                    detail: `${ad.title} by ${ad.owner} was opened from HumanChain Market.`,
+                    kind: "market",
+                  });
+                  act(ad.title, "Business ad preview opened. Chat and booking stay user controlled.");
+                }}
+                type="button"
+              >
+                View ad
+              </button>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="market-panel listing-studio">

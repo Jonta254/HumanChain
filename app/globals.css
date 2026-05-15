@@ -2561,10 +2561,50 @@ button.danger {
   overflow: hidden;
 }
 
+.image-post-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #16211f;
+}
+
 .image-post img,
 .image-post video,
 .generated-post-art {
   aspect-ratio: 4 / 3;
+}
+
+.image-post-media img,
+.image-post-media video,
+.image-post-media .generated-post-art {
+  border-radius: 16px;
+}
+
+.live-photo-badge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 253, 248, 0.3);
+  border-radius: 999px;
+  color: #fffdf8;
+  background: rgba(6, 18, 16, 0.72);
+  backdrop-filter: blur(12px);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.live-photo-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ef7d69;
+  box-shadow: 0 0 0 4px rgba(239, 125, 105, 0.2);
 }
 
 .generated-post-art {
@@ -5265,6 +5305,72 @@ button.danger {
   display: grid;
   gap: 10px;
   margin-top: 12px;
+}
+
+.business-ad-showcase {
+  background:
+    linear-gradient(135deg, #fffdf8, #f1f6ff),
+    radial-gradient(circle at 92% 8%, rgba(185, 130, 24, 0.14), transparent 10rem);
+}
+
+.business-ad-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.business-ad-card {
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(32, 35, 40, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: 0 12px 28px rgba(62, 48, 31, 0.06);
+}
+
+.business-ad-card img {
+  width: 86px;
+  height: 92px;
+  display: block;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.business-ad-card div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.business-ad-card span {
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 950;
+}
+
+.business-ad-card strong {
+  font-size: 0.92rem;
+  line-height: 1.16;
+}
+
+.business-ad-card p,
+.business-ad-card small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.28;
+}
+
+.business-ad-card button {
+  grid-column: 1 / -1;
+  min-height: 38px;
+  border: 0;
+  border-radius: 999px;
+  color: #fffdf8;
+  background: var(--ink);
+  font-weight: 900;
 }
 
 .market-item {
