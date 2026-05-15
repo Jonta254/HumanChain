@@ -2833,69 +2833,116 @@ export default function HumanChainApp() {
     }
 
     let cancelled = false;
+    let syncing = false;
+    const wallet = verifiedHuman.wallet;
 
-    async function refreshStoredWorldProfile() {
-      const wallet = verifiedHuman?.wallet;
-
-      if (!wallet) {
+    async function syncWorldProfile(reason = "background") {
+      if (syncing) {
         return;
       }
 
-      const beforeLookupContext = getWorldMiniAppContext();
-      const worldUser = await getWorldUserByAddress(wallet);
-      const afterLookupContext = getWorldMiniAppContext();
-      const username = normalizeWorldUsername(
-        afterLookupContext.username ??
-          worldUser?.username ??
-          beforeLookupContext.username,
-      );
-      const profilePictureUrl =
-        afterLookupContext.profilePictureUrl ??
-        worldUser?.profilePictureUrl ??
-        beforeLookupContext.profilePictureUrl;
+      syncing = true;
 
-      if (cancelled || (!username && !profilePictureUrl)) {
-        return;
+      try {
+        const beforeLookupContext = getWorldMiniAppContext();
+        const worldUser = await getWorldUserByAddress(wallet);
+        const afterLookupContext = getWorldMiniAppContext();
+        const username = normalizeWorldUsername(
+          afterLookupContext.username ??
+            worldUser?.username ??
+            beforeLookupContext.username,
+        );
+        const profilePictureUrl =
+          afterLookupContext.profilePictureUrl ??
+          worldUser?.profilePictureUrl ??
+          beforeLookupContext.profilePictureUrl;
+
+        if (cancelled) {
+          return;
+        }
+
+        setWorldContext({
+          ...beforeLookupContext,
+          ...afterLookupContext,
+          profilePictureUrl,
+          username,
+          walletAddress: wallet,
+        });
+
+        setVerifiedHuman((current) => {
+          if (!current || current.wallet !== wallet) {
+            return current;
+          }
+
+          const nextUsername =
+            username ??
+            (isGeneratedHumanUsername(current.username)
+              ? "World username syncing"
+              : current.username);
+          const nextProfilePictureUrl =
+            profilePictureUrl ?? current.profilePictureUrl;
+
+          if (
+            nextUsername === current.username &&
+            nextProfilePictureUrl === current.profilePictureUrl
+          ) {
+            return current;
+          }
+
+          return {
+            ...current,
+            lastSeenAt: new Date().toISOString(),
+            launchLocation:
+              afterLookupContext.launchLocation ??
+              beforeLookupContext.launchLocation ??
+              current.launchLocation,
+            profilePictureUrl: nextProfilePictureUrl,
+            username: nextUsername,
+          };
+        });
+      } catch {
+        if (reason === "initial" && !cancelled) {
+          setVerifiedHuman((current) => {
+            if (
+              !current ||
+              current.wallet !== wallet ||
+              !isGeneratedHumanUsername(current.username)
+            ) {
+              return current;
+            }
+
+            return {
+              ...current,
+              lastSeenAt: new Date().toISOString(),
+              username: "World username syncing",
+            };
+          });
+        }
+      } finally {
+        syncing = false;
       }
-
-      setWorldContext({
-        ...beforeLookupContext,
-        ...afterLookupContext,
-        profilePictureUrl,
-        username,
-        walletAddress: wallet,
-      });
-
-      setVerifiedHuman((current) => {
-        if (!current || current.wallet !== wallet) {
-          return current;
-        }
-
-        const nextUsername = username ?? current.username;
-        const nextProfilePictureUrl = profilePictureUrl ?? current.profilePictureUrl;
-
-        if (
-          nextUsername === current.username &&
-          nextProfilePictureUrl === current.profilePictureUrl
-        ) {
-          return current;
-        }
-
-        return {
-          ...current,
-          lastSeenAt: new Date().toISOString(),
-          profilePictureUrl: nextProfilePictureUrl,
-          username: nextUsername,
-        };
-      });
     }
 
-    void refreshStoredWorldProfile();
+    function syncWhenVisible() {
+      if (document.visibilityState === "visible") {
+        void syncWorldProfile("visible");
+      }
+    }
+
+    void syncWorldProfile("initial");
+    window.addEventListener("focus", syncWhenVisible);
+    document.addEventListener("visibilitychange", syncWhenVisible);
+    const interval = window.setInterval(() => {
+      void syncWorldProfile("interval");
+    }, 60_000);
 
     return () => {
       cancelled = true;
+      window.removeEventListener("focus", syncWhenVisible);
+      document.removeEventListener("visibilitychange", syncWhenVisible);
+      window.clearInterval(interval);
     };
-  }, [verifiedHuman?.mode, verifiedHuman?.username, verifiedHuman?.wallet]);
+  }, [verifiedHuman?.mode, verifiedHuman?.wallet]);
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.posts, humanPosts);
