@@ -1456,9 +1456,103 @@ button.danger {
   font-size: 0.98rem;
 }
 
+.ask-service-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.ask-service-switch button {
+  position: relative;
+  min-height: 94px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  overflow: hidden;
+  padding: 14px;
+  border: 1px solid rgba(36, 107, 85, 0.16);
+  border-radius: 18px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 88% 12%, rgba(185, 130, 24, 0.12), transparent 32%),
+    linear-gradient(135deg, #fffdf8, #f5efe5);
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 253, 248, 0.82);
+}
+
+.ask-service-switch button::after {
+  content: "";
+  position: absolute;
+  inset: auto 12px 10px 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(36, 107, 85, 0.12);
+}
+
+.ask-service-switch button.active {
+  color: #fffdf8;
+  border-color: rgba(255, 253, 248, 0.2);
+  background:
+    radial-gradient(circle at 86% 12%, rgba(214, 163, 58, 0.34), transparent 34%),
+    linear-gradient(135deg, #102b2a, #246b55);
+}
+
+.ask-service-switch button.active::after {
+  background: linear-gradient(90deg, #d6a33a, rgba(255, 253, 248, 0.74));
+}
+
+.ask-service-switch span {
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.ask-service-switch button.active span,
+.ask-service-switch button.active small {
+  color: rgba(255, 253, 248, 0.78);
+}
+
+.ask-service-switch strong {
+  font-size: 0.98rem;
+  line-height: 1.12;
+}
+
+.ask-service-switch small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.22;
+}
+
+.ask-world-note {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border: 1px solid rgba(36, 107, 85, 0.14);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(238, 246, 242, 0.9), rgba(255, 253, 248, 0.94));
+}
+
+.ask-world-note strong {
+  color: var(--green);
+  font-size: 0.86rem;
+}
+
+.ask-world-note span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.3;
+  text-align: right;
+}
+
 .ask-box label {
   display: block;
-  margin-bottom: 10px;
+  margin: 12px 0 10px;
   font-weight: 800;
 }
 
@@ -1518,7 +1612,7 @@ button.danger {
 .ask-route-panel {
   display: grid;
   gap: 10px;
-  margin-top: 10px;
+  margin-bottom: 12px;
   padding: 12px;
   border: 1px solid rgba(47, 111, 237, 0.12);
   border-radius: 18px;
@@ -1570,8 +1664,15 @@ button.danger {
 
 .ask-route-status {
   display: flex;
+  align-items: center;
   gap: 8px;
   overflow-x: auto;
+}
+
+.ask-route-status > span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 850;
 }
 
 .ask-route-status button {

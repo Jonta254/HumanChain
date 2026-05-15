@@ -3936,6 +3936,7 @@ function AskView({
   const [selectedMode, setSelectedMode] = useState("Text");
   const [selectedTopic, setSelectedTopic] = useState("Life");
   const [selectedCountryRoute, setSelectedCountryRoute] = useState("World");
+  const [activeAskService, setActiveAskService] = useState<"world" | "country">("world");
   const [countryRouteDraft, setCountryRouteDraft] = useState("");
   const [paidCountryRoutes, setPaidCountryRoutes] = useState<string[]>(() =>
     loadJsonFromStorage<string[]>(storageKeys.askCountryRoutes, []),
@@ -3969,6 +3970,7 @@ function AskView({
 
     if (existingRoute) {
       setSelectedCountryRoute(existingRoute);
+      setActiveAskService("country");
       setCountryRouteDraft(existingRoute);
       act(`${existingRoute} selected`, "Your Ask question will track only this selected country route.");
       return;
@@ -3988,12 +3990,17 @@ function AskView({
             : [...current, country],
         );
         setSelectedCountryRoute(country);
+        setActiveAskService("country");
         setCountryRouteDraft(country);
       },
     });
   }
 
   function publishQuestion() {
+    const targetCountry =
+      activeAskService === "country" && selectedCountryRoute !== "World"
+        ? selectedCountryRoute
+        : "World";
     const cleanQuestion =
       question.trim() || "How do I begin again when life feels heavy?";
     setThreads((current) => [
@@ -4002,8 +4009,8 @@ function AskView({
         author: humanIdentity?.username ?? "@you",
         owner: true,
         topic: selectedTopic,
-        mode: selectedCountryRoute === "World" ? selectedMode : `${selectedCountryRoute} route`,
-        targetCountry: selectedCountryRoute,
+        mode: targetCountry === "World" ? selectedMode : `${targetCountry} route`,
+        targetCountry,
         answers: [],
       },
       ...current,
@@ -4079,21 +4086,96 @@ function AskView({
           <Mic size={24} />
         </button>
       </section>
-      <section className="ask-signal-grid" aria-label="Ask network status">
-        <span>
-          <strong>Free</strong>
-          Ask The World
-        </span>
-        <span>
-          <strong>2 WLD</strong>
-          Country route
-        </span>
-        <span>
-          <strong>Live</strong>
-          Human replies only
-        </span>
-      </section>
       <section className="ask-box">
+        <div className="ask-service-switch" aria-label="Ask service path">
+          <button
+            aria-pressed={activeAskService === "world"}
+            className={activeAskService === "world" ? "active" : ""}
+            onClick={() => {
+              setActiveAskService("world");
+              setSelectedCountryRoute("World");
+              act("Ask The World", "Your question will be free and open to all verified humans.");
+            }}
+            type="button"
+          >
+            <span>Free</span>
+            <strong>Ask The World</strong>
+            <small>Open to all verified humans</small>
+          </button>
+          <button
+            aria-pressed={activeAskService === "country"}
+            className={activeAskService === "country" ? "active" : ""}
+            onClick={() => {
+              setActiveAskService("country");
+              act("Country route", "Enter one country and unlock exact country tracking for 2 WLD.");
+            }}
+            type="button"
+          >
+            <span>2 WLD</span>
+            <strong>Country Route</strong>
+            <small>
+              {selectedCountryRoute === "World"
+                ? "Ask one selected country"
+                : `Tracking ${selectedCountryRoute}`}
+            </small>
+          </button>
+        </div>
+
+        {activeAskService === "country" ? (
+          <div className="ask-route-panel">
+            <div>
+              <strong>Choose the exact country</strong>
+              <span>
+                Enter the country you want to ask. After the World App payment,
+                this question tracks that country only.
+              </span>
+            </div>
+            <div className="ask-route-control">
+              <input
+                aria-label="Country to ask"
+                onChange={(event) => setCountryRouteDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    unlockEnteredCountryRoute();
+                  }
+                }}
+                placeholder="Country, e.g. Kenya"
+                value={countryRouteDraft}
+              />
+              <button onClick={unlockEnteredCountryRoute} type="button">
+                Unlock route - 2 WLD
+              </button>
+            </div>
+            <div className="ask-route-status">
+              {paidCountryRoutes.length ? paidCountryRoutes.map((country) => (
+                <button
+                  aria-pressed={selectedCountryRoute === country}
+                  className={selectedCountryRoute === country ? "active" : ""}
+                  key={country}
+                  onClick={() => {
+                    setSelectedCountryRoute(country);
+                    setActiveAskService("country");
+                    act(`${country} selected`, "Your Ask question will track only this selected country route.");
+                  }}
+                  type="button"
+                >
+                  {country}
+                </button>
+              )) : (
+                <span>No country route unlocked yet</span>
+              )}
+            </div>
+            <small className="ask-route-current">
+              Tracking: {selectedCountryRoute === "World" ? "country route not unlocked" : `${selectedCountryRoute} only`}
+            </small>
+          </div>
+        ) : (
+          <div className="ask-world-note">
+            <strong>World free path</strong>
+            <span>Publishes to all verified humans. No bot answer is inserted.</span>
+          </div>
+        )}
+
         <label htmlFor="question">What do you want to ask humanity?</label>
         <textarea
           id="question"
@@ -4145,61 +4227,6 @@ function AskView({
             </button>
           ))}
         </div>
-        <div className="ask-route-panel">
-          <div>
-            <strong>Route to a country</strong>
-            <span>
-              Ask The World stays free. To ask one specific country, enter it
-              here and unlock that exact route for 2 WLD.
-            </span>
-          </div>
-          <div className="ask-route-control">
-            <input
-              aria-label="Country to ask"
-              onChange={(event) => setCountryRouteDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  unlockEnteredCountryRoute();
-                }
-              }}
-              placeholder="Country, e.g. Kenya"
-              value={countryRouteDraft}
-            />
-            <button onClick={unlockEnteredCountryRoute} type="button">
-              Unlock route - 2 WLD
-            </button>
-          </div>
-          <div className="ask-route-status">
-            <button
-              aria-pressed={selectedCountryRoute === "World"}
-              className={selectedCountryRoute === "World" ? "active" : ""}
-              onClick={() => {
-                setSelectedCountryRoute("World");
-                act("Ask The World", "Your question will be free and open to all verified humans.");
-              }}
-              type="button"
-            >
-              World free
-            </button>
-            {paidCountryRoutes.map((country) => (
-              <button
-                aria-pressed={selectedCountryRoute === country}
-                className={selectedCountryRoute === country ? "active" : ""}
-                key={country}
-                onClick={() => {
-                  setSelectedCountryRoute(country);
-                  act(`${country} selected`, "Your Ask question will track only this selected country route.");
-                }}
-                type="button"
-              >
-                {country}
-              </button>
-            ))}
-          </div>
-          <small className="ask-route-current">
-            Tracking: {selectedCountryRoute === "World" ? "all verified humans" : `${selectedCountryRoute} only`}
-          </small>
-        </div>
         <div className="chip-row">
           {["Life", "Love", "Money", "Business", "Family", "Culture", "Faith"].map((chip) => (
             <button
@@ -4216,9 +4243,24 @@ function AskView({
             </button>
           ))}
         </div>
-        <button className="primary-command" onClick={publishQuestion} type="button">
+        <button
+          className="primary-command"
+          onClick={() => {
+            if (activeAskService === "country" && selectedCountryRoute === "World") {
+              unlockEnteredCountryRoute();
+              return;
+            }
+
+            publishQuestion();
+          }}
+          type="button"
+        >
           <Send size={18} />
-          {selectedCountryRoute === "World" ? "Ask The World Free" : `Ask ${selectedCountryRoute}`}
+          {activeAskService === "country"
+            ? selectedCountryRoute === "World"
+              ? "Unlock country route"
+              : `Ask ${selectedCountryRoute}`
+            : "Ask The World Free"}
         </button>
       </section>
 
