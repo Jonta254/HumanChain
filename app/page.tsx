@@ -2150,24 +2150,29 @@ const settingsEssentialsByLanguage: Record<
 const marketplaceItems = [
   {
     title: "Samsung Galaxy A54",
-    seller: "@nairobitech",
+    seller: "@mombasa_mobiles",
     condition: "Second hand",
-    price: "WLD 22",
-    distance: "1.4 km",
-    location: "Westlands",
+    price: "WLD 68",
+    distance: "4.8 km",
+    location: "Nyali, Mombasa",
     tag: "Phone",
     trust: "World ID seller",
     tone: "blue",
     photos: 3,
-    image: "/images/market/samsung-galaxy-a54.svg",
-    quality: "Clean front, back, and screen photos",
+    image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=800&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=800&q=82",
+    ],
+    quality: "Recent hand-shot front, back, screen, charger, and small edge marks disclosed",
     bidding: {
-      target: 22,
-      floor: 18,
+      target: 68,
+      floor: 60,
       ends: "18h left",
       offers: [
-        { buyer: "@sam_bid", amount: 18, note: "Can pick in Westlands today." },
-        { buyer: "@techmama", amount: 20, note: "Cashless pickup after work." },
+        { buyer: "@coast_buyer", amount: 60, note: "Can inspect in Nyali this evening." },
+        { buyer: "@techmama", amount: 64, note: "Cashless pickup after screen test." },
       ],
     },
   },
@@ -2175,42 +2180,47 @@ const marketplaceItems = [
     title: "New Ankara tote batch",
     seller: "@amina_makes",
     condition: "New listed",
-    price: "WLD 4",
-    distance: "2.1 km",
-    location: "Kilimani",
+    price: "WLD 6",
+    distance: "6.2 km",
+    location: "Milimani, Kisumu",
     tag: "Handmade",
     trust: "3 verified buyers",
     tone: "gold",
     photos: 4,
-    image: "/images/market/ankara-tote.svg",
-    quality: "Styled product photos and size detail",
+    image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=82",
+    ],
+    quality: "Fresh camera photos of fabric, stitching, lining, and size held by seller",
     bidding: {
-      target: 4,
-      floor: 3,
+      target: 6,
+      floor: 5,
       ends: "2d left",
       offers: [
-        { buyer: "@giftbuyer", amount: 3, note: "Need two bags if available." },
+        { buyer: "@giftbuyer", amount: 5, note: "Need two bags if available." },
       ],
     },
   },
   {
-    title: "Restaurant launch poster",
+    title: "Taste 254 lunch launch",
     seller: "@taste254",
     condition: "Sponsored",
-    price: "Open link",
+    price: "WLD 2 booking",
     distance: "3.8 km",
-    location: "Lavington",
+    location: "Kileleshwa, Nairobi",
     tag: "Marketing",
     trust: "Business link allowed",
     tone: "green",
     photos: 2,
-    image: "/images/market/restaurant-poster.svg",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=700&q=82",
     gallery: [
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=700&q=82",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=700&q=82",
       "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=700&q=82",
     ],
-    quality: "Menu preview and shop-front image",
+    quality: "Real menu board, shop-front table setup, kitchen counter, and launch offer",
     bidding: null,
   },
   {
@@ -2218,8 +2228,8 @@ const marketplaceItems = [
     seller: "@glowbarber_ke",
     condition: "Sponsored",
     price: "Book slot",
-    distance: "1.9 km",
-    location: "Kilimani",
+    distance: "7.1 km",
+    location: "Rupa Mall, Eldoret",
     tag: "Marketing",
     trust: "Verified service owner",
     tone: "gold",
@@ -2237,9 +2247,9 @@ const marketplaceItems = [
     title: "Mama Nia lunch bowls",
     seller: "@mamania_eats",
     condition: "Sponsored",
-    price: "KES 450",
+    price: "WLD 1.2",
     distance: "2.7 km",
-    location: "Westlands",
+    location: "Milimani, Nakuru",
     tag: "Marketing",
     trust: "Repeat local buyers",
     tone: "green",
@@ -2257,9 +2267,9 @@ const marketplaceItems = [
     title: "Studio Kitenge photoshoot",
     seller: "@studio_kitenge",
     condition: "Sponsored",
-    price: "WLD 6",
+    price: "WLD 8",
     distance: "5.2 km",
-    location: "CBD",
+    location: "Kisumu CBD",
     tag: "Marketing",
     trust: "Portfolio link allowed",
     tone: "violet",
@@ -2277,15 +2287,20 @@ const marketplaceItems = [
     title: "Used study desk",
     seller: "@student_chain",
     condition: "Second hand",
-    price: "WLD 7",
-    distance: "4.6 km",
-    location: "Ngong Road",
+    price: "WLD 14",
+    distance: "1.6 km",
+    location: "Section 58, Nakuru",
     tag: "Home",
     trust: "Pickup only",
     tone: "violet",
     photos: 3,
-    image: "/images/market/study-desk.svg",
-    quality: "Wide photo plus scratches disclosed",
+    image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=800&q=82",
+    ],
+    quality: "Wide camera photo, drawer close-up, scratch disclosure, and pickup doorway view",
     bidding: {
       target: 7,
       floor: 5,
@@ -2326,7 +2341,7 @@ const marketplaceBusinessAds = [
   {
     title: "Mama Nia lunch bowls",
     owner: "@mamania_eats",
-    area: "Westlands",
+    area: "Milimani, Nakuru",
     offer: "Fresh lunch bowls, office delivery, 11:30-14:30.",
     image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=82",
     tag: "Food",
@@ -2335,7 +2350,7 @@ const marketplaceBusinessAds = [
   {
     title: "GlowBarber weekend slots",
     owner: "@glowbarber_ke",
-    area: "Kilimani",
+    area: "Rupa Mall, Eldoret",
     offer: "Haircuts, beard lineups, and clean chair photos before booking.",
     image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=900&q=82",
     tag: "Service",
@@ -2344,7 +2359,7 @@ const marketplaceBusinessAds = [
   {
     title: "Studio Kitenge portraits",
     owner: "@studio_kitenge",
-    area: "CBD",
+    area: "Kisumu CBD",
     offer: "Portrait sessions for founders, families, products, and events.",
     image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=900&q=82",
     tag: "Creative",
@@ -3586,9 +3601,11 @@ export default function HumanChainApp() {
             earnPoints={earnPoints}
             historyRecords={historyRecords}
             humanPosts={humanPosts}
+            links={links}
             marketplaceListings={marketplaceListings}
             marketLocation={marketLocation}
             notificationReady={notificationReady}
+            openPayment={openPayment}
             points={points}
             lastCheckInAt={lastCheckInAt}
             lastCheckInDate={lastCheckInDate}
@@ -3613,6 +3630,7 @@ export default function HumanChainApp() {
             }}
             recordHistory={recordHistory}
             savedItems={savedItems}
+            setTab={setTab}
             streak={streak}
             verifiedHuman={verifiedHuman}
             worldContext={worldContext}
@@ -8399,13 +8417,16 @@ function MeView({
   humanPosts,
   lastCheckInAt,
   lastCheckInDate,
+  links,
   marketLocation,
   marketplaceListings,
   notificationReady,
   onCheckIn,
+  openPayment,
   points,
   recordHistory,
   savedItems,
+  setTab,
   streak,
   verifiedHuman,
   worldContext,
@@ -8416,19 +8437,23 @@ function MeView({
   humanPosts: HumanPost[];
   lastCheckInAt: string | null;
   lastCheckInDate: string | null;
+  links: ChainLink[];
   marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
   notificationReady: boolean;
   onCheckIn: () => void;
+  openPayment: OpenPayment;
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   savedItems: number;
+  setTab: React.Dispatch<React.SetStateAction<Tab>>;
   streak: number;
   verifiedHuman: VerifiedHuman | null;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
   const displayUsername = getWorldDisplayUsername(worldContext, verifiedHuman);
   const todayKey = getLocalDateKey();
   const checkedInToday = lastCheckInDate === todayKey;
@@ -8441,6 +8466,46 @@ function MeView({
         : "World account pending";
   const ownedPosts = humanPosts.filter((post) => post.owner);
   const chainScore = Math.round(points / 8 + streak * 9);
+  const connectedSignals = Array.from(
+    new Map(
+      links.map((link) => [
+        getChainLinkAuthor(link, displayUsername),
+        {
+          handle: getChainLinkAuthor(link, displayUsername),
+          text: link.text,
+        },
+      ]),
+    ).values(),
+  ).slice(0, 8);
+
+  function openConnectionMap() {
+    setQuickToolPanel("connections");
+    recordHistory({
+      title: "Connection map opened",
+      detail: `${connectedSignals.length} live chain sources are ready from your saved and public links.`,
+      kind: "profile",
+    });
+    act("Connection map ready", "Your connected human handles and chain quotes are shown inside Me.");
+  }
+
+  function openDeepHumanMirror() {
+    openPayment({
+      title: "Deep Human Mirror",
+      amount: "6",
+      detail: "Unlock a private premium reflection from your profile activity, check-ins, questions, stories, and chain signals.",
+      success: "Deep Human Mirror unlocked and stored in your Human Vault.",
+      feature: "deep-world-verdict",
+      points: 30,
+      onConfirmed: async () => {
+        setQuickToolPanel("mirror");
+        recordHistory({
+          title: "Deep Human Mirror unlocked",
+          detail: "Premium profile reflection unlocked and added to Human Vault.",
+          kind: "profile",
+        });
+      },
+    });
+  }
 
   return (
     <div className="screen">
@@ -8648,11 +8713,11 @@ function MeView({
           <Search size={18} />
         </div>
         <div className="compact-actions">
-          <button onClick={() => act("Connection map", "Countries linked to your chain are loading.")} type="button">
+          <button onClick={openConnectionMap} type="button">
             <Compass size={17} />
             Find countries I connected with
           </button>
-          <button onClick={() => act("Deep Human Mirror", "Premium reflection flow is ready.")} type="button">
+          <button onClick={openDeepHumanMirror} type="button">
             <LockKeyhole size={17} />
             Open Deep Human Mirror
           </button>
@@ -8662,6 +8727,12 @@ function MeView({
                 const result = await requestWorldPermission(Permission.Microphone);
 
                 if (isWorldPermissionGranted(result)) {
+                  setQuickToolPanel("voice");
+                  recordHistory({
+                    title: "Voice access enabled",
+                    detail: "Microphone permission is ready for voice questions and voice answers in World App.",
+                    kind: "profile",
+                  });
                   act("Microphone ready", "Voice answers can request microphone access in World App.");
                 } else {
                   act("Open in World App", "Microphone permission must be granted inside World App.");
@@ -8676,6 +8747,60 @@ function MeView({
             Enable voice access
           </button>
         </div>
+        {quickToolPanel ? (
+          <div className="quick-tool-result">
+            {quickToolPanel === "connections" ? (
+              <>
+                <strong>Live connection map</strong>
+                <p>
+                  These are the human handles currently connected to your chain feed. Open Chains
+                  to follow the source post, tip, or pin a useful signal.
+                </p>
+                <div className="connection-signal-grid">
+                  {connectedSignals.map((signal) => (
+                    <button
+                      key={`${signal.handle}-${signal.text}`}
+                      onClick={() => {
+                        setTab("chains");
+                        act("Opening chain source", `${signal.handle} is ready in Chains.`);
+                      }}
+                      type="button"
+                    >
+                      <span>{signal.handle}</span>
+                      <small>{signal.text}</small>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
+            {quickToolPanel === "mirror" ? (
+              <>
+                <strong>Deep Human Mirror ready</strong>
+                <p>
+                  Your private mirror now reads profile activity, check-ins, saved posts, and chain
+                  signals. It stays in your Human Vault after payment confirmation.
+                </p>
+                <div className="mirror-signal-row">
+                  <span>{chainScore} score</span>
+                  <span>{streak} day streak</span>
+                  <span>{ownedPosts.length} posts</span>
+                </div>
+              </>
+            ) : null}
+            {quickToolPanel === "voice" ? (
+              <>
+                <strong>Voice access live</strong>
+                <p>
+                  Microphone permission is connected for voice questions and voice answers. Ask can
+                  now carry tone when you choose a paid voice flow.
+                </p>
+                <button onClick={() => setTab("ask")} type="button">
+                  Open voice Ask
+                </button>
+              </>
+            ) : null}
+          </div>
+        ) : null}
       </section>
         </>
       ) : (
