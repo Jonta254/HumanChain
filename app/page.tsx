@@ -1350,131 +1350,131 @@ const initialHumanPosts = [
   {
     id: 101,
     author: "@mara_chain",
-    caption: "Morning tea, open notebook, one honest sentence before work.",
-    image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=900&q=82" as string | null,
+    caption: "The river was quiet this morning, and it reminded me to move without noise.",
+    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=84" as string | null,
     theme: "gold",
     reactions: 58,
     loves: 34,
     tips: 7,
-    comments: ["This feels like my Monday.", "The notebook made it real.", "Small starts count."],
-    createdAt: "Live camera - 08:20",
+    comments: ["This looks peaceful.", "Water has a way of teaching patience.", "Small starts count."],
+    createdAt: "Today, 08:20",
     owner: false,
   },
   {
     id: 102,
     author: "@worldbuilder",
-    caption: "I fixed the table corner before opening my laptop. Order first, ambition second.",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=82",
+    caption: "Busy town, early errands, people carrying their whole day in one hand.",
+    image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=900&q=84",
     theme: "green",
     reactions: 71,
     loves: 42,
     tips: 9,
-    comments: ["Needed this.", "A clean desk changes the mind.", "Build anyway."],
-    createdAt: "Live camera - 09:02",
+    comments: ["This feels alive.", "Every street has a lesson.", "Build anyway."],
+    createdAt: "Today, 09:02",
     owner: false,
   },
   {
     id: 103,
     author: "@faith_worker",
-    caption: "First light through the kitchen window. One prayer, one plan, one step.",
-    image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=82",
+    caption: "Morning light on my notebook before work. One prayer, one plan, one step.",
+    image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=84",
     theme: "gold",
     reactions: 49,
     loves: 31,
     tips: 6,
     comments: ["One prayer, one plan is strong.", "This has peace in it."],
-    createdAt: "Live camera - 09:28",
+    createdAt: "Today, 09:28",
     owner: false,
   },
   {
     id: 104,
     author: "@amina_makes",
     caption: "Finished stitching the last tote handle. Real work has fingerprints.",
-    image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=900&q=82",
+    image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=900&q=84",
     theme: "gold",
     reactions: 83,
     loves: 51,
     tips: 13,
     comments: ["Craft is beautiful.", "The colors feel alive.", "Would buy this."],
-    createdAt: "Live camera - 10:11",
+    createdAt: "Today, 10:11",
     owner: false,
   },
   {
     id: 105,
     author: "@taste254",
     caption: "Lunch rush before the rain. Food can carry a whole neighborhood.",
-    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=82",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=84",
     theme: "green",
     reactions: 66,
     loves: 39,
     tips: 8,
     comments: ["I can smell this photo.", "Neighborhood food is memory."],
-    createdAt: "Live camera - 12:37",
+    createdAt: "Today, 12:37",
     owner: false,
   },
   {
     id: 106,
     author: "@repair_juma",
     caption: "A cracked screen, a steady hand, and a customer waiting with hope.",
-    image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=900&q=82",
+    image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=900&q=84",
     theme: "green",
     reactions: 52,
     loves: 27,
     tips: 5,
     comments: ["Repair is dignity.", "This is real work."],
-    createdAt: "Live camera - 13:18",
+    createdAt: "Today, 13:18",
     owner: false,
   },
   {
     id: 107,
     author: "@market_mama",
     caption: "Fresh tomatoes at closing time. The day was long, but the stall still smiled.",
-    image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=900&q=82",
+    image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=900&q=84",
     theme: "gold",
     reactions: 77,
     loves: 44,
     tips: 11,
     comments: ["This feels like home.", "Markets carry stories."],
-    createdAt: "Live camera - 16:05",
+    createdAt: "Today, 16:05",
     owner: false,
   },
   {
     id: 108,
     author: "@student_chain",
     caption: "Study desk after midnight. I am tired, but future me is watching.",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=82",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=84",
     theme: "green",
     reactions: 64,
     loves: 37,
     tips: 4,
     comments: ["Future you will thank you.", "This is discipline."],
-    createdAt: "Live camera - 00:14",
+    createdAt: "Today, 00:14",
     owner: false,
   },
   {
     id: 109,
     author: "@quiet_courage",
     caption: "Bus stop rain, two missed calls, and still I kept moving.",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=82",
+    image: "https://images.unsplash.com/photo-1494515843206-f3117d3f51b7?auto=format&fit=crop&w=900&q=84",
     theme: "green",
     reactions: 69,
     loves: 41,
     tips: 6,
     comments: ["Kept moving is enough.", "Rain days count too."],
-    createdAt: "Live camera - Yesterday",
+    createdAt: "Yesterday, 18:44",
     owner: false,
   },
   {
     id: 110,
     author: "@family_room",
     caption: "Small hands helped set the table. Family is built in ordinary minutes.",
-    image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=900&q=82",
+    image: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=900&q=84",
     theme: "gold",
     reactions: 91,
     loves: 58,
     tips: 12,
     comments: ["Ordinary minutes are sacred.", "This one is warm."],
-    createdAt: "Live camera - Yesterday",
+    createdAt: "Yesterday, 19:10",
     owner: false,
   },
 ];
@@ -4955,7 +4955,7 @@ function ChainsView({
   >(null);
   const [chainPremium, setChainPremium] = useState(loadStoredChainPremium);
 
-  const visiblePosts = [...humanPosts].sort((a, b) => {
+  const visiblePosts = humanPosts.filter((post) => Boolean(post.image)).sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return 0;
@@ -5564,26 +5564,10 @@ function ChainsView({
           </section>
           <div className="chain-section-note">
             <span>Recent human moments</span>
-            <p>Live camera-style posts from different verified humans. Reactions, comments, tips, and pins keep the best moments moving.</p>
+            <p>Photo posts from verified humans. Every card begins with the human, the caption, and the real image they shared.</p>
           </div>
           {visiblePosts.map((post) => (
             <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
-              <div className="image-post-media">
-                {post.image ? (
-                  post.mediaType === "video" ? (
-                    <video controls src={post.image} />
-                  ) : (
-                    <img alt={post.caption} src={post.image} />
-                  )
-                ) : (
-                  <div className={`generated-post-art ${post.theme}`}>
-                    <span />
-                    <i />
-                    <b />
-                  </div>
-                )}
-                <span className="live-photo-badge">Live camera</span>
-              </div>
               <div>
                 <div className="post-head">
                   <div>
@@ -5601,7 +5585,14 @@ function ChainsView({
                     </button>
                   ) : null}
                 </div>
-                <p>{post.caption}</p>
+                <p className="post-caption">{post.caption}</p>
+                <div className="image-post-media">
+                  {post.mediaType === "video" ? (
+                    <video controls src={post.image ?? undefined} />
+                  ) : (
+                    <img alt={post.caption} src={post.image ?? ""} />
+                  )}
+                </div>
                 <div className="post-metrics">
                   <span>{post.reactions} reactions</span>
                   <span>{post.loves} loves</span>
