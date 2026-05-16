@@ -5567,9 +5567,17 @@ button.danger {
 }
 
 .business-ad-showcase {
+  margin-top: 14px;
   background:
-    linear-gradient(135deg, #fffdf8, #f1f6ff),
+    linear-gradient(135deg, #fffdf8, #f5f1e7),
     radial-gradient(circle at 92% 8%, rgba(185, 130, 24, 0.14), transparent 10rem);
+}
+
+.business-ad-intro {
+  margin: -4px 0 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .business-ad-grid {
@@ -5579,10 +5587,10 @@ button.danger {
 
 .business-ad-card {
   display: grid;
-  grid-template-columns: 86px 1fr;
-  gap: 10px;
-  align-items: center;
-  padding: 10px;
+  grid-template-columns: 72px 1fr;
+  gap: 9px;
+  align-items: start;
+  padding: 9px;
   border: 1px solid rgba(32, 35, 40, 0.08);
   border-radius: 18px;
   background: rgba(255, 253, 248, 0.82);
@@ -5590,11 +5598,16 @@ button.danger {
 }
 
 .business-ad-card img {
-  width: 86px;
-  height: 92px;
+  width: 72px;
+  height: 72px;
   display: block;
   object-fit: cover;
-  border-radius: 15px;
+  overflow: hidden;
+  border-radius: 14px;
+  color: transparent;
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 253, 248, 0.8), transparent 26%),
+    linear-gradient(135deg, rgba(36, 107, 85, 0.9), rgba(185, 130, 24, 0.7));
 }
 
 .business-ad-card div {
@@ -5624,7 +5637,7 @@ button.danger {
 
 .business-ad-card button {
   grid-column: 1 / -1;
-  min-height: 38px;
+  min-height: 36px;
   border: 0;
   border-radius: 999px;
   color: #fffdf8;

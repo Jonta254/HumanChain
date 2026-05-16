@@ -5470,11 +5470,11 @@ function ChainsView({
       </section>
       <div className="chain-tabs">
         <button
-          className={chainView === "images" ? "active" : ""}
-          onClick={() => setChainView("images")}
+          className={chainView === "groups" ? "active" : ""}
+          onClick={() => setChainView("groups")}
           type="button"
         >
-          Image posts
+          Quote rooms
         </button>
           <button
             className={chainView === "quotes" ? "active" : ""}
@@ -5484,11 +5484,11 @@ function ChainsView({
           Live links
         </button>
         <button
-          className={chainView === "groups" ? "active" : ""}
-          onClick={() => setChainView("groups")}
+          className={chainView === "images" ? "active" : ""}
+          onClick={() => setChainView("images")}
           type="button"
         >
-          Quote rooms
+          Image posts
         </button>
       </div>
       {chainView === "images" ? (
@@ -8179,39 +8179,6 @@ function MarketplaceView({
         </button>
       </section>
 
-      <section className="market-panel business-ad-showcase">
-        <div className="section-heading">
-          <span>Live business ads</span>
-          <Send size={18} />
-        </div>
-        <div className="business-ad-grid">
-          {marketplaceBusinessAds.map((ad) => (
-            <article className="business-ad-card" key={ad.title}>
-              <img alt={`${ad.title} business ad`} src={ad.image} />
-              <div>
-                <span>{ad.tag} - {ad.area}</span>
-                <strong>{ad.title}</strong>
-                <p>{ad.offer}</p>
-                <small>{ad.owner} - {ad.signal}</small>
-              </div>
-              <button
-                onClick={() => {
-                  recordHistory({
-                    title: "Business ad opened",
-                    detail: `${ad.title} by ${ad.owner} was opened from HumanChain Market.`,
-                    kind: "market",
-                  });
-                  act(ad.title, "Business ad preview opened. Chat and booking stay user controlled.");
-                }}
-                type="button"
-              >
-                View ad
-              </button>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="market-panel listing-studio">
         <div className="section-heading">
           <span>Create seller listing</span>
@@ -8627,6 +8594,43 @@ function MarketplaceView({
               <BadgeCheck size={16} />
               <strong>{title}</strong>
               <span>{detail}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="market-panel business-ad-showcase">
+        <div className="section-heading">
+          <span>Business ad examples</span>
+          <Send size={18} />
+        </div>
+        <p className="business-ad-intro">
+          Real businesses can publish clean, verified ads after payment. These examples
+          show how a buyer should see the offer before opening chat or booking.
+        </p>
+        <div className="business-ad-grid">
+          {marketplaceBusinessAds.map((ad) => (
+            <article className="business-ad-card" key={ad.title}>
+              <img alt="" src={ad.image} />
+              <div>
+                <span>{ad.tag} - {ad.area}</span>
+                <strong>{ad.title}</strong>
+                <p>{ad.offer}</p>
+                <small>{ad.owner} - {ad.signal}</small>
+              </div>
+              <button
+                onClick={() => {
+                  recordHistory({
+                    title: "Business ad opened",
+                    detail: `${ad.title} by ${ad.owner} was opened from HumanChain Market.`,
+                    kind: "market",
+                  });
+                  act(ad.title, "Business ad preview opened. Chat and booking stay user controlled.");
+                }}
+                type="button"
+              >
+                View ad
+              </button>
             </article>
           ))}
         </div>
