@@ -331,7 +331,8 @@ html[data-world-mini-app="true"] .phone-frame {
 
 .home-bell-button {
   position: absolute;
-  right: 18px;
+  left: auto;
+  right: 20px;
   top: 18px;
   z-index: 2;
   width: 44px;
@@ -712,6 +713,7 @@ html[data-world-mini-app="true"] .phone-frame {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding-right: 58px;
 }
 
 .hero-logo {
