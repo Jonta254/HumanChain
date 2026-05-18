@@ -329,12 +329,16 @@ html[data-world-mini-app="true"] .phone-frame {
   font-weight: 900;
 }
 
+.home-utility-row {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 44px;
+  margin-bottom: 8px;
+}
+
 .home-bell-button {
-  position: absolute;
-  left: auto;
-  right: 20px;
-  top: 18px;
-  z-index: 2;
+  position: relative;
+  z-index: 3;
   width: 44px;
   height: 44px;
   display: grid;
@@ -347,7 +351,7 @@ html[data-world-mini-app="true"] .phone-frame {
     rgba(14, 45, 38, 0.45);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 12px 24px rgba(0, 0, 0, 0.18);
+    0 12px 24px rgba(23, 49, 47, 0.16);
   backdrop-filter: blur(8px);
 }
 
@@ -713,7 +717,6 @@ html[data-world-mini-app="true"] .phone-frame {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-right: 58px;
 }
 
 .hero-logo {
@@ -5647,9 +5650,9 @@ button.danger {
 
 .market-item {
   display: grid;
-  grid-template-columns: 72px 1fr;
+  grid-template-columns: 100px 1fr;
   gap: 10px;
-  align-items: center;
+  align-items: start;
   padding: 10px;
   border: 1px solid rgba(32, 35, 40, 0.08);
   border-radius: 18px;
@@ -5657,11 +5660,12 @@ button.danger {
 }
 
 .market-thumb-stack {
-  width: 72px;
-  min-height: 84px;
+  width: 96px;
+  height: 76px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
+  grid-template-columns: 1.45fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4px;
   border: 0;
   padding: 0;
   background: transparent;
@@ -5670,12 +5674,18 @@ button.danger {
 
 .market-thumb-stack img {
   width: 100%;
-  height: 84px;
+  height: 100%;
   display: block;
   object-fit: cover;
-  border: 2px solid #fffdf8;
-  border-radius: 12px;
-  box-shadow: 0 12px 22px rgba(62, 48, 31, 0.16);
+  overflow: hidden;
+  border: 1px solid rgba(255, 253, 248, 0.92);
+  border-radius: 11px;
+  background: rgba(36, 107, 85, 0.12);
+  box-shadow: 0 8px 16px rgba(62, 48, 31, 0.12);
+}
+
+.market-thumb-stack img:first-child {
+  grid-row: 1 / 3;
 }
 
 .market-item-art {
