@@ -4132,7 +4132,7 @@ function HomeView({
 
   return (
     <div className="screen">
-      <div className="home-utility-row">
+      <header className="hero">
         <button
           aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
           className={`home-bell-button ${notificationUnreadCount > 0 || !notificationReady ? "has-dot" : ""}`}
@@ -4141,8 +4141,6 @@ function HomeView({
         >
           <Bell size={20} />
         </button>
-      </div>
-      <header className="hero">
         <div className="hero-network-mark" aria-hidden="true">
           <span />
           <i />

@@ -329,18 +329,13 @@ html[data-world-mini-app="true"] .phone-frame {
   font-weight: 900;
 }
 
-.home-utility-row {
-  display: flex;
-  justify-content: flex-end;
-  min-height: 44px;
-  margin-bottom: 8px;
-}
-
 .home-bell-button {
-  position: relative;
+  position: absolute;
+  right: 26px;
+  top: 26px;
   z-index: 3;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 253, 248, 0.28);
@@ -717,6 +712,7 @@ html[data-world-mini-app="true"] .phone-frame {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding-right: 74px;
 }
 
 .hero-logo {
