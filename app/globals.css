@@ -658,9 +658,16 @@ html[data-world-mini-app="true"] .phone-frame {
   );
 }
 
-.hero > * {
+.hero > *:not(.home-bell-button) {
   position: relative;
   z-index: 1;
+}
+
+.hero > .home-bell-button {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  z-index: 3;
 }
 
 .hero-network-mark {
