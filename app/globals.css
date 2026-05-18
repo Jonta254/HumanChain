@@ -329,7 +329,7 @@ html[data-world-mini-app="true"] .phone-frame {
   font-weight: 900;
 }
 
-.home-bell-button {
+.hero-bell-button {
   position: relative;
   z-index: 3;
   width: 46px;
@@ -349,7 +349,7 @@ html[data-world-mini-app="true"] .phone-frame {
   backdrop-filter: blur(8px);
 }
 
-.home-bell-button.has-dot::after {
+.hero-bell-button.has-dot::after {
   content: "";
   position: absolute;
   right: 8px;

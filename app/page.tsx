@@ -2993,6 +2993,7 @@ function loadStoredAppMemory(): AppMemory {
 export default function HumanChainApp() {
   const [storedAppMemory] = useState(loadStoredAppMemory);
   const [tab, setTab] = useState<Tab>("home");
+  const [chainEntryNonce, setChainEntryNonce] = useState(0);
   const [toast, setToast] = useState<Toast | null>(null);
   const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
   const [notificationPromptDismissed, setNotificationPromptDismissed] = useState(false);
@@ -3725,6 +3726,7 @@ export default function HumanChainApp() {
             earnPoints={earnPoints}
             humanIdentity={verifiedHuman}
             humanPosts={humanPosts}
+            key={`chains-${chainEntryNonce}`}
             keepStreak={keepStreak}
             links={links}
             openPayment={openPayment}
@@ -3895,7 +3897,17 @@ export default function HumanChainApp() {
           />
         ) : null}
         {verifiedHuman ? (
-          <BottomNav active={tab} appLanguage={appLanguage} onChange={setTab} />
+          <BottomNav
+            active={tab}
+            appLanguage={appLanguage}
+            onChange={(nextTab) => {
+              if (nextTab === "chains") {
+                setActiveField(null);
+                setChainEntryNonce((current) => current + 1);
+              }
+              setTab(nextTab);
+            }}
+          />
         ) : null}
       </section>
     </main>
@@ -4191,7 +4203,7 @@ function HomeView({
           <div className="hero-notification-slot">
             <button
               aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
-              className={`home-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
+              className={`hero-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
               onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
               type="button"
             >
