@@ -4188,14 +4188,16 @@ function HomeView({
               <strong>HumanChain</strong>
             </div>
           </div>
-          <button
-            aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
-            className={`home-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
-            onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
-            type="button"
-          >
-            <Bell size={20} />
-          </button>
+          <div className="hero-notification-slot">
+            <button
+              aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
+              className={`home-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
+              onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
+              type="button"
+            >
+              <Bell size={20} />
+            </button>
+          </div>
         </div>
         <h1>{homeCopy.headline}</h1>
         <p>{homeCopy.intro}</p>
