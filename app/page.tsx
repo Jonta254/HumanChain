@@ -4994,7 +4994,7 @@ function ChainsView({
   const [isPublishingPost, setIsPublishingPost] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
-    "groups",
+    "images",
   );
   const [activeChainTool, setActiveChainTool] = useState<
     "circle" | "pulse" | "pin" | null
@@ -5516,25 +5516,25 @@ function ChainsView({
       </section>
       <div className="chain-tabs">
         <button
-          className={chainView === "groups" ? "active" : ""}
-          onClick={() => setChainView("groups")}
-          type="button"
-        >
-          Quote rooms
-        </button>
-          <button
-            className={chainView === "quotes" ? "active" : ""}
-            onClick={() => setChainView("quotes")}
-            type="button"
-          >
-          Live links
-        </button>
-        <button
           className={chainView === "images" ? "active" : ""}
           onClick={() => setChainView("images")}
           type="button"
         >
           Image posts
+        </button>
+        <button
+          className={chainView === "quotes" ? "active" : ""}
+          onClick={() => setChainView("quotes")}
+          type="button"
+        >
+          Live links
+        </button>
+        <button
+          className={chainView === "groups" ? "active" : ""}
+          onClick={() => setChainView("groups")}
+          type="button"
+        >
+          Quote rooms
         </button>
       </div>
       {chainView === "images" ? (
