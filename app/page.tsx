@@ -2453,6 +2453,22 @@ type MarketLocationState = {
 
 type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me";
 
+const appTabs = new Set<Tab>(["home", "ask", "market", "chains", "stories", "me"]);
+
+function isAppTab(value: string | null): value is Tab {
+  return Boolean(value && appTabs.has(value as Tab));
+}
+
+function getTabFromUrl(): Tab {
+  if (typeof window === "undefined") {
+    return "home";
+  }
+
+  const requestedTab = new URLSearchParams(window.location.search).get("tab");
+
+  return isAppTab(requestedTab) ? requestedTab : "home";
+}
+
 type StoryArtKind =
   | "cover-symbol"
   | "closed-door"
@@ -3059,6 +3075,25 @@ export default function HumanChainApp() {
   const [paymentToken, setPaymentToken] = useState<HumanChainPaymentToken>(
     defaultHumanChainPaymentToken,
   );
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const requestedTab = getTabFromUrl();
+
+      if (requestedTab === "home") {
+        return;
+      }
+
+      if (requestedTab === "chains") {
+        setActiveField(null);
+        setChainEntryNonce((current) => current + 1);
+      }
+
+      setTab(requestedTab);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     scrollMiniAppToTop();
@@ -5092,6 +5127,14 @@ function ChainsView({
       act("Post published", "Network upload was unavailable, but your post still joined the app.");
     } finally {
       setIsPublishingPost(false);
+    }
+
+    if (!mediaUrl) {
+      act(
+        postMediaType === "video" ? "Video required" : "Image required",
+        "Add a real recent image or paid video before publishing to the Image posts chain.",
+      );
+      return;
     }
 
     const post: HumanPost = {
@@ -7617,18 +7660,29 @@ function MarketplaceView({
   }
 
   function saveMarketplaceListing() {
-    const title = listingDraft.title.trim() || "Untitled marketplace listing";
+    const title = listingDraft.title.trim();
+    const price = listingDraft.price.trim();
+    const area = listingDraft.area.trim();
+
+    if (!title || !price || !area || !listingPhotos.length) {
+      act(
+        "Listing needs details",
+        "Add a title, price, strict pickup area, and at least one real photo before saving a marketplace listing.",
+      );
+      return;
+    }
+
     const listing: MarketplaceListing = {
       id: Date.now(),
       seller: humanIdentity?.username ?? "@you",
       sellerWallet: humanIdentity?.wallet,
       title,
-      price: listingDraft.price.trim() || "Price not set",
+      price,
       bidFloor: listingDraft.bidFloor.trim(),
       duration: listingDraft.duration.trim() || "3 days",
       saleMode: listingDraft.saleMode,
       condition: listingDraft.condition || "Condition not set",
-      area: listingDraft.area.trim() || "Nearby area not set",
+      area,
       link: listingDraft.link.trim(),
       details: listingDraft.details.trim(),
       photos: listingPhotos,
