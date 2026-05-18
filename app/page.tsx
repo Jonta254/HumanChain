@@ -2579,6 +2579,63 @@ type NotificationItem = {
   read: boolean;
 };
 
+const firstRunNotifications: NotificationItem[] = [
+  {
+    id: 101,
+    title: "Welcome to HumanChain",
+    detail:
+      "You are entering a verified human network for honest questions, live wisdom, safer local trade, lasting stories, and a personal HumanChain vault.",
+    time: "Now",
+    sector: "welcome",
+    read: false,
+  },
+  {
+    id: 102,
+    title: "Start here",
+    detail:
+      "Use Home for your live dashboard, Ask for replies from real humans, Chains for image posts, links, quote rooms, Pulse, Circle, and Pin.",
+    time: "Now",
+    sector: "account",
+    read: false,
+  },
+  {
+    id: 103,
+    title: "Trade and build safely",
+    detail:
+      "Market keeps listings, holds, seller contact, distance context, bids, and receipts together. Stories stores human records, files, covers, and reader activity.",
+    time: "Now",
+    sector: "marketplace",
+    read: false,
+  },
+  {
+    id: 104,
+    title: "Your profile is the vault",
+    detail:
+      "Me shows your World username, points, streak, posts, saved items, payments, notifications, and activity history until you delete your own content.",
+    time: "Now",
+    sector: "account",
+    read: false,
+  },
+];
+
+function mergeFirstRunNotifications(current: NotificationItem[]) {
+  const hasProfessionalWelcome = current.some(
+    (notification) => notification.title === firstRunNotifications[0].title &&
+      notification.detail === firstRunNotifications[0].detail,
+  );
+
+  if (hasProfessionalWelcome) {
+    return current;
+  }
+
+  const existingDetails = new Set(current.map((notification) => notification.detail));
+  const missingFirstRun = firstRunNotifications.filter(
+    (notification) => !existingDetails.has(notification.detail),
+  );
+
+  return [...missingFirstRun, ...current].slice(0, 60);
+}
+
 type VerifiedHuman = {
   deviceOS?: string;
   lastSeenAt?: string;
@@ -2878,24 +2935,9 @@ function loadStoredHistoryRecords(): HistoryRecord[] {
 }
 
 function loadStoredNotifications(): NotificationItem[] {
-  return loadJsonFromStorage<NotificationItem[]>(storageKeys.notifications, [
-    {
-      id: 1,
-      title: "Welcome to HumanChain",
-      detail: "Start with the guide, ask one honest question, follow live chains, and trade only with verified humans.",
-      time: "Now",
-      sector: "welcome",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Professional user guide",
-      detail: "Use Ask for human replies, Chains for live wisdom, Market for verified trade, Stories for longer records, and Me for your vault.",
-      time: "Now",
-      sector: "account",
-      read: false,
-    },
-  ]);
+  return mergeFirstRunNotifications(
+    loadJsonFromStorage<NotificationItem[]>(storageKeys.notifications, firstRunNotifications),
+  );
 }
 
 function loadStoredChainPremium(): ChainPremiumState {
@@ -3474,12 +3516,12 @@ export default function HumanChainApp() {
       if (!notificationWelcomeSent) {
         const welcomeTitle = "Welcome to HumanChain";
         const welcomeDetail =
-          "You are part of a verified human network. Start with the guide, ask honestly, trade safely, and help real wisdom move through World.";
+          "Welcome to HumanChain. Ask real humans, join chains, trade safely, publish stories, track your vault, and keep alerts on for replies, holds, payments, and safety.";
 
         addNotification(welcomeTitle, welcomeDetail, "welcome");
         addNotification(
-          "User guide ready",
-          "Home is your dashboard, Ask routes human replies, Chains keeps live wisdom, Market supports verified trade, Stories stores long records, and Me is your vault.",
+          "HumanChain guide unlocked",
+          "Home is your dashboard. Ask routes real replies. Chains holds posts, links, rooms, Pulse, Circle, and Pin. Market, Stories, and Me keep your records clear.",
           "account",
         );
 
@@ -4135,7 +4177,7 @@ function HomeView({
       <header className="hero">
         <button
           aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
-          className={`home-bell-button ${notificationUnreadCount > 0 || !notificationReady ? "has-dot" : ""}`}
+          className={`home-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
           onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
           type="button"
         >
