@@ -4175,25 +4175,27 @@ function HomeView({
   return (
     <div className="screen">
       <header className="hero">
-        <button
-          aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
-          className={`home-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
-          onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
-          type="button"
-        >
-          <Bell size={20} />
-        </button>
         <div className="hero-network-mark" aria-hidden="true">
           <span />
           <i />
           <b />
         </div>
         <div className="hero-brandline">
-          <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.png" />
-          <div>
-            <span>{homeCopy.heroKicker}</span>
-            <strong>HumanChain</strong>
+          <div className="hero-brand-copy">
+            <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.png" />
+            <div>
+              <span>{homeCopy.heroKicker}</span>
+              <strong>HumanChain</strong>
+            </div>
           </div>
+          <button
+            aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
+            className={`home-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
+            onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
+            type="button"
+          >
+            <Bell size={20} />
+          </button>
         </div>
         <h1>{homeCopy.headline}</h1>
         <p>{homeCopy.intro}</p>
