@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   CircleDollarSign,
   Compass,
-  Flame,
   Gavel,
   HandCoins,
   HeartHandshake,
@@ -1514,9 +1513,8 @@ const storyCategories = [
   "World Stories",
   "Money Stories",
   "Faith Stories",
-  "Human Lessons",
-  "African Stories",
-  "Founder Stories",
+  "Life Stories",
+  "Builder Stories",
 ];
 
 const worldVerdictParts = [
@@ -3868,6 +3866,7 @@ export default function HumanChainApp() {
             setDailyResponses={setDailyResponses}
             setTab={setTab}
             resetHistory={resetHistory}
+            savedItems={savedItems}
             streak={streak}
             verifiedHuman={verifiedHuman}
             worldContext={worldContext}
@@ -4139,6 +4138,7 @@ function HomeView({
   onOpenNotifications,
   points,
   resetHistory,
+  savedItems,
   setDailyAnsweredAt,
   setDailyAnsweredDate,
   setActiveField,
@@ -4168,6 +4168,7 @@ function HomeView({
   onOpenNotifications: () => void;
   points: number;
   resetHistory: () => void;
+  savedItems: number;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
   setDailyAnsweredDate: React.Dispatch<React.SetStateAction<string | null>>;
   setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
@@ -4182,148 +4183,212 @@ function HomeView({
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const userPostCount = humanPosts.filter((post) => post.owner).length;
-  const trackItems = [
-    {
-      detail: verifiedHuman?.mode === "world" ? "World username live" : "Wallet connected, username next",
-      label: "Account",
-      value: worldHandle,
-    },
-    {
-      detail: `${dailyResponses.length} human answer${dailyResponses.length === 1 ? "" : "s"} recorded`,
-      label: "Today",
-      value: dailyAnswered ? "Checked in" : "Open",
-    },
-    {
-      detail: `${userPostCount} post${userPostCount === 1 ? "" : "s"} by you`,
-      label: "Posts",
-      value: `${humanPosts.length} total`,
-    },
-    {
-      detail: `${marketplaceListings.length} stored listing${marketplaceListings.length === 1 ? "" : "s"}`,
-      label: "Chain",
-      value: `${links.length} live link${links.length === 1 ? "" : "s"}`,
-    },
+  const chainScore = Math.max(
+    151,
+    Math.round(points / 4) + streak * 7 + userPostCount * 12 + savedItems * 5,
+  );
+  const missionItems = [
+    { complete: dailyAnswered, label: "Answer today's question" },
+    { complete: dailyResponses.length > 1, label: "Read human answers" },
+    { complete: userPostCount > 0, label: "Post one real moment" },
   ];
+  const missionCompleted = missionItems.filter((item) => item.complete).length;
+  const trendingWisdom =
+    dailyResponses[0]?.text ||
+    links[0]?.text ||
+    "Life taught me that silence is sometimes rest, not failure.";
   const liveVerdicts = [
     {
       question: dailyHumanQuestion.title,
       result: `${dailyResponses.length} live answers recorded today`,
-      truth:
-        dailyResponses[0]?.text ??
-        "Answer the Daily to help form the first real verdict.",
-    },
-    {
-      question: "What should the world remember today?",
-      result: `${links.length} chain links from verified humans`,
-      truth: links[0]?.text ?? "The newest chain link will appear here.",
+      truth: trendingWisdom,
     },
   ];
 
+  function submitDailyAnswer() {
+    if (dailyAnswered) {
+      act("Already answered", "Come back tomorrow for a new global question.");
+      return;
+    }
+
+    setDailyAnswered(true);
+    const now = new Date();
+    const time = formatShortTime(now);
+    setDailyAnsweredAt(time);
+    setDailyAnsweredDate(getLocalDateKey(now));
+    setDailyResponses((current) => [
+      {
+        user: verifiedHuman?.username ?? "@human",
+        text:
+          dailyDraft.trim() ||
+          "Life taught me that a real answer can carry another human.",
+        time,
+      },
+      ...current,
+    ]);
+    earnPoints(18, "Your Daily Human answer entered today's global verdict.");
+  }
+
   return (
     <div className="screen">
-      <header className="hero">
-        <div className="hero-network-mark" aria-hidden="true">
-          <span />
-          <i />
-          <b />
-        </div>
-        <div className="hero-brandline">
-          <div className="hero-brand-copy">
-            <img alt="HumanChain logo" className="hero-logo" src="/images/humanchain-logo.png" />
-            <div>
-              <span>{homeCopy.heroKicker}</span>
-              <strong>HumanChain</strong>
-            </div>
-          </div>
-          <div className="hero-notification-slot">
-            <button
-              aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
-              className={`hero-bell-button ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
-              onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
-              type="button"
-            >
-              <Bell size={20} />
-            </button>
+      <header className="home-compact-header">
+        <div className="home-brand-mark">
+          <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
+          <div>
+            <strong>HumanChain</strong>
+            <span>Verified human network</span>
           </div>
         </div>
-        <h1>{homeCopy.headline}</h1>
-        <p>{homeCopy.intro}</p>
-        <div className="hero-live-track" aria-label="Live HumanChain activity track">
-          {trackItems.map((item) => (
-            <span data-live="Live" key={item.label}>
-              <small>
-                <i aria-hidden="true" />
-                {item.label}
-              </small>
-              <strong>{item.value}</strong>
-              <em>{item.detail}</em>
+        <span className="wallet-chip">Wallet connected</span>
+        <button
+          aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
+          className={`hero-bell-button compact ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
+          onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
+          type="button"
+        >
+          <Bell size={18} />
+        </button>
+      </header>
+
+      <section className="home-brand-message">
+        <span>Real humans. Real wisdom. Real trust.</span>
+        <p>Ask verified humans, share real stories, build your chain, and trade safely inside World App.</p>
+      </section>
+
+      <section className="mission-card">
+        <div className="section-heading">
+          <span>Today&apos;s Human Mission</span>
+          <CalendarCheck size={18} />
+        </div>
+        <h2>Complete one meaningful action today and keep your chain alive.</h2>
+        <div className="mission-progress">
+          <strong>{missionCompleted}/3 completed</strong>
+          <i style={{ width: `${(missionCompleted / 3) * 100}%` }} />
+        </div>
+        <div className="mission-list">
+          {missionItems.map((item) => (
+            <span className={item.complete ? "complete" : ""} key={item.label}>
+              <CheckCircle2 size={15} />
+              {item.label}
             </span>
           ))}
         </div>
-        <div className="home-proof-grid" aria-label="HumanChain highlights">
-          {homeCopy.highlights.map((highlight) => (
-            <span key={highlight}>{highlight}</span>
-          ))}
+        <small>Complete mission: +25 HP</small>
+        <div className="mission-actions">
+          <button onClick={submitDailyAnswer} type="button">
+            Answer Daily
+          </button>
+          <button onClick={() => setTab("ask")} type="button">
+            Read Answers
+          </button>
+          <button onClick={() => setTab("chains")} type="button">
+            Post Moment
+          </button>
         </div>
-      </header>
+      </section>
 
-      <section className="quick-grid" aria-label={homeCopy.actionsLabel}>
+      <section className="daily-card focused">
+        <div className="section-heading">
+          <span>Daily Human Question</span>
+          <span className="daily-reward">+18 HP</span>
+        </div>
+        <h2>What truth did life teach you this week?</h2>
+        <p>Answer with something real. The best answers help other humans think, heal, or act.</p>
+        <textarea
+          disabled={dailyAnswered}
+          onChange={(event) => setDailyDraft(event.target.value)}
+          placeholder="Write one honest answer..."
+          value={dailyAnswered ? `Answered at ${dailyAnsweredAt ?? "today"}` : dailyDraft}
+        />
+        <div className="daily-actions">
+          <button disabled={dailyAnswered} onClick={submitDailyAnswer} type="button">
+            {dailyAnswered ? "Answered today" : "Answer Today"}
+          </button>
+          <button onClick={() => setTab("ask")} type="button">
+            See Answers
+          </button>
+        </div>
+        <div className="daily-live compact">
+          <span>{dailyResponses.length} live answers today</span>
+          <span>{streak} day streak</span>
+        </div>
+      </section>
+
+      <section className="passport-summary-card">
+        <div>
+          <span className="section-kicker">Your Human Passport</span>
+          <h2>{worldHandle}</h2>
+          <p>Score shows trust. HP shows contribution.</p>
+        </div>
+        <div className="passport-metrics">
+          <b>{chainScore}<small>Score</small></b>
+          <b>{points.toLocaleString()}<small>HP</small></b>
+          <b>{streak}<small>Streak</small></b>
+          <b>{userPostCount}<small>Posts</small></b>
+          <b>{savedItems}<small>Saved</small></b>
+        </div>
+        <button onClick={() => setTab("me")} type="button">
+          View Passport
+        </button>
+      </section>
+
+      <section className="quick-grid clean" aria-label="Quick actions">
         <ActionButton
           icon={<MessageCircleQuestion size={20} />}
-          label={homeCopy.actions[0][0]}
-          detail={homeCopy.actions[0][1]}
+          label="Ask The World"
+          detail="Ask verified humans."
           onClick={() => setTab("ask")}
         />
         <ActionButton
           icon={<Sparkles size={20} />}
-          label={homeCopy.actions[1][0]}
-          detail={homeCopy.actions[1][1]}
+          label="Post Moment"
+          detail="Share one real human moment."
           onClick={() => setTab("chains")}
         />
         <ActionButton
           icon={<Store size={20} />}
-          label={homeCopy.actions[2][0]}
-          detail={homeCopy.actions[2][1]}
+          label="Human Market"
+          detail="Buy, sell, or promote safely."
           onClick={() => setTab("market")}
         />
         <ActionButton
           icon={<BookOpen size={20} />}
-          label={homeCopy.actions[3][0]}
-          detail={homeCopy.actions[3][1]}
+          label="Read Stories"
+          detail="Explore human stories."
           onClick={() => setTab("stories")}
         />
       </section>
 
-      <section className="streak-card">
-        <div>
-          <span className="section-kicker">{homeCopy.streakKicker}</span>
-          <h2>{streak}-{homeCopy.streakTitle}</h2>
-          <p>{homeCopy.streakDetail}</p>
+      <section className="wisdom-card">
+        <div className="section-heading">
+          <span>Trending Human Wisdom</span>
+          <Vote size={18} />
         </div>
-        <button
-          className="icon-action"
-          onClick={() =>
-            act("Human Streak", "Ask, answer, read, save, or join the chain.")
-          }
-          type="button"
-        >
-          <Flame size={22} />
-        </button>
-      </section>
-
-      <section className="points-card">
+        <p>&ldquo;{trendingWisdom}&rdquo;</p>
         <div>
-          <span className="section-kicker">{homeCopy.pointsKicker}</span>
-          <h2>{points.toLocaleString()} HP</h2>
-          <p>{homeCopy.pointsDetail}</p>
-        </div>
-        <div className="points-ring">
-          <strong>{Math.min(100, Math.round(points / 10))}%</strong>
-          <span>Level 2</span>
+          <button onClick={() => act("Wisdom saved", "This wisdom was added to your saved list.")} type="button">
+            Save
+          </button>
+          <button onClick={() => setTab("ask")} type="button">
+            Read more
+          </button>
         </div>
       </section>
 
-      <section className="daily-card">
+      <section className="pulse-card compact">
+        <div>
+          <span className="section-kicker">Live Human Pulse</span>
+          <h2>Today on HumanChain</h2>
+        </div>
+        <div className="pulse-stat-grid">
+          <b>{dailyResponses.length}<small>Answers today</small></b>
+          <b>{links.length}<small>Chain links</small></b>
+          <b>{savedItems}<small>New stories</small></b>
+          <b>{marketplaceListings.length}<small>Market listings</small></b>
+        </div>
+      </section>
+
+      <section className="daily-card home-legacy-section" hidden>
         <div className="section-heading">
           <span>{homeCopy.dailyTitle}</span>
           <CalendarCheck size={18} />
@@ -4385,7 +4450,7 @@ function HomeView({
         </div>
       </section>
 
-      <section className="panel">
+      <section className="panel home-legacy-section" hidden>
         <div className="section-heading">
           <span>{homeCopy.trendingTitle}</span>
           <Vote size={18} />
@@ -4408,7 +4473,7 @@ function HomeView({
         ))}
       </section>
 
-      <section className="panel">
+      <section className="panel home-legacy-section" hidden>
         <div className="section-heading">
           <span>{homeCopy.fieldsTitle}</span>
           <Users size={18} />
@@ -4430,7 +4495,7 @@ function HomeView({
         </div>
       </section>
 
-      <section className="pulse-card">
+      <section className="pulse-card home-legacy-section" hidden>
         <div>
           <span className="section-kicker">{homeCopy.pulseKicker}</span>
           <h2>{homeCopy.pulseTitle}</h2>
@@ -4598,14 +4663,13 @@ function AskView({
 
   return (
     <div className="screen">
-      <TopBar title="Ask The World" subtitle="One question. Verified human answers." />
+      <TopBar title="Ask The World" subtitle="Ask one honest question. Verified humans answer." />
       <section className="ask-hero">
         <div>
-          <span className="section-kicker">Human signal desk</span>
-          <h2>Ask the world free, route deeper when it matters.</h2>
+          <span className="section-kicker">Verified answers</span>
+          <h2>Ask clearly. Let real humans answer.</h2>
           <p>
-            Publish one honest question to verified humans. No bot answers are
-            seeded here; the thread waits for real people to reply.
+            Public questions are free. Private, country-routed, and deep verdict questions unlock when you choose them.
           </p>
         </div>
         <button
@@ -4638,7 +4702,7 @@ function AskView({
             type="button"
           >
             <span>Free</span>
-            <strong>Ask The World</strong>
+            <strong>Public</strong>
             <small>Open to all verified humans</small>
           </button>
           <button
@@ -4767,7 +4831,7 @@ function AskView({
           ))}
         </div>
         <div className="chip-row">
-          {["Life", "Love", "Money", "Business", "Family", "Culture", "Faith"].map((chip) => (
+          {["Life", "Money", "Business", "Family", "Love", "Culture"].map((chip) => (
             <button
               aria-pressed={selectedTopic === chip}
               className={selectedTopic === chip ? "active" : ""}
@@ -4799,7 +4863,7 @@ function AskView({
             ? selectedCountryRoute === "World"
               ? "Unlock country route"
               : `Ask ${selectedCountryRoute}`
-            : "Ask The World Free"}
+            : "Ask Verified Humans"}
         </button>
       </section>
 
@@ -5447,7 +5511,7 @@ function ChainsView({
 
   return (
     <div className="screen">
-      <TopBar title="Human Fields" subtitle="Living chains for real humans." />
+      <TopBar title="Human Chains" subtitle="Post real moments, useful links, and quote rooms from verified humans." />
       <section className="chain-tools">
         <button
           onClick={() => {
@@ -5562,7 +5626,7 @@ function ChainsView({
       ) : null}
       <section className="chain-map">
         <span className="section-kicker">World field</span>
-        <h2>Post images, follow live links, or enter quote rooms.</h2>
+        <h2>Moments, links, and quote rooms from real humans.</h2>
         <div className="chain-orbit" aria-hidden="true">
           <span />
           <i />
@@ -5575,21 +5639,21 @@ function ChainsView({
           onClick={() => setChainView("images")}
           type="button"
         >
-          Image posts
+          Moments
         </button>
         <button
           className={chainView === "quotes" ? "active" : ""}
           onClick={() => setChainView("quotes")}
           type="button"
         >
-          Live links
+          Links
         </button>
         <button
           className={chainView === "groups" ? "active" : ""}
           onClick={() => setChainView("groups")}
           type="button"
         >
-          Quote rooms
+          Quote Rooms
         </button>
       </div>
       {chainView === "images" ? (
@@ -6235,13 +6299,13 @@ function StoriesView({
 
   return (
     <div className="screen">
-      <TopBar title="Human Story" subtitle="A monthly story about being human." />
+      <TopBar title="Human Story" subtitle="Monthly stories and published reflections from verified humans." />
       <section className="story-cover">
         <StoryCoverPhoto
           alt="Colored cinematic cover for The Door That Waited showing a blue door and cracked cup"
           src={monthlyStoryCover}
         />
-        <span>April Human Story</span>
+        <span>Featured Monthly Story</span>
         <h2>The Door That Waited</h2>
         <p>
           A monthly life story about a blue door, a cracked cup, and the small
@@ -6376,16 +6440,26 @@ function StoriesView({
       <section className="publish-card">
         <div>
           <span className="section-kicker">Publish to humans</span>
-          <h2>Your life can become a chain.</h2>
+          <h2>Publish to Humans</h2>
           <p>
-            Upload a PDF/text story for 4 WLD, or publish a free 200-character
-            story with a cover image. Every published story is stored and only
-            its owner can delete it.
+            Publish a free short reflection or a paid file story. Stories may be reviewed before appearing publicly.
           </p>
+          <div className="story-quality-list">
+            {[
+              "Clear title",
+              "Human-written",
+              "No private information",
+              "No harmful or fake claims",
+              "Cover image added",
+              "Category selected",
+            ].map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
         </div>
         <div className="story-publish-grid">
           <div className="story-publish-panel">
-            <strong>File story - 4 WLD</strong>
+            <strong>File Story - 4 WLD</strong>
             <input
               aria-label="Story file title"
               onChange={(event) =>
@@ -6450,7 +6524,7 @@ function StoriesView({
             </button>
           </div>
           <div className="story-publish-panel">
-            <strong>Free 200-character story</strong>
+            <strong>Free Short Story</strong>
             <input
               aria-label="Short story title"
               onChange={(event) =>
@@ -7669,7 +7743,7 @@ function MarketplaceView({
         "Listing needs details",
         "Add a title, price, strict pickup area, and at least one real photo before saving a marketplace listing.",
       );
-      return;
+      return false;
     }
 
     const listing: MarketplaceListing = {
@@ -7734,6 +7808,7 @@ function MarketplaceView({
       title: "",
     });
     setListingPhotos([]);
+    return true;
   }
 
   function handleListingPhotos(files: FileList | null) {
@@ -8195,14 +8270,14 @@ function MarketplaceView({
       <section className="market-hero">
         <div className="market-hero-top">
           <div>
-            <span className="section-kicker">HumanChain Market</span>
-            <h1>Buy, sell, and promote nearby.</h1>
+            <span className="section-kicker">Human Market</span>
+            <h1>Buy, sell, and promote with verified humans.</h1>
           </div>
           <Store size={30} />
         </div>
         <p>
-          A verified human marketplace for new items, second-hand goods,
-          services, business links, and local discovery inside World App.
+          Buy, sell, and promote with trust-first listings, real photos,
+          seller handles, and World Chat before payment.
         </p>
         <div className="market-identity-strip">
           <UserRound size={17} />
@@ -8282,20 +8357,29 @@ function MarketplaceView({
           <strong>2 WLD</strong>
         </button>
         <button
+          onClick={() => publishListing(marketplacePlans[2])}
+          type="button"
+        >
+          <HandCoins size={19} />
+          <span>Boost listing</span>
+          <strong>2 WLD</strong>
+        </button>
+        <button
           onClick={() => publishListing(marketplacePlans[3])}
           type="button"
         >
           <HandCoins size={19} />
-          <span>Market business</span>
+          <span>Business ad</span>
           <strong>4 WLD</strong>
         </button>
       </section>
 
       <section className="market-panel listing-studio">
         <div className="section-heading">
-          <span>Create seller listing</span>
+          <span>Publish Verified Listing</span>
           <Upload size={18} />
         </div>
+        <div className="listing-section-label">1. What are you selling?</div>
         <div className="listing-photo-zone">
           <label className="listing-upload">
             <Upload size={20} />
@@ -8373,6 +8457,7 @@ function MarketplaceView({
             <option>Refurbished</option>
             <option>Service or business</option>
           </select>
+          <div className="listing-section-label">2. Proof and trust</div>
           <input
             aria-label="Pickup area"
             onChange={(event) => updateListingDraft("area", event.target.value)}
@@ -8391,6 +8476,7 @@ function MarketplaceView({
             placeholder="Premium details: size, defects, warranty, delivery route, receipt, pickup safety, why buyers should trust it."
             value={listingDraft.details}
           />
+          <div className="listing-section-label">3. Location and sale method</div>
         </div>
         <div className="listing-checklist">
           {marketplaceChecklist.map((item) => (
@@ -8403,12 +8489,13 @@ function MarketplaceView({
         <button
           className="primary-command"
           onClick={() => {
-            saveMarketplaceListing();
-            publishListing(marketplacePlans[0]);
+            if (saveMarketplaceListing()) {
+              publishListing(marketplacePlans[0]);
+            }
           }}
           type="button"
         >
-          Store verified listing - 2 WLD
+          Publish Verified Listing - 2 WLD
         </button>
       </section>
 
@@ -8850,7 +8937,7 @@ function MeView({
 
   return (
     <div className="screen">
-      <TopBar title="HumanChain Profile" subtitle="Identity, vault, and activity." />
+      <TopBar title="Human Passport" subtitle="Who am I in the chain?" />
       <section className="treasure-profile">
         <div className="treasure-mark">
           <div className="avatar">
@@ -8865,9 +8952,9 @@ function MeView({
           <BadgeCheck size={22} />
         </div>
         <div>
-          <span className="section-kicker">Verified HumanChain profile</span>
+          <span className="section-kicker">Verified Human Passport</span>
           <h2>{displayUsername}</h2>
-          <p>{identityLabel}. Chain score {chainScore}. {notificationReady ? "Notifications active." : "Notifications off."}</p>
+          <p>{identityLabel}. Score shows trust. HP shows contribution. {notificationReady ? "Notifications active." : "Notifications off."}</p>
         </div>
         <button
           disabled={checkedInToday}

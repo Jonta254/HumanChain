@@ -362,6 +362,270 @@ html[data-world-mini-app="true"] .phone-frame {
   box-shadow: 0 0 0 4px rgba(216, 160, 35, 0.16);
 }
 
+.hero-bell-button.compact {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  color: var(--green);
+  border-color: rgba(36, 107, 85, 0.14);
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: 0 10px 24px rgba(23, 49, 47, 0.1);
+}
+
+.home-compact-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.home-brand-mark {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-brand-mark img {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(13, 28, 26, 0.16);
+}
+
+.home-brand-mark div {
+  display: grid;
+  gap: 2px;
+}
+
+.home-brand-mark strong {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.home-brand-mark span,
+.wallet-chip {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1.15;
+}
+
+.wallet-chip {
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fffdf8;
+  white-space: nowrap;
+}
+
+.home-brand-message,
+.mission-card,
+.passport-summary-card,
+.wisdom-card {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--paper-strong);
+  box-shadow: 0 10px 28px rgba(62, 48, 31, 0.06);
+}
+
+.home-brand-message {
+  color: #fffdf8;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(214, 163, 58, 0.22), transparent 9rem),
+    linear-gradient(135deg, #0b2724, #246b55);
+}
+
+.home-brand-message span {
+  font-size: 1.34rem;
+  font-weight: 950;
+  line-height: 1.08;
+}
+
+.home-brand-message p,
+.mission-card p,
+.passport-summary-card p {
+  margin: 0;
+  color: inherit;
+  line-height: 1.42;
+}
+
+.mission-card {
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(240, 247, 243, 0.96)),
+    radial-gradient(circle at 100% 0, rgba(185, 130, 24, 0.12), transparent 8rem);
+}
+
+.mission-card h2,
+.passport-summary-card h2,
+.wisdom-card p {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.24;
+}
+
+.mission-progress {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(232, 223, 210, 0.72);
+}
+
+.mission-progress strong {
+  color: var(--green);
+  font-size: 0.86rem;
+}
+
+.mission-progress i {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold), var(--green));
+}
+
+.mission-list {
+  display: grid;
+  gap: 7px;
+}
+
+.mission-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.mission-list span.complete {
+  color: var(--green);
+}
+
+.mission-actions,
+.wisdom-card div:last-child {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mission-actions button,
+.passport-summary-card button,
+.wisdom-card button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 999px;
+  color: #fffdf8;
+  background: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.daily-card.focused {
+  margin-top: 12px;
+}
+
+.daily-live.compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.daily-live.compact span {
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(36, 107, 85, 0.08);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.passport-summary-card {
+  background: linear-gradient(135deg, #fffdf8, #f0f7f3);
+}
+
+.passport-metrics,
+.pulse-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.passport-metrics b,
+.pulse-stat-grid b {
+  display: grid;
+  gap: 2px;
+  min-height: 54px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.78);
+  font-size: 0.9rem;
+}
+
+.passport-metrics small,
+.pulse-stat-grid small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.quick-grid.clean {
+  margin-top: 12px;
+}
+
+.wisdom-card p {
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.wisdom-card div:last-child {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pulse-card.compact {
+  gap: 12px;
+}
+
+.pulse-card.compact h2 {
+  font-size: 1.05rem;
+}
+
+.pulse-stat-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.listing-section-label,
+.story-quality-list span {
+  color: var(--green);
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.listing-section-label {
+  grid-column: 1 / -1;
+  padding-top: 8px;
+}
+
+.story-quality-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.story-quality-list span {
+  padding: 6px 8px;
+  border: 1px solid rgba(36, 107, 85, 0.16);
+  border-radius: 999px;
+  background: rgba(36, 107, 85, 0.08);
+}
+
 .login-gate {
   min-height: 100vh;
   display: grid;
