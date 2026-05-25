@@ -2848,6 +2848,33 @@ function isWorldPermissionGranted(result: unknown) {
   );
 }
 
+const worldProfileRefreshMs = 10 * 60 * 1000;
+const worldProfileFocusCooldownMs = 2 * 60 * 1000;
+const publicFeedRefreshMs = 5 * 60 * 1000;
+const publicFeedFocusCooldownMs = 2 * 60 * 1000;
+const worldNotificationCooldownMs = 60 * 60 * 1000;
+
+function canSendWorldNotificationOnce(
+  wallet: string,
+  sector: string,
+  title: string,
+  cooldownMs = worldNotificationCooldownMs,
+) {
+  try {
+    const key = `humanchain_notification_sent:${wallet.toLowerCase()}:${sector}:${title}`;
+    const lastSentAt = Number(window.localStorage.getItem(key) ?? 0);
+
+    if (Number.isFinite(lastSentAt) && Date.now() - lastSentAt < cooldownMs) {
+      return false;
+    }
+
+    window.localStorage.setItem(key, Date.now().toString());
+    return true;
+  } catch {
+    return true;
+  }
+}
+
 async function storeSafeData(
   kind: "post" | "marketplace-listing" | "marketplace-bid" | "payment" | "story",
   id: number | string,
@@ -3250,6 +3277,7 @@ export default function HumanChainApp() {
 
     let cancelled = false;
     let syncing = false;
+    let lastSyncAt = 0;
     const wallet = verifiedHuman.wallet;
 
     async function syncWorldProfile(reason = "background") {
@@ -3257,7 +3285,15 @@ export default function HumanChainApp() {
         return;
       }
 
+      if (
+        reason !== "initial" &&
+        Date.now() - lastSyncAt < worldProfileFocusCooldownMs
+      ) {
+        return;
+      }
+
       syncing = true;
+      lastSyncAt = Date.now();
 
       try {
         const beforeLookupContext = getWorldMiniAppContext();
@@ -3350,7 +3386,7 @@ export default function HumanChainApp() {
     document.addEventListener("visibilitychange", syncWhenVisible);
     const interval = window.setInterval(() => {
       void syncWorldProfile("interval");
-    }, 60_000);
+    }, worldProfileRefreshMs);
 
     return () => {
       cancelled = true;
@@ -3665,8 +3701,15 @@ export default function HumanChainApp() {
     }
 
     let cancelled = false;
+    let lastRefreshAt = 0;
 
-    async function refreshFeedSafely() {
+    async function refreshFeedSafely(force = false) {
+      if (!force && Date.now() - lastRefreshAt < publicFeedFocusCooldownMs) {
+        return;
+      }
+
+      lastRefreshAt = Date.now();
+
       try {
         if (!cancelled) {
           await refreshLatestHumanChainFeed();
@@ -3682,10 +3725,10 @@ export default function HumanChainApp() {
       }
     }
 
-    void refreshFeedSafely();
+    void refreshFeedSafely(true);
     window.addEventListener("focus", refreshWhenVisible);
     document.addEventListener("visibilitychange", refreshWhenVisible);
-    const interval = window.setInterval(refreshFeedSafely, 75_000);
+    const interval = window.setInterval(() => void refreshFeedSafely(true), publicFeedRefreshMs);
 
     return () => {
       cancelled = true;
@@ -3713,7 +3756,7 @@ export default function HumanChainApp() {
           setAccountSyncStatus(payload?.pendingSetup ? "offline" : "ready");
         })
         .catch(() => setAccountSyncStatus("offline"));
-    }, 1600);
+    }, 6000);
 
     return () => window.clearTimeout(timeout);
     // The debounced save intentionally observes the state values below and uses the current snapshot helper.
@@ -3788,6 +3831,16 @@ export default function HumanChainApp() {
     title: string;
   }) {
     if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") {
+      return false;
+    }
+
+    if (
+      !canSendWorldNotificationOnce(
+        verifiedHuman.wallet,
+        sector,
+        title,
+      )
+    ) {
       return false;
     }
 
@@ -8474,6 +8527,16 @@ function MarketplaceView({
     const itemInfo = getMarketItemInfo(item);
 
     if (!itemInfo.sellerWallet) {
+      return false;
+    }
+
+    if (
+      !canSendWorldNotificationOnce(
+        itemInfo.sellerWallet,
+        "marketplace",
+        `${itemInfo.title}:interest`,
+      )
+    ) {
       return false;
     }
 

@@ -21,6 +21,16 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WCLP: Tokens.WCLP,
 };
 
+const worldUserCache = new Map<
+  string,
+  {
+    expiresAt: number;
+    promise: Promise<WorldUserProfile | null>;
+  }
+>();
+
+const worldUserCacheMs = 5 * 60 * 1000;
+
 type WorldPaymentInput = {
   amount: number;
   description: string;
@@ -140,14 +150,36 @@ export async function getWorldUserByAddress(
     return null;
   }
 
-  try {
-    return await MiniKit.getUserByAddress(address);
-  } catch {
-    return null;
+  const cacheKey = address.toLowerCase();
+  const cached = worldUserCache.get(cacheKey);
+
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.promise;
   }
+
+  const promise = MiniKit.getUserByAddress(address).catch(() => null);
+
+  worldUserCache.set(cacheKey, {
+    expiresAt: Date.now() + worldUserCacheMs,
+    promise,
+  });
+
+  return promise;
 }
 
 export async function getWorldPermissions() {
+  if (!isWorldMiniAppReady()) {
+    return {
+      executedWith: "fallback",
+      data: {
+        permissions: getWorldMiniAppContext().permissions ?? {},
+        status: "unavailable",
+        timestamp: new Date().toISOString(),
+        version: 1,
+      },
+    };
+  }
+
   const miniKitWithPermissions = MiniKit as unknown as {
     getPermissions?: (input?: Record<string, never>) => Promise<{
       data?: {
@@ -176,6 +208,19 @@ export async function getWorldPermissions() {
 }
 
 export async function authenticateHumanWallet() {
+  if (!isWorldMiniAppReady()) {
+    return {
+      result: {
+        executedWith: "fallback",
+        data: null,
+      },
+      verification: {
+        ok: false,
+        error: "World wallet authentication must be completed inside World App.",
+      },
+    };
+  }
+
   const nonceResponse = await fetch("/api/world/nonce");
 
   if (!nonceResponse.ok) {
@@ -239,6 +284,14 @@ export async function payWithWorld({
       ok: false,
       pendingSetup: true,
       message: "Add NEXT_PUBLIC_HUMANCHAIN_TREASURY before live World payments.",
+    };
+  }
+
+  if (!isWorldMiniAppReady()) {
+    return {
+      ok: false,
+      pendingWorldApp: true,
+      message: "World payments must be started inside World App.",
     };
   }
 
@@ -323,6 +376,18 @@ export async function payWithWorld({
 }
 
 export async function requestWorldPermission(permission: Permission) {
+  if (!isWorldMiniAppReady()) {
+    return {
+      executedWith: "fallback",
+      data: {
+        permission,
+        status: "unavailable",
+        version: 1,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
   return MiniKit.requestPermission({
     permission,
     fallback: () => ({

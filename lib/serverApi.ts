@@ -54,10 +54,14 @@ export function isRateLimited(
 }
 
 export function rateLimitResponse() {
-  return noStoreJson(
+  const response = noStoreJson(
     { error: "Too many requests. Please try again shortly." },
     { status: 429 },
   );
+
+  response.headers.set("Retry-After", "60");
+
+  return response;
 }
 
 export function isSafeMiniAppPath(path: string) {
