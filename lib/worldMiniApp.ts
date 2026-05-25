@@ -95,6 +95,31 @@ type RawWorldAppContext = {
   world_app_version?: number;
 };
 
+type RawMiniKitUser = {
+  pendingNotifications?: number;
+  pending_notifications?: number;
+  permissions?: WorldPermissionSnapshot;
+  profilePictureUrl?: string;
+  profile_picture_url?: string;
+  username?: string;
+  walletAddress?: string;
+  wallet_address?: string;
+};
+
+type RawWorldUserProfile =
+  | (WorldUserProfile & {
+      profile_picture_url?: string;
+      wallet_address?: string;
+    })
+  | {
+      data?: WorldUserProfile & {
+        profile_picture_url?: string;
+        wallet_address?: string;
+      };
+    }
+  | null
+  | undefined;
+
 export function isWorldMiniAppReady() {
   return MiniKit.isInstalled();
 }
@@ -103,18 +128,37 @@ function readMiniKitValue<T>(key: string): T | undefined {
   return (MiniKit as unknown as Record<string, T | undefined>)[key];
 }
 
+function normalizeWorldUserProfile(profile: RawWorldUserProfile): WorldUserProfile | null {
+  const profileRecord = profile as Record<string, unknown> | null | undefined;
+  const candidate = (
+    profileRecord && "data" in profileRecord
+      ? (profileRecord.data as RawWorldUserProfile)
+      : profile
+  ) as
+    | (WorldUserProfile & {
+        profile_picture_url?: string;
+        wallet_address?: string;
+      })
+    | null
+    | undefined;
+
+  if (!candidate) {
+    return null;
+  }
+
+  return {
+    profilePictureUrl: candidate.profilePictureUrl ?? candidate.profile_picture_url,
+    username: candidate.username,
+    walletAddress: candidate.walletAddress ?? candidate.wallet_address,
+  };
+}
+
 export function getWorldMiniAppContext(): WorldMiniAppContext {
   const rawWorldApp =
     typeof window === "undefined"
       ? undefined
       : (window as unknown as { WorldApp?: RawWorldAppContext }).WorldApp;
-  const user = readMiniKitValue<{
-    pendingNotifications?: number;
-    permissions?: WorldPermissionSnapshot;
-    profilePictureUrl?: string;
-    username?: string;
-    walletAddress?: string;
-  } | null>("user");
+  const user = readMiniKitValue<RawMiniKitUser | null>("user");
   const deviceProperties = readMiniKitValue<{
     deviceOS?: string;
     safeAreaInsets?: {
@@ -134,11 +178,13 @@ export function getWorldMiniAppContext(): WorldMiniAppContext {
       null,
     permissions: user?.permissions,
     pendingNotifications:
-      user?.pendingNotifications ?? rawWorldApp?.pending_notifications,
-    profilePictureUrl: user?.profilePictureUrl,
+      user?.pendingNotifications ??
+      user?.pending_notifications ??
+      rawWorldApp?.pending_notifications,
+    profilePictureUrl: user?.profilePictureUrl ?? user?.profile_picture_url,
     safeAreaInsets: deviceProperties?.safeAreaInsets ?? rawWorldApp?.safe_area_insets,
     username: user?.username,
-    walletAddress: user?.walletAddress ?? rawWorldApp?.wallet_address,
+    walletAddress: user?.walletAddress ?? user?.wallet_address ?? rawWorldApp?.wallet_address,
     worldAppVersion: deviceProperties?.worldAppVersion ?? rawWorldApp?.world_app_version,
   };
 }
@@ -157,14 +203,22 @@ export async function getWorldUserByAddress(
     return cached.promise;
   }
 
-  const promise = MiniKit.getUserByAddress(address).catch(() => null);
+  const promise = MiniKit.getUserByAddress(address)
+    .then((profile) => normalizeWorldUserProfile(profile))
+    .catch(() => null);
 
   worldUserCache.set(cacheKey, {
     expiresAt: Date.now() + worldUserCacheMs,
     promise,
   });
 
-  return promise;
+  const profile = await promise;
+
+  if (!profile?.username) {
+    worldUserCache.delete(cacheKey);
+  }
+
+  return profile;
 }
 
 export async function getWorldPermissions() {

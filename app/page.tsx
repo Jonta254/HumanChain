@@ -2767,13 +2767,22 @@ function isGeneratedHumanUsername(username?: string) {
   return Boolean(username?.startsWith("@human_"));
 }
 
+function isWorldUsernamePlaceholder(username?: string) {
+  return (
+    !username ||
+    username === "World username syncing" ||
+    username === "World account pending" ||
+    isGeneratedHumanUsername(username)
+  );
+}
+
 function getWorldDisplayUsername(
   worldContext: ReturnType<typeof getWorldMiniAppContext>,
   verifiedHuman?: VerifiedHuman | null,
 ) {
   return (
     normalizeWorldUsername(worldContext.username) ??
-    (isGeneratedHumanUsername(verifiedHuman?.username)
+    (isWorldUsernamePlaceholder(verifiedHuman?.username)
       ? undefined
       : verifiedHuman?.username) ??
     (verifiedHuman?.wallet ? "World username syncing" : "World account pending")
@@ -3282,18 +3291,20 @@ export default function HumanChainApp() {
 
     async function syncWorldProfile(reason = "background") {
       if (syncing) {
-        return;
+        return false;
       }
 
       if (
         reason !== "initial" &&
+        reason !== "retry" &&
         Date.now() - lastSyncAt < worldProfileFocusCooldownMs
       ) {
-        return;
+        return false;
       }
 
       syncing = true;
       lastSyncAt = Date.now();
+      let resolvedUsername = false;
 
       try {
         const beforeLookupContext = getWorldMiniAppContext();
@@ -3308,9 +3319,10 @@ export default function HumanChainApp() {
           afterLookupContext.profilePictureUrl ??
           worldUser?.profilePictureUrl ??
           beforeLookupContext.profilePictureUrl;
+        resolvedUsername = Boolean(username);
 
         if (cancelled) {
-          return;
+          return resolvedUsername;
         }
 
         setWorldContext({
@@ -3328,7 +3340,7 @@ export default function HumanChainApp() {
 
           const nextUsername =
             username ??
-            (isGeneratedHumanUsername(current.username)
+            (isWorldUsernamePlaceholder(current.username)
               ? "World username syncing"
               : current.username);
           const nextProfilePictureUrl =
@@ -3358,7 +3370,7 @@ export default function HumanChainApp() {
             if (
               !current ||
               current.wallet !== wallet ||
-              !isGeneratedHumanUsername(current.username)
+              !isWorldUsernamePlaceholder(current.username)
             ) {
               return current;
             }
@@ -3373,6 +3385,8 @@ export default function HumanChainApp() {
       } finally {
         syncing = false;
       }
+
+      return resolvedUsername;
     }
 
     function syncWhenVisible() {
@@ -3382,6 +3396,12 @@ export default function HumanChainApp() {
     }
 
     void syncWorldProfile("initial");
+    const quickRetry = window.setTimeout(() => {
+      void syncWorldProfile("retry");
+    }, 2500);
+    const hydratedRetry = window.setTimeout(() => {
+      void syncWorldProfile("retry");
+    }, 8000);
     window.addEventListener("focus", syncWhenVisible);
     document.addEventListener("visibilitychange", syncWhenVisible);
     const interval = window.setInterval(() => {
@@ -3392,6 +3412,8 @@ export default function HumanChainApp() {
       cancelled = true;
       window.removeEventListener("focus", syncWhenVisible);
       document.removeEventListener("visibilitychange", syncWhenVisible);
+      window.clearTimeout(quickRetry);
+      window.clearTimeout(hydratedRetry);
       window.clearInterval(interval);
     };
   }, [verifiedHuman?.mode, verifiedHuman?.wallet]);
@@ -3525,7 +3547,8 @@ export default function HumanChainApp() {
               launchLocation: current.launchLocation ?? memory.verifiedHuman?.launchLocation,
               profilePictureUrl: current.profilePictureUrl ?? memory.verifiedHuman?.profilePictureUrl,
               username:
-                current.username === "World username syncing"
+                isWorldUsernamePlaceholder(current.username) &&
+                !isWorldUsernamePlaceholder(memory.verifiedHuman?.username)
                   ? memory.verifiedHuman?.username ?? current.username
                   : current.username,
             }
