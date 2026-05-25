@@ -4743,6 +4743,88 @@ function HomeView({
       truth: trendingWisdom,
     },
   ];
+  const topMarketItem = marketplaceListings[0] ?? marketplaceItems[0];
+  const topMoment = humanPosts.find((post) => post.image) ?? humanPosts[0];
+  const homeHighlights = [
+    {
+      detail:
+        "Fresh verified listing with chat-first trade and visible trust signals.",
+      icon: <Store size={18} />,
+      label: "Trending market",
+      meta: "Open Market",
+      onClick: () => setTab("market"),
+      title: topMarketItem?.title ?? "Verified local listings",
+      tone: "market",
+    },
+    {
+      detail: trendingWisdom,
+      icon: <MessageCircleQuestion size={18} />,
+      label: "Best asked",
+      meta: `${dailyResponses.length} live answers`,
+      onClick: () => setTab("ask"),
+      title: dailyHumanQuestion.title,
+      tone: "ask",
+    },
+    {
+      detail:
+        topMoment?.caption ??
+        "Recent human moments from verified people are entering the chain.",
+      icon: <Sparkles size={18} />,
+      label: "Live moment",
+      meta: "Open Chains",
+      onClick: () => setTab("chains"),
+      title: topMoment?.author ?? "Moments from humans",
+      tone: "chains",
+    },
+    {
+      detail: "Monthly reflections, short stories, and file stories from verified humans.",
+      icon: <BookOpen size={18} />,
+      label: "Story pick",
+      meta: "Open Stories",
+      onClick: () => setTab("stories"),
+      title: "Human Story Library",
+      tone: "stories",
+    },
+  ];
+  const forYouActions = [
+    {
+      detail: dailyAnswered ? "Your answer is saved for today." : "+18 HP",
+      icon: <MessageCircleQuestion size={18} />,
+      label: "Answer today",
+      onClick: submitDailyAnswer,
+      status: dailyAnswered ? "Done" : "Open",
+    },
+    {
+      detail: "Share a recent real moment.",
+      icon: <Sparkles size={18} />,
+      label: "Post moment",
+      onClick: () => setTab("chains"),
+      status: `${humanPosts.filter((post) => post.image).length} live`,
+    },
+    {
+      detail: topMarketItem?.title ?? "Verified listings near humans.",
+      icon: <Store size={18} />,
+      label: "Check market",
+      onClick: () => setTab("market"),
+      status: "Trust-first",
+    },
+    {
+      detail: "Read calm, useful human reflections.",
+      icon: <BookOpen size={18} />,
+      label: "Read story",
+      onClick: () => setTab("stories"),
+      status: "Library",
+    },
+  ];
+  const levelUpSteps = [
+    { icon: <CalendarCheck size={17} />, label: "Check in", value: `${streak}d` },
+    { icon: <MessageCircleQuestion size={17} />, label: "Answer", value: "+18 HP" },
+    { icon: <Sparkles size={17} />, label: "Post", value: "Real moment" },
+    { icon: <Star size={17} />, label: "Save", value: "Wisdom" },
+    { icon: <ShieldCheck size={17} />, label: "Trade", value: "Safely" },
+  ];
+  const profileInitial =
+    worldHandle.replace(/^@/, "").trim().charAt(0).toUpperCase() || "H";
 
   function submitDailyAnswer() {
     if (dailyAnswered) {
@@ -4765,20 +4847,33 @@ function HomeView({
       },
       ...current,
     ]);
+    recordHistory({
+      title: "Daily Human answer",
+      detail: dailyDraft.trim() || "Answered today's HumanChain question.",
+      kind: "post",
+    });
     earnPoints(18, "Your Daily Human answer entered today's global verdict.");
   }
 
   return (
     <div className="screen">
-      <header className="home-compact-header">
-        <div className="home-brand-mark">
-          <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
-          <div>
-            <strong>HumanChain</strong>
-            <span>Verified human network</span>
-          </div>
+      <header className="human-home-topbar">
+        <button
+          aria-label="Open Human Passport"
+          className="human-home-avatar"
+          onClick={() => setTab("me")}
+          type="button"
+        >
+          {worldContext.profilePictureUrl ? (
+            <img alt="" src={worldContext.profilePictureUrl} />
+          ) : (
+            profileInitial
+          )}
+        </button>
+        <div className="human-home-topcopy">
+          <strong>HumanChain</strong>
+          <span>{worldHandle}</span>
         </div>
-        <span className="wallet-chip">Wallet connected</span>
         <button
           aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
           className={`hero-bell-button compact ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
@@ -4787,11 +4882,89 @@ function HomeView({
         >
           <Bell size={18} />
         </button>
+        <button
+          aria-label="Open HumanChain guide"
+          className="home-guide-button"
+          onClick={() => act("HumanChain guide", "Start with Ask, Chains, Market, Stories, then track your trust inside Me.")}
+          type="button"
+        >
+          <Compass size={18} />
+        </button>
       </header>
 
-      <section className="home-brand-message">
-        <span>Real humans. Real wisdom. Real trust.</span>
+      <section className="human-home-identity">
+        <div className="home-brand-row">
+          <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
+          <div>
+            <span>Verified human network</span>
+            <strong>HumanChain</strong>
+          </div>
+        </div>
+        <h1>Real humans. Real wisdom. Real trust.</h1>
         <p>Ask verified humans, share real stories, build your chain, and trade safely inside World App.</p>
+        <div className="human-trust-grid">
+          <button onClick={() => setTab("me")} type="button">
+            <strong>{chainScore}</strong>
+            <span>Human Score</span>
+          </button>
+          <button onClick={() => setTab("me")} type="button">
+            <strong>{points.toLocaleString()}</strong>
+            <span>HP contribution</span>
+          </button>
+          <button onClick={() => setTab("me")} type="button">
+            <strong>{streak}d</strong>
+            <span>Streak</span>
+          </button>
+          <button onClick={() => setTab("chains")} type="button">
+            <strong>{userPostCount}</strong>
+            <span>Posts</span>
+          </button>
+        </div>
+      </section>
+
+      <section className="human-service-grid" aria-label="HumanChain services">
+        <ActionButton
+          icon={<MessageCircleQuestion size={19} />}
+          label="Ask"
+          detail="Verified answers"
+          onClick={() => setTab("ask")}
+          tone="ask"
+        />
+        <ActionButton
+          icon={<Sparkles size={19} />}
+          label="Post"
+          detail="Recent moment"
+          onClick={() => setTab("chains")}
+          tone="chains"
+        />
+        <ActionButton
+          icon={<Store size={19} />}
+          label="Market"
+          detail="Safe trade"
+          onClick={() => setTab("market")}
+          tone="market"
+        />
+        <ActionButton
+          icon={<BookOpen size={19} />}
+          label="Stories"
+          detail="Human library"
+          onClick={() => setTab("stories")}
+          tone="stories"
+        />
+        <ActionButton
+          icon={<UserRound size={19} />}
+          label="Passport"
+          detail="Your trust"
+          onClick={() => setTab("me")}
+          tone="ask"
+        />
+        <ActionButton
+          icon={<Compass size={19} />}
+          label="Guide"
+          detail="How it works"
+          onClick={() => act("HumanChain guide", "Ask verified humans, post useful moments, publish stories, trade safely, and build your Human Passport.")}
+          tone="market"
+        />
       </section>
 
       <section className="mission-card">
@@ -4826,91 +4999,76 @@ function HomeView({
         </div>
       </section>
 
-      <section className="daily-card focused">
+      <section className="home-for-you">
         <div className="section-heading">
-          <span>Daily Human Question</span>
-          <span className="daily-reward">+18 HP</span>
+          <span>For You</span>
+          <Sparkles size={18} />
         </div>
-        <h2>What truth did life teach you this week?</h2>
-        <p>Answer with something real. The best answers help other humans think, heal, or act.</p>
-        <textarea
-          disabled={dailyAnswered}
-          onChange={(event) => setDailyDraft(event.target.value)}
-          placeholder="Write one honest answer..."
-          value={dailyAnswered ? `Answered at ${dailyAnsweredAt ?? "today"}` : dailyDraft}
-        />
-        <div className="daily-actions">
-          <button disabled={dailyAnswered} onClick={submitDailyAnswer} type="button">
-            {dailyAnswered ? "Answered today" : "Answer Today"}
-          </button>
-          <button onClick={() => setTab("ask")} type="button">
-            See Answers
-          </button>
-        </div>
-        <div className="daily-live compact">
-          <span>{dailyResponses.length} live answers today</span>
-          <span>{streak} day streak</span>
+        <div className="home-for-you-grid">
+          {forYouActions.map((action) => (
+            <button
+              className="home-for-you-card"
+              key={action.label}
+              onClick={action.onClick}
+              type="button"
+            >
+              <i>{action.icon}</i>
+              <strong>{action.label}</strong>
+              <span>{action.detail}</span>
+              <b>{action.status}</b>
+            </button>
+          ))}
         </div>
       </section>
 
-      <section className="passport-summary-card">
-        <div>
-          <span className="section-kicker">Your Human Passport</span>
-          <h2>{worldHandle}</h2>
-          <p>Score shows trust. HP shows contribution.</p>
-        </div>
-        <div className="passport-metrics">
-          <b>{chainScore}<small>Score</small></b>
-          <b>{points.toLocaleString()}<small>HP</small></b>
-          <b>{streak}<small>Streak</small></b>
-          <b>{userPostCount}<small>Posts</small></b>
-          <b>{savedItems}<small>Saved</small></b>
-        </div>
-        <button onClick={() => setTab("me")} type="button">
-          View Passport
-        </button>
-      </section>
-
-      <section className="quick-grid clean" aria-label="Quick actions">
-        <ActionButton
-          icon={<MessageCircleQuestion size={20} />}
-          label="Ask The World"
-          detail="Ask verified humans."
-          onClick={() => setTab("ask")}
-        />
-        <ActionButton
-          icon={<Sparkles size={20} />}
-          label="Post Moment"
-          detail="Share one real human moment."
-          onClick={() => setTab("chains")}
-        />
-        <ActionButton
-          icon={<Store size={20} />}
-          label="Human Market"
-          detail="Buy, sell, or promote safely."
-          onClick={() => setTab("market")}
-        />
-        <ActionButton
-          icon={<BookOpen size={20} />}
-          label="Read Stories"
-          detail="Explore human stories."
-          onClick={() => setTab("stories")}
-        />
-      </section>
-
-      <section className="wisdom-card">
+      <section className="home-trending-rail">
         <div className="section-heading">
-          <span>Trending Human Wisdom</span>
-          <Vote size={18} />
+          <span>Trending Now</span>
+          <Radio size={18} />
         </div>
-        <p>&ldquo;{trendingWisdom}&rdquo;</p>
-        <div>
-          <button onClick={() => act("Wisdom saved", "This wisdom was added to your saved list.")} type="button">
-            Save
-          </button>
-          <button onClick={() => setTab("ask")} type="button">
-            Read more
-          </button>
+        <div className="home-trending-scroll">
+          {homeHighlights.map((highlight) => (
+            <button
+              className={`home-trending-card ${highlight.tone}`}
+              key={highlight.label}
+              onClick={highlight.onClick}
+              type="button"
+            >
+              <span>
+                {highlight.icon}
+                {highlight.label}
+              </span>
+              <strong>{highlight.title}</strong>
+              <small>{highlight.detail}</small>
+              <b>{highlight.meta}</b>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-level-card">
+        <div className="section-heading">
+          <span>Level Up Your Chain</span>
+          <ShieldCheck size={18} />
+        </div>
+        <div className="home-level-scroll">
+          {levelUpSteps.map((step) => (
+            <button
+              key={step.label}
+              onClick={() => {
+                if (step.label === "Check in") setTab("me");
+                if (step.label === "Answer") setTab("ask");
+                if (step.label === "Post") setTab("chains");
+                if (step.label === "Save") act("Saved wisdom", "Save useful answers and stories to grow your Human Passport.");
+                if (step.label === "Trade") setTab("market");
+              }}
+              type="button"
+            >
+              {step.icon}
+              <strong>{step.label}</strong>
+              <span>{step.value}</span>
+            </button>
+          ))}
         </div>
       </section>
 
@@ -10239,14 +10397,16 @@ function ActionButton({
   label,
   detail,
   onClick,
+  tone,
 }: {
   icon: React.ReactNode;
   label: string;
   detail: string;
   onClick: () => void;
+  tone?: "ask" | "chains" | "market" | "stories";
 }) {
   return (
-    <button className="action-card" onClick={onClick} type="button">
+    <button className={`action-card ${tone ? `tone-${tone}` : ""}`} onClick={onClick} type="button">
       {icon}
       <strong>{label}</strong>
       <span>{detail}</span>
