@@ -11,6 +11,7 @@ const allowedKinds = new Set([
   "post",
   "marketplace-listing",
   "marketplace-bid",
+  "payment",
   "story",
 ]);
 

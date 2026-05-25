@@ -2557,6 +2557,10 @@ function formatPaymentAmount(amount: number, token: HumanChainPaymentToken) {
   return `${amount} ${humanChainPaymentTokens[token].label}`;
 }
 
+function getPaymentKind(feature: string): HistoryRecord["kind"] {
+  return feature.startsWith("tip-") || feature.endsWith("-tip") ? "tip" : "payment";
+}
+
 type DailyResponse = {
   user: string;
   text: string;
@@ -2581,7 +2585,16 @@ type HistoryRecord = {
   title: string;
   detail: string;
   time: string;
-  kind: "post" | "reaction" | "comment" | "tip" | "delete" | "profile" | "market" | "story";
+  kind:
+    | "comment"
+    | "delete"
+    | "market"
+    | "payment"
+    | "post"
+    | "profile"
+    | "reaction"
+    | "story"
+    | "tip";
 };
 
 type NotificationItem = {
@@ -2807,7 +2820,7 @@ function isWorldPermissionGranted(result: unknown) {
 }
 
 async function storeSafeData(
-  kind: "post" | "marketplace-listing" | "marketplace-bid" | "story",
+  kind: "post" | "marketplace-listing" | "marketplace-bid" | "payment" | "story",
   id: number | string,
   data: unknown,
 ) {
@@ -3451,6 +3464,7 @@ export default function HumanChainApp() {
       comment: "inbox",
       delete: "account",
       market: "marketplace",
+      payment: "payments",
       post: "account",
       profile: "account",
       reaction: "inbox",
@@ -3780,8 +3794,24 @@ export default function HumanChainApp() {
 
       await paymentPrompt.onConfirmed?.(amount);
 
+      const formattedAmount = formatPaymentAmount(amount, paymentToken);
+
+      recordHistory({
+        title: getPaymentKind(feature) === "tip" ? "Tip payment confirmed" : "Payment confirmed",
+        detail: `${formattedAmount} confirmed for ${paymentPrompt.title}. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`,
+        kind: getPaymentKind(feature),
+      });
+      void storeSafeData("payment", `${feature}-${Date.now()}`, {
+        amount,
+        feature,
+        human: verifiedHuman?.username,
+        paymentTitle: paymentPrompt.title,
+        token: paymentToken,
+        wallet: verifiedHuman?.wallet,
+      });
+
       setToast({
-        title: `${formatPaymentAmount(amount, paymentToken)} prepared`,
+        title: `${formattedAmount} confirmed`,
         detail: paymentPrompt.success,
       });
       setPaymentPrompt(null);
