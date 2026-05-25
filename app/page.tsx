@@ -7545,6 +7545,7 @@ function MarketplaceView({
   const [activeMarketItem, setActiveMarketItem] = useState<
     MarketplaceItem | MarketplaceListing | null
   >(null);
+  const [marketBusyAction, setMarketBusyAction] = useState<string | null>(null);
   const [listingDraft, setListingDraft] = useState({
     area: "",
     bidFloor: "",
@@ -7569,6 +7570,14 @@ function MarketplaceView({
 
   function getMarketItemKey(item: MarketplaceItem | MarketplaceListing) {
     return "id" in item ? `stored:${item.id}` : `seed:${item.seller}:${item.title}`;
+  }
+
+  function getMarketActionKey(action: string, item: MarketplaceItem | MarketplaceListing) {
+    return `${action}:${getMarketItemKey(item)}`;
+  }
+
+  function isMarketActionBusy(action: string, item: MarketplaceItem | MarketplaceListing) {
+    return marketBusyAction === getMarketActionKey(action, item);
   }
 
   function getMarketItemImages(item: MarketplaceItem | MarketplaceListing): string[] {
@@ -7922,16 +7931,27 @@ function MarketplaceView({
     });
   }
 
-  async function shareMarketItem(item: MarketplaceItem) {
+  async function shareMarketItem(item: MarketplaceItem | MarketplaceListing) {
+    const itemInfo = getMarketItemInfo(item);
+    const busyKey = getMarketActionKey("share", item);
+
+    if (marketBusyAction) {
+      return;
+    }
+
+    setMarketBusyAction(busyKey);
+
     try {
       await shareWithWorld({
-        title: `${item.title} on HumanChain Market`,
-        text: `${item.title} - ${item.price} near ${item.location}. ${item.condition}, ${item.photos} photos, seller ${item.seller}.`,
+        title: `${itemInfo.title} on HumanChain Market`,
+        text: `${itemInfo.title} - ${itemInfo.price} near ${itemInfo.area}. ${itemInfo.condition}, ${itemInfo.photos} photos, seller ${itemInfo.seller}.`,
         url: process.env.NEXT_PUBLIC_APP_URL,
       });
       act("Listing shared", "World share opened for this marketplace item.");
     } catch (error) {
       act("Share unavailable", error instanceof Error ? error.message : "Try sharing from World App.");
+    } finally {
+      setMarketBusyAction((current) => (current === busyKey ? null : current));
     }
   }
 
@@ -7956,8 +7976,9 @@ function MarketplaceView({
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
+    const result = (await response.json().catch(() => null)) as { ok?: boolean } | null;
 
-    return response.ok;
+    return response.ok && result?.ok !== false;
   }
 
   async function openSellerChat(item: MarketplaceItem | MarketplaceListing, intent = "interest") {
@@ -7984,6 +8005,22 @@ function MarketplaceView({
     }
   }
 
+  async function messageMarketplaceSeller(item: MarketplaceItem | MarketplaceListing) {
+    const busyKey = getMarketActionKey("chat", item);
+
+    if (marketBusyAction) {
+      return;
+    }
+
+    setMarketBusyAction(busyKey);
+
+    try {
+      await openSellerChat(item);
+    } finally {
+      setMarketBusyAction((current) => (current === busyKey ? null : current));
+    }
+  }
+
   async function bookMarketItem(item: MarketplaceItem | MarketplaceListing) {
     if (!locationReady) {
       act(
@@ -7995,6 +8032,14 @@ function MarketplaceView({
 
     const itemInfo = getMarketItemInfo(item);
     const itemKey = getMarketItemKey(item);
+    const busyKey = getMarketActionKey("hold", item);
+
+    if (marketBusyAction) {
+      return;
+    }
+
+    setMarketBusyAction(busyKey);
+
     const hold: MarketHold = {
       area: itemInfo.area,
       buyer: humanIdentity?.username ?? "@you",
@@ -8010,30 +8055,34 @@ function MarketplaceView({
       status: itemInfo.sellerWallet ? "notified" : "local",
     };
 
-    setMarketHolds((current) => [hold, ...current.filter((entry) => entry.itemKey !== itemKey)]);
-    recordHistory({
-      title: "Marketplace hold started",
-      detail: `${itemInfo.title} was held for ${hold.buyer}. Seller ${itemInfo.seller} can continue in World Chat.`,
-      kind: "market",
-    });
-    void storeSafeData("marketplace-bid", `hold-${itemKey}-${hold.id}`, hold);
+    try {
+      setMarketHolds((current) => [hold, ...current.filter((entry) => entry.itemKey !== itemKey)]);
+      recordHistory({
+        title: "Marketplace hold started",
+        detail: `${itemInfo.title} was held for ${hold.buyer}. Seller ${itemInfo.seller} can continue in World Chat.`,
+        kind: "market",
+      });
+      void storeSafeData("marketplace-bid", `hold-${itemKey}-${hold.id}`, hold);
 
-    const notificationMessage = `${hold.buyer} wants to hold ${itemInfo.title}. Location: ${marketLocation.label}.`;
-    const notificationSent = await notifyMarketplaceSeller(item, notificationMessage).catch(() => false);
-    await openSellerChat(item, "hold");
-    setMarketHolds((current) =>
-      current.map((entry) =>
-        entry.id === hold.id
-          ? { ...entry, status: notificationSent ? "notified" : entry.status }
-          : entry,
-      ),
-    );
-    act(
-      notificationSent ? "Hold sent" : "Hold saved",
-      notificationSent
-        ? "The seller received a marketplace notification and World Chat is ready."
-        : "The hold is saved locally and World Chat is ready when available.",
-    );
+      const notificationMessage = `${hold.buyer} wants to hold ${itemInfo.title}. Location: ${marketLocation.label}.`;
+      const notificationSent = await notifyMarketplaceSeller(item, notificationMessage).catch(() => false);
+      await openSellerChat(item, "hold");
+      setMarketHolds((current) =>
+        current.map((entry) =>
+          entry.id === hold.id
+            ? { ...entry, status: notificationSent ? "notified" : entry.status }
+            : entry,
+        ),
+      );
+      act(
+        notificationSent ? "Hold sent" : "Hold saved",
+        notificationSent
+          ? "The seller received a marketplace notification and World Chat is ready."
+          : "The hold is saved locally and World Chat is ready when available.",
+      );
+    } finally {
+      setMarketBusyAction((current) => (current === busyKey ? null : current));
+    }
   }
 
   function getTopBid(item: MarketplaceItem) {
@@ -8079,6 +8128,14 @@ function MarketplaceView({
       return;
     }
 
+    const busyKey = getMarketActionKey("bid", item);
+
+    if (marketBusyAction) {
+      return;
+    }
+
+    setMarketBusyAction(busyKey);
+
     const bidId = (marketBids[item.title]?.length ?? 0) + 1;
     const bid: MarketBid = {
       amount: nextBid,
@@ -8096,41 +8153,40 @@ function MarketplaceView({
       dataStorageStatus: "local-safe",
     };
 
-    setMarketBids((current) => ({
-      ...current,
-      [item.title]: [bid, ...(current[item.title] ?? [])],
-    }));
-    void storeSafeData("marketplace-bid", `${item.title}-${bid.id}`, {
-      ...bid,
-      listing: item.title,
-      seller: item.seller,
-      sellerTarget: item.bidding.target,
-    }).then((receipt) => {
-      if (!receipt.ok) {
-        return;
-      }
-
+    try {
       setMarketBids((current) => ({
         ...current,
-        [item.title]: (current[item.title] ?? []).map((offer) =>
-          offer.id === bidId
-            ? {
-                ...offer,
-                dataReceiptUrl: receipt.url,
-                dataStorageStatus: "cloud-safe",
-              }
-            : offer,
-        ),
+        [item.title]: [bid, ...(current[item.title] ?? [])],
       }));
-    });
-    setBidDrafts((current) => ({ ...current, [item.title]: "" }));
-    recordHistory({
-      title: nextBid >= item.bidding.target ? "Target bid placed" : "Marketplace bid placed",
-      detail: `${nextBid} WLD bid placed on ${item.title}. The bid is saved, ranked automatically, and sent to seller chat when available.`,
-      kind: "market",
-    });
+      void storeSafeData("marketplace-bid", `${item.title}-${bid.id}`, {
+        ...bid,
+        listing: item.title,
+        seller: item.seller,
+        sellerTarget: item.bidding.target,
+      }).then((receipt) => {
+        if (!receipt.ok) {
+          return;
+        }
 
-    try {
+        setMarketBids((current) => ({
+          ...current,
+          [item.title]: (current[item.title] ?? []).map((offer) =>
+            offer.id === bidId
+              ? {
+                  ...offer,
+                  dataReceiptUrl: receipt.url,
+                  dataStorageStatus: "cloud-safe",
+                }
+              : offer,
+          ),
+        }));
+      });
+      setBidDrafts((current) => ({ ...current, [item.title]: "" }));
+      recordHistory({
+        title: nextBid >= item.bidding.target ? "Target bid placed" : "Marketplace bid placed",
+        detail: `${nextBid} WLD bid placed on ${item.title}. The bid is saved, ranked automatically, and sent to seller chat when available.`,
+        kind: "market",
+      });
       await chatWithWorld({
         message: `I placed a ${nextBid} WLD bid on ${item.title}. Let me know if this is close enough to accept.`,
         to: [item.seller.replace(/^@/, "")],
@@ -8144,6 +8200,8 @@ function MarketplaceView({
       act("Bid sent to seller", "World Chat opened so the buyer and seller can confirm details directly.");
     } catch (error) {
       act("Bid saved", error instanceof Error ? error.message : "Bid is saved in the mini app preview.");
+    } finally {
+      setMarketBusyAction((current) => (current === busyKey ? null : current));
     }
   }
 
@@ -8249,15 +8307,22 @@ function MarketplaceView({
             </div>
           </dl>
           <div className="market-detail-actions">
-            <button onClick={() => void bookMarketItem(activeMarketItem)} type="button">
-              Book / hold item
-            </button>
             <button
-              className="secondary"
-              onClick={() => void openSellerChat(activeMarketItem)}
+              aria-busy={isMarketActionBusy("hold", activeMarketItem)}
+              disabled={Boolean(marketBusyAction)}
+              onClick={() => void bookMarketItem(activeMarketItem)}
               type="button"
             >
-              Message seller
+              {isMarketActionBusy("hold", activeMarketItem) ? "Holding..." : "Book / hold item"}
+            </button>
+            <button
+              aria-busy={isMarketActionBusy("chat", activeMarketItem)}
+              className="secondary"
+              disabled={Boolean(marketBusyAction)}
+              onClick={() => void messageMarketplaceSeller(activeMarketItem)}
+              type="button"
+            >
+              {isMarketActionBusy("chat", activeMarketItem) ? "Opening..." : "Message seller"}
             </button>
           </div>
         </section>
@@ -8675,8 +8740,13 @@ function MarketplaceView({
                         placeholder={`${item.bidding.floor}+ WLD`}
                         value={bidDrafts[item.title] ?? ""}
                       />
-                      <button onClick={() => void placeBid(item)} type="button">
-                        Bid
+                      <button
+                        aria-busy={isMarketActionBusy("bid", item)}
+                        disabled={Boolean(marketBusyAction)}
+                        onClick={() => void placeBid(item)}
+                        type="button"
+                      >
+                        {isMarketActionBusy("bid", item) ? "Sending..." : "Bid"}
                       </button>
                     </div>
                     <div className="bid-stack">
@@ -8701,20 +8771,24 @@ function MarketplaceView({
                   Tip item
                 </button>
                 <button
+                  aria-busy={isMarketActionBusy("chat", item)}
+                  disabled={Boolean(marketBusyAction)}
                   onClick={() => {
-                    void openSellerChat(item);
+                    void messageMarketplaceSeller(item);
                   }}
                   type="button"
                 >
-                  Human Chat
+                  {isMarketActionBusy("chat", item) ? "Opening..." : "Human Chat"}
                 </button>
                 <button
+                  aria-busy={isMarketActionBusy("share", item)}
+                  disabled={Boolean(marketBusyAction)}
                   onClick={() => {
                     void shareMarketItem(item);
                   }}
                   type="button"
                 >
-                  Share
+                  {isMarketActionBusy("share", item) ? "Sharing..." : "Share"}
                 </button>
               </div>
             </article>

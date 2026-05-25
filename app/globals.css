@@ -5670,6 +5670,13 @@ button.danger {
   font-weight: 900;
 }
 
+.market-detail-actions button:disabled,
+.market-card-actions button:disabled,
+.bid-row button:disabled {
+  cursor: wait;
+  opacity: 0.66;
+}
+
 .market-detail-actions button.secondary {
   border: 1px solid var(--line);
   color: var(--green);
