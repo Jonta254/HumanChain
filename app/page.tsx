@@ -2714,6 +2714,15 @@ type AccountSyncSnapshot = {
   version: 1;
 };
 
+type PublicFeedPayload = {
+  blobStorageReady?: boolean;
+  marketplaceListings?: MarketplaceListing[];
+  ok?: boolean;
+  pendingSetup?: boolean;
+  posts?: HumanPost[];
+  stories?: UserStory[];
+};
+
 function formatWorldLaunchLocation(location?: string | null) {
   const labels: Record<string, string> = {
     "app-store": "App Store",
@@ -3152,6 +3161,7 @@ export default function HumanChainApp() {
   const [accountSyncStatus, setAccountSyncStatus] = useState<
     "idle" | "loading" | "ready" | "saving" | "offline"
   >(verifiedHuman?.mode === "world" ? "loading" : "idle");
+  const [feedRefreshNonce, setFeedRefreshNonce] = useState(0);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -3505,6 +3515,68 @@ export default function HumanChainApp() {
     saveJsonToStorage(storageKeys.userStories, snapshot.localRecords?.userStories ?? []);
   }
 
+  function mergeLatestHumanChainFeed(payload: PublicFeedPayload) {
+    const wallet = verifiedHuman?.wallet?.toLowerCase();
+
+    if (payload.posts?.length) {
+      setHumanPosts((current) => {
+        const seen = new Set(current.map((post) => `${post.id}:${post.author}:${post.image}`));
+        const incoming = payload.posts
+          ?.filter((post) => Boolean(post.image))
+          .map((post) => ({
+            ...post,
+            owner: Boolean(post.authorWallet && post.authorWallet.toLowerCase() === wallet),
+            storageStatus: post.storageStatus ?? "cloud-safe",
+          }))
+          .filter((post) => !seen.has(`${post.id}:${post.author}:${post.image}`)) ?? [];
+
+        return incoming.length ? [...incoming, ...current].slice(0, 90) : current;
+      });
+    }
+
+    if (payload.marketplaceListings?.length) {
+      setMarketplaceListings((current) => {
+        const seen = new Set(current.map((listing) => `${listing.id}:${listing.seller}:${listing.title}`));
+        const incoming = payload.marketplaceListings
+          ?.map((listing) => ({
+            ...listing,
+            dataStorageStatus: listing.dataStorageStatus ?? "cloud-safe",
+          }))
+          .filter((listing) => !seen.has(`${listing.id}:${listing.seller}:${listing.title}`)) ?? [];
+
+        return incoming.length ? [...incoming, ...current].slice(0, 70) : current;
+      });
+    }
+
+    if (payload.stories?.length) {
+      const storedStories = loadJsonFromStorage<UserStory[]>(storageKeys.userStories, []);
+      const seen = new Set(storedStories.map((story) => `${story.id}:${story.author}:${story.title}`));
+      const incoming = payload.stories
+        .map((story) => ({
+          ...story,
+          owner: Boolean(story.authorWallet && story.authorWallet.toLowerCase() === wallet),
+          storageStatus: story.storageStatus ?? "cloud-safe",
+        }))
+        .filter((story) => !seen.has(`${story.id}:${story.author}:${story.title}`));
+
+      if (incoming.length) {
+        saveJsonToStorage(storageKeys.userStories, [...incoming, ...storedStories].slice(0, 60));
+        setFeedRefreshNonce((current) => current + 1);
+      }
+    }
+  }
+
+  async function refreshLatestHumanChainFeed() {
+    const response = await fetch("/api/data/feed", {
+      cache: "no-store",
+    });
+    const payload = (await response.json()) as PublicFeedPayload;
+
+    if (payload.ok && payload.blobStorageReady) {
+      mergeLatestHumanChainFeed(payload);
+    }
+  }
+
   async function syncHumanAccount(action: "load" | "save", snapshot?: AccountSyncSnapshot) {
     if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") {
       return null;
@@ -3586,6 +3658,44 @@ export default function HumanChainApp() {
     // Snapshot helpers read the latest mounted app state; this effect should only run when the World wallet changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verifiedHuman?.mode, verifiedHuman?.wallet]);
+
+  useEffect(() => {
+    if (!verifiedHuman) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function refreshFeedSafely() {
+      try {
+        if (!cancelled) {
+          await refreshLatestHumanChainFeed();
+        }
+      } catch {
+        // The app remains usable from local/account storage if the shared feed is briefly unavailable.
+      }
+    }
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") {
+        void refreshFeedSafely();
+      }
+    }
+
+    void refreshFeedSafely();
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    const interval = window.setInterval(refreshFeedSafely, 75_000);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.clearInterval(interval);
+    };
+    // The feed merge reads current wallet state and should restart only when the signed-in human changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifiedHuman?.wallet]);
 
   useEffect(() => {
     if (
@@ -4095,6 +4205,7 @@ export default function HumanChainApp() {
             humanIdentity={verifiedHuman}
             keepStreak={keepStreak}
             openPayment={openPayment}
+            recordHistory={recordHistory}
           />
         );
       case "chains":
@@ -4120,6 +4231,7 @@ export default function HumanChainApp() {
             <StoriesView
               act={act}
               earnPoints={earnPoints}
+              feedRefreshNonce={feedRefreshNonce}
               humanIdentity={verifiedHuman}
               keepStreak={keepStreak}
               openPayment={openPayment}
@@ -4205,6 +4317,7 @@ export default function HumanChainApp() {
             onChangeLanguage={setAppLanguage}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             onOpenNotifications={() => setNotificationCenterOpen(true)}
+            recordHistory={recordHistory}
             setDailyAnsweredAt={setDailyAnsweredAt}
             setDailyAnsweredDate={setDailyAnsweredDate}
             setActiveField={setActiveField}
@@ -4485,6 +4598,7 @@ function HomeView({
   onEnableNotifications,
   onOpenNotifications,
   points,
+  recordHistory,
   resetHistory,
   savedItems,
   setDailyAnsweredAt,
@@ -4515,6 +4629,7 @@ function HomeView({
   onEnableNotifications: () => void | Promise<void>;
   onOpenNotifications: () => void;
   points: number;
+  recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   resetHistory: () => void;
   savedItems: number;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
@@ -4778,6 +4893,11 @@ function HomeView({
                 },
                 ...current,
               ]);
+              recordHistory({
+                title: "Daily Human answer",
+                detail: dailyDraft.trim() || "Answered today's HumanChain question.",
+                kind: "post",
+              });
               earnPoints(18, "Your Daily Human answer entered today's global verdict.");
             }}
             type="button"
@@ -4877,12 +4997,14 @@ function AskView({
   humanIdentity,
   keepStreak,
   openPayment,
+  recordHistory,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   humanIdentity: HumanIdentity | null;
   keepStreak: (detail?: string) => void;
   openPayment: OpenPayment;
+  recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
 }) {
   const [question, setQuestion] = useState("");
   const [selectedMode, setSelectedMode] = useState("Text");
@@ -4968,6 +5090,11 @@ function AskView({
       ...current,
     ]);
     setQuestion("");
+    recordHistory({
+      title: targetCountry === "World" ? "World question published" : `${targetCountry} question published`,
+      detail: `${selectedTopic}: ${cleanQuestion}`,
+      kind: "post",
+    });
     earnPoints(20, "Useful questions build your future earning score.");
     keepStreak("Your question is live and the Human Verdict is forming.");
   }
@@ -4998,6 +5125,11 @@ function AskView({
       ),
     );
     setAnswerDrafts((current) => ({ ...current, [questionText]: "" }));
+    recordHistory({
+      title: "Ask answer published",
+      detail: draft,
+      kind: "comment",
+    });
     earnPoints(15, "Your answer helped another verified human.");
     keepStreak("Your answer joined the Human Ask board.");
   }
@@ -5494,6 +5626,11 @@ function ChainsView({
       ...current,
     ]);
     setLinkText("");
+    recordHistory({
+      title: "Live chain link added",
+      detail: text,
+      kind: "post",
+    });
     earnPoints(12, "Your chain link added value to today's field.");
     keepStreak("Your link joined today's global chain.");
   }
@@ -6329,6 +6466,7 @@ function ChainsView({
 function StoriesView({
   act,
   earnPoints,
+  feedRefreshNonce,
   humanIdentity,
   keepStreak,
   openPayment,
@@ -6337,6 +6475,7 @@ function StoriesView({
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
+  feedRefreshNonce: number;
   humanIdentity: HumanIdentity | null;
   keepStreak: (detail?: string) => void;
   openPayment: OpenPayment;
@@ -6384,6 +6523,22 @@ function StoriesView({
   useEffect(() => {
     saveJsonToStorage(storageKeys.userStories, userStories);
   }, [userStories]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setUserStories((current) => {
+        const storedStories = loadJsonFromStorage<UserStory[]>(storageKeys.userStories, []);
+        const seen = new Set(current.map((story) => `${story.id}:${story.author}:${story.title}`));
+        const incoming = storedStories.filter(
+          (story) => !seen.has(`${story.id}:${story.author}:${story.title}`),
+        );
+
+        return incoming.length ? [...incoming, ...current].slice(0, 60) : current;
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [feedRefreshNonce]);
 
   function saveStory() {
     setSavedItems((value) => value + 1);

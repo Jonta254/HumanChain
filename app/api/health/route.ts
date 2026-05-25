@@ -1,15 +1,34 @@
+import { list } from "@vercel/blob";
 import { noStoreJson } from "@/lib/serverApi";
 import { getHumanChainTreasury, getWorldAppId } from "@/lib/worldConfig";
 
-export function GET() {
+export async function GET() {
   const worldAppId = getWorldAppId();
   const treasury = getHumanChainTreasury();
+  let blobStorageReady = false;
+  let blobStorageStatus = process.env.BLOB_READ_WRITE_TOKEN
+    ? "Blob token configured; checking store."
+    : "BLOB_READ_WRITE_TOKEN is not configured.";
+
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      await list({ limit: 1 });
+      blobStorageReady = true;
+      blobStorageStatus = "Vercel Blob store connected.";
+    } catch (error) {
+      blobStorageStatus =
+        error instanceof Error
+          ? error.message
+          : "Vercel Blob store check failed.";
+    }
+  }
 
   return noStoreJson({
     ok: true,
     app: "HumanChain",
-    accountSyncReady: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-    blobStorageReady: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    accountSyncReady: blobStorageReady,
+    blobStorageReady,
+    blobStorageStatus,
     paymentsReady: Boolean(treasury),
     treasury,
     worldAppId,
