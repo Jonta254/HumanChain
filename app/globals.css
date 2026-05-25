@@ -39,7 +39,9 @@ body {
 
 html[data-world-mini-app="true"],
 html[data-world-mini-app="true"] body {
-  overflow-y: auto;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
   overscroll-behavior-y: contain;
   touch-action: pan-y;
 }
@@ -79,16 +81,26 @@ button {
 
 html[data-world-mini-app="true"] .app-shell {
   display: block;
+  height: 100dvh;
+  height: var(--app-height);
   min-height: 100dvh;
   min-height: var(--app-height);
+  overflow: hidden;
   background: var(--paper);
 }
 
 html[data-world-mini-app="true"] .phone-frame {
   width: 100%;
   max-width: none;
+  height: 100dvh;
+  height: var(--app-height);
   min-height: 100dvh;
   min-height: var(--app-height);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   box-shadow: none;
 }
 
