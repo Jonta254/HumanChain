@@ -3073,6 +3073,7 @@ export default function HumanChainApp() {
   const [paymentToken, setPaymentToken] = useState<HumanChainPaymentToken>(
     defaultHumanChainPaymentToken,
   );
+  const [paymentBusy, setPaymentBusy] = useState(false);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -3522,6 +3523,10 @@ export default function HumanChainApp() {
   }
 
   function openPayment(payment: PaymentRequest) {
+    if (paymentBusy) {
+      return;
+    }
+
     setPaymentPrompt(payment);
   }
 
@@ -3660,7 +3665,7 @@ export default function HumanChainApp() {
   }
 
   async function confirmPayment(customAmount?: number) {
-    if (!paymentPrompt) {
+    if (!paymentPrompt || paymentBusy) {
       return;
     }
 
@@ -3677,6 +3682,8 @@ export default function HumanChainApp() {
       return;
     }
 
+    setPaymentBusy(true);
+
     try {
       const result = await payWithWorld({
         amount,
@@ -3690,6 +3697,7 @@ export default function HumanChainApp() {
           title: "World setup needed",
           detail: result.message,
         });
+        setPaymentBusy(false);
         return;
       }
 
@@ -3698,6 +3706,7 @@ export default function HumanChainApp() {
           title: "Open in World App",
           detail: result.message,
         });
+        setPaymentBusy(false);
         return;
       }
 
@@ -3706,6 +3715,7 @@ export default function HumanChainApp() {
           title: "Payment not confirmed",
           detail: "World payments are only counted after backend verification.",
         });
+        setPaymentBusy(false);
         return;
       }
 
@@ -3714,6 +3724,7 @@ export default function HumanChainApp() {
           title: "Payment not prepared",
           detail: result.error,
         });
+        setPaymentBusy(false);
         return;
       }
     } catch (error) {
@@ -3721,25 +3732,35 @@ export default function HumanChainApp() {
         title: "World payment failed",
         detail: error instanceof Error ? error.message : "Try again in World App.",
       });
+      setPaymentBusy(false);
       return;
     }
 
-    const earnedPoints = paymentPrompt.points ?? 0;
+    try {
+      const earnedPoints = paymentPrompt.points ?? 0;
 
-    if (earnedPoints > 0) {
-      setPoints((current) => current + earnedPoints);
+      if (earnedPoints > 0) {
+        setPoints((current) => current + earnedPoints);
+      }
+
+      await paymentPrompt.onConfirmed?.(amount);
+
+      setToast({
+        title: `${formatPaymentAmount(amount, paymentToken)} prepared`,
+        detail: paymentPrompt.success,
+      });
+      setPaymentPrompt(null);
+    } finally {
+      setPaymentBusy(false);
     }
-
-    await paymentPrompt.onConfirmed?.(amount);
-
-    setToast({
-      title: `${formatPaymentAmount(amount, paymentToken)} prepared`,
-      detail: paymentPrompt.success,
-    });
-    setPaymentPrompt(null);
   }
 
   const activeView = (() => {
+    const unreadNotificationCount = Math.max(
+      notifications.filter((notification) => !notification.read).length,
+      worldContext.pendingNotifications ?? 0,
+    );
+
     switch (tab) {
       case "ask":
         return (
@@ -3854,7 +3875,7 @@ export default function HumanChainApp() {
             links={links}
             marketplaceListings={marketplaceListings}
             notificationReady={notificationReady}
-            notificationUnreadCount={notifications.filter((notification) => !notification.read).length}
+            notificationUnreadCount={unreadNotificationCount}
             onChangeLanguage={setAppLanguage}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             onOpenNotifications={() => setNotificationCenterOpen(true)}
@@ -3906,6 +3927,7 @@ export default function HumanChainApp() {
             onCancel={() => setPaymentPrompt(null)}
             onChangeToken={setPaymentToken}
             onConfirm={confirmPayment}
+            busy={paymentBusy}
             payment={paymentPrompt}
             selectedToken={paymentToken}
           />
@@ -9349,12 +9371,14 @@ function MeView({
 }
 
 function PaymentSheet({
+  busy,
   onCancel,
   onChangeToken,
   onConfirm,
   payment,
   selectedToken,
 }: {
+  busy: boolean;
   onCancel: () => void;
   onChangeToken: (token: HumanChainPaymentToken) => void;
   onConfirm: (amount?: number) => void | Promise<void>;
@@ -9424,11 +9448,11 @@ function PaymentSheet({
           <small>Confirming this also records +{payment.points} HP value.</small>
         ) : null}
         <div className="payment-actions">
-          <button onClick={onCancel} type="button">
+          <button disabled={busy} onClick={onCancel} type="button">
             Cancel
           </button>
-          <button disabled={!amountValid} onClick={() => onConfirm(amount)} type="button">
-            Prepare Payment
+          <button disabled={!amountValid || busy} onClick={() => onConfirm(amount)} type="button">
+            {busy ? "Confirming..." : "Prepare Payment"}
           </button>
         </div>
       </div>

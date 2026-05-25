@@ -49,6 +49,7 @@ export type WorldMiniAppContext = {
   deviceOS?: string;
   launchLocation?: string | null;
   permissions?: WorldPermissionSnapshot;
+  pendingNotifications?: number;
   profilePictureUrl?: string;
   safeAreaInsets?: {
     bottom: number;
@@ -98,6 +99,7 @@ export function getWorldMiniAppContext(): WorldMiniAppContext {
       ? undefined
       : (window as unknown as { WorldApp?: RawWorldAppContext }).WorldApp;
   const user = readMiniKitValue<{
+    pendingNotifications?: number;
     permissions?: WorldPermissionSnapshot;
     profilePictureUrl?: string;
     username?: string;
@@ -121,6 +123,8 @@ export function getWorldMiniAppContext(): WorldMiniAppContext {
       rawWorldApp?.location?.open_origin ??
       null,
     permissions: user?.permissions,
+    pendingNotifications:
+      user?.pendingNotifications ?? rawWorldApp?.pending_notifications,
     profilePictureUrl: user?.profilePictureUrl,
     safeAreaInsets: deviceProperties?.safeAreaInsets ?? rawWorldApp?.safe_area_insets,
     username: user?.username,

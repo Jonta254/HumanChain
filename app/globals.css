@@ -5672,7 +5672,8 @@ button.danger {
 
 .market-detail-actions button:disabled,
 .market-card-actions button:disabled,
-.bid-row button:disabled {
+.bid-row button:disabled,
+.payment-actions button:disabled {
   cursor: wait;
   opacity: 0.66;
 }
