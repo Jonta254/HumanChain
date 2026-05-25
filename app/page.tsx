@@ -2694,6 +2694,26 @@ type AppMemory = {
   verifiedHuman: VerifiedHuman | null;
 };
 
+type AccountSyncSnapshot = {
+  appMemory: AppMemory;
+  historyRecords: HistoryRecord[];
+  humanPosts: HumanPost[];
+  links: ChainLink[];
+  localRecords: {
+    askCountryRoutes: string[];
+    askThreads: AskThread[];
+    chainPremium: ChainPremiumState;
+    marketBids: Record<string, MarketBid[]>;
+    marketHolds: MarketHold[];
+    marketRatings: Record<string, { rating: number; tips: number }>;
+    userStories: UserStory[];
+  };
+  marketplaceListings: MarketplaceListing[];
+  notifications: NotificationItem[];
+  savedAt: string;
+  version: 1;
+};
+
 function formatWorldLaunchLocation(location?: string | null) {
   const labels: Record<string, string> = {
     "app-store": "App Store",
@@ -3052,6 +3072,10 @@ function loadStoredAppMemory(): AppMemory {
   };
 }
 
+function loadLocalRecord<T>(key: string, fallback: T) {
+  return loadJsonFromStorage<T>(key, fallback);
+}
+
 export default function HumanChainApp() {
   const [storedAppMemory] = useState(loadStoredAppMemory);
   const [tab, setTab] = useState<Tab>("home");
@@ -3122,6 +3146,12 @@ export default function HumanChainApp() {
     defaultHumanChainPaymentToken,
   );
   const [paymentBusy, setPaymentBusy] = useState(false);
+  const [accountSyncReady, setAccountSyncReady] = useState(
+    verifiedHuman?.mode !== "world",
+  );
+  const [accountSyncStatus, setAccountSyncStatus] = useState<
+    "idle" | "loading" | "ready" | "saving" | "offline"
+  >(verifiedHuman?.mode === "world" ? "loading" : "idle");
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -3370,6 +3400,236 @@ export default function HumanChainApp() {
     savedItems,
     streak,
     verifiedHuman,
+  ]);
+
+  function getCurrentAppMemory(): AppMemory {
+    return {
+      appLanguageCode: appLanguage.code,
+      dailyAnswered,
+      dailyAnsweredAt,
+      dailyAnsweredDate,
+      lastCheckInAt,
+      lastCheckInDate,
+      marketLocation,
+      notificationReady,
+      notificationWelcomeSent,
+      points,
+      savedItems,
+      streak,
+      verifiedHuman,
+    };
+  }
+
+  function buildAccountSnapshot(): AccountSyncSnapshot {
+    return {
+      appMemory: getCurrentAppMemory(),
+      historyRecords,
+      humanPosts,
+      links,
+      localRecords: {
+        askCountryRoutes: loadLocalRecord<string[]>(storageKeys.askCountryRoutes, []),
+        askThreads: loadLocalRecord<AskThread[]>(storageKeys.askThreads, starterAskThreads),
+        chainPremium: loadLocalRecord<ChainPremiumState>(storageKeys.chainPremium, {
+          circleCreated: false,
+          pulseUnlocked: false,
+        }),
+        marketBids: loadLocalRecord<Record<string, MarketBid[]>>(storageKeys.bids, getInitialMarketBids()),
+        marketHolds: loadLocalRecord<MarketHold[]>(storageKeys.marketHolds, []),
+        marketRatings: loadLocalRecord<Record<string, { rating: number; tips: number }>>(
+          storageKeys.marketRatings,
+          {},
+        ),
+        userStories: loadLocalRecord<UserStory[]>(storageKeys.userStories, []),
+      },
+      marketplaceListings,
+      notifications,
+      savedAt: new Date().toISOString(),
+      version: 1,
+    };
+  }
+
+  function restoreAccountSnapshot(snapshot: AccountSyncSnapshot) {
+    setHumanPosts(snapshot.humanPosts ?? initialHumanPosts);
+    setLinks(snapshot.links ?? initialLinks);
+    setMarketplaceListings(snapshot.marketplaceListings ?? []);
+    setHistoryRecords(snapshot.historyRecords ?? []);
+    setNotifications(mergeFirstRunNotifications(snapshot.notifications ?? firstRunNotifications));
+
+    const memory = snapshot.appMemory;
+
+    if (memory) {
+      setAppLanguage(
+        appLanguages.find((language) => language.code === memory.appLanguageCode) ?? appLanguages[0],
+      );
+      setDailyAnswered(memory.dailyAnsweredDate === getLocalDateKey() ? memory.dailyAnswered : false);
+      setDailyAnsweredAt(memory.dailyAnsweredDate === getLocalDateKey() ? memory.dailyAnsweredAt : null);
+      setDailyAnsweredDate(memory.dailyAnsweredDate === getLocalDateKey() ? memory.dailyAnsweredDate : null);
+      setLastCheckInAt(memory.lastCheckInAt);
+      setLastCheckInDate(memory.lastCheckInDate);
+      setMarketLocation(memory.marketLocation);
+      setNotificationReady(memory.notificationReady);
+      setNotificationWelcomeSent(memory.notificationWelcomeSent);
+      setPoints(memory.points);
+      setSavedItems(memory.savedItems);
+      setStreak(memory.streak);
+      setVerifiedHuman((current) =>
+        current
+          ? {
+              ...current,
+              launchLocation: current.launchLocation ?? memory.verifiedHuman?.launchLocation,
+              profilePictureUrl: current.profilePictureUrl ?? memory.verifiedHuman?.profilePictureUrl,
+              username:
+                current.username === "World username syncing"
+                  ? memory.verifiedHuman?.username ?? current.username
+                  : current.username,
+            }
+          : memory.verifiedHuman,
+      );
+    }
+
+    saveJsonToStorage(storageKeys.appMemory, memory);
+    saveJsonToStorage(storageKeys.posts, snapshot.humanPosts ?? initialHumanPosts);
+    saveJsonToStorage(storageKeys.links, snapshot.links ?? initialLinks);
+    saveJsonToStorage(storageKeys.marketplace, snapshot.marketplaceListings ?? []);
+    saveJsonToStorage(storageKeys.history, snapshot.historyRecords ?? []);
+    saveJsonToStorage(storageKeys.notifications, snapshot.notifications ?? []);
+    saveJsonToStorage(storageKeys.askCountryRoutes, snapshot.localRecords?.askCountryRoutes ?? []);
+    saveJsonToStorage(storageKeys.askThreads, snapshot.localRecords?.askThreads ?? starterAskThreads);
+    saveJsonToStorage(storageKeys.chainPremium, snapshot.localRecords?.chainPremium ?? {
+      circleCreated: false,
+      pulseUnlocked: false,
+    });
+    saveJsonToStorage(storageKeys.bids, snapshot.localRecords?.marketBids ?? getInitialMarketBids());
+    saveJsonToStorage(storageKeys.marketHolds, snapshot.localRecords?.marketHolds ?? []);
+    saveJsonToStorage(storageKeys.marketRatings, snapshot.localRecords?.marketRatings ?? {});
+    saveJsonToStorage(storageKeys.userStories, snapshot.localRecords?.userStories ?? []);
+  }
+
+  async function syncHumanAccount(action: "load" | "save", snapshot?: AccountSyncSnapshot) {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") {
+      return null;
+    }
+
+    const response = await fetch("/api/data/account", {
+      body: JSON.stringify({
+        action,
+        snapshot,
+        wallet: verifiedHuman.wallet,
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+
+    return (await response.json()) as {
+      ok?: boolean;
+      pendingSetup?: boolean;
+      snapshot?: {
+        savedAt?: string;
+        snapshot?: AccountSyncSnapshot;
+      } | null;
+    };
+  }
+
+  useEffect(() => {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadCloudAccount() {
+      setAccountSyncReady(false);
+      setAccountSyncStatus("loading");
+
+      try {
+        const payload = await syncHumanAccount("load");
+        const cloudSnapshot = payload?.snapshot?.snapshot;
+
+        if (cancelled) {
+          return;
+        }
+
+        if (payload?.pendingSetup) {
+          setAccountSyncStatus("offline");
+          setAccountSyncReady(true);
+          return;
+        }
+
+        if (cloudSnapshot) {
+          restoreAccountSnapshot(cloudSnapshot);
+          recordHistory({
+            title: "HumanChain restored",
+            detail: "Your World account data was restored from HumanChain cloud storage on this device.",
+            kind: "profile",
+          });
+        } else {
+          await syncHumanAccount("save", buildAccountSnapshot());
+        }
+
+        if (!cancelled) {
+          setAccountSyncReady(true);
+          setAccountSyncStatus("ready");
+        }
+      } catch {
+        if (!cancelled) {
+          setAccountSyncReady(true);
+          setAccountSyncStatus("offline");
+        }
+      }
+    }
+
+    void loadCloudAccount();
+
+    return () => {
+      cancelled = true;
+    };
+    // Snapshot helpers read the latest mounted app state; this effect should only run when the World wallet changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifiedHuman?.mode, verifiedHuman?.wallet]);
+
+  useEffect(() => {
+    if (
+      !accountSyncReady ||
+      !verifiedHuman?.wallet ||
+      verifiedHuman.mode !== "world"
+    ) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setAccountSyncStatus("saving");
+      void syncHumanAccount("save", buildAccountSnapshot())
+        .then((payload) => {
+          setAccountSyncStatus(payload?.pendingSetup ? "offline" : "ready");
+        })
+        .catch(() => setAccountSyncStatus("offline"));
+    }, 1600);
+
+    return () => window.clearTimeout(timeout);
+    // The debounced save intentionally observes the state values below and uses the current snapshot helper.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    accountSyncReady,
+    appLanguage,
+    dailyAnswered,
+    dailyAnsweredAt,
+    dailyAnsweredDate,
+    historyRecords,
+    humanPosts,
+    lastCheckInAt,
+    lastCheckInDate,
+    links,
+    marketLocation,
+    marketplaceListings,
+    notificationReady,
+    notificationWelcomeSent,
+    notifications,
+    points,
+    savedItems,
+    streak,
+    verifiedHuman?.mode,
+    verifiedHuman?.username,
+    verifiedHuman?.wallet,
   ]);
 
   function shouldShowToast(title: string, detail: string) {
@@ -3885,6 +4145,7 @@ export default function HumanChainApp() {
       case "me":
         return (
           <MeView
+            accountSyncStatus={accountSyncStatus}
             act={act}
             earnPoints={earnPoints}
             historyRecords={historyRecords}
@@ -9009,6 +9270,7 @@ function MarketplaceView({
 }
 
 function MeView({
+  accountSyncStatus,
   act,
   earnPoints,
   historyRecords,
@@ -9029,6 +9291,7 @@ function MeView({
   verifiedHuman,
   worldContext,
 }: {
+  accountSyncStatus: "idle" | "loading" | "ready" | "saving" | "offline";
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   historyRecords: HistoryRecord[];
@@ -9062,6 +9325,16 @@ function MeView({
       : verifiedHuman?.wallet
         ? "World username syncing"
         : "World account pending";
+  const syncLabel =
+    accountSyncStatus === "ready"
+      ? "Cloud sync active"
+      : accountSyncStatus === "saving"
+        ? "Saving cloud backup"
+        : accountSyncStatus === "loading"
+          ? "Restoring cloud backup"
+          : accountSyncStatus === "offline"
+            ? "Local safe, cloud pending"
+            : "Local safe";
   const ownedPosts = humanPosts.filter((post) => post.owner);
   const chainScore = Math.round(points / 8 + streak * 9);
   const connectedSignals = Array.from(
@@ -9124,7 +9397,7 @@ function MeView({
         <div>
           <span className="section-kicker">Verified Human Passport</span>
           <h2>{displayUsername}</h2>
-          <p>{identityLabel}. Score shows trust. HP shows contribution. {notificationReady ? "Notifications active." : "Notifications off."}</p>
+          <p>{identityLabel}. {syncLabel}. Score shows trust. HP shows contribution. {notificationReady ? "Notifications active." : "Notifications off."}</p>
         </div>
         <button
           disabled={checkedInToday}

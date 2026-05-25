@@ -8,6 +8,7 @@ export function GET() {
   return noStoreJson({
     ok: true,
     app: "HumanChain",
+    accountSyncReady: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
     blobStorageReady: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
     paymentsReady: Boolean(treasury),
     treasury,
