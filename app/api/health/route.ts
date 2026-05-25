@@ -1,11 +1,18 @@
 import { noStoreJson } from "@/lib/serverApi";
-import { getWorldAppId } from "@/lib/worldConfig";
+import { getHumanChainTreasury, getWorldAppId } from "@/lib/worldConfig";
 
 export function GET() {
+  const worldAppId = getWorldAppId();
+  const treasury = getHumanChainTreasury();
+
   return noStoreJson({
     ok: true,
     app: "HumanChain",
-    worldAppReady: Boolean(getWorldAppId()),
+    blobStorageReady: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    paymentsReady: Boolean(treasury),
+    treasury,
+    worldAppId,
+    worldAppReady: Boolean(worldAppId),
     checkedAt: new Date().toISOString(),
   });
 }

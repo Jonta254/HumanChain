@@ -2837,6 +2837,41 @@ async function storeSafeData(
   }
 }
 
+async function prepareMomentImage(file: File) {
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
+
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const longestSide = Math.max(bitmap.width, bitmap.height);
+    const scale = longestSide > 1440 ? 1440 / longestSide : 1;
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/webp", 0.84),
+    );
+
+    if (!blob || blob.size >= file.size) {
+      return file;
+    }
+
+    return new File(
+      [blob],
+      `${file.name.replace(/\.[^.]+$/, "") || "moment"}.webp`,
+      { type: "image/webp" },
+    );
+  } catch {
+    return file;
+  }
+}
+
 function getInitialMarketBids() {
   return Object.fromEntries(
     marketplaceItems.map((item) => [
@@ -5723,15 +5758,18 @@ function ChainsView({
                     const file = event.target.files?.[0];
                     if (file) {
                       const reader = new FileReader();
-                      reader.onload = () => {
+                      reader.onload = async () => {
+                        const preparedFile = await prepareMomentImage(file);
                         setPostPreview(String(reader.result));
-                        setPostFile(file);
+                        setPostFile(preparedFile);
                         setPostMediaType(file.type.startsWith("video/") ? "video" : "image");
                         act(
                           file.type.startsWith("video/") ? "Video selected" : "Image selected",
                           file.type.startsWith("video/")
                             ? "Video posting uses a small World payment before publishing."
-                            : "Add a caption, then publish it.",
+                            : preparedFile.size < file.size
+                              ? "Image optimized for faster upload. Add a caption, then publish it."
+                              : "Add a caption, then publish it.",
                         );
                       };
                       reader.readAsDataURL(file);
@@ -5753,7 +5791,7 @@ function ChainsView({
             <span>Recent human moments</span>
             <p>Photo posts from verified humans. Every card begins with the human, the caption, and the real image they shared.</p>
           </div>
-          {visiblePosts.map((post) => (
+          {visiblePosts.map((post, index) => (
             <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
               <div>
                 <div className="post-head">
@@ -5777,7 +5815,12 @@ function ChainsView({
                   {post.mediaType === "video" ? (
                     <video controls src={post.image ?? undefined} />
                   ) : (
-                    <img alt={post.caption} src={post.image ?? ""} />
+                    <img
+                      alt={post.caption}
+                      decoding="async"
+                      loading={index < 3 ? "eager" : "lazy"}
+                      src={post.image ?? ""}
+                    />
                   )}
                 </div>
                 <div className="post-metrics">
@@ -5785,6 +5828,7 @@ function ChainsView({
                   <span>{post.loves} loves</span>
                   <span>{post.tips} tips</span>
                   <span>{post.comments.length} comments</span>
+                  <span>{post.storageStatus === "cloud-safe" ? "cloud stored" : "local safe"}</span>
                 </div>
                 <div className="reaction-row social-actions">
                   <button

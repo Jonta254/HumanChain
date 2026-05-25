@@ -16,6 +16,19 @@ const allowedMediaTypes = new Set([
 ]);
 const maxMediaSize = 24 * 1024 * 1024;
 
+function safeMediaName(fileName: string) {
+  const parts = fileName.split(".");
+  const extension = parts.length > 1 ? `.${parts.pop()?.toLowerCase()}` : "";
+  const baseName = parts
+    .join(".")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 70);
+
+  return `${baseName || "moment"}${extension}`;
+}
+
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "post-upload", 12)) {
     return rateLimitResponse();
@@ -43,7 +56,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const blob = await put(`humanchain/posts/${file.name}`, file, {
+  const dayPath = new Date().toISOString().slice(0, 10);
+  const blob = await put(`humanchain/posts/${dayPath}/${safeMediaName(file.name)}`, file, {
     access: "public",
     addRandomSuffix: true,
   });

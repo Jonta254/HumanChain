@@ -2304,7 +2304,8 @@ button.danger {
 
 .image-chain-card {
   display: grid;
-  gap: 12px;
+  gap: 9px;
+  padding: 13px;
   background:
     radial-gradient(circle at 92% 10%, rgba(47, 111, 237, 0.12), transparent 9rem),
     linear-gradient(135deg, #fffdf8, #eef6f2 54%, #f6efe2);
@@ -2312,13 +2313,14 @@ button.danger {
 
 .image-chain-card h2 {
   margin: 0;
-  font-size: 1.22rem;
+  font-size: 1.02rem;
   line-height: 1.16;
 }
 
 .image-chain-card p {
   margin: 0;
   color: var(--muted);
+  font-size: 0.82rem;
   line-height: 1.42;
 }
 
@@ -2329,14 +2331,14 @@ button.danger {
 }
 
 .recent-moment-strip span {
-  min-height: 34px;
+  min-height: 28px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(36, 107, 85, 0.12);
   border-radius: 999px;
   color: var(--green);
   background: rgba(255, 253, 248, 0.72);
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 900;
 }
 
@@ -2352,12 +2354,12 @@ button.danger {
 
 .image-chain-card img,
 .image-chain-card video {
-  max-height: 220px;
+  max-height: 150px;
 }
 
 .image-post-placeholder {
   position: relative;
-  min-height: 150px;
+  min-height: 104px;
   display: grid;
   place-items: center;
   gap: 8px;
@@ -2369,7 +2371,7 @@ button.danger {
     radial-gradient(circle at 20% 22%, rgba(185, 130, 24, 0.16), transparent 28%),
     linear-gradient(135deg, rgba(36, 107, 85, 0.08), rgba(255, 253, 248, 0.7));
   text-align: center;
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 850;
 }
 
@@ -2381,7 +2383,7 @@ button.danger {
 
 .moment-lens {
   position: absolute;
-  inset: 18px;
+  inset: 12px;
   border: 1px solid rgba(36, 107, 85, 0.18);
   border-radius: 22px;
 }
@@ -2393,24 +2395,24 @@ button.danger {
 }
 
 .moment-lens span {
-  right: 20px;
-  top: 16px;
-  width: 86px;
-  height: 86px;
+  right: 14px;
+  top: 12px;
+  width: 58px;
+  height: 58px;
   border: 2px solid rgba(36, 107, 85, 0.18);
 }
 
 .moment-lens i {
-  left: 24px;
-  bottom: 22px;
-  width: 68px;
-  height: 12px;
+  left: 18px;
+  bottom: 16px;
+  width: 54px;
+  height: 9px;
   background: rgba(185, 130, 24, 0.32);
   transform: rotate(-12deg);
 }
 
 .image-chain-card textarea {
-  min-height: 82px;
+  min-height: 58px;
   resize: none;
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -2429,7 +2431,7 @@ button.danger {
 .image-post-actions button,
 .field-quote-card button,
 .field-room-hero button {
-  min-height: 42px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2439,6 +2441,7 @@ button.danger {
   color: var(--paper-strong);
   background: var(--ink);
   font-weight: 850;
+  font-size: 0.84rem;
   cursor: pointer;
 }
 
