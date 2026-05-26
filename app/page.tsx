@@ -3174,18 +3174,7 @@ export default function HumanChainApp() {
   const [historyRecords, setHistoryRecords] = useState<HistoryRecord[]>(
     loadStoredHistoryRecords,
   );
-  const [dailyResponses, setDailyResponses] = useState<DailyResponse[]>([
-    {
-      user: "@mara_chain",
-      text: "Life taught me that silence is sometimes rest, not failure.",
-      time: "08:15",
-    },
-    {
-      user: "@worldbuilder",
-      text: "I learned that money is useful, but trusted people are rarer.",
-      time: "09:02",
-    },
-  ]);
+  const [dailyResponses, setDailyResponses] = useState<DailyResponse[]>([]);
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
   const [paymentToken, setPaymentToken] = useState<HumanChainPaymentToken>(
     defaultHumanChainPaymentToken,
@@ -4722,20 +4711,27 @@ function HomeView({
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const userPostCount = humanPosts.filter((post) => post.owner).length;
+  const liveMomentPosts = humanPosts.filter(
+    (post) => Boolean(post.image) && (post.owner || post.storageStatus === "cloud-safe"),
+  );
+  const liveChainLinks = links.filter((link) => Boolean(link.owner || link.id || link.pinned));
+  const liveMarketListings = marketplaceListings.filter(
+    (listing) => listing.dataStorageStatus === "cloud-safe" || listing.seller === worldHandle,
+  );
   const chainScore = Math.max(
     151,
     Math.round(points / 4) + streak * 7 + userPostCount * 12 + savedItems * 5,
   );
   const missionItems = [
     { complete: dailyAnswered, label: "Answer today's question" },
-    { complete: dailyResponses.length > 1, label: "Read human answers" },
+    { complete: dailyResponses.length > 0, label: "Read human answers" },
     { complete: userPostCount > 0, label: "Post one real moment" },
   ];
   const missionCompleted = missionItems.filter((item) => item.complete).length;
   const trendingWisdom =
     dailyResponses[0]?.text ||
-    links[0]?.text ||
-    "Life taught me that silence is sometimes rest, not failure.";
+    liveChainLinks[0]?.text ||
+    "No live wisdom yet. Add the first honest answer, moment, or link today.";
   const liveVerdicts = [
     {
       question: dailyHumanQuestion.title,
@@ -4743,37 +4739,36 @@ function HomeView({
       truth: trendingWisdom,
     },
   ];
-  const topMarketItem = marketplaceListings[0] ?? marketplaceItems[0];
-  const topMoment = humanPosts.find((post) => post.image) ?? humanPosts[0];
+  const topMarketItem = liveMarketListings[0];
+  const topMoment = liveMomentPosts[0];
   const homeHighlights = [
     {
-      detail:
-        "Fresh verified listing with chat-first trade and visible trust signals.",
+      detail: topMarketItem
+        ? "Fresh verified listing with chat-first trade and visible trust signals."
+        : "No live listing yet. Publish or browse the market to start real trade.",
       icon: <Store size={18} />,
-      label: "Trending market",
+      label: topMarketItem ? "Trending market" : "Market ready",
       meta: "Open Market",
       onClick: () => setTab("market"),
-      title: topMarketItem?.title ?? "Verified local listings",
+      title: topMarketItem?.title ?? "Waiting for first live listing",
       tone: "market",
     },
     {
       detail: trendingWisdom,
       icon: <MessageCircleQuestion size={18} />,
       label: "Best asked",
-      meta: `${dailyResponses.length} live answers`,
+      meta: dailyResponses.length ? `${dailyResponses.length} live answers` : "Waiting for answers",
       onClick: () => setTab("ask"),
       title: dailyHumanQuestion.title,
       tone: "ask",
     },
     {
-      detail:
-        topMoment?.caption ??
-        "Recent human moments from verified people are entering the chain.",
+      detail: topMoment?.caption ?? "No live moment yet. Be the first verified human to post today.",
       icon: <Sparkles size={18} />,
-      label: "Live moment",
+      label: topMoment ? "Live moment" : "Moment ready",
       meta: "Open Chains",
       onClick: () => setTab("chains"),
-      title: topMoment?.author ?? "Moments from humans",
+      title: topMoment?.author ?? "Post the first real moment",
       tone: "chains",
     },
     {
@@ -4799,10 +4794,10 @@ function HomeView({
       icon: <Sparkles size={18} />,
       label: "Post moment",
       onClick: () => setTab("chains"),
-      status: `${humanPosts.filter((post) => post.image).length} live`,
+      status: `${liveMomentPosts.length} live`,
     },
     {
-      detail: topMarketItem?.title ?? "Verified listings near humans.",
+      detail: topMarketItem?.title ?? "No live listing yet. Open Market to publish or browse.",
       icon: <Store size={18} />,
       label: "Check market",
       onClick: () => setTab("market"),
@@ -5079,9 +5074,9 @@ function HomeView({
         </div>
         <div className="pulse-stat-grid">
           <b>{dailyResponses.length}<small>Answers today</small></b>
-          <b>{links.length}<small>Chain links</small></b>
-          <b>{savedItems}<small>New stories</small></b>
-          <b>{marketplaceListings.length}<small>Market listings</small></b>
+          <b>{liveChainLinks.length}<small>Chain links</small></b>
+          <b>{savedItems}<small>Saved items</small></b>
+          <b>{liveMarketListings.length}<small>Market listings</small></b>
         </div>
       </section>
 
