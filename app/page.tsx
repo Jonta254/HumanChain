@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   CircleDollarSign,
   Compass,
+  Copy,
   Gavel,
   HandCoins,
   HeartHandshake,
@@ -2372,6 +2373,11 @@ const marketplaceTrustRails = [
   ["Receipt trail", "Listings, holds, bids, boosts, and tips keep a local record."],
 ];
 
+const humanChainTradePaybill = {
+  account: "856340",
+  number: "542542",
+};
+
 type MarketplaceListing = {
   dataReceiptUrl?: string;
   dataStorageStatus?: "cloud-safe" | "local-safe";
@@ -2536,6 +2542,8 @@ type EarnPoints = (amount: number, reason: string) => void;
 
 type PaymentRequest = {
   allowCustomAmount?: boolean;
+  customAmountHelp?: string;
+  customAmountLabel?: string;
   title: string;
   amount: string;
   detail: string;
@@ -4018,7 +4026,7 @@ export default function HumanChainApp() {
   }
 
   function openPayment(payment: PaymentRequest) {
-    if (paymentBusy) {
+    if (paymentBusy || paymentPrompt) {
       return;
     }
 
@@ -4171,7 +4179,7 @@ export default function HumanChainApp() {
       setToast({
         title: "Payment amount",
         detail: paymentPrompt.allowCustomAmount
-          ? "Choose a tip between 0.1 and 100 WLD, using up to two decimals."
+          ? (paymentPrompt.customAmountHelp ?? "Choose a tip between 0.1 and 100 WLD, using up to two decimals.")
           : "This premium action has a fixed World App price.",
       });
       return;
@@ -8269,6 +8277,11 @@ function MarketplaceView({
       ? marketLocation.label.replace(/^Manual area:\s*/, "")
       : "Nairobi",
   );
+  const [tradeMode, setTradeMode] = useState<"buy" | "sell">("buy");
+  const [buyKesAmount, setBuyKesAmount] = useState("1000");
+  const [sellWldAmount, setSellWldAmount] = useState("4");
+  const [tradeBusy, setTradeBusy] = useState(false);
+  const [tradeCopied, setTradeCopied] = useState<string | null>(null);
   const [bidDrafts, setBidDrafts] = useState<Record<string, string>>({});
   const [marketBids, setMarketBids] = useState<Record<string, MarketBid[]>>(() =>
     loadJsonFromStorage<Record<string, MarketBid[]>>(
@@ -8324,6 +8337,90 @@ function MarketplaceView({
 
   function isMarketActionBusy(action: string, item: MarketplaceItem | MarketplaceListing) {
     return marketBusyAction === getMarketActionKey(action, item);
+  }
+
+  async function copyTradeValue(label: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setTradeCopied(label);
+      window.setTimeout(() => {
+        setTradeCopied((current) => (current === label ? null : current));
+      }, 1800);
+      act(`${label} copied`, `${value} is ready to paste in M-Pesa.`);
+    } catch {
+      act("Copy blocked", `Copy ${label}: ${value}`);
+    }
+  }
+
+  function confirmBuyChangePaid() {
+    const amount = Number.parseFloat(buyKesAmount);
+
+    if (!Number.isFinite(amount) || amount < 50) {
+      act("Amount needed", "Enter the KES amount you sent to the HumanChain Paybill before saving this buy request.");
+      return;
+    }
+
+    recordHistory({
+      title: "Buy change payment noted",
+      detail: `User marked KES ${amount.toLocaleString()} paid to Paybill ${humanChainTradePaybill.number}, account ${humanChainTradePaybill.account}. HumanChain support should verify M-Pesa before release.`,
+      kind: "market",
+    });
+    void storeSafeData("payment", `buy-change-${Date.now()}`, {
+      amountKes: amount,
+      account: humanChainTradePaybill.account,
+      human: humanIdentity?.username,
+      paybill: humanChainTradePaybill.number,
+      status: "awaiting-manual-mpesa-verification",
+      wallet: humanIdentity?.wallet,
+    });
+    act(
+      "Buy request saved",
+      "Your Paybill details are recorded. HumanChain should release only after M-Pesa confirmation is checked.",
+    );
+  }
+
+  function openSellChangePayment() {
+    const amount = Number.parseFloat(sellWldAmount);
+
+    if (tradeBusy) {
+      return;
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      act("Sell amount needed", "Enter the WLD or USDC amount you want to send from World App.");
+      return;
+    }
+
+    setTradeBusy(true);
+    window.setTimeout(() => setTradeBusy(false), 2500);
+    openPayment({
+      title: "Sell WLD or USDC",
+      amount: `${amount} WLD`,
+      allowCustomAmount: true,
+      customAmountHelp: "Choose the exact amount to send from World App. HumanChain verifies before settlement.",
+      customAmountLabel: "Sell amount",
+      minAmount: 0.1,
+      maxAmount: 100,
+      detail:
+        "Send from World App to HumanChain treasury. HumanChain verifies the World Chain payment before any M-Pesa settlement is marked complete.",
+      success: "Sell order payment confirmed. Manual M-Pesa settlement can now be processed from the saved receipt.",
+      feature: "trade-sell-world-asset",
+      onConfirmed: (confirmedAmount) => {
+        recordHistory({
+          title: "Sell change payment confirmed",
+          detail: `${confirmedAmount} WLD sent from World App for manual M-Pesa settlement.`,
+          kind: "market",
+        });
+        void storeSafeData("payment", `sell-change-${Date.now()}`, {
+          amount: confirmedAmount,
+          human: humanIdentity?.username,
+          status: "world-payment-confirmed-awaiting-mpesa-settlement",
+          token: "WLD",
+          wallet: humanIdentity?.wallet,
+        });
+      },
+      points: 6,
+    });
   }
 
   function getMarketItemImages(item: MarketplaceItem | MarketplaceListing): string[] {
@@ -9166,6 +9263,106 @@ function MarketplaceView({
         <small className="market-transparency-note">
           World MiniKit identifies launch and device context; nearby ranking uses the World App WebView location permission only after you choose it.
         </small>
+      </section>
+
+      <section className="market-panel trade-change-panel">
+        <div className="section-heading">
+          <span>HumanChain Change Desk</span>
+          <Wallet size={18} />
+        </div>
+        <p>
+          Buy change with M-Pesa Paybill or sell from World App through MiniKit Pay.
+          Every request is saved until the payment is verified.
+        </p>
+        <div className="trade-mode-switch" role="tablist" aria-label="Choose trade direction">
+          <button
+            aria-selected={tradeMode === "buy"}
+            className={tradeMode === "buy" ? "active" : ""}
+            onClick={() => setTradeMode("buy")}
+            role="tab"
+            type="button"
+          >
+            Buy change
+          </button>
+          <button
+            aria-selected={tradeMode === "sell"}
+            className={tradeMode === "sell" ? "active" : ""}
+            onClick={() => setTradeMode("sell")}
+            role="tab"
+            type="button"
+          >
+            Sell WLD/USDC
+          </button>
+        </div>
+        {tradeMode === "buy" ? (
+          <div className="trade-flow-card">
+            <div className="trade-amount-row">
+              <label>
+                <span>KES sent</span>
+                <input
+                  inputMode="decimal"
+                  onChange={(event) => setBuyKesAmount(event.target.value)}
+                  placeholder="1000"
+                  value={buyKesAmount}
+                />
+              </label>
+              <strong>Pay via M-Pesa</strong>
+            </div>
+            <div className="paybill-grid">
+              <button
+                onClick={() => void copyTradeValue("Paybill", humanChainTradePaybill.number)}
+                type="button"
+              >
+                <span>Paybill No.</span>
+                <strong>{humanChainTradePaybill.number}</strong>
+                <Copy size={16} />
+              </button>
+              <button
+                onClick={() => void copyTradeValue("Account", humanChainTradePaybill.account)}
+                type="button"
+              >
+                <span>Account No.</span>
+                <strong>{humanChainTradePaybill.account}</strong>
+                <Copy size={16} />
+              </button>
+            </div>
+            <small>
+              {tradeCopied ? `${tradeCopied} copied.` : "Copy Paybill and Account, pay in M-Pesa, then mark it paid."}
+            </small>
+            <button className="primary-command" onClick={confirmBuyChangePaid} type="button">
+              I paid - save buy request
+            </button>
+          </div>
+        ) : (
+          <div className="trade-flow-card">
+            <div className="trade-amount-row">
+              <label>
+                <span>You send</span>
+                <input
+                  inputMode="decimal"
+                  onChange={(event) => setSellWldAmount(event.target.value)}
+                  placeholder="4"
+                  value={sellWldAmount}
+                />
+              </label>
+              <strong>World Pay</strong>
+            </div>
+            <div className="trade-safety-note">
+              <ShieldCheck size={17} />
+              <span>
+                Opens one World App payment sheet. Do not tap repeatedly; HumanChain verifies the transaction before M-Pesa settlement is recorded.
+              </span>
+            </div>
+            <button
+              className="primary-command"
+              disabled={tradeBusy}
+              onClick={openSellChangePayment}
+              type="button"
+            >
+              {tradeBusy ? "Preparing World Pay..." : "Sell from World App"}
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="market-actions">
@@ -10155,9 +10352,9 @@ function PaymentSheet({
         <p>{payment.detail}</p>
         {payment.allowCustomAmount ? (
           <label className="payment-amount-field">
-            <span>Tip amount</span>
+            <span>{payment.customAmountLabel ?? "Tip amount"}</span>
             <input
-              aria-label="Tip amount in WLD"
+              aria-label={`${payment.customAmountLabel ?? "Tip amount"} in WLD`}
               inputMode="decimal"
               min={payment.minAmount ?? 0.1}
               max={payment.maxAmount ?? 100}
@@ -10167,7 +10364,7 @@ function PaymentSheet({
               type="number"
               value={customAmount}
             />
-            <small>Choose 0.1-100 WLD. HumanChain records the selected tip amount in the receipt.</small>
+            <small>{payment.customAmountHelp ?? "Choose 0.1-100 WLD. HumanChain records the selected tip amount in the receipt."}</small>
           </label>
         ) : null}
         <div className="payment-token-picker" aria-label="Choose payment currency">
@@ -10198,7 +10395,7 @@ function PaymentSheet({
             Cancel
           </button>
           <button disabled={!amountValid || busy} onClick={() => onConfirm(amount)} type="button">
-            {busy ? "Confirming..." : "Prepare Payment"}
+            {busy ? "Confirming..." : "Open World Pay"}
           </button>
         </div>
       </div>

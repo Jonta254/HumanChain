@@ -24,6 +24,7 @@ export const humanChainPaymentFeatures = {
   "tip-chain-link": 1,
   "tip-human": 1,
   "tip-storyteller": 1,
+  "trade-sell-world-asset": 0,
   "voice-answer": 2,
   "voice-question": 2,
 } as const;
@@ -80,6 +81,10 @@ export function isValidHumanChainPaymentAmount(feature: string, amount: number) 
 
   if (isTipPaymentFeature(feature)) {
     return amount >= 0.1 && amount <= 100 && Number(amount.toFixed(2)) === amount;
+  }
+
+  if (feature === "trade-sell-world-asset") {
+    return amount >= 0.1 && amount <= 1000 && Number(amount.toFixed(2)) === amount;
   }
 
   return (
