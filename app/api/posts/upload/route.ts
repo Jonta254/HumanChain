@@ -10,11 +10,8 @@ const allowedMediaTypes = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
-  "video/mp4",
-  "video/webm",
-  "video/quicktime",
 ]);
-const maxMediaSize = 24 * 1024 * 1024;
+const maxMediaSize = 10 * 1024 * 1024;
 
 function safeMediaName(fileName: string) {
   const parts = fileName.split(".");
@@ -51,7 +48,7 @@ export async function POST(req: NextRequest) {
 
   if (!allowedMediaTypes.has(file.type) || file.size > maxMediaSize) {
     return noStoreJson(
-      { error: "Use a JPG, PNG, WebP, MP4, WebM, or MOV file under 24 MB." },
+      { error: "Use a JPG, PNG, or WebP image under 10 MB.", errorState: "upload_type_not_allowed" },
       { status: 400 },
     );
   }

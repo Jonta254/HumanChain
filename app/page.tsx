@@ -55,6 +55,14 @@ import {
   normalizePaymentFeature,
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
+import {
+  humanChainErrorStates,
+  validateAnswerInput,
+  validateListingInput,
+  validateMomentImage,
+  validateQuestionInput,
+  validateStoryFile,
+} from "@/lib/humanchainPolicy";
 
 type ChainLink = {
   createdAt?: string;
@@ -2453,6 +2461,53 @@ type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me";
 
 const appTabs = new Set<Tab>(["home", "ask", "market", "chains", "stories", "me"]);
 
+function isVerifiedWorldHuman(human: HumanIdentity | null) {
+  return Boolean(human?.wallet && ("mode" in human ? human.mode === "world" : true));
+}
+
+function getTrustPassportMetrics({
+  completedTrades,
+  human,
+  points,
+  posts,
+  savedItems,
+  streak,
+}: {
+  completedTrades: number;
+  human: HumanIdentity | null;
+  points: number;
+  posts: number;
+  savedItems: number;
+  streak: number;
+}) {
+  const helpfulScore = Math.min(99, Math.max(12, Math.round(points / 12) + savedItems * 2));
+
+  return {
+    completedTrades,
+    disputeRate: completedTrades > 0 ? "0%" : "n/a",
+    helpfulScore,
+    identityTier: isVerifiedWorldHuman(human) ? "Verified human" : "Preview only",
+    moderationState: "Clear",
+    streak,
+    tenure: "Launch member",
+    tradeScore: Math.min(99, completedTrades * 12 + posts * 2),
+    verification: isVerifiedWorldHuman(human) ? "World verified" : "World verification required",
+  };
+}
+
+function requireVerifiedPublicAction(
+  human: HumanIdentity | null,
+  act: (title: string, detail: string) => void,
+  action = "publish publicly",
+) {
+  if (isVerifiedWorldHuman(human)) {
+    return true;
+  }
+
+  act("World ID required", `${humanChainErrorStates.world_id_required} Drafting is allowed, but ${action} needs World App verification.`);
+  return false;
+}
+
 function isAppTab(value: string | null): value is Tab {
   return Boolean(value && appTabs.has(value as Tab));
 }
@@ -4449,7 +4504,7 @@ export default function HumanChainApp() {
             }
           />
         ) : null}
-        {verifiedHuman && !notificationReady && !notificationPromptDismissed ? (
+        {verifiedHuman && points > 0 && !notificationReady && !notificationPromptDismissed ? (
           <NotificationPermissionPrompt
             onClose={() => setNotificationPromptDismissed(true)}
             onEnable={() => enableHumanChainNotifications("prompt")}
@@ -4820,8 +4875,59 @@ function HomeView({
   ];
   const profileInitial =
     worldHandle.replace(/^@/, "").trim().charAt(0).toUpperCase() || "H";
+  const passportMetrics = getTrustPassportMetrics({
+    completedTrades: marketplaceListings.filter((listing) => listing.status === "payment-ready").length,
+    human: verifiedHuman,
+    points,
+    posts: userPostCount,
+    savedItems,
+    streak,
+  });
+  const nextBestAction = !isVerifiedWorldHuman(verifiedHuman)
+    ? {
+        detail: "Preview can browse and draft. Public trust actions unlock only after World verification.",
+        icon: <ShieldCheck size={20} />,
+        label: "Verify Human Passport",
+        onClick: () => setTab("me"),
+        title: "Unlock public posting, bidding, comments, and listings",
+      }
+    : !dailyAnswered
+      ? {
+          detail: "First value should happen in under a minute: answer one real prompt and start your trust record.",
+          icon: <MessageCircleQuestion size={20} />,
+          label: "Answer today",
+          onClick: submitDailyAnswer,
+          title: dailyHumanQuestion.title,
+        }
+      : userPostCount === 0
+        ? {
+            detail: "Share a recent photo-first proof-of-life moment with report, comment, and reaction controls.",
+            icon: <Sparkles size={20} />,
+            label: "Post first moment",
+            onClick: () => setTab("chains"),
+            title: "Add one real moment",
+          }
+        : liveMarketListings.length === 0
+          ? {
+              detail: "Create the first safer listing with 3 photos, condition, area, price, and trust proof.",
+              icon: <Store size={20} />,
+              label: "Complete listing",
+              onClick: () => setTab("market"),
+              title: "Bring trust to the nearby market",
+            }
+          : {
+              detail: "Read verified-human answers and inspect trust signals before you act.",
+              icon: <ShieldCheck size={20} />,
+              label: "Open Passport",
+              onClick: () => setTab("me"),
+              title: "Keep building your trust passport",
+            };
 
   function submitDailyAnswer() {
+    if (!requireVerifiedPublicAction(verifiedHuman, act, "answering today's question")) {
+      return;
+    }
+
     if (dailyAnswered) {
       act("Already answered", "Come back tomorrow for a new global question.");
       return;
@@ -4912,9 +5018,39 @@ function HomeView({
           </button>
           <button onClick={() => setTab("chains")} type="button">
             <strong>{userPostCount}</strong>
-            <span>Posts</span>
+            <span>Moments</span>
           </button>
         </div>
+      </section>
+
+      <section className="next-best-action-card">
+        <div>
+          <span className="section-kicker">Next best action</span>
+          <h2>{nextBestAction.title}</h2>
+          <p>{nextBestAction.detail}</p>
+        </div>
+        <button onClick={nextBestAction.onClick} type="button">
+          {nextBestAction.icon}
+          {nextBestAction.label}
+        </button>
+      </section>
+
+      <section className="passport-summary-card">
+        <div className="section-heading">
+          <span>Human Passport</span>
+          <BadgeCheck size={18} />
+        </div>
+        <p>{passportMetrics.verification}. {passportMetrics.identityTier}. Moderation state: {passportMetrics.moderationState}.</p>
+        <div className="passport-metrics">
+          <b>{passportMetrics.tenure}<small>Tenure</small></b>
+          <b>{passportMetrics.streak}d<small>Streak</small></b>
+          <b>{passportMetrics.helpfulScore}<small>Helpful</small></b>
+          <b>{passportMetrics.completedTrades}<small>Trades</small></b>
+          <b>{passportMetrics.disputeRate}<small>Disputes</small></b>
+        </div>
+        <button onClick={() => setTab("me")} type="button">
+          View full passport
+        </button>
       </section>
 
       <section className="human-service-grid" aria-label="HumanChain services">
@@ -4927,7 +5063,7 @@ function HomeView({
         />
         <ActionButton
           icon={<Sparkles size={19} />}
-          label="Post"
+          label="Moments"
           detail="Recent moment"
           onClick={() => setTab("chains")}
           tone="chains"
@@ -5300,12 +5436,23 @@ function AskView({
   }
 
   function publishQuestion() {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "publishing a public question")) {
+      return;
+    }
+
     const targetCountry =
       activeAskService === "country" && selectedCountryRoute !== "World"
         ? selectedCountryRoute
         : "World";
     const cleanQuestion =
       question.trim() || "How do I begin again when life feels heavy?";
+    const validation = validateQuestionInput(cleanQuestion, cleanQuestion, selectedTopic, targetCountry);
+
+    if (!validation.ok) {
+      act("Question needs work", validation.issues[0] ?? "Adjust the question before publishing.");
+      return;
+    }
+
     setThreads((current) => [
       {
         question: cleanQuestion,
@@ -5329,9 +5476,19 @@ function AskView({
   }
 
   function answerThread(questionText: string) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "answering publicly")) {
+      return;
+    }
+
     const draft =
       answerDrafts[questionText]?.trim() ||
       "My honest answer: begin with the smallest action that proves life can still move.";
+    const validation = validateAnswerInput(draft);
+
+    if (!validation.ok) {
+      act("Answer needs work", validation.issues[0] ?? "Adjust the answer before publishing.");
+      return;
+    }
 
     setThreads((current) =>
       current.map((thread) =>
@@ -5607,6 +5764,14 @@ function AskView({
                 <div className="answer-card" key={`${thread.question}-${answer.user}-${answer.text}`}>
                   <strong>{answer.user} · {answer.country}</strong>
                   <p>{answer.text}</p>
+                  <div className="trust-action-row">
+                    <button onClick={() => act("Helpful signal", "This answer was marked helpful for verdict ranking.")} type="button">
+                      Helpful
+                    </button>
+                    <button onClick={() => act("Report queued", "Choose a report reason before moderator review.")} type="button">
+                      Report
+                    </button>
+                  </div>
                 </div>
               )) : (
                 <div className="answer-card waiting">
@@ -5841,6 +6006,10 @@ function ChainsView({
   }, [chainPremium]);
 
   function addLink() {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "adding a public moment link")) {
+      return;
+    }
+
     const text =
       linkText.trim() || "I am still becoming, and today that is enough.";
     setLinks((current) => [
@@ -5865,6 +6034,19 @@ function ChainsView({
   }
 
   async function publishMediaPost() {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "publishing a moment")) {
+      return;
+    }
+
+    if (postFile && postMediaType === "image") {
+      const validation = validateMomentImage(postFile);
+
+      if (!validation.ok) {
+        act("Upload type not allowed", validation.issues[0] ?? humanChainErrorStates.upload_type_not_allowed);
+        return;
+      }
+    }
+
     const caption =
       postCaption.trim() ||
       "A real human moment I want the chain to remember today.";
@@ -5985,15 +6167,7 @@ function ChainsView({
 
   function publishPostWithPaymentCheck() {
     if (postMediaType === "video") {
-      openPayment({
-        title: "Video post",
-        amount: "2 WLD",
-        detail: "Publish one human video post. The media is stored locally first and gets a cloud receipt when storage is configured.",
-        success: "Video post payment confirmed. Your video is now in the chain.",
-        feature: "video-post",
-        points: 10,
-        onConfirmed: publishMediaPost,
-      });
+      act("Photo-first launch", "Moments accepts JPEG, PNG, or WebP photos for launch. Video can return after moderation and scan coverage is ready.");
       return;
     }
 
@@ -6001,6 +6175,10 @@ function ChainsView({
   }
 
   function reactToPost(postId: number, reaction: string, field: "reactions" | "loves" = "reactions") {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "reacting publicly")) {
+      return;
+    }
+
     setHumanPosts((current) =>
       current.map((post) =>
         post.id === postId
@@ -6018,10 +6196,21 @@ function ChainsView({
   }
 
   function commentOnPost(postId: number) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "commenting publicly")) {
+      return;
+    }
+
     const comment = commentDrafts[postId]?.trim();
 
     if (!comment) {
       act("Write a comment", "Add a real human response before sending.");
+      return;
+    }
+
+    const validation = validateAnswerInput(comment);
+
+    if (!validation.ok) {
+      act("Comment needs work", validation.issues[0] ?? "Adjust the comment before publishing.");
       return;
     }
 
@@ -6225,7 +6414,7 @@ function ChainsView({
 
   return (
     <div className="screen">
-      <TopBar title="Human Chains" subtitle="Post real moments, useful links, and quote rooms from verified humans." />
+      <TopBar title="Moments" subtitle="Photo-first proof-of-life posts from verified humans." />
       <section className="chain-tools">
         <button
           onClick={() => {
@@ -6410,21 +6599,24 @@ function ChainsView({
                 <Upload size={17} />
                 Add image
                 <input
-                  accept="image/*,video/*"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={(event) => {
                     const file = event.target.files?.[0];
                     if (file) {
+                      if (!file.type.startsWith("image/")) {
+                        act("Photo-first launch", "Moments accepts JPEG, PNG, or WebP photos for launch.");
+                        return;
+                      }
+
                       const reader = new FileReader();
                       reader.onload = async () => {
                         const preparedFile = await prepareMomentImage(file);
                         setPostPreview(String(reader.result));
                         setPostFile(preparedFile);
-                        setPostMediaType(file.type.startsWith("video/") ? "video" : "image");
+                        setPostMediaType("image");
                         act(
-                          file.type.startsWith("video/") ? "Video selected" : "Image selected",
-                          file.type.startsWith("video/")
-                            ? "Video posting uses a small World payment before publishing."
-                            : preparedFile.size < file.size
+                          "Image selected",
+                          preparedFile.size < file.size
                               ? "Image optimized for faster upload. Add a caption, then publish it."
                               : "Add a caption, then publish it.",
                         );
@@ -6438,9 +6630,7 @@ function ChainsView({
               <button disabled={isPublishingPost} onClick={publishPostWithPaymentCheck} type="button">
                 {isPublishingPost
                   ? "Publishing..."
-                  : postMediaType === "video"
-                    ? "Pay and publish video"
-                    : "Publish image"}
+                  : "Publish image"}
               </button>
             </div>
           </section>
@@ -6809,6 +6999,10 @@ function StoriesView({
   }
 
   function publishFileStory() {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "submitting a file story")) {
+      return;
+    }
+
     if (!fileDraft.dataUrl && !fileDraft.fileText) {
       act("Story file required", "Upload a PDF or text file before paying to publish.");
       return;
@@ -6847,6 +7041,10 @@ function StoriesView({
   }
 
   function publishMicroStory() {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "publishing a short story")) {
+      return;
+    }
+
     const title = microDraft.title.trim() || "200-character HumanChain story";
 
     if (microCharacters !== 200) {
@@ -7218,6 +7416,16 @@ function StoriesView({
                   const file = event.target.files?.[0];
 
                   if (!file) {
+                    return;
+                  }
+
+                  const validation = validateStoryFile({
+                    size: file.size,
+                    type: file.type || (file.name.toLowerCase().endsWith(".txt") ? "text/plain" : "application/pdf"),
+                  });
+
+                  if (!validation.ok) {
+                    act("Story upload blocked", validation.issues[0] ?? humanChainErrorStates.upload_type_not_allowed);
                     return;
                   }
 
@@ -8484,14 +8692,25 @@ function MarketplaceView({
   }
 
   function saveMarketplaceListing() {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "publishing marketplace listings")) {
+      return false;
+    }
+
     const title = listingDraft.title.trim();
     const price = listingDraft.price.trim();
     const area = listingDraft.area.trim();
+    const validation = validateListingInput({
+      area,
+      condition: listingDraft.condition,
+      photos: listingPhotos,
+      price,
+      title,
+    });
 
-    if (!title || !price || !area || !listingPhotos.length) {
+    if (!validation.ok) {
       act(
-        "Listing needs details",
-        "Add a title, price, strict pickup area, and at least one real photo before saving a marketplace listing.",
+        validation.errorState === "listing_blocked_category" ? "Listing blocked category" : "Listing needs details",
+        validation.issues[0] ?? "Add title, positive price, condition, area, and at least 3 real photos.",
       );
       return false;
     }
@@ -8567,7 +8786,7 @@ function MarketplaceView({
     }
 
     const selectedFiles = Array.from(files);
-    const includedFiles = selectedFiles.slice(0, 3);
+    const includedFiles = selectedFiles.slice(0, 9);
 
     setListingPhotos([]);
 
@@ -8588,11 +8807,11 @@ function MarketplaceView({
       reader.readAsDataURL(file);
     });
 
-    if (selectedFiles.length > 3) {
+    if (selectedFiles.length > 6) {
       publishListing(marketplacePlans[1]);
       act(
         "Extra photos reserved",
-        "The first 3 photos are included. Extra photos need the small photo-pack fee before publishing.",
+        "Up to 6 photos are free at launch. Extra photos are queued behind the photo-pack fee.",
       );
     } else {
       act("Photos added", `${includedFiles.length} listing photo slot${includedFiles.length > 1 ? "s" : ""} ready.`);
@@ -8773,6 +8992,10 @@ function MarketplaceView({
   }
 
   async function bookMarketItem(item: MarketplaceItem | MarketplaceListing) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "creating a marketplace hold")) {
+      return;
+    }
+
     if (!locationReady) {
       act(
         "Location required",
@@ -8863,6 +9086,10 @@ function MarketplaceView({
   }
 
   async function placeBid(item: MarketplaceItem) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "placing marketplace bids")) {
+      return;
+    }
+
     if (!item.bidding) {
       act("Direct sale item", "This listing uses chat-first buying instead of timed bidding.");
       return;
@@ -9017,6 +9244,13 @@ function MarketplaceView({
               </span>
             </div>
           ) : null}
+          <div className="market-detail-hold">
+            <strong>Inspection and dispute trail</strong>
+            <span>
+              Chat-first sale is default. Hold-protected orders require inspection confirmation,
+              evidence, moderator review, and backend transaction confirmation before payout.
+            </span>
+          </div>
           <dl>
             <div>
               <dt>Seller</dt>
@@ -9200,7 +9434,7 @@ function MarketplaceView({
           <label className="listing-upload">
             <Upload size={20} />
             <strong>Add item photos</strong>
-            <span>3 photos included. More photos trigger an extra photo pack.</span>
+            <span>Minimum 3 photos. Up to 6 are free at launch; max 9.</span>
             <input
               accept="image/*"
               multiple
@@ -9209,7 +9443,7 @@ function MarketplaceView({
             />
           </label>
           <div className="listing-photo-grid">
-            {[0, 1, 2].map((slot) => {
+            {Array.from({ length: 9 }, (_, slot) => slot).map((slot) => {
               const photo = listingPhotos[slot];
 
               return (
@@ -9731,6 +9965,14 @@ function MeView({
             : "Local safe";
   const ownedPosts = humanPosts.filter((post) => post.owner);
   const chainScore = Math.round(points / 8 + streak * 9);
+  const passportMetrics = getTrustPassportMetrics({
+    completedTrades: marketplaceListings.filter((listing) => listing.status === "payment-ready").length,
+    human: verifiedHuman,
+    points,
+    posts: ownedPosts.length,
+    savedItems,
+    streak,
+  });
   const connectedSignals = Array.from(
     new Map(
       links.map((link) => [
@@ -9869,6 +10111,23 @@ function MeView({
         <p>
           This profile represents one real verified human. Username becomes the
           public chain handle across questions, stories, tips, and fields.
+        </p>
+      </section>
+      <section className="panel trust-passport-detail">
+        <div className="section-heading">
+          <span>Trust Passport</span>
+          <ShieldCheck size={18} />
+        </div>
+        <div className="trust-passport-grid">
+          <span><strong>{passportMetrics.verification}</strong>Verification</span>
+          <span><strong>{passportMetrics.tenure}</strong>Tenure</span>
+          <span><strong>{passportMetrics.helpfulScore}</strong>Helpfulness</span>
+          <span><strong>{passportMetrics.completedTrades}</strong>Completed trades</span>
+          <span><strong>{passportMetrics.disputeRate}</strong>Dispute rate</span>
+          <span><strong>{passportMetrics.moderationState}</strong>Moderation</span>
+        </div>
+        <p>
+          Wallet addresses stay out of primary public UI. HumanChain shows World usernames, coarse area, helpfulness, trade completion, and moderation state instead.
         </p>
       </section>
       <section className="panel human-history-panel">
@@ -10363,10 +10622,8 @@ function BottomNav({
   const items: Array<[Tab, string, React.ReactNode]> = [
     ["home", appLanguage.nav.home, <Home key="home" size={20} />],
     ["ask", appLanguage.nav.ask, <MessageCircleQuestion key="ask" size={20} />],
-    ["chains", appLanguage.nav.chains, <Sparkles key="chains" size={20} />],
+    ["chains", "Moments", <Sparkles key="chains" size={20} />],
     ["market", appLanguage.nav.market, <Store key="market" size={20} />],
-    ["stories", appLanguage.nav.stories, <BookOpen key="stories" size={20} />],
-    ["me", appLanguage.nav.me, <UserRound key="me" size={20} />],
   ];
 
   return (

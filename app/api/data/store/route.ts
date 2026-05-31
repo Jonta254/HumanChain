@@ -6,6 +6,7 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
+import { validateListingInput } from "@/lib/humanchainPolicy";
 
 const allowedKinds = new Set([
   "post",
@@ -41,6 +42,21 @@ export async function POST(req: NextRequest) {
       { error: "Send a supported data kind and record payload." },
       { status: 400 },
     );
+  }
+
+  if (payload.kind === "marketplace-listing") {
+    const result = validateListingInput(payload.data as Parameters<typeof validateListingInput>[0]);
+
+    if (!result.ok) {
+      return noStoreJson(
+        {
+          error: "Marketplace listing failed server validation.",
+          errorState: result.errorState ?? "content_under_review",
+          issues: result.issues,
+        },
+        { status: 422 },
+      );
+    }
   }
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
