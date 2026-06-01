@@ -135,7 +135,8 @@ export async function GET(req: NextRequest) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
-      message: "Add BLOB_READ_WRITE_TOKEN before shared HumanChain feed reads.",
+      message:
+        "The shared feed is being finalized. Starter content remains available.",
     });
   }
 

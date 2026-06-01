@@ -16,10 +16,15 @@ export async function POST(req: NextRequest) {
   const rpId = getWorldRpId();
 
   if (!rpId || !process.env.RP_SIGNING_KEY) {
-    return noStoreJson({
-      pendingSetup: true,
-      message: "Add RP_SIGNING_KEY before requesting World ID proofs.",
-    });
+    return noStoreJson(
+      {
+        ok: false,
+        pendingSetup: true,
+        message:
+          "World human verification is being finalized. You can continue using the app while this is connected.",
+      },
+      { status: 503 },
+    );
   }
 
   const { createdAt, expiresAt, nonce, sig } = signRequest({
@@ -28,6 +33,7 @@ export async function POST(req: NextRequest) {
   });
 
   return noStoreJson({
+    ok: true,
     rpContext: {
       rp_id: rpId,
       nonce,

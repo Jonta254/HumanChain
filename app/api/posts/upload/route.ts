@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
-      message: "Add BLOB_READ_WRITE_TOKEN before durable image and video uploads.",
+      message:
+        "Media uploads are being finalized. Try a text action or listing draft for now.",
     });
   }
 

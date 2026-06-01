@@ -63,7 +63,8 @@ export async function POST(req: NextRequest) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
-      message: "Add BLOB_READ_WRITE_TOKEN before durable data receipts.",
+      message:
+        "Cloud receipts are being finalized. This action stays saved locally for now.",
     });
   }
 

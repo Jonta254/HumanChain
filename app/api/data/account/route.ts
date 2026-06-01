@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
-      message: "Add BLOB_READ_WRITE_TOKEN before cross-device account sync.",
+      message:
+        "Account sync is being finalized. This device keeps your activity locally for now.",
     });
   }
 

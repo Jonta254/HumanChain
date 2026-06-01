@@ -7,19 +7,16 @@ export async function GET() {
   const treasury = getHumanChainTreasury();
   let blobStorageReady = false;
   let blobStorageStatus = process.env.BLOB_READ_WRITE_TOKEN
-    ? "Blob token configured; checking store."
-    : "BLOB_READ_WRITE_TOKEN is not configured.";
+    ? "Cloud storage check running."
+    : "Cloud storage is not connected yet.";
 
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     try {
       await list({ limit: 1 });
       blobStorageReady = true;
       blobStorageStatus = "Vercel Blob store connected.";
-    } catch (error) {
-      blobStorageStatus =
-        error instanceof Error
-          ? error.message
-          : "Vercel Blob store check failed.";
+    } catch {
+      blobStorageStatus = "Cloud storage check failed.";
     }
   }
 

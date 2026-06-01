@@ -6,7 +6,7 @@ export const humanChainErrorStates = {
   escrow_unavailable_region: "Hold-protected orders are not available in this region yet.",
   listing_blocked_category: "This category is blocked on HumanChain Market.",
   network_offline_retrying: "Network is unstable. HumanChain will retry without losing your draft.",
-  not_in_world_app: "Open HumanChain inside World App to use verified-human actions.",
+  not_in_world_app: "Continue with World App to use verified-human actions.",
   payment_rejected: "The payment was rejected. No public action was unlocked.",
   payment_unverified: "Payment could not be verified by the backend yet.",
   permission_denied_microphone: "Microphone permission was denied. You can continue with text.",

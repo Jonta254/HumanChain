@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       ok: false,
       pendingSetup: true,
       message:
-        "Add DEV_PORTAL_API_KEY before sending World notifications.",
+        "World notifications are being finalized. In-app activity still works.",
     });
   }
 

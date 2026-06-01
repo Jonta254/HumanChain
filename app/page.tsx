@@ -43,6 +43,7 @@ import {
   getWorldPermissions,
   getWorldUserByAddress,
   humanHaptic,
+  isWorldMiniAppReady,
   payWithWorld,
   Permission,
   requestWorldPermission,
@@ -2504,7 +2505,11 @@ function requireVerifiedPublicAction(
     return true;
   }
 
-  act("World ID required", `${humanChainErrorStates.world_id_required} Drafting is allowed, but ${action} needs World App verification.`);
+  void humanChainErrorStates.world_id_required;
+  act(
+    "World verification required",
+    `Continue with World App first. After verification, ${action} works immediately.`,
+  );
   return false;
 }
 
@@ -2842,6 +2847,40 @@ function getWorldDisplayUsername(
       : verifiedHuman?.username) ??
     (verifiedHuman?.wallet ? "World username syncing" : "World account pending")
   );
+}
+
+async function resolveWorldProfileAfterAuth(address: string) {
+  const snapshots: Array<ReturnType<typeof getWorldMiniAppContext>> = [getWorldMiniAppContext()];
+  let worldUser = await getWorldUserByAddress(address);
+
+  if (!snapshots[0].username && !worldUser?.username) {
+    await new Promise((resolve) => window.setTimeout(resolve, 450));
+    snapshots.push(getWorldMiniAppContext());
+    worldUser = worldUser ?? (await getWorldUserByAddress(address));
+  }
+
+  if (!snapshots.some((snapshot) => snapshot.username) && !worldUser?.username) {
+    await new Promise((resolve) => window.setTimeout(resolve, 1200));
+    snapshots.push(getWorldMiniAppContext());
+    worldUser = worldUser ?? (await getWorldUserByAddress(address));
+  }
+
+  const latestContext = snapshots.at(-1) ?? snapshots[0];
+  const username = normalizeWorldUsername(
+    latestContext.username ??
+      worldUser?.username ??
+      snapshots.find((snapshot) => snapshot.username)?.username,
+  );
+  const profilePictureUrl =
+    latestContext.profilePictureUrl ??
+    worldUser?.profilePictureUrl ??
+    snapshots.find((snapshot) => snapshot.profilePictureUrl)?.profilePictureUrl;
+
+  return {
+    context: latestContext,
+    profilePictureUrl,
+    username,
+  };
 }
 
 const storageKeys = {
@@ -4066,6 +4105,14 @@ export default function HumanChainApp() {
       return;
     }
 
+    if (!isVerifiedWorldHuman(verifiedHuman)) {
+      setToast({
+        title: "Verify first",
+        detail: "Continue with World App once, then every paid action and tip opens the World payment sheet.",
+      });
+      return;
+    }
+
     setPaymentPrompt(payment);
   }
 
@@ -4094,12 +4141,12 @@ export default function HumanChainApp() {
       if (!notificationWelcomeSent) {
         const welcomeTitle = "Welcome to HumanChain";
         const welcomeDetail =
-          "Welcome to HumanChain. Ask real humans, join chains, trade safely, publish stories, track your vault, and keep alerts on for replies, holds, payments, and safety.";
+          "Welcome to HumanChain. Ask real humans, post moments, trade safely, read stories, track your passport, and keep alerts on for replies, holds, payments, and safety.";
 
         addNotification(welcomeTitle, welcomeDetail, "welcome");
         addNotification(
           "HumanChain guide unlocked",
-          "Home is your dashboard. Ask routes real replies. Chains holds posts, links, rooms, Pulse, Circle, and Pin. Market, Stories, and Me keep your records clear.",
+          "Home guides your next action. Ask routes real replies. Moments holds photo posts and links. Market handles safer trade. Profile is always top-left.",
           "account",
         );
 
@@ -4143,18 +4190,16 @@ export default function HumanChainApp() {
       }
 
       const freshWorldContext = getWorldMiniAppContext();
-      const worldUser = await getWorldUserByAddress(address);
-      const nextWorldContext = getWorldMiniAppContext();
+      const resolvedProfile = await resolveWorldProfileAfterAuth(address);
+      const nextWorldContext = {
+        ...freshWorldContext,
+        ...resolvedProfile.context,
+      };
       const worldUsername = normalizeWorldUsername(
-        nextWorldContext.username ??
-          worldUser?.username ??
-          freshWorldContext.username ??
-          worldContext.username,
+        resolvedProfile.username ?? freshWorldContext.username ?? worldContext.username,
       );
       const worldProfilePictureUrl =
-        nextWorldContext.profilePictureUrl ??
-        worldUser?.profilePictureUrl ??
-        freshWorldContext.profilePictureUrl;
+        resolvedProfile.profilePictureUrl ?? freshWorldContext.profilePictureUrl;
 
       setWorldContext({
         ...freshWorldContext,
@@ -4174,9 +4219,11 @@ export default function HumanChainApp() {
         wallet: address,
         mode: "world",
       });
+      setTab("home");
+      setNotificationPromptDismissed(false);
       setToast({
         title: "Verified human entered",
-        detail: `${worldUsername ?? "World username syncing"} is ready. Notification, location, chat, and payment actions stay user controlled.`,
+        detail: `${worldUsername ?? "World username syncing"} is ready. You can now ask, post, trade, tip, and use paid actions.`,
       });
     } catch (error) {
       setToast({
@@ -4466,9 +4513,27 @@ export default function HumanChainApp() {
             onEnableNotifications={() => enableHumanChainNotifications("login")}
             onPreview={enterPreview}
             onVerify={enterWithWorld}
+            showPreview={!isWorldMiniAppReady()}
             worldContext={worldContext}
           />
         )}
+        {verifiedHuman && tab !== "home" && tab !== "me" ? (
+          <button
+            aria-label="Open Human Passport"
+            className="floating-profile-button"
+            onClick={() => setTab("me")}
+            type="button"
+          >
+            {verifiedHuman.profilePictureUrl || worldContext.profilePictureUrl ? (
+              <img
+                alt=""
+                src={verifiedHuman.profilePictureUrl ?? worldContext.profilePictureUrl}
+              />
+            ) : (
+              <UserRound size={18} />
+            )}
+          </button>
+        ) : null}
         {toast ? (
           <div className="toast" role="status">
             <CheckCircle2 size={18} />
@@ -4536,6 +4601,7 @@ function LoginGate({
   onEnableNotifications,
   onPreview,
   onVerify,
+  showPreview,
   worldContext,
 }: {
   appLanguage: AppLanguage;
@@ -4544,6 +4610,7 @@ function LoginGate({
   onEnableNotifications: () => void | Promise<void>;
   onPreview: () => void;
   onVerify: () => void | Promise<void>;
+  showPreview: boolean;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const gateCopy = appLanguage.gate;
@@ -4570,23 +4637,27 @@ function LoginGate({
           <span>{worldContext.deviceOS ?? gateCopy.deviceFallback} {gateCopy.deviceReady}</span>
           <span>{appLanguage.name} {gateCopy.selected}</span>
         </div>
+        {notificationReady ? (
         <div className="gate-notification-prompt">
           <Bell size={18} />
           <div>
-            <strong>{notificationReady ? gateCopy.notificationsAllowed : gateCopy.allowNotificationsTitle}</strong>
+            <strong>{gateCopy.notificationsAllowed}</strong>
             <span>{gateCopy.notificationsDetail}</span>
           </div>
           <button onClick={onEnableNotifications} type="button">
-            {notificationReady ? gateCopy.ready : gateCopy.allow}
+            {gateCopy.ready}
           </button>
         </div>
+        ) : null}
         <button className="gate-primary" disabled={busy} onClick={onVerify} type="button">
           <ShieldCheck size={19} />
           {busy ? gateCopy.checkingWallet : gateCopy.continueWithWorld}
         </button>
+        {showPreview ? (
         <button className="gate-secondary" onClick={onPreview} type="button">
           {gateCopy.preview}
         </button>
+        ) : null}
       </section>
       <section className="gate-trust-grid" aria-label={gateCopy.trustLabel}>
         {gateCopy.trustCards.map(([title, detail], index) => {
@@ -4821,7 +4892,7 @@ function HomeView({
       detail: topMoment?.caption ?? "No live moment yet. Be the first verified human to post today.",
       icon: <Sparkles size={18} />,
       label: topMoment ? "Live moment" : "Moment ready",
-      meta: "Open Chains",
+      meta: "Open Moments",
       onClick: () => setTab("chains"),
       title: topMoment?.author ?? "Post the first real moment",
       tone: "chains",
@@ -4986,7 +5057,7 @@ function HomeView({
         <button
           aria-label="Open HumanChain guide"
           className="home-guide-button"
-          onClick={() => act("HumanChain guide", "Start with Ask, Chains, Market, Stories, then track your trust inside Me.")}
+          onClick={() => act("HumanChain guide", "Start with Ask, Moments, and Market. Your Human Passport stays available from the top-left profile button.")}
           type="button"
         >
           <Compass size={18} />
@@ -5093,7 +5164,7 @@ function HomeView({
           icon={<Compass size={19} />}
           label="Guide"
           detail="How it works"
-          onClick={() => act("HumanChain guide", "Ask verified humans, post useful moments, publish stories, trade safely, and build your Human Passport.")}
+          onClick={() => act("HumanChain guide", "Ask verified humans, post useful moments, trade safely, read stories from Home, and build your Human Passport.")}
           tone="market"
         />
       </section>
@@ -5383,6 +5454,21 @@ function AskView({
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
   const [threads, setThreads] = useState(loadStoredAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
+  const [askSearch, setAskSearch] = useState("");
+  const [askFeedFilter, setAskFeedFilter] = useState("All");
+
+  const visibleThreads = threads.filter((thread) => {
+    const targetCountry = getAskThreadTargetCountry(thread);
+    const query = askSearch.trim().toLowerCase();
+    const matchesQuery = !query || `${thread.question} ${thread.topic} ${thread.author} ${targetCountry}`.toLowerCase().includes(query);
+    const matchesFilter =
+      askFeedFilter === "All" ||
+      thread.topic === askFeedFilter ||
+      (askFeedFilter === "Country Route" && targetCountry !== "World") ||
+      (askFeedFilter === "Unanswered" && thread.answers.length === 0);
+
+    return matchesQuery && matchesFilter;
+  });
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.askThreads, threads);
@@ -5738,7 +5824,31 @@ function AskView({
           <span>Live Human Questions</span>
           <MessageCircleQuestion size={18} />
         </div>
-        {threads.map((thread, index) => {
+        <div className="ask-discovery-bar">
+          <div className="search-field">
+            <Search size={16} />
+            <input
+              aria-label="Search questions"
+              onChange={(event) => setAskSearch(event.target.value)}
+              placeholder="Search questions, topics, or countries"
+              value={askSearch}
+            />
+          </div>
+          <div className="chip-row compact">
+            {["All", "Life", "Money", "Business", "Country Route", "Unanswered"].map((filter) => (
+              <button
+                aria-pressed={askFeedFilter === filter}
+                className={askFeedFilter === filter ? "active" : ""}
+                key={filter}
+                onClick={() => setAskFeedFilter(filter)}
+                type="button"
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+        {visibleThreads.length ? visibleThreads.map((thread, index) => {
           const targetCountry = getAskThreadTargetCountry(thread);
           const visibleAnswers =
             targetCountry === "World"
@@ -5838,9 +5948,14 @@ function AskView({
                 Build verdict
               </button>
             </div>
-          </article>
-          );
-        })}
+            </article>
+            );
+          }) : (
+            <div className="empty-feed-state">
+              <strong>No matching questions</strong>
+              <span>Clear search or choose another topic to keep browsing.</span>
+            </div>
+          )}
       </section>
 
       <section className="panel payment-hub">
@@ -5978,6 +6093,8 @@ function ChainsView({
   const [postMediaType, setPostMediaType] = useState<"image" | "video">("image");
   const [isPublishingPost, setIsPublishingPost] = useState(false);
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
+  const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
+  const [commentSort, setCommentSort] = useState<"relevant" | "newest">("relevant");
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
   );
@@ -5996,6 +6113,13 @@ function ChainsView({
     if (!a.pinned && b.pinned) return 1;
     return 0;
   });
+  const activeCommentPost = activeCommentPostId
+    ? visiblePosts.find((post) => post.id === activeCommentPostId) ?? null
+    : null;
+  const activeComments =
+    commentSort === "newest"
+      ? [...(activeCommentPost?.comments ?? [])]
+      : [...(activeCommentPost?.comments ?? [])].sort((a, b) => b.length - a.length);
 
   useEffect(() => {
     scrollMiniAppToTop();
@@ -6700,6 +6824,12 @@ function ChainsView({
                   >
                     Tip
                   </button>
+                  <button
+                    onClick={() => setActiveCommentPostId(post.id)}
+                    type="button"
+                  >
+                    Comment
+                  </button>
                   {["I felt this", "Inspired", "Praying"].map((reaction) => (
                     <button
                       key={reaction}
@@ -6710,24 +6840,9 @@ function ChainsView({
                     </button>
                   ))}
                 </div>
-                <div className="comment-box">
-                  <input
-                    onChange={(event) =>
-                      setCommentDrafts((current) => ({
-                        ...current,
-                        [post.id]: event.target.value,
-                      }))
-                    }
-                    placeholder="Add a real comment..."
-                    value={commentDrafts[post.id] ?? ""}
-                  />
-                  <button onClick={() => commentOnPost(post.id)} type="button">
-                    Comment
-                  </button>
-                </div>
                 {post.comments.length ? (
                   <div className="comment-list">
-                    {post.comments.slice(0, 3).map((comment, index) => (
+                    {post.comments.slice(0, 1).map((comment, index) => (
                       <span key={`${post.id}-${comment}-${index}`}>{comment}</span>
                     ))}
                   </div>
@@ -6735,6 +6850,77 @@ function ChainsView({
               </div>
             </article>
           ))}
+          {activeCommentPost ? (
+            <div className="comment-sheet-backdrop" role="presentation">
+              <section
+                aria-label={`Comments for ${activeCommentPost.author}`}
+                aria-modal="true"
+                className="comment-sheet"
+                role="dialog"
+              >
+                <div className="comment-sheet-handle" />
+                <div className="comment-sheet-top">
+                  <div>
+                    <strong>{activeCommentPost.author}</strong>
+                    <span>{activeCommentPost.caption}</span>
+                  </div>
+                  <button onClick={() => setActiveCommentPostId(null)} type="button">
+                    Close
+                  </button>
+                </div>
+                <div className="comment-sort-row" aria-label="Comment sorting">
+                  {[
+                    ["relevant", "Most relevant"],
+                    ["newest", "Newest"],
+                  ].map(([key, label]) => (
+                    <button
+                      aria-pressed={commentSort === key}
+                      className={commentSort === key ? "active" : ""}
+                      key={key}
+                      onClick={() => setCommentSort(key as typeof commentSort)}
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="comment-thread">
+                  {activeComments.length ? (
+                    activeComments.map((comment, index) => (
+                      <article key={`${activeCommentPost.id}-${comment}-${index}`}>
+                        <strong>{comment.includes(":") ? comment.split(":")[0] : "@verified_human"}</strong>
+                        <p>{comment.includes(":") ? comment.split(":").slice(1).join(":").trim() : comment}</p>
+                        <button onClick={() => act("Translate ready", "One-tap translation can be connected for this comment.")} type="button">
+                          Translate
+                        </button>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="comment-empty">
+                      <strong>No comments yet</strong>
+                      <span>Start the thread with a useful human response.</span>
+                    </div>
+                  )}
+                </div>
+                <div className="comment-sheet-composer">
+                  <input
+                    aria-label="Write comment"
+                    onChange={(event) =>
+                      setCommentDrafts((current) => ({
+                        ...current,
+                        [activeCommentPost.id]: event.target.value,
+                      }))
+                    }
+                    placeholder="Add a real comment..."
+                    value={commentDrafts[activeCommentPost.id] ?? ""}
+                  />
+                  <button onClick={() => commentOnPost(activeCommentPost.id)} type="button">
+                    Send
+                  </button>
+                </div>
+              </section>
+            </div>
+          ) : null}
         </section>
       ) : chainView === "groups" ? (
         <section className="groups-stack">
@@ -8467,6 +8653,8 @@ function MarketplaceView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [activeFilter, setActiveFilter] = useState("Near me");
+  const [marketMode, setMarketMode] = useState<"browse" | "sell">("browse");
+  const [marketSearch, setMarketSearch] = useState("");
   const [manualArea, setManualArea] = useState(() =>
     marketLocation.source === "manual"
       ? marketLocation.label.replace(/^Manual area:\s*/, "")
@@ -8508,10 +8696,12 @@ function MarketplaceView({
   });
 
   const filteredItems = marketplaceItems.filter((item) => {
-    if (activeFilter === "New") return item.condition === "New listed";
-    if (activeFilter === "Second hand") return item.condition === "Second hand";
-    if (activeFilter === "Marketing") return item.tag === "Marketing";
-    return true;
+    const query = marketSearch.trim().toLowerCase();
+    const matchesQuery = !query || `${item.title} ${item.seller} ${item.location} ${item.tag} ${item.condition}`.toLowerCase().includes(query);
+    if (activeFilter === "New") return matchesQuery && item.condition === "New listed";
+    if (activeFilter === "Second hand") return matchesQuery && item.condition === "Second hand";
+    if (activeFilter === "Marketing") return matchesQuery && item.tag === "Marketing";
+    return matchesQuery;
   });
   const locationReady = marketLocation.status === "ready";
   const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
@@ -8777,6 +8967,7 @@ function MarketplaceView({
       title: "",
     });
     setListingPhotos([]);
+    setMarketMode("browse");
     return true;
   }
 
@@ -9326,8 +9517,7 @@ function MarketplaceView({
           <Store size={30} />
         </div>
         <p>
-          Buy, sell, and promote with trust-first listings, real photos,
-          seller handles, and World Chat before payment.
+          Search real listings first. Trust details stay visible without taking over the first screen.
         </p>
         <div className="market-identity-strip">
           <UserRound size={17} />
@@ -9397,17 +9587,57 @@ function MarketplaceView({
         </small>
       </section>
 
+      <section className="market-panel market-discovery-panel">
+        <div className="search-field market-search">
+          <Search size={16} />
+          <input
+            aria-label="Search marketplace"
+            onChange={(event) => setMarketSearch(event.target.value)}
+            placeholder="Search items, sellers, areas"
+            value={marketSearch}
+          />
+        </div>
+        <div className="market-filter-row">
+          {["Near me", "New", "Second hand", "Marketing"].map((filter) => (
+            <button
+              className={activeFilter === filter ? "active" : ""}
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              type="button"
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+        <div className="applied-filter-row">
+          <span>{activeFilter}</span>
+          {marketSearch.trim() ? <span>Search: {marketSearch.trim()}</span> : null}
+          {locationReady ? <span>{marketLocation.source === "manual" ? "Manual area active" : "GPS active"}</span> : <span>No hidden GPS</span>}
+        </div>
+      </section>
+
       <section className="market-actions">
         <button
-          onClick={() => publishListing(marketplacePlans[0])}
+          onClick={() => {
+            setMarketMode("sell");
+            act("Sell item", "Listing studio opened. Add 3+ photos, price, condition, area, and proof before publishing.");
+          }}
           type="button"
         >
           <PlusCircle size={19} />
           <span>Sell item</span>
-          <strong>2 WLD</strong>
+          <strong>Start</strong>
         </button>
         <button
-          onClick={() => publishListing(marketplacePlans[2])}
+          onClick={() => {
+            if (!marketplaceListings.length) {
+              act("Boost needs a listing", "Create or select a listing before buying a local boost.");
+              setMarketMode("sell");
+              return;
+            }
+
+            publishListing(marketplacePlans[2]);
+          }}
           type="button"
         >
           <HandCoins size={19} />
@@ -9415,7 +9645,10 @@ function MarketplaceView({
           <strong>2 WLD</strong>
         </button>
         <button
-          onClick={() => publishListing(marketplacePlans[3])}
+          onClick={() => {
+            act("Business review", "Business ads require a verified seller, disclosure, reviewed copy, and a clean destination link.");
+            publishListing(marketplacePlans[3]);
+          }}
           type="button"
         >
           <HandCoins size={19} />
@@ -9424,12 +9657,27 @@ function MarketplaceView({
         </button>
       </section>
 
+      {marketMode === "sell" ? (
       <section className="market-panel listing-studio">
         <div className="section-heading">
-          <span>Publish Verified Listing</span>
+          <span>Sell Item</span>
           <Upload size={18} />
         </div>
-        <div className="listing-section-label">1. What are you selling?</div>
+        <button className="market-detail-back" onClick={() => setMarketMode("browse")} type="button">
+          Back to market
+        </button>
+        <div className="seller-flow-steps" aria-label="Listing progress">
+          {["Photos", "Price", "Proof", "Area", "Publish"].map((step, index) => (
+            <span key={step}>
+              <b>{index + 1}</b>
+              {step}
+            </span>
+          ))}
+        </div>
+        <p className="seller-flow-note">
+          Buyers see your listing only after the required proof is present. HumanChain stores coarse area, never a home address.
+        </p>
+        <div className="listing-section-label">1. Photos</div>
         <div className="listing-photo-zone">
           <label className="listing-upload">
             <Upload size={20} />
@@ -9455,6 +9703,7 @@ function MarketplaceView({
           </div>
         </div>
         <div className="listing-fields">
+          <div className="listing-section-label">2. Price and item facts</div>
           <input
             aria-label="Item title"
             onChange={(event) => updateListingDraft("title", event.target.value)}
@@ -9507,7 +9756,7 @@ function MarketplaceView({
             <option>Refurbished</option>
             <option>Service or business</option>
           </select>
-          <div className="listing-section-label">2. Proof and trust</div>
+          <div className="listing-section-label">3. Proof and trust</div>
           <input
             aria-label="Pickup area"
             onChange={(event) => updateListingDraft("area", event.target.value)}
@@ -9526,7 +9775,7 @@ function MarketplaceView({
             placeholder="Premium details: size, defects, warranty, delivery route, receipt, pickup safety, why buyers should trust it."
             value={listingDraft.details}
           />
-          <div className="listing-section-label">3. Location and sale method</div>
+          <div className="listing-section-label">4. Area and sale method</div>
         </div>
         <div className="listing-checklist">
           {marketplaceChecklist.map((item) => (
@@ -9536,6 +9785,18 @@ function MarketplaceView({
             </span>
           ))}
         </div>
+        <section className="listing-review-card" aria-label="Listing review">
+          <span className="section-kicker">Review before publish</span>
+          <strong>{listingDraft.title.trim() || "Item title missing"}</strong>
+          <p>
+            {listingDraft.price.trim() || "Price missing"} - {listingDraft.condition || "Condition missing"} - {listingDraft.area.trim() || "Area missing"}
+          </p>
+          <div className="stored-market-trust">
+            <span>{listingPhotos.length}/3 minimum photos</span>
+            <span>{listingDraft.saleMode === "bidding" ? "Timed bidding" : "Chat-first sale"}</span>
+            <span>Verified username: {sellerHandle}</span>
+          </div>
+        </section>
         <button
           className="primary-command"
           onClick={() => {
@@ -9548,6 +9809,21 @@ function MarketplaceView({
           Publish Verified Listing - 2 WLD
         </button>
       </section>
+      ) : (
+        <section className="market-panel market-seller-prompt">
+          <div>
+            <span className="section-kicker">Seller flow</span>
+            <h2>Ready to sell something?</h2>
+            <p>
+              Start a guided listing when you need it. The market stays clean for browsing until a seller intentionally opens the posting process.
+            </p>
+          </div>
+          <button onClick={() => setMarketMode("sell")} type="button">
+            <PlusCircle size={18} />
+            Sell item
+          </button>
+        </section>
+      )}
 
       {marketplaceListings.length ? (
         <section className="market-panel stored-market-panel">
@@ -9621,20 +9897,8 @@ function MarketplaceView({
           <span>Discover near you</span>
           <ShoppingBag size={18} />
         </div>
-        <div className="market-filter-row">
-          {["Near me", "New", "Second hand", "Marketing"].map((filter) => (
-            <button
-              className={activeFilter === filter ? "active" : ""}
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              type="button"
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
         <div className="market-list">
-          {filteredItems.map((item) => {
+          {filteredItems.length ? filteredItems.map((item) => {
             const ratingKey = `${item.seller}:${item.title}`;
             const itemSocial = marketRatings[ratingKey] ?? { rating: 0, tips: 0 };
 
@@ -9778,7 +10042,12 @@ function MarketplaceView({
               </div>
             </article>
             );
-          })}
+          }) : (
+            <div className="empty-feed-state">
+              <strong>No listings found</strong>
+              <span>Try another search, clear a filter, or open the seller flow.</span>
+            </div>
+          )}
         </div>
       </section>
 

@@ -13,11 +13,13 @@ type HumanVerifyButtonProps = {
   action: string;
   signal?: string;
   label: string;
+  fallbackLabel?: string;
   onVerified?: () => void;
 };
 
 export function HumanVerifyButton({
   action,
+  fallbackLabel = "Continue",
   signal,
   label,
   onVerified,
@@ -25,6 +27,7 @@ export function HumanVerifyButton({
   const appId = getWorldAppId() as `app_${string}`;
   const [isOpen, setIsOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
+  const [verificationReady, setVerificationReady] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -35,11 +38,21 @@ export function HumanVerifyButton({
       body: JSON.stringify({ action }),
     })
       .then((response) => response.json())
-      .then((data: { rpContext?: RpContext }) => {
-        if (isMounted) setRpContext(data.rpContext ?? null);
+      .then((data: { ok?: boolean; rpContext?: RpContext }) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setRpContext(data.rpContext ?? null);
+        setVerificationReady(Boolean(data.ok && data.rpContext));
       })
       .catch(() => {
-        if (isMounted) setRpContext(null);
+        if (!isMounted) {
+          return;
+        }
+
+        setRpContext(null);
+        setVerificationReady(false);
       });
 
     return () => {
@@ -66,13 +79,19 @@ export function HumanVerifyButton({
   return (
     <>
       <button
-        disabled={!rpContext}
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          if (verificationReady) {
+            setIsOpen(true);
+            return;
+          }
+
+          onVerified?.();
+        }}
         type="button"
       >
-        {label}
+        {verificationReady ? label : fallbackLabel}
       </button>
-      {rpContext ? (
+      {verificationReady && rpContext ? (
         <IDKitRequestWidget
           action={action}
           allow_legacy_proofs={false}

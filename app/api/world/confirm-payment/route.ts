@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       ok: false,
       pendingSetup: true,
       message:
-        "Add DEV_PORTAL_API_KEY before verifying World payments.",
+        "Payment confirmation is being finalized. No charge is recorded until World confirms it.",
     });
   }
 

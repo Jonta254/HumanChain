@@ -337,7 +337,8 @@ export async function payWithWorld({
     return {
       ok: false,
       pendingSetup: true,
-      message: "Add NEXT_PUBLIC_HUMANCHAIN_TREASURY before live World payments.",
+      message:
+        "Live payments are being finalized. No payment will be requested until the treasury wallet is ready.",
     };
   }
 

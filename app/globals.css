@@ -653,6 +653,34 @@ html[data-world-mini-app="true"] .phone-frame {
   box-shadow: 0 10px 28px rgba(62, 48, 31, 0.06);
 }
 
+.floating-profile-button {
+  position: fixed;
+  left: calc(50% - min(50vw, 215px) + max(14px, var(--world-safe-left)));
+  top: calc(12px + var(--world-safe-top));
+  z-index: 6;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(36, 107, 85, 0.18);
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: 0 12px 28px rgba(23, 49, 47, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.floating-profile-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-world-mini-app="true"] .floating-profile-button {
+  left: max(14px, calc(14px + var(--world-safe-left)));
+}
+
 .next-best-action-card {
   grid-template-columns: 1fr;
   border-color: rgba(36, 107, 85, 0.2);
@@ -2124,7 +2152,7 @@ button.danger {
 }
 
 .top-bar {
-  padding: 8px 2px 4px;
+  padding: 8px 2px 4px 52px;
 }
 
 .top-bar .section-kicker {
@@ -2475,6 +2503,59 @@ button.danger {
   display: grid;
   gap: 12px;
   margin-top: 14px;
+}
+
+.ask-discovery-bar {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.search-field {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 9px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--muted);
+  background: #fffcf6;
+}
+
+.search-field input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.chip-row.compact {
+  margin: 0;
+}
+
+.chip-row.compact button {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 0.76rem;
+}
+
+.empty-feed-state {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px dashed rgba(36, 107, 85, 0.28);
+  border-radius: 18px;
+  color: var(--muted);
+  background: rgba(36, 107, 85, 0.05);
+  text-align: center;
+}
+
+.empty-feed-state strong {
+  color: var(--green);
 }
 
 .ask-thread {
@@ -3517,6 +3598,149 @@ button.danger {
   background: rgba(32, 35, 40, 0.05);
   font-size: 0.78rem;
   line-height: 1.32;
+}
+
+.comment-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  align-items: end;
+  background: rgba(14, 20, 18, 0.28);
+}
+
+.comment-sheet {
+  width: min(100%, 430px);
+  max-height: min(78vh, 680px);
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 12px;
+  margin: 0 auto;
+  padding: 10px 16px calc(14px + max(env(safe-area-inset-bottom), var(--world-safe-bottom)));
+  border: 1px solid rgba(255, 253, 248, 0.72);
+  border-radius: 24px 24px 0 0;
+  background: var(--paper-strong);
+  box-shadow: 0 -18px 44px rgba(20, 28, 24, 0.22);
+}
+
+.comment-sheet-handle {
+  justify-self: center;
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(32, 35, 40, 0.18);
+}
+
+.comment-sheet-top {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.comment-sheet-top div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.comment-sheet-top strong {
+  color: var(--green);
+}
+
+.comment-sheet-top span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.34;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.comment-sheet-top button,
+.comment-sort-row button,
+.comment-thread button {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--ink);
+  background: #fffcf6;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.comment-sort-row {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-sort-row button.active {
+  color: var(--paper-strong);
+  border-color: rgba(36, 107, 85, 0.26);
+  background: var(--green);
+}
+
+.comment-thread {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 160px;
+  overflow-y: auto;
+}
+
+.comment-thread article,
+.comment-empty {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid rgba(36, 107, 85, 0.1);
+  border-radius: 14px;
+  background: rgba(36, 107, 85, 0.05);
+}
+
+.comment-thread article p,
+.comment-empty span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.38;
+}
+
+.comment-thread button {
+  justify-self: start;
+  min-height: 32px;
+  padding: 6px 9px;
+}
+
+.comment-sheet-composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.comment-sheet-composer input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 13px;
+  color: var(--ink);
+  background: #fffcf6;
+}
+
+.comment-sheet-composer button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  color: var(--paper-strong);
+  background: var(--ink);
+  font-weight: 950;
 }
 
 .field-room-hero {
@@ -6172,6 +6396,77 @@ button.danger {
     radial-gradient(circle at 0% 0%, rgba(47, 111, 237, 0.08), transparent 9rem);
 }
 
+.market-seller-prompt {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  background:
+    linear-gradient(135deg, #fffdf8, #eef8f3),
+    radial-gradient(circle at 100% 0%, rgba(36, 107, 85, 0.1), transparent 9rem);
+}
+
+.market-seller-prompt h2,
+.market-seller-prompt p {
+  margin: 0;
+}
+
+.market-seller-prompt h2 {
+  font-size: 1.08rem;
+}
+
+.market-seller-prompt p,
+.seller-flow-note {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.38;
+}
+
+.market-seller-prompt button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 13px;
+  color: #fffdf8;
+  background: var(--green);
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.seller-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.seller-flow-steps span {
+  min-height: 50px;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  border: 1px solid rgba(36, 107, 85, 0.14);
+  border-radius: 14px;
+  color: var(--green);
+  background: rgba(36, 107, 85, 0.07);
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.seller-flow-steps b {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #fffdf8;
+  background: var(--green);
+  font-size: 0.7rem;
+}
+
 .listing-photo-zone {
   display: grid;
   gap: 10px;
@@ -6276,6 +6571,29 @@ button.danger {
   font-weight: 850;
 }
 
+.listing-review-card {
+  display: grid;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid rgba(36, 107, 85, 0.16);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(238, 248, 243, 0.92)),
+    radial-gradient(circle at 100% 0%, rgba(47, 111, 237, 0.08), transparent 7rem);
+}
+
+.listing-review-card strong {
+  font-size: 1rem;
+  line-height: 1.18;
+}
+
+.listing-review-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.36;
+}
+
 .market-panel {
   margin-top: 14px;
   padding: 16px;
@@ -6283,6 +6601,16 @@ button.danger {
   border-radius: 22px;
   background: var(--paper-strong);
   box-shadow: 0 10px 28px rgba(62, 48, 31, 0.06);
+}
+
+.market-discovery-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.market-search {
+  min-height: 48px;
 }
 
 .market-filter-row {
@@ -6307,6 +6635,25 @@ button.danger {
   color: #fffdf8;
   border-color: rgba(47, 111, 237, 0.32);
   background: linear-gradient(135deg, var(--ink), var(--blue));
+}
+
+.applied-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.applied-filter-row span {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(36, 107, 85, 0.12);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: var(--green);
+  background: rgba(36, 107, 85, 0.07);
+  font-size: 0.74rem;
+  font-weight: 900;
 }
 
 .market-list {
@@ -6933,10 +7280,15 @@ html[data-world-mini-app="true"] .bottom-nav {
   .ask-service-switch,
   .ask-modes,
   .image-post-actions,
+  .market-seller-prompt,
   .market-detail-actions,
   .payment-actions,
   .story-publish-grid {
     grid-template-columns: 1fr;
+  }
+
+  .seller-flow-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .chain-tabs {

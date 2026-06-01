@@ -34,13 +34,17 @@ export async function POST(req: NextRequest) {
   const rpId = getWorldRpId();
 
   if (!rpId) {
-    return noStoreJson({
-      ok: false,
-      pendingSetup: true,
-      action,
-      signal,
-      message: "Add WORLD_RP_ID before verifying World ID proofs.",
-    });
+    return noStoreJson(
+      {
+        ok: false,
+        pendingSetup: true,
+        action,
+        signal,
+        message:
+          "World human verification is being finalized. Please continue with wallet verification for now.",
+      },
+      { status: 503 },
+    );
   }
 
   const response = await fetch(
