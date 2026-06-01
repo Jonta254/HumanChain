@@ -2570,6 +2570,12 @@ type Toast = {
   detail: string;
 };
 
+function getShortText(value: string, limit = 96) {
+  const normalized = value.trim().replace(/\s+/g, " ");
+
+  return normalized.length > limit ? `${normalized.slice(0, limit - 1)}...` : normalized;
+}
+
 const importantToastTerms = [
   "confirmed",
   "payment",
@@ -4335,7 +4341,7 @@ export default function HumanChainApp() {
 
       recordHistory({
         title: getPaymentKind(feature) === "tip" ? "Tip payment confirmed" : "Payment confirmed",
-        detail: `${formattedAmount} confirmed for ${paymentPrompt.title}. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`,
+        detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`,
         kind: getPaymentKind(feature),
       });
       void storeSafeData("payment", `${feature}-${Date.now()}`, {
@@ -4954,6 +4960,12 @@ function HomeView({
     savedItems,
     streak,
   });
+  const homeProof = [
+    { label: "Verified people", value: passportMetrics.identityTier },
+    { label: "Comments", value: "Sheet view" },
+    { label: "Market", value: "Chat first" },
+    { label: "Payments", value: "World verified" },
+  ];
   const nextBestAction = !isVerifiedWorldHuman(verifiedHuman)
     ? {
         detail: "Preview can browse and draft. Public trust actions unlock only after World verification.",
@@ -5074,6 +5086,14 @@ function HomeView({
         </div>
         <h1>Real humans. Real wisdom. Real trust.</h1>
         <p>Ask verified humans, share real stories, build your chain, and trade safely inside World App.</p>
+        <div className="home-proof-strip">
+          {homeProof.map((proof) => (
+            <span key={proof.label}>
+              <strong>{proof.label}</strong>
+              {proof.value}
+            </span>
+          ))}
+        </div>
         <div className="human-trust-grid">
           <button onClick={() => setTab("me")} type="button">
             <strong>{chainScore}</strong>
@@ -5124,7 +5144,7 @@ function HomeView({
         </button>
       </section>
 
-      <section className="human-service-grid" aria-label="HumanChain services">
+      <section className="human-service-grid professional" aria-label="HumanChain services">
         <ActionButton
           icon={<MessageCircleQuestion size={19} />}
           label="Ask"
@@ -6782,7 +6802,12 @@ function ChainsView({
                   ) : null}
                 </div>
                 <p className="post-caption">{post.caption}</p>
-                <div className="image-post-media">
+                <button
+                  aria-label={`Open comments for ${post.author}'s moment`}
+                  className="image-post-media"
+                  onClick={() => setActiveCommentPostId(post.id)}
+                  type="button"
+                >
                   {post.mediaType === "video" ? (
                     <video controls src={post.image ?? undefined} />
                   ) : (
@@ -6793,7 +6818,7 @@ function ChainsView({
                       src={post.image ?? ""}
                     />
                   )}
-                </div>
+                </button>
                 <div className="post-metrics">
                   <span>{post.reactions} reactions</span>
                   <span>{post.loves} loves</span>
@@ -9390,6 +9415,11 @@ function MarketplaceView({
         >
           Back to market
         </button>
+        <div className="market-detail-titlebar">
+          <span className="section-kicker">Item detail</span>
+          <strong>{itemInfo.title}</strong>
+          <small>{itemInfo.price} - {itemInfo.condition}</small>
+        </div>
         <section className="market-detail-gallery" aria-label={`${itemInfo.title} images`}>
           {images.length ? (
             images.map((image, index) => (
@@ -9424,6 +9454,21 @@ function MarketplaceView({
               Chat before payment
             </span>
           </div>
+          <section className="seller-contact-card" aria-label="Seller details">
+            <div>
+              <span>Seller</span>
+              <strong>{itemInfo.seller}</strong>
+              <small>{itemInfo.area}</small>
+            </div>
+            <button
+              aria-busy={isMarketActionBusy("chat", activeMarketItem)}
+              disabled={Boolean(marketBusyAction)}
+              onClick={() => void messageMarketplaceSeller(activeMarketItem)}
+              type="button"
+            >
+              {isMarketActionBusy("chat", activeMarketItem) ? "Opening..." : "Talk to seller"}
+            </button>
+          </section>
           {activeHold ? (
             <div className="market-detail-hold">
               <strong>Hold active</strong>
@@ -9442,6 +9487,57 @@ function MarketplaceView({
               evidence, moderator review, and backend transaction confirmation before payout.
             </span>
           </div>
+          {"bidding" in activeMarketItem && activeMarketItem.bidding ? (
+            <div className="bid-console detail-bid-console">
+              <div className="bid-console-top">
+                <span>
+                  <Gavel size={14} />
+                  Bidding closes {activeMarketItem.bidding.ends}
+                </span>
+                <strong>Best {getTopBid(activeMarketItem)?.amount ?? activeMarketItem.bidding.floor} WLD</strong>
+              </div>
+              <p>
+                Seller target {activeMarketItem.bidding.target} WLD. Next bid must be at least {getMinimumNextBid(activeMarketItem)} WLD.
+              </p>
+              <div className="quick-bid-row" aria-label={`Quick bids for ${activeMarketItem.title}`}>
+                {[getMinimumNextBid(activeMarketItem), activeMarketItem.bidding.target].map((amount) => (
+                  <button
+                    key={`${activeMarketItem.title}-${amount}`}
+                    onClick={() => setQuickBid(activeMarketItem, amount)}
+                    type="button"
+                  >
+                    {amount} WLD
+                  </button>
+                ))}
+              </div>
+              <div className="bid-row">
+                <input
+                  aria-label={`Bid amount for ${activeMarketItem.title}`}
+                  inputMode="decimal"
+                  onChange={(event) =>
+                    setBidDrafts((current) => ({
+                      ...current,
+                      [activeMarketItem.title]: event.target.value,
+                    }))
+                  }
+                  placeholder={`${activeMarketItem.bidding.floor}+ WLD`}
+                  value={bidDrafts[activeMarketItem.title] ?? ""}
+                />
+                <button
+                  aria-busy={isMarketActionBusy("bid", activeMarketItem)}
+                  disabled={Boolean(marketBusyAction)}
+                  onClick={() => void placeBid(activeMarketItem)}
+                  type="button"
+                >
+                  {isMarketActionBusy("bid", activeMarketItem) ? "Sending..." : "Place bid"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="direct-chat-note detail-direct-note">
+              Direct sale. Use seller chat to confirm condition, pickup route, payment timing, and inspection before paying.
+            </div>
+          )}
           <dl>
             <div>
               <dt>Seller</dt>
@@ -9948,71 +10044,25 @@ function MarketplaceView({
                     Inspect before pay
                   </span>
                 </div>
-                <small>{item.quality}</small>
-                {item.bidding ? (
-                  <div className="bid-console">
-                    <div className="bid-console-top">
-                      <span>
-                        <Gavel size={14} />
-                        Bidding closes {item.bidding.ends}
-                      </span>
-                      <strong>
-                        Best {getTopBid(item)?.amount ?? item.bidding.floor} WLD
-                      </strong>
-                    </div>
-                    <p>
-                      Seller target {item.bidding.target} WLD. Next bid must be
-                      at least {getMinimumNextBid(item)} WLD. HumanChain ranks
-                      serious offers, stores the bid trail, and opens seller chat.
-                    </p>
-                    <div className="quick-bid-row" aria-label={`Quick bids for ${item.title}`}>
-                      {[getMinimumNextBid(item), item.bidding.target].map((amount) => (
-                        <button
-                          key={`${item.title}-${amount}`}
-                          onClick={() => setQuickBid(item, amount)}
-                          type="button"
-                        >
-                          {amount} WLD
-                        </button>
-                      ))}
-                    </div>
-                    <div className="bid-row">
-                      <input
-                        aria-label={`Bid amount for ${item.title}`}
-                        inputMode="decimal"
-                        onChange={(event) =>
-                          setBidDrafts((current) => ({
-                            ...current,
-                            [item.title]: event.target.value,
-                          }))
-                        }
-                        placeholder={`${item.bidding.floor}+ WLD`}
-                        value={bidDrafts[item.title] ?? ""}
-                      />
-                      <button
-                        aria-busy={isMarketActionBusy("bid", item)}
-                        disabled={Boolean(marketBusyAction)}
-                        onClick={() => void placeBid(item)}
-                        type="button"
-                      >
-                        {isMarketActionBusy("bid", item) ? "Sending..." : "Bid"}
-                      </button>
-                    </div>
-                    <div className="bid-stack">
-                      {(marketBids[item.title] ?? []).slice(0, 3).map((bid) => (
-                        <span key={`${bid.id}-${bid.buyer}-${bid.amount}-${bid.note}`}>
-                          {bid.buyer}: {bid.amount} WLD - {bid.note} - {bid.status === "sent" ? "sent" : "saved"} - {bid.dataStorageStatus === "cloud-safe" ? "safe receipt" : "local safe"}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="direct-chat-note">
-                    Direct inbox sale. Confirm item condition, delivery, and payment path in Human Chat before buying.
-                  </div>
-                )}
+                <small>{getShortText(item.quality, 112)}</small>
+                <div className="market-card-summary">
+                  {item.bidding ? (
+                    <>
+                      <span>Best bid {getTopBid(item)?.amount ?? item.bidding.floor} WLD</span>
+                      <span>Closes {item.bidding.ends}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Direct chat sale</span>
+                      <span>Inspect first</span>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="market-card-actions">
+                <button onClick={() => setActiveMarketItem(item)} type="button">
+                  View details
+                </button>
                 <button onClick={() => rateMarketItem(item, item.title)} type="button">
                   Rate look
                 </button>
@@ -10676,6 +10726,12 @@ function PaymentSheet({
             : `0 ${humanChainPaymentTokens[selectedToken].label}`}
         </strong>
         <p>{payment.detail}</p>
+        <div className="payment-verification-note">
+          <ShieldCheck size={16} />
+          <span>
+            HumanChain creates a backend reference first. This action unlocks only after World App payment and server verification.
+          </span>
+        </div>
         {payment.allowCustomAmount ? (
           <label className="payment-amount-field">
             <span>Tip amount</span>
@@ -10721,7 +10777,7 @@ function PaymentSheet({
             Cancel
           </button>
           <button disabled={!amountValid || busy} onClick={() => onConfirm(amount)} type="button">
-            {busy ? "Confirming..." : "Prepare Payment"}
+            {busy ? "Verifying..." : "Confirm in World App"}
           </button>
         </div>
       </div>

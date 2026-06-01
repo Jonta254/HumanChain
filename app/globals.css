@@ -21,6 +21,12 @@
   box-sizing: border-box;
 }
 
+*,
+*::before,
+*::after {
+  min-width: 0;
+}
+
 html,
 body {
   margin: 0;
@@ -54,6 +60,26 @@ textarea {
 
 button {
   cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+p,
+span,
+strong,
+small,
+h1,
+h2,
+h3,
+button,
+input,
+textarea,
+dd {
+  overflow-wrap: anywhere;
 }
 
 .app-shell {
@@ -571,6 +597,34 @@ html[data-world-mini-app="true"] .phone-frame {
   line-height: 1.45;
 }
 
+.home-proof-strip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.home-proof-strip span {
+  min-height: 46px;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  border-radius: 14px;
+  color: rgba(255, 253, 248, 0.74);
+  background: rgba(0, 32, 28, 0.24);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.home-proof-strip strong {
+  color: #fffdf8;
+  font-size: 0.78rem;
+  line-height: 1.1;
+}
+
 .human-trust-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -607,6 +661,10 @@ html[data-world-mini-app="true"] .phone-frame {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 9px;
   margin-top: 14px;
+}
+
+.human-service-grid.professional {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .human-service-grid .action-card {
@@ -3225,6 +3283,12 @@ button.danger {
   display: flex;
   gap: 7px;
   overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.reaction-row button {
+  flex: 0 0 auto;
+  min-height: 40px;
 }
 
 .chain-tools {
@@ -3419,9 +3483,27 @@ button.danger {
 .image-post-media {
   position: relative;
   overflow: hidden;
+  width: 100%;
+  display: block;
   border-radius: 16px;
+  border: 0;
+  padding: 0;
   margin-top: 9px;
   background: #16211f;
+  text-align: left;
+}
+
+.image-post-media::after {
+  content: "Tap image to view comments";
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #fffdf8;
+  background: rgba(12, 24, 21, 0.72);
+  font-size: 0.66rem;
+  font-weight: 900;
 }
 
 .image-post img,
@@ -3490,6 +3572,10 @@ button.danger {
   margin: 9px 0 0;
   font-size: 0.98rem;
   line-height: 1.46;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .post-head {
@@ -5783,6 +5869,25 @@ button.danger {
   font-size: 0.78rem;
 }
 
+.payment-verification-note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid rgba(255, 253, 248, 0.14);
+  border-radius: 14px;
+  color: #fffdf8;
+  background: rgba(255, 253, 248, 0.08);
+}
+
+.payment-verification-note span {
+  color: rgba(255, 253, 248, 0.78);
+  font-size: 0.78rem;
+  line-height: 1.34;
+}
+
 .payment-token-picker {
   display: grid;
   gap: 8px;
@@ -6214,9 +6319,26 @@ button.danger {
   font-weight: 850;
 }
 
+.market-detail-titlebar {
+  display: grid;
+  gap: 3px;
+  margin-top: 12px;
+}
+
+.market-detail-titlebar strong {
+  font-size: 1.28rem;
+  line-height: 1.12;
+}
+
+.market-detail-titlebar small {
+  color: var(--gold);
+  font-weight: 900;
+}
+
 .market-detail-gallery {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1.5fr 1fr;
+  grid-auto-rows: minmax(96px, auto);
   gap: 8px;
   margin-top: 14px;
 }
@@ -6233,6 +6355,10 @@ button.danger {
 
 .market-detail-gallery img {
   object-fit: cover;
+}
+
+.market-detail-gallery img:first-child {
+  grid-row: span 2;
 }
 
 .market-detail-empty {
@@ -6291,6 +6417,45 @@ button.danger {
   background: rgba(36, 107, 85, 0.08);
   font-size: 0.76rem;
   font-weight: 900;
+}
+
+.seller-contact-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(36, 107, 85, 0.14);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(36, 107, 85, 0.07), rgba(255, 253, 248, 0.88));
+}
+
+.seller-contact-card div {
+  display: grid;
+  gap: 2px;
+}
+
+.seller-contact-card span,
+.seller-contact-card small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+
+.seller-contact-card strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.seller-contact-card button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #fffdf8;
+  background: var(--green);
+  font-weight: 950;
+  white-space: nowrap;
 }
 
 .market-detail-info dl {
@@ -6743,21 +6908,21 @@ button.danger {
 
 .market-item {
   display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 10px;
+  grid-template-columns: 112px 1fr;
+  gap: 12px;
   align-items: start;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid rgba(32, 35, 40, 0.08);
-  border-radius: 18px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #fffdf8, #f4efe6);
 }
 
 .market-thumb-stack {
-  width: 96px;
-  height: 76px;
+  width: 112px;
+  min-height: 112px;
   display: grid;
-  grid-template-columns: 1.45fr 1fr;
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1.3fr 0.9fr;
   gap: 4px;
   border: 0;
   padding: 0;
@@ -6778,7 +6943,7 @@ button.danger {
 }
 
 .market-thumb-stack img:first-child {
-  grid-row: 1 / 3;
+  grid-column: 1 / 3;
 }
 
 .market-item-art {
@@ -6804,6 +6969,8 @@ button.danger {
 }
 
 .market-item-top {
+  display: grid;
+  grid-template-columns: 1fr auto;
   justify-content: space-between;
   gap: 8px;
 }
@@ -6833,6 +7000,25 @@ button.danger {
   font-size: 0.72rem;
   font-weight: 850;
   line-height: 1.25;
+}
+
+.market-card-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.market-card-summary span {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: var(--ink);
+  background: rgba(255, 253, 248, 0.88);
+  font-size: 0.7rem;
+  font-weight: 900;
 }
 
 .bid-console,
@@ -7022,19 +7208,20 @@ button.danger {
 .market-card-actions {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
 }
 
 .market-card-actions button {
-  min-height: 38px;
+  min-height: 40px;
   border: 0;
-  border-radius: 999px;
-  padding: 8px 10px;
+  border-radius: 12px;
+  padding: 8px 7px;
   color: #fffdf8;
   background: var(--ink);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 850;
+  line-height: 1.12;
 }
 
 .market-card-actions button:last-child {
@@ -7284,6 +7471,25 @@ html[data-world-mini-app="true"] .bottom-nav {
   .market-detail-actions,
   .payment-actions,
   .story-publish-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .market-item {
+    grid-template-columns: 96px 1fr;
+    gap: 9px;
+  }
+
+  .market-thumb-stack {
+    width: 96px;
+    min-height: 104px;
+  }
+
+  .market-card-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .seller-contact-card,
+  .market-detail-info dl div {
     grid-template-columns: 1fr;
   }
 
