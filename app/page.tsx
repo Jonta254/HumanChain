@@ -2496,6 +2496,52 @@ function getTrustPassportMetrics({
   };
 }
 
+function getMarketVerificationTier({
+  isVerified,
+  listingCount,
+  locationReady,
+  ratingCount,
+  tipCount,
+}: {
+  isVerified: boolean;
+  listingCount: number;
+  locationReady: boolean;
+  ratingCount: number;
+  tipCount: number;
+}) {
+  const usageScore =
+    (isVerified ? 30 : 0) +
+    (locationReady ? 18 : 0) +
+    Math.min(30, listingCount * 10) +
+    Math.min(14, ratingCount * 2) +
+    Math.min(8, tipCount * 2);
+
+  if (usageScore >= 72) {
+    return {
+      className: "gold",
+      label: "Gold verified",
+      next: "Top seller signal active",
+      score: usageScore,
+    };
+  }
+
+  if (usageScore >= 48) {
+    return {
+      className: "silver",
+      label: "Silver verified",
+      next: "More successful listings move this to gold",
+      score: usageScore,
+    };
+  }
+
+  return {
+    className: "bronze",
+    label: "Bronze verified",
+    next: "Add listings, location, and buyer signals to reach silver",
+    score: usageScore,
+  };
+}
+
 function requireVerifiedPublicAction(
   human: HumanIdentity | null,
   act: (title: string, detail: string) => void,
@@ -4986,7 +5032,7 @@ function HomeView({
     isVerifiedWorldHuman(verifiedHuman) ? "Verified" : "Preview",
     passportMetrics.moderationState,
     `${streak}d streak`,
-    "Nairobi area",
+    "Safe trade",
     `${notificationUnreadCount} pending`,
   ];
   const nextBestAction = !isVerifiedWorldHuman(verifiedHuman)
@@ -5078,8 +5124,8 @@ function HomeView({
           )}
         </button>
         <div className="human-home-topcopy">
-          <strong>HumanChain</strong>
-          <span>Verified and ready to ask, post, and trade</span>
+          <strong>{worldHandle}</strong>
+          <span>Ask, post, read, and trade with verified trust</span>
         </div>
         <button
           aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
@@ -5116,7 +5162,7 @@ function HomeView({
           <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
           <div>
             <span>Daily trust dashboard</span>
-            <strong>HumanChain</strong>
+            <strong>Human hub</strong>
           </div>
         </div>
         <div>
@@ -5162,7 +5208,7 @@ function HomeView({
 
       <section className="home-live-section" aria-label="Live on HumanChain">
         <div className="section-heading">
-          <span>Live on HumanChain</span>
+          <span>Live network</span>
           <Radio size={18} />
         </div>
         <div className="home-live-filters" aria-label="Home filters">
@@ -6330,6 +6376,7 @@ function ChainsView({
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
   );
+  const [showPostComposer, setShowPostComposer] = useState(false);
   const [activeChainTool, setActiveChainTool] = useState<
     "circle" | "pulse" | "pin" | null
   >(null);
@@ -6508,6 +6555,7 @@ function ChainsView({
     setPostPreview(null);
     setPostFile(null);
     setPostMediaType("image");
+    setShowPostComposer(false);
     recordHistory({
       title: postMediaType === "video" ? "Video post published" : "Image post published",
       detail:
@@ -6961,79 +7009,110 @@ function ChainsView({
       </div>
       {chainView === "images" ? (
         <section className="image-post-grid">
-          <section className="image-chain-card">
-            <span className="section-kicker">Human Image Chain</span>
-            <h2>Post a recent moment. Make the chain feel alive.</h2>
-            <p>
-              Share what just happened, what you saw, built, cooked, fixed, felt,
-              or survived today. Recent moments carry more human energy.
-            </p>
-            <div className="recent-moment-strip">
-              <span>Now</span>
-              <span>Real photo</span>
-              <span>Human caption</span>
-            </div>
-            {postPreview ? (
-              postMediaType === "video" ? (
-                <video controls src={postPreview} />
-              ) : (
-                <img alt="Selected human post" src={postPreview} />
-              )
-            ) : (
-              <div className="image-post-placeholder">
-                <div className="moment-lens" aria-hidden="true">
-                  <span />
-                  <i />
-                </div>
-                <Upload size={22} />
-                <span>Recent image preview appears here before it enters the chain.</span>
+          {!showPostComposer && !postPreview ? (
+            <section className="moment-create-prompt">
+              <div>
+                <span>Moment composer</span>
+                <strong>Hidden until you need it</strong>
+                <p>Browse first. When you are ready, open the composer and add a recent real photo with a human caption.</p>
               </div>
-            )}
-            <textarea
-              onChange={(event) => setPostCaption(event.target.value)}
-              placeholder="Write what this image means..."
-              value={postCaption}
-            />
-            <div className="image-post-actions">
-              <label>
-                <Upload size={17} />
-                Add image
-                <input
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) {
-                      if (!file.type.startsWith("image/")) {
-                        act("Photo-first launch", "Moments accepts JPEG, PNG, or WebP photos for launch.");
-                        return;
-                      }
-
-                      const reader = new FileReader();
-                      reader.onload = async () => {
-                        const preparedFile = await prepareMomentImage(file);
-                        setPostPreview(String(reader.result));
-                        setPostFile(preparedFile);
-                        setPostMediaType("image");
-                        act(
-                          "Image selected",
-                          preparedFile.size < file.size
-                              ? "Image optimized for faster upload. Add a caption, then publish it."
-                              : "Add a caption, then publish it.",
-                        );
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  type="file"
-                />
-              </label>
-              <button disabled={isPublishingPost} onClick={publishPostWithPaymentCheck} type="button">
-                {isPublishingPost
-                  ? "Publishing..."
-                  : "Publish image"}
+              <button onClick={() => setShowPostComposer(true)} type="button">
+                <PlusCircle size={17} />
+                Post moment
               </button>
-            </div>
-          </section>
+            </section>
+          ) : (
+            <section className="image-chain-card">
+              <div className="composer-title-row">
+                <div>
+                  <span className="section-kicker">Human Image Chain</span>
+                  <h2>Post a recent moment. Make the chain feel alive.</h2>
+                </div>
+                <button
+                  aria-label="Hide moment composer"
+                  onClick={() => {
+                    setShowPostComposer(false);
+                    setPostCaption("");
+                    setPostPreview(null);
+                    setPostFile(null);
+                    setPostMediaType("image");
+                  }}
+                  type="button"
+                >
+                  Hide
+                </button>
+              </div>
+              <p>
+                Share what just happened, what you saw, built, cooked, fixed, felt,
+                or survived today. Recent moments carry more human energy.
+              </p>
+              <div className="recent-moment-strip">
+                <span>Now</span>
+                <span>Real photo</span>
+                <span>Human caption</span>
+              </div>
+              {postPreview ? (
+                postMediaType === "video" ? (
+                  <video controls src={postPreview} />
+                ) : (
+                  <img alt="Selected human post" src={postPreview} />
+                )
+              ) : (
+                <div className="image-post-placeholder">
+                  <div className="moment-lens" aria-hidden="true">
+                    <span />
+                    <i />
+                  </div>
+                  <Upload size={22} />
+                  <span>Recent image preview appears here before it enters the chain.</span>
+                </div>
+              )}
+              <textarea
+                onChange={(event) => setPostCaption(event.target.value)}
+                placeholder="Write what this image means..."
+                value={postCaption}
+              />
+              <div className="image-post-actions">
+                <label>
+                  <Upload size={17} />
+                  Add image
+                  <input
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        if (!file.type.startsWith("image/")) {
+                          act("Photo-first launch", "Moments accepts JPEG, PNG, or WebP photos for launch.");
+                          return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = async () => {
+                          const preparedFile = await prepareMomentImage(file);
+                          setPostPreview(String(reader.result));
+                          setPostFile(preparedFile);
+                          setPostMediaType("image");
+                          act(
+                            "Image selected",
+                            preparedFile.size < file.size
+                                ? "Image optimized for faster upload. Add a caption, then publish it."
+                                : "Add a caption, then publish it.",
+                          );
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    type="file"
+                  />
+                </label>
+                <button disabled={isPublishingPost} onClick={publishPostWithPaymentCheck} type="button">
+                  {isPublishingPost
+                    ? "Publishing..."
+                    : "Publish image"}
+                </button>
+              </div>
+            </section>
+          )}
           <div className="chain-section-note">
             <span>Recent human moments</span>
             <p>Photo posts from verified humans. Every card begins with the human, the caption, and the real image they shared.</p>
@@ -9085,6 +9164,19 @@ function MarketplaceView({
   const locationReady = marketLocation.status === "ready";
   const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
   const sellerHandle = humanIdentity?.username ?? "@preview_human";
+  const marketUsageRatings =
+    marketplaceListings.reduce((total, listing) => total + (listing.ratings ?? 0), 0) +
+    Object.values(marketRatings).reduce((total, item) => total + item.rating, 0);
+  const marketUsageTips =
+    marketplaceListings.reduce((total, listing) => total + (listing.tips ?? 0), 0) +
+    Object.values(marketRatings).reduce((total, item) => total + item.tips, 0);
+  const marketVerificationTier = getMarketVerificationTier({
+    isVerified: isVerifiedWorldHuman(humanIdentity),
+    listingCount: marketplaceListings.length,
+    locationReady,
+    ratingCount: marketUsageRatings,
+    tipCount: marketUsageTips,
+  });
 
   function getMarketItemKey(item: MarketplaceItem | MarketplaceListing) {
     return "id" in item ? `stored:${item.id}` : `seed:${item.seller}:${item.title}`;
@@ -10070,10 +10162,17 @@ function MarketplaceView({
         <p>
           Search real listings first. Trust details stay visible without taking over the first screen.
         </p>
-        <div className="market-identity-strip">
-          <UserRound size={17} />
-          <span>Verified seller account</span>
-          <strong>{sellerHandle}</strong>
+        <div className={`market-verification-band ${marketVerificationTier.className}`}>
+          <div className="market-verification-mark" aria-hidden="true">
+            <BadgeCheck size={24} />
+          </div>
+          <div>
+            <span>{marketVerificationTier.label}</span>
+            <strong>{sellerHandle}</strong>
+            <small>
+              {marketVerificationTier.score}/100 usage score - {marketVerificationTier.next}
+            </small>
+          </div>
         </div>
         <div className="market-premium-strip" aria-label="Marketplace trust status">
           <span>
@@ -10089,23 +10188,14 @@ function MarketplaceView({
             Chat-first deals
           </span>
         </div>
-        <div className="market-location-card">
-          <MapPin size={18} />
-          <div>
-            <strong>{locationReady ? "Nearby market active" : "Connect nearby market"}</strong>
-            <span>
-              {locationReady ? marketLocation.label : "Allow location in World App or enter an area for nearby ranking."}
-            </span>
-            <small>
-              {marketLocation.source === "browser-gps"
-                ? "Location active after your World App WebView permission."
-                : marketLocation.source === "manual"
-                  ? "Manual area active and saved."
-                  : "No nearby location shared yet."}{" "}
-              Opened from {worldLaunchLabel}.
-            </small>
-          </div>
-          {!locationReady ? (
+        {!locationReady ? (
+          <div className="market-location-card">
+            <MapPin size={18} />
+            <div>
+              <strong>Connect nearby market</strong>
+              <span>Allow location in World App or enter an area for nearby ranking.</span>
+              <small>No nearby location shared yet. Opened from {worldLaunchLabel}.</small>
+            </div>
             <button
               disabled={marketLocation.status === "requesting"}
               onClick={requestMarketplaceLocation}
@@ -10113,8 +10203,14 @@ function MarketplaceView({
             >
               {marketLocation.status === "requesting" ? "..." : "GPS"}
             </button>
-          ) : null}
-        </div>
+          </div>
+        ) : (
+          <div className="market-location-verified">
+            <MapPin size={16} />
+            <span>{marketLocation.source === "manual" ? "Manual area" : "GPS area"}</span>
+            <strong>{marketLocation.label}</strong>
+          </div>
+        )}
         {!locationReady ? (
           <div className="manual-location-row">
             <input
