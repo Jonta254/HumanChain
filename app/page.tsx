@@ -56,7 +56,6 @@ import {
   normalizePaymentFeature,
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
-import { getHumanChainTreasury } from "@/lib/worldConfig";
 import {
   humanChainErrorStates,
   validateAnswerInput,
@@ -2467,6 +2466,21 @@ function isVerifiedWorldHuman(human: HumanIdentity | null) {
   return Boolean(human?.wallet && ("mode" in human ? human.mode === "world" : true));
 }
 
+function accountStatusLabel(
+  worldContext: ReturnType<typeof getWorldMiniAppContext>,
+  human: HumanIdentity | null,
+) {
+  if (isVerifiedWorldHuman(human)) {
+    return worldContext.walletAddress || human?.wallet ? "World wallet ready" : "World verified";
+  }
+
+  if (human && "mode" in human && human.mode === "preview") {
+    return "Preview mode";
+  }
+
+  return "World login needed";
+}
+
 function getTrustPassportMetrics({
   completedTrades,
   human,
@@ -2711,6 +2725,16 @@ type HistoryRecord = {
     | "tip";
 };
 
+type HpLedgerRecord = {
+  amount: number;
+  balanceAfter: number;
+  date: string;
+  id: number;
+  reason: string;
+  time: string;
+  wallet?: string;
+};
+
 type NotificationItem = {
   id: number;
   title: string;
@@ -2945,6 +2969,7 @@ const storageKeys = {
   chainPremium: "humanchain_chain_premium",
   history: "humanchain_history",
   links: "humanchain_links",
+  hpLedger: "humanchain_hp_ledger",
   marketHolds: "humanchain_market_holds",
   marketComments: "humanchain_market_comments",
   marketRatings: "humanchain_market_ratings",
@@ -3300,6 +3325,9 @@ export default function HumanChainApp() {
   const [links, setLinks] = useState(loadStoredChainLinks);
   const [savedItems, setSavedItems] = useState(storedAppMemory.savedItems);
   const [points, setPoints] = useState(storedAppMemory.points);
+  const [hpLedger, setHpLedger] = useState<HpLedgerRecord[]>(() =>
+    loadJsonFromStorage<HpLedgerRecord[]>(storageKeys.hpLedger, []),
+  );
   const [dailyAnswered, setDailyAnswered] = useState(storedAppMemory.dailyAnswered);
   const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(
     storedAppMemory.dailyAnsweredAt,
@@ -3326,7 +3354,7 @@ export default function HumanChainApp() {
   );
   const [dailyResponses, setDailyResponses] = useState<DailyResponse[]>([]);
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
-  const [paymentToken, setPaymentToken] = useState<HumanChainPaymentToken>(
+  const [paymentToken] = useState<HumanChainPaymentToken>(
     defaultHumanChainPaymentToken,
   );
   const [paymentBusy, setPaymentBusy] = useState(false);
@@ -3572,6 +3600,10 @@ export default function HumanChainApp() {
   useEffect(() => {
     saveJsonToStorage(storageKeys.history, historyRecords);
   }, [historyRecords]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.hpLedger, hpLedger.slice(0, 120));
+  }, [hpLedger]);
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.notifications, notifications.slice(0, 60));
@@ -4105,6 +4137,7 @@ export default function HumanChainApp() {
     window.localStorage.removeItem(storageKeys.askThreads);
     window.localStorage.removeItem(storageKeys.askCountryRoutes);
     window.localStorage.removeItem(storageKeys.links);
+    window.localStorage.removeItem(storageKeys.hpLedger);
     window.localStorage.removeItem(storageKeys.marketHolds);
     window.localStorage.removeItem(storageKeys.appMemory);
     window.localStorage.removeItem(storageKeys.userStories);
@@ -4120,6 +4153,7 @@ export default function HumanChainApp() {
         kind: "profile",
       },
     ]);
+    setHpLedger([]);
     setVerifiedHuman(null);
     setAppLanguage(appLanguages[0]);
     setDailyAnswered(false);
@@ -4150,10 +4184,27 @@ export default function HumanChainApp() {
     setStreak((current) => current + 1);
   }
 
-  function earnPoints(amount: number, _reason: string) {
-    void _reason;
+  function earnPoints(amount: number, reason: string) {
     void humanHaptic("light");
-    setPoints((current) => current + amount);
+    setPoints((current) => {
+      const balanceAfter = current + amount;
+      const now = new Date();
+
+      setHpLedger((ledger) => [
+        {
+          amount,
+          balanceAfter,
+          date: getLocalDateKey(now),
+          id: Date.now(),
+          reason,
+          time: formatCheckInTime(now),
+          wallet: verifiedHuman?.wallet,
+        },
+        ...ledger,
+      ].slice(0, 120));
+
+      return balanceAfter;
+    });
   }
 
   function openPayment(payment: PaymentRequest) {
@@ -4388,7 +4439,7 @@ export default function HumanChainApp() {
       const earnedPoints = paymentPrompt.points ?? 0;
 
       if (earnedPoints > 0) {
-        setPoints((current) => current + earnedPoints);
+        earnPoints(earnedPoints, `${paymentPrompt.title} payment reward`);
       }
 
       await paymentPrompt.onConfirmed?.(amount);
@@ -4397,7 +4448,7 @@ export default function HumanChainApp() {
 
       recordHistory({
         title: getPaymentKind(feature) === "tip" ? "Tip payment confirmed" : "Payment confirmed",
-        detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${treasuryRecipient ? `Recipient ${treasuryRecipient}. ` : ""}${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`,
+        detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`,
         kind: getPaymentKind(feature),
       });
       void storeSafeData("payment", `${feature}-${Date.now()}`, {
@@ -4493,6 +4544,7 @@ export default function HumanChainApp() {
             act={act}
             earnPoints={earnPoints}
             historyRecords={historyRecords}
+            hpLedger={hpLedger}
             humanPosts={humanPosts}
             links={links}
             marketplaceListings={marketplaceListings}
@@ -4515,7 +4567,7 @@ export default function HumanChainApp() {
               setLastCheckInAt(formatCheckInTime(now));
               recordHistory({
                 title: "Daily check-in",
-                detail: `HumanChain check-in completed at ${formatCheckInTime(now)}.`,
+                detail: `HumanChain check-in completed on ${today} at ${formatCheckInTime(now)}.`,
                 kind: "profile",
               });
               earnPoints(10, "Daily check-in recorded with your device calendar and time.");
@@ -4614,7 +4666,6 @@ export default function HumanChainApp() {
         {paymentPrompt ? (
           <PaymentSheet
             onCancel={() => setPaymentPrompt(null)}
-            onChangeToken={setPaymentToken}
             onConfirm={confirmPayment}
             busy={paymentBusy}
             payment={paymentPrompt}
@@ -4899,6 +4950,7 @@ function HomeView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
+  const [homeSettingsOpen, setHomeSettingsOpen] = useState(false);
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const userPostCount = humanPosts.filter((post) => post.owner).length;
@@ -5041,9 +5093,9 @@ function HomeView({
   } : null;
   const identityStrip = [
     isVerifiedWorldHuman(verifiedHuman) ? "Verified" : "Preview",
-    passportMetrics.moderationState,
+    accountStatusLabel(worldContext, verifiedHuman),
     `${streak}d streak`,
-    "Safe trade",
+    notificationReady ? "Alerts on" : "Alerts off",
     `${notificationUnreadCount} pending`,
   ];
   const nextBestAction = !isVerifiedWorldHuman(verifiedHuman)
@@ -5147,14 +5199,29 @@ function HomeView({
           <Bell size={18} />
         </button>
         <button
-          aria-label="Open settings and passport"
+          aria-expanded={homeSettingsOpen}
+          aria-label="Open settings and guide"
           className="home-guide-button"
-          onClick={() => setTab("me")}
+          onClick={() => setHomeSettingsOpen((current) => !current)}
           type="button"
         >
           <Settings size={18} />
         </button>
       </header>
+
+      {homeSettingsOpen ? (
+        <AppSettingsBar
+          activeLanguage={appLanguage}
+          clearMarketplaceData={clearMarketplaceData}
+          clearPostData={clearPostData}
+          deleteLocalAccount={deleteLocalAccount}
+          notificationReady={notificationReady}
+          onEnableNotifications={onEnableNotifications}
+          onChange={onChangeLanguage}
+          resetHistory={resetHistory}
+          worldContext={worldContext}
+        />
+      ) : null}
 
       <section className="living-passport-strip" aria-label="Living passport">
         <div>
@@ -10275,20 +10342,17 @@ function MarketplaceView({
 
   return (
     <div className="screen marketplace-screen">
-      <section className="market-hero">
+      <section className="market-hero compact-market-hero">
         <div className="market-hero-top">
           <div>
-            <span className="section-kicker">Human Market</span>
-            <h1>Buy, sell, and promote with verified humans.</h1>
+            <span className="section-kicker">Verified local trade</span>
+            <h1>Human Market</h1>
           </div>
-          <Store size={30} />
+          <Store size={24} />
         </div>
-        <p>
-          Search real listings first. Trust details stay visible without taking over the first screen.
-        </p>
-        <div className={`market-verification-band ${marketVerificationTier.className}`}>
+        <div className={`market-verification-band compact ${marketVerificationTier.className}`}>
           <div className="market-verification-mark" aria-hidden="true">
-            <BadgeCheck size={24} />
+            <BadgeCheck size={20} />
           </div>
           <div>
             <span>{marketVerificationTier.label}</span>
@@ -10298,7 +10362,7 @@ function MarketplaceView({
             </small>
           </div>
         </div>
-        <div className="market-premium-strip" aria-label="Marketplace trust status">
+        <div className="market-premium-strip compact" aria-label="Marketplace trust status">
           <span>
             <ShieldCheck size={15} />
             Human verified
@@ -10902,6 +10966,7 @@ function MeView({
   act,
   earnPoints,
   historyRecords,
+  hpLedger,
   humanPosts,
   lastCheckInAt,
   lastCheckInDate,
@@ -10923,6 +10988,7 @@ function MeView({
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   historyRecords: HistoryRecord[];
+  hpLedger: HpLedgerRecord[];
   humanPosts: HumanPost[];
   lastCheckInAt: string | null;
   lastCheckInDate: string | null;
@@ -11129,6 +11195,27 @@ function MeView({
             </span>
           ))}
         </div>
+      </section>
+      <section className="panel hp-ledger-panel">
+        <div className="section-heading">
+          <span>HP ledger</span>
+          <Star size={18} />
+        </div>
+        {hpLedger.length ? (
+          <div className="hp-ledger-list">
+            {hpLedger.slice(0, 6).map((record) => (
+              <article className="hp-ledger-row" key={record.id}>
+                <strong>+{record.amount} HP</strong>
+                <span>{record.reason}</span>
+                <small>
+                  {record.date} - {record.time}
+                </small>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p>Check in, answer, post, trade, or confirm a WLD action to create your first HP record.</p>
+        )}
       </section>
       <section className="chain-id-card">
         <div>
@@ -11401,14 +11488,12 @@ function MeView({
 function PaymentSheet({
   busy,
   onCancel,
-  onChangeToken,
   onConfirm,
   payment,
   selectedToken,
 }: {
   busy: boolean;
   onCancel: () => void;
-  onChangeToken: (token: HumanChainPaymentToken) => void;
   onConfirm: (amount?: number) => void | Promise<void>;
   payment: PaymentRequest;
   selectedToken: HumanChainPaymentToken;
@@ -11423,7 +11508,6 @@ function PaymentSheet({
     payment.feature ?? normalizePaymentFeature(payment.title),
     amount,
   );
-  const treasuryAddress = getHumanChainTreasury();
 
   return (
     <section className="payment-backdrop" role="dialog" aria-modal="true">
@@ -11442,10 +11526,6 @@ function PaymentSheet({
             HumanChain creates a backend reference first. This action unlocks only after World App payment and server verification.
           </span>
         </div>
-        <div className="payment-recipient-note">
-          <span>Recipient</span>
-          <strong>{treasuryAddress}</strong>
-        </div>
         {payment.allowCustomAmount ? (
           <label className="payment-amount-field">
             <span>Tip amount</span>
@@ -11463,24 +11543,11 @@ function PaymentSheet({
             <small>Choose 0.1-100 WLD. HumanChain records the selected tip amount in the receipt.</small>
           </label>
         ) : null}
-        <div className="payment-token-picker" aria-label="Choose payment currency">
-          <span>Pay with</span>
-          <div className="payment-token-grid">
-            {(Object.keys(humanChainPaymentTokens) as HumanChainPaymentToken[]).map((token) => (
-              <button
-                aria-pressed={selectedToken === token}
-                className={selectedToken === token ? "active" : ""}
-                key={token}
-                onClick={() => onChangeToken(token)}
-                type="button"
-              >
-                {humanChainPaymentTokens[token].label}
-              </button>
-            ))}
-          </div>
+        <div className="payment-token-picker" aria-label="Payment currency">
+          <span>Pay with WLD</span>
           <small>
-            MiniKit Pay supports WLD and World App local stablecoins. Unsupported tokens
-            need a separate allowlisted transaction flow.
+            HumanChain accepts WLD only. The recipient is verified by the server after
+            World App confirms the transaction.
           </small>
         </div>
         {payment.points ? (

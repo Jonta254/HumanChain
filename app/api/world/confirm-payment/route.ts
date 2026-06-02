@@ -87,12 +87,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const isMined = transaction.transaction_status === "mined";
+  const transactionRecord = transaction as Record<string, unknown>;
+  const isMined = transactionRecord.transaction_status === "mined";
   const treasury = getHumanChainTreasury().toLowerCase();
-  const transactionRecipient =
-    typeof transaction.to === "string" ? transaction.to.toLowerCase() : "";
+  const transactionRecipients = [
+    transactionRecord.to,
+    transactionRecord.recipient,
+    transactionRecord.to_address,
+    transactionRecord.recipient_address,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.toLowerCase());
 
-  if (isMined && transactionRecipient !== treasury) {
+  if (isMined && !transactionRecipients.includes(treasury)) {
     return noStoreJson(
       {
         ok: false,

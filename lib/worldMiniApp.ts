@@ -12,13 +12,6 @@ import {
 
 const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
-  USDCE: Tokens.USDC,
-  EURC: Tokens.EURC,
-  WBRL: Tokens.WBRL,
-  WCOP: Tokens.WCOP,
-  WMXN: Tokens.WMXN,
-  WPEN: Tokens.WPEN,
-  WCLP: Tokens.WCLP,
 };
 
 const worldUserCache = new Map<
