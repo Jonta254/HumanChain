@@ -2466,21 +2466,6 @@ function isVerifiedWorldHuman(human: HumanIdentity | null) {
   return Boolean(human?.wallet && ("mode" in human ? human.mode === "world" : true));
 }
 
-function accountStatusLabel(
-  worldContext: ReturnType<typeof getWorldMiniAppContext>,
-  human: HumanIdentity | null,
-) {
-  if (isVerifiedWorldHuman(human)) {
-    return worldContext.walletAddress || human?.wallet ? "World wallet ready" : "World verified";
-  }
-
-  if (human && "mode" in human && human.mode === "preview") {
-    return "Preview mode";
-  }
-
-  return "World login needed";
-}
-
 function getTrustPassportMetrics({
   completedTrades,
   human,
@@ -4603,6 +4588,7 @@ export default function HumanChainApp() {
       case "settings":
         return (
           <SettingsView
+            act={act}
             activeLanguage={appLanguage}
             clearMarketplaceData={clearMarketplaceData}
             clearPostData={clearPostData}
@@ -4978,6 +4964,7 @@ function HomeView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
+  const [passportBackOpen, setPassportBackOpen] = useState(false);
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const userPostCount = humanPosts.filter((post) => post.owner).length;
@@ -5118,13 +5105,6 @@ function HomeView({
     seller: marketPreview.seller,
     title: marketPreview.title,
   } : null;
-  const identityStrip = [
-    isVerifiedWorldHuman(verifiedHuman) ? "Verified" : "Preview",
-    accountStatusLabel(worldContext, verifiedHuman),
-    `${streak}d streak`,
-    notificationReady ? "Alerts on" : "Alerts off",
-    `${notificationUnreadCount} pending`,
-  ];
   const nextBestAction = !isVerifiedWorldHuman(verifiedHuman)
     ? {
         detail: "Preview can browse and draft. Public trust actions unlock only after World verification.",
@@ -5164,6 +5144,57 @@ function HomeView({
               onClick: () => setTab("me"),
               title: "Keep building your trust passport",
             };
+  const passportLevel =
+    chainScore >= 420 ? "Gold Human" : chainScore >= 240 ? "Silver Human" : "Bronze Human";
+  const passportRank = chainScore >= 420 ? "Top 5%" : chainScore >= 240 ? "Top 18%" : "Rising";
+  const reputationGrowth = `+${Math.max(1, Math.round(points / 140) + streak)} this week`;
+  const safetyStatus =
+    passportMetrics.disputeRate === "0%" ? "Clean" : "Review";
+  const topBadges = [
+    passportMetrics.verification,
+    passportLevel,
+    streak >= 7 ? "Streak Builder" : "New Builder",
+  ];
+  const hiddenBadgeCount = Math.max(
+    0,
+    [
+      dailyAnswered,
+      dailyResponses.length > 0,
+      userPostCount > 0,
+      savedItems > 0,
+      marketplaceListings.length > 0,
+      notificationReady,
+    ].filter(Boolean).length + 6 - topBadges.length,
+  );
+  const opportunities = [
+    {
+      reward: dailyAnswered ? "Done" : "+18 HP",
+      time: "1 min",
+      title: dailyAnswered ? "Read one useful answer" : "Answer 1 community question",
+      onClick: dailyAnswered ? () => setTab("ask") : submitDailyAnswer,
+    },
+    {
+      reward: "+10 HP",
+      time: "2 min",
+      title: userPostCount ? "Add another proof moment" : "Share one real moment",
+      onClick: () => setTab("chains"),
+    },
+    {
+      reward: "Trust",
+      time: "3 min",
+      title: liveMarketListings.length ? "Inspect nearby market" : "Create first listing",
+      onClick: () => setTab("market"),
+    },
+  ];
+  const trendingHumans = [
+    { handle: worldHandle, score: chainScore, initial: profileInitial },
+    { handle: dailyResponses[0]?.user ?? "@answer_builder", score: Math.max(120, chainScore - 18), initial: (dailyResponses[0]?.user ?? "A").replace(/^@/, "").charAt(0).toUpperCase() },
+    { handle: topMoment?.author ?? "@moment_keeper", score: Math.max(110, chainScore - 26), initial: (topMoment?.author ?? "M").replace(/^@/, "").charAt(0).toUpperCase() },
+    { handle: topMarketItem?.seller ?? "@trusted_seller", score: Math.max(104, chainScore - 32), initial: (topMarketItem?.seller ?? "T").replace(/^@/, "").charAt(0).toUpperCase() },
+    { handle: liveChainLinks[0] ? getChainLinkAuthor(liveChainLinks[0], worldHandle) : "@wisdom_saver", score: Math.max(98, chainScore - 39), initial: (liveChainLinks[0] ? getChainLinkAuthor(liveChainLinks[0], worldHandle) : "W").replace(/^@/, "").charAt(0).toUpperCase() },
+  ].slice(0, 5);
+  const communitySpotlight = chainFields[(new Date().getDate() - 1) % chainFields.length];
+  const marketPreviewItems = (liveMarketListings.length ? liveMarketListings : marketplaceListings).slice(0, 3);
 
   function submitDailyAnswer() {
     if (!requireVerifiedPublicAction(verifiedHuman, act, "answering today's question")) {
@@ -5199,7 +5230,7 @@ function HomeView({
   }
 
   return (
-    <div className="screen home-dashboard">
+    <div className="screen home-dashboard v7-home">
       <header className="human-home-topbar">
         <button
           aria-label="Open Human Passport"
@@ -5235,88 +5266,60 @@ function HomeView({
         </button>
       </header>
 
-      <section className="living-passport-strip" aria-label="Living passport">
-        <div>
-          <span>{worldHandle}</span>
-          <strong>Your trust record</strong>
-        </div>
-        <div>
-          {identityStrip.map((item) => (
-            <span key={item}>{item}</span>
-          ))}
-        </div>
-      </section>
+      <button
+        aria-expanded={passportBackOpen}
+        className={`v7-digital-card ${passportBackOpen ? "show-back" : ""}`}
+        onClick={() => setPassportBackOpen((current) => !current)}
+        type="button"
+      >
+        {!passportBackOpen ? (
+          <>
+            <span className="v7-section-label">Digital card</span>
+            <div className="v7-card-avatar">
+              {worldContext.profilePictureUrl ? <img alt="" src={worldContext.profilePictureUrl} /> : profileInitial}
+            </div>
+            <strong>{worldHandle}</strong>
+            <small>{verifiedHuman?.wallet ? `HC-${verifiedHuman.wallet.slice(2, 8).toUpperCase()}` : "HC-PREVIEW"}</small>
+            <b>{chainScore}</b>
+            <span>{passportLevel}</span>
+            <div className="v7-badge-row">
+              {topBadges.map((badge) => <i key={badge}>{badge}</i>)}
+              {hiddenBadgeCount ? <i>+{hiddenBadgeCount} More</i> : null}
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="v7-section-label">Card back</span>
+            <dl className="v7-card-back">
+              <div><dt>Join date</dt><dd>{passportMetrics.tenure}</dd></div>
+              <div><dt>Communities</dt><dd>{chainFields.length}</dd></div>
+              <div><dt>Achievements</dt><dd>{topBadges.length + hiddenBadgeCount}</dd></div>
+              <div><dt>Transactions</dt><dd>{marketplaceListings.length}</dd></div>
+              <div><dt>Contribution</dt><dd>{points.toLocaleString()} HP</dd></div>
+              <div><dt>Safety</dt><dd>{safetyStatus}</dd></div>
+              <div><dt>History</dt><dd>{reputationGrowth}</dd></div>
+            </dl>
+          </>
+        )}
+      </button>
 
-      <section className="home-stat-panel" aria-label="HumanChain progress">
-        <button onClick={() => setTab("me")} type="button">
-          <strong>{chainScore}</strong>
-          <span>Human Score</span>
-        </button>
-        <button onClick={() => setTab("me")} type="button">
-          <strong>{points.toLocaleString()}</strong>
-          <span>HP earned</span>
-        </button>
-        <button onClick={() => setTab("me")} type="button">
-          <strong>{streak}d</strong>
-          <span>Streak</span>
-        </button>
-      </section>
-
-      <section className="home-action-hero">
-        <div className="home-brand-row">
-          <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
-          <div>
-            <span>Daily trust dashboard</span>
-            <strong>Human hub</strong>
-          </div>
-        </div>
+      <section className="v7-command-center" aria-label="AI command center">
+        <span className="v7-section-label">AI Command Center</span>
         <div>
-          <span className="section-kicker">Next best action</span>
-          <h1>{nextBestAction.title}</h1>
+          {nextBestAction.icon}
+          <strong>{nextBestAction.title}</strong>
           <p>{nextBestAction.detail}</p>
         </div>
-        <button onClick={nextBestAction.onClick} type="button">
-          {nextBestAction.icon}
-          {nextBestAction.label}
-        </button>
+        <button onClick={nextBestAction.onClick} type="button">{nextBestAction.label}</button>
       </section>
 
-      <section className="mission-rail-card" aria-label="Today's progress">
-        <div className="section-heading">
-          <span>Daily Mission</span>
-          <CalendarCheck size={18} />
-        </div>
-        <div className="mission-progress">
-          <strong>{missionCompleted}/3 meaningful actions</strong>
-          <i style={{ width: `${(missionCompleted / 3) * 100}%` }} />
-        </div>
-        <div className="mission-list compact">
-          {missionItems.map((item) => (
-            <button
-              className={item.complete ? "complete" : ""}
-              key={item.label}
-              onClick={
-                item.label.includes("Answer")
-                  ? submitDailyAnswer
-                  : item.label.includes("Read")
-                    ? () => setTab("ask")
-                    : () => setTab("chains")
-              }
-              type="button"
-            >
-              <CheckCircle2 size={15} />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="home-quick-actions" aria-label="Quick actions">
+      <section className="v7-quick-actions" aria-label="Quick actions">
         {[
           { icon: <MessageCircleQuestion size={18} />, label: "Ask", onClick: () => setTab("ask") },
           { icon: <Sparkles size={18} />, label: "Moment", onClick: () => setTab("chains") },
           { icon: <Store size={18} />, label: "Sell", onClick: () => setTab("market") },
-          { icon: <BookOpen size={18} />, label: "Story", onClick: () => setTab("stories") },
+          { icon: <Users size={18} />, label: "Community", onClick: () => setTab("chains") },
+          { icon: <CalendarCheck size={18} />, label: "Event", onClick: () => act("Events", "Community events will appear when verified hosts publish them.") },
         ].map((action) => (
           <button key={action.label} onClick={action.onClick} type="button">
             {action.icon}
@@ -5325,23 +5328,125 @@ function HomeView({
         ))}
       </section>
 
-      <section className="home-live-section" aria-label="Live on HumanChain">
+      <section className="v7-score-card" aria-label="Human score">
+        <div>
+          <span className="v7-section-label">Human Score</span>
+          <strong>{chainScore}</strong>
+          <small>{passportRank} - {reputationGrowth}</small>
+        </div>
+        <button onClick={() => setTab("me")} type="button">View</button>
+      </section>
+
+      <section className="v7-reputation-health" aria-label="Reputation health">
+        <span className="v7-section-label">Reputation Health</span>
+        <div>
+          <strong>{passportMetrics.moderationState}</strong>
+          <span>{safetyStatus === "Clean" ? "No active warnings or reports" : "Review your safety center"}</span>
+        </div>
+      </section>
+
+      <section className="v7-opportunities" aria-label="Opportunities">
+        <div className="section-heading">
+          <span>Opportunities</span>
+          <Sparkles size={18} />
+        </div>
+        {opportunities.map((item) => (
+          <button key={item.title} onClick={item.onClick} type="button">
+            <strong>{item.title}</strong>
+            <span>{item.reward}</span>
+            <small>{item.time}</small>
+          </button>
+        ))}
+      </section>
+
+      <section className="v7-live-network" aria-label="Live network">
+        <span className="v7-section-label">Live Network</span>
+        <div>
+          <b>{dailyResponses.length + liveMomentPosts.length + liveMarketListings.length}</b>
+          <span>Active Humans</span>
+        </div>
+        <div>
+          <b>{communitySpotlight.name}</b>
+          <span>Top Community</span>
+        </div>
+        <div>
+          <b>{dailyHumanQuestion.title}</b>
+          <span>Trending Topic</span>
+        </div>
+      </section>
+
+      <section className="v7-trending-humans" aria-label="Trending humans">
+        <div className="section-heading">
+          <span>Trending Humans</span>
+          <Users size={18} />
+        </div>
+        <div>
+          {trendingHumans.map((human) => (
+            <button key={human.handle} onClick={() => setTab("me")} type="button">
+              <i>{human.initial}</i>
+              <strong>{human.handle}</strong>
+              <span>{human.score}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="v7-community-spotlight" aria-label="Community spotlight">
+        <span className="v7-section-label">Community Spotlight</span>
+        <strong>{communitySpotlight.name}</strong>
+        <p>{communitySpotlight.detail}</p>
+        <button
+          onClick={() => {
+            setActiveField(communitySpotlight);
+            setTab("chains");
+          }}
+          type="button"
+        >
+          Open community
+        </button>
+      </section>
+
+      <section className="v7-market-preview" aria-label="Market preview">
+        <div className="section-heading">
+          <span>Market Preview</span>
+          <Store size={18} />
+        </div>
+        {marketPreviewItems.length ? marketPreviewItems.map((listing) => (
+          <button key={listing.id} onClick={() => setTab("market")} type="button">
+            {listing.photos[0] ? <img alt={listing.photos[0].name} src={listing.photos[0].src} /> : <Tag size={18} />}
+            <div>
+              <strong>{listing.title}</strong>
+              <span>{listing.price}</span>
+              <small>{listing.seller} - Score {chainScore}</small>
+            </div>
+          </button>
+        )) : (
+          <button onClick={() => setTab("market")} type="button">
+            <Store size={18} />
+            <div>
+              <strong>Create your first listing</strong>
+              <span>Sell Item</span>
+              <small>No listings yet</small>
+            </div>
+          </button>
+        )}
+      </section>
+
+      <button
+        className="v7-ai-assistant"
+        onClick={() => act("AI Assistant", "Reputation Coach, Marketplace Guide, World Guide, Community Guide, and Safety Assistant are ready from this command button.")}
+        type="button"
+      >
+        <Sparkles size={18} />
+      </button>
+
+      <section className="home-live-section home-legacy-section" hidden aria-label="Live on HumanChain">
         <div className="section-heading">
           <span>Live network</span>
           <Radio size={18} />
         </div>
-        <div className="home-live-filters" aria-label="Home filters">
-          {["For you", "Nearby", "Saved"].map((filter, index) => (
-            <button className={index === 0 ? "active" : ""} key={filter} type="button">
-              {filter}
-            </button>
-          ))}
-        </div>
 
         <article className="home-preview-row ask-preview">
-          <div className="home-preview-icon">
-            <MessageCircleQuestion size={19} />
-          </div>
           <div>
             <span>Ask</span>
             <strong>{askPreview.question}</strong>
@@ -7226,6 +7331,19 @@ function ChainsView({
       </div>
       {chainView === "images" ? (
         <section className="image-post-grid">
+          <section className="moment-safety-card" aria-label="Community rules before posting">
+            <div className="section-heading">
+              <span>Community Rules</span>
+              <ShieldCheck size={18} />
+            </div>
+            <p>Allowed: travel, projects, achievements, learning, community events, and daily life.</p>
+            <div>
+              {["Respect others", "No harassment", "No pornography", "No hate speech", "No violence", "No scams", "No illegal content", "No spam"].map((rule) => (
+                <span key={rule}>{rule}</span>
+              ))}
+            </div>
+            <small>Every image is checked before it appears. Blocked content never enters Moments.</small>
+          </section>
           {!showPostComposer && !postPreview ? (
             <section className="moment-create-prompt">
               <div>
@@ -9357,7 +9475,7 @@ function MarketplaceView({
   setMarketplaceListings: React.Dispatch<React.SetStateAction<MarketplaceListing[]>>;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
-  const [activeFilter, setActiveFilter] = useState("Near me");
+  const [activeFilter, setActiveFilter] = useState("Products");
   const [marketMode, setMarketMode] = useState<"browse" | "sell">("browse");
   const [marketSearch, setMarketSearch] = useState("");
   const [manualArea, setManualArea] = useState(() =>
@@ -9408,9 +9526,10 @@ function MarketplaceView({
   const filteredItems = marketplaceItems.filter((item) => {
     const query = marketSearch.trim().toLowerCase();
     const matchesQuery = !query || `${item.title} ${item.seller} ${item.location} ${item.tag} ${item.condition}`.toLowerCase().includes(query);
-    if (activeFilter === "New") return matchesQuery && item.condition === "New listed";
-    if (activeFilter === "Second hand") return matchesQuery && item.condition === "Second hand";
-    if (activeFilter === "Marketing") return matchesQuery && item.tag === "Marketing";
+    if (activeFilter === "Products") return matchesQuery && item.tag !== "Marketing";
+    if (activeFilter === "Services") return matchesQuery && item.condition === "Service or business";
+    if (activeFilter === "Jobs") return matchesQuery && item.tag === "Marketing";
+    if (activeFilter === "Digital Goods") return matchesQuery && item.tag === "Marketing";
     return matchesQuery;
   });
   const locationReady = marketLocation.status === "ready";
@@ -10522,7 +10641,7 @@ function MarketplaceView({
           />
         </div>
         <div className="market-filter-row">
-          {["Near me", "New", "Second hand", "Marketing"].map((filter) => (
+          {["Products", "Services", "Jobs", "Digital Goods"].map((filter) => (
             <button
               className={activeFilter === filter ? "active" : ""}
               key={filter}
@@ -11254,6 +11373,25 @@ function MeView({
           />
         </label>
       </section>
+      <section className="profile-passport-map" aria-label="Digital passport sections">
+        {[
+          "Digital Human Card",
+          "Reputation Passport",
+          "Growth Analytics",
+          "Achievements",
+          "Communities",
+          "Marketplace",
+          "Activity",
+        ].map((section) => (
+          <button
+            key={section}
+            onClick={() => setProfileView(section === "Activity" ? "activity" : "overview")}
+            type="button"
+          >
+            {section}
+          </button>
+        ))}
+      </section>
       <nav className="me-view-tabs" aria-label="Me sections">
         <button
           aria-pressed={profileView === "overview"}
@@ -11261,7 +11399,7 @@ function MeView({
           onClick={() => setProfileView("overview")}
           type="button"
         >
-          Overview
+          Passport
         </button>
         <button
           aria-pressed={profileView === "activity"}
@@ -11588,6 +11726,7 @@ function MeView({
 }
 
 function SettingsView({
+  act,
   activeLanguage,
   clearMarketplaceData,
   clearPostData,
@@ -11599,6 +11738,7 @@ function SettingsView({
   setTab,
   worldContext,
 }: {
+  act: (title: string, detail: string) => void;
   activeLanguage: AppLanguage;
   clearMarketplaceData: () => void;
   clearPostData: () => void;
@@ -11633,6 +11773,33 @@ function SettingsView({
         <button onClick={() => setTab("home")} type="button">
           Back to Home
         </button>
+      </section>
+      <section className="settings-safety-center" aria-label="Safety center">
+        <div className="section-heading">
+          <span>Safety Center</span>
+          <ShieldCheck size={18} />
+        </div>
+        {[
+          "Community Rules",
+          "Governance",
+          "Reporting",
+          "Appeals",
+          "Safety Tips",
+          "Scam Prevention",
+        ].map((item) => (
+          <button
+            key={item}
+            onClick={() =>
+              act(
+                item,
+                `${item} guidance is available in HumanChain settings, with public rules kept outside the posting feed.`,
+              )
+            }
+            type="button"
+          >
+            {item}
+          </button>
+        ))}
       </section>
     </div>
   );
