@@ -5157,6 +5157,21 @@ function HomeView({
         </div>
       </section>
 
+      <section className="home-stat-panel" aria-label="HumanChain progress">
+        <button onClick={() => setTab("me")} type="button">
+          <strong>{chainScore}</strong>
+          <span>Human Score</span>
+        </button>
+        <button onClick={() => setTab("me")} type="button">
+          <strong>{points.toLocaleString()}</strong>
+          <span>HP earned</span>
+        </button>
+        <button onClick={() => setTab("me")} type="button">
+          <strong>{streak}d</strong>
+          <span>Streak</span>
+        </button>
+      </section>
+
       <section className="home-action-hero">
         <div className="home-brand-row">
           <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
@@ -5178,7 +5193,7 @@ function HomeView({
 
       <section className="mission-rail-card" aria-label="Today's progress">
         <div className="section-heading">
-          <span>Today&apos;s progress</span>
+          <span>Daily Mission</span>
           <CalendarCheck size={18} />
         </div>
         <div className="mission-progress">
@@ -5204,6 +5219,20 @@ function HomeView({
             </button>
           ))}
         </div>
+      </section>
+
+      <section className="home-quick-actions" aria-label="Quick actions">
+        {[
+          { icon: <MessageCircleQuestion size={18} />, label: "Ask", onClick: () => setTab("ask") },
+          { icon: <Sparkles size={18} />, label: "Moment", onClick: () => setTab("chains") },
+          { icon: <Store size={18} />, label: "Sell", onClick: () => setTab("market") },
+          { icon: <BookOpen size={18} />, label: "Story", onClick: () => setTab("stories") },
+        ].map((action) => (
+          <button key={action.label} onClick={action.onClick} type="button">
+            {action.icon}
+            <span>{action.label}</span>
+          </button>
+        ))}
       </section>
 
       <section className="home-live-section" aria-label="Live on HumanChain">
@@ -5742,6 +5771,11 @@ function AskView({
 
     return matchesQuery && matchesFilter;
   });
+  const questionLength = question.trim().length;
+  const askerTrustScore = Math.min(
+    99,
+    24 + (isVerifiedWorldHuman(humanIdentity) ? 26 : 0) + threads.filter((thread) => thread.owner).length * 4,
+  );
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.askThreads, threads);
@@ -5948,6 +5982,20 @@ function AskView({
             </small>
           </button>
         </div>
+        <div className="ask-benefit-row">
+          <span>
+            <ShieldCheck size={14} />
+            Free: all verified humans
+          </span>
+          <span>
+            <MapPin size={14} />
+            2 WLD: one country route
+          </span>
+          <span>
+            <Radio size={14} />
+            Estimate: first reply in 10 min
+          </span>
+        </div>
 
         {activeAskService === "country" ? (
           <div className="ask-route-panel">
@@ -6011,6 +6059,10 @@ function AskView({
           placeholder="Example: Should I leave my job and start my own business?"
           value={question}
         />
+        <div className="field-helper-row">
+          <span>{questionLength}/280 characters</span>
+          <span>Asker trust score: {askerTrustScore}</span>
+        </div>
         <div className="ask-modes">
           {[
             ["Text", "Public question", "Free"],
@@ -6073,6 +6125,7 @@ function AskView({
         </div>
         <button
           className="primary-command"
+          disabled={!question.trim()}
           onClick={() => {
             if (activeAskService === "country" && selectedCountryRoute === "World") {
               unlockEnteredCountryRoute();
@@ -6132,7 +6185,7 @@ function AskView({
           <article className="ask-thread" key={`${thread.question}-${index}`}>
             <div className="ask-thread-top">
               <span>{thread.topic} - {thread.author}</span>
-              <small>{targetCountry === "World" ? thread.mode : targetCountry} route</small>
+              <small>Trust {askerTrustScore} - {targetCountry === "World" ? thread.mode : targetCountry} route</small>
             </div>
             <h3>{thread.question}</h3>
             {targetCountry !== "World" ? (
@@ -6145,7 +6198,8 @@ function AskView({
             <div className="answer-stack">
               {visibleAnswers.length ? visibleAnswers.map((answer) => (
                 <div className="answer-card" key={`${thread.question}-${answer.user}-${answer.text}`}>
-                  <strong>{answer.user} · {answer.country}</strong>
+                  <strong>{answer.user} - {answer.country}</strong>
+                  <small>Verified responder - helpful signal visible</small>
                   <p>{answer.text}</p>
                   <div className="trust-action-row">
                     <button onClick={() => act("Helpful signal", "This answer was marked helpful for verdict ranking.")} type="button">
@@ -7173,7 +7227,7 @@ function ChainsView({
                     }
                     type="button"
                   >
-                    Pin 4 WLD
+                    Promote
                   </button>
                   <button onClick={() => reactToPost(post.id, "Love", "loves")} type="button">
                     Love
@@ -7190,7 +7244,7 @@ function ChainsView({
                   >
                     Comment
                   </button>
-                  {["I felt this", "Inspired", "Praying"].map((reaction) => (
+                  {["Inspired"].map((reaction) => (
                     <button
                       key={reaction}
                       onClick={() => reactToPost(post.id, reaction)}
@@ -7202,9 +7256,14 @@ function ChainsView({
                 </div>
                 {post.comments.length ? (
                   <div className="comment-list">
-                    {post.comments.slice(0, 1).map((comment, index) => (
+                    {post.comments.slice(0, 2).map((comment, index) => (
                       <span key={`${post.id}-${comment}-${index}`}>{comment}</span>
                     ))}
+                    {post.comments.length > 2 ? (
+                      <button onClick={() => setActiveCommentPostId(post.id)} type="button">
+                        View all {post.comments.length} comments
+                      </button>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -10046,16 +10105,14 @@ function MarketplaceView({
               <p>
                 Seller target {activeMarketItem.bidding.target} WLD. Next bid must be at least {getMinimumNextBid(activeMarketItem)} WLD.
               </p>
-              <div className="quick-bid-row" aria-label={`Quick bids for ${activeMarketItem.title}`}>
-                {[getMinimumNextBid(activeMarketItem), activeMarketItem.bidding.target].map((amount) => (
-                  <button
-                    key={`${activeMarketItem.title}-${amount}`}
-                    onClick={() => setQuickBid(activeMarketItem, amount)}
-                    type="button"
-                  >
-                    {amount} WLD
-                  </button>
-                ))}
+              <div className="bid-stepper-card">
+                <button onClick={() => setQuickBid(activeMarketItem, getMinimumNextBid(activeMarketItem))} type="button">
+                  Minimum
+                </button>
+                <button onClick={() => setQuickBid(activeMarketItem, activeMarketItem.bidding.target)} type="button">
+                  Seller target
+                </button>
+                <span>Recent bids stay saved in your receipt trail after submission.</span>
               </div>
               <div className="bid-row">
                 <input
@@ -10307,14 +10364,14 @@ function MarketplaceView({
       {marketMode === "sell" ? (
       <section className="market-panel listing-studio">
         <div className="section-heading">
-          <span>Sell Item</span>
+          <span>Listing wizard</span>
           <Upload size={18} />
         </div>
         <button className="market-detail-back" onClick={() => setMarketMode("browse")} type="button">
           Back to market
         </button>
         <div className="seller-flow-steps" aria-label="Listing progress">
-          {["Photos", "Price", "Proof", "Area", "Publish"].map((step, index) => (
+          {["Photos", "Details", "Trust", "Review", "Publish"].map((step, index) => (
             <span key={step}>
               <b>{index + 1}</b>
               {step}
@@ -10322,14 +10379,14 @@ function MarketplaceView({
           ))}
         </div>
         <p className="seller-flow-note">
-          Buyers see your listing only after the required proof is present. HumanChain stores coarse area, never a home address.
+          Add 3-6 real item photos, clear defects, pickup area, and chat-first sale details. HumanChain stores coarse area, never a home address.
         </p>
         <div className="listing-section-label">1. Photos</div>
         <div className="listing-photo-zone">
           <label className="listing-upload">
             <Upload size={20} />
             <strong>Add item photos</strong>
-            <span>Minimum 3 photos. Up to 6 are free at launch; max 9.</span>
+            <span>Add 3-6 photos of the actual item. Front, back, defects, receipt, and pickup proof help buyers trust you.</span>
             <input
               accept="image/*"
               multiple
@@ -10403,7 +10460,7 @@ function MarketplaceView({
             <option>Refurbished</option>
             <option>Service or business</option>
           </select>
-          <div className="listing-section-label">3. Proof and trust</div>
+          <div className="listing-section-label">3. Trust, defects, pickup</div>
           <input
             aria-label="Pickup area"
             onChange={(event) => updateListingDraft("area", event.target.value)}
@@ -10422,7 +10479,7 @@ function MarketplaceView({
             placeholder="Premium details: size, defects, warranty, delivery route, receipt, pickup safety, why buyers should trust it."
             value={listingDraft.details}
           />
-          <div className="listing-section-label">4. Area and sale method</div>
+          <div className="listing-section-label">4. Review and publish</div>
         </div>
         <div className="listing-checklist">
           {marketplaceChecklist.map((item) => (
@@ -10446,6 +10503,7 @@ function MarketplaceView({
         </section>
         <button
           className="primary-command"
+          disabled={listingPhotos.length < 3 || !listingDraft.title.trim() || !listingDraft.price.trim()}
           onClick={() => {
             if (saveMarketplaceListing()) {
               publishListing(marketplacePlans[0]);
@@ -10848,6 +10906,17 @@ function MeView({
     savedItems,
     streak,
   });
+  const passportLevel =
+    chainScore >= 420 ? "Gold Human" : chainScore >= 240 ? "Silver Human" : "Bronze Human";
+  const nextPassportTarget = chainScore >= 420 ? 600 : chainScore >= 240 ? 420 : 240;
+  const passportProgress = Math.min(100, Math.round((chainScore / nextPassportTarget) * 100));
+  const earnedBadges = [
+    { active: isVerifiedWorldHuman(verifiedHuman), label: "Verified Human" },
+    { active: streak >= 7, label: "7-day Streak" },
+    { active: ownedPosts.length > 0, label: "Moment Maker" },
+    { active: savedItems > 0, label: "Wisdom Saver" },
+    { active: passportMetrics.completedTrades > 0, label: "Trusted Trader" },
+  ];
   const connectedSignals = Array.from(
     new Map(
       links.map((link) => [
@@ -10976,6 +11045,23 @@ function MeView({
         <Stat label="Streak" value={`${streak}d`} />
         <Stat label="Posts" value={String(ownedPosts.length)} />
         <Stat label="Saved" value={String(savedItems)} />
+      </section>
+      <section className={`passport-level-panel ${passportLevel.toLowerCase().replace(/\s+/g, "-")}`}>
+        <div>
+          <span>Passport level</span>
+          <strong>{passportLevel}</strong>
+          <p>{chainScore}/{nextPassportTarget} trust score toward the next level.</p>
+        </div>
+        <i aria-hidden="true">
+          <b style={{ width: `${passportProgress}%` }} />
+        </i>
+        <div className="passport-badge-grid">
+          {earnedBadges.map((badge) => (
+            <span className={badge.active ? "active" : ""} key={badge.label}>
+              {badge.label}
+            </span>
+          ))}
+        </div>
       </section>
       <section className="chain-id-card">
         <div>
