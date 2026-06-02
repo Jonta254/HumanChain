@@ -2898,10 +2898,12 @@ const storageKeys = {
   history: "humanchain_history",
   links: "humanchain_links",
   marketHolds: "humanchain_market_holds",
+  marketComments: "humanchain_market_comments",
   marketRatings: "humanchain_market_ratings",
   marketplace: "humanchain_marketplace",
   notifications: "humanchain_notifications",
   posts: "humanchain_posts",
+  chainComments: "humanchain_chain_comments",
   userStories: "humanchain_user_stories",
 } as const;
 
@@ -4966,6 +4968,27 @@ function HomeView({
     { label: "Market", value: "Chat first" },
     { label: "Payments", value: "World verified" },
   ];
+  const askPreview = {
+    answers: dailyResponses.length,
+    question: dailyHumanQuestion.title,
+    topAnswer: trendingWisdom,
+  };
+  const momentPreview = topMoment ?? liveMomentPosts[0] ?? humanPosts.find((post) => Boolean(post.image));
+  const marketPreview = topMarketItem ?? marketplaceListings[0];
+  const marketPreviewInfo = marketPreview ? {
+    area: marketPreview.area,
+    image: marketPreview.photos[0]?.src ?? "",
+    price: marketPreview.price,
+    seller: marketPreview.seller,
+    title: marketPreview.title,
+  } : null;
+  const identityStrip = [
+    isVerifiedWorldHuman(verifiedHuman) ? "Verified" : "Preview",
+    passportMetrics.moderationState,
+    `${streak}d streak`,
+    "Nairobi area",
+    `${notificationUnreadCount} pending`,
+  ];
   const nextBestAction = !isVerifiedWorldHuman(verifiedHuman)
     ? {
         detail: "Preview can browse and draft. Public trust actions unlock only after World verification.",
@@ -5038,6 +5061,190 @@ function HomeView({
     });
     earnPoints(18, "Your Daily Human answer entered today's global verdict.");
   }
+
+  return (
+    <div className="screen home-dashboard">
+      <header className="human-home-topbar">
+        <button
+          aria-label="Open Human Passport"
+          className="human-home-avatar"
+          onClick={() => setTab("me")}
+          type="button"
+        >
+          {worldContext.profilePictureUrl ? (
+            <img alt="" src={worldContext.profilePictureUrl} />
+          ) : (
+            profileInitial
+          )}
+        </button>
+        <div className="human-home-topcopy">
+          <strong>HumanChain</strong>
+          <span>Verified and ready to ask, post, and trade</span>
+        </div>
+        <button
+          aria-label={notificationReady ? "Open notification center" : "Enable HumanChain notifications"}
+          className={`hero-bell-button compact ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
+          onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
+          type="button"
+        >
+          <Bell size={18} />
+        </button>
+        <button
+          aria-label="Open settings and passport"
+          className="home-guide-button"
+          onClick={() => setTab("me")}
+          type="button"
+        >
+          <Settings size={18} />
+        </button>
+      </header>
+
+      <section className="living-passport-strip" aria-label="Living passport">
+        <div>
+          <span>{worldHandle}</span>
+          <strong>Your trust record</strong>
+        </div>
+        <div>
+          {identityStrip.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-action-hero">
+        <div className="home-brand-row">
+          <img alt="HumanChain logo" src="/images/humanchain-logo.png" />
+          <div>
+            <span>Daily trust dashboard</span>
+            <strong>HumanChain</strong>
+          </div>
+        </div>
+        <div>
+          <span className="section-kicker">Next best action</span>
+          <h1>{nextBestAction.title}</h1>
+          <p>{nextBestAction.detail}</p>
+        </div>
+        <button onClick={nextBestAction.onClick} type="button">
+          {nextBestAction.icon}
+          {nextBestAction.label}
+        </button>
+      </section>
+
+      <section className="mission-rail-card" aria-label="Today's progress">
+        <div className="section-heading">
+          <span>Today&apos;s progress</span>
+          <CalendarCheck size={18} />
+        </div>
+        <div className="mission-progress">
+          <strong>{missionCompleted}/3 meaningful actions</strong>
+          <i style={{ width: `${(missionCompleted / 3) * 100}%` }} />
+        </div>
+        <div className="mission-list compact">
+          {missionItems.map((item) => (
+            <button
+              className={item.complete ? "complete" : ""}
+              key={item.label}
+              onClick={
+                item.label.includes("Answer")
+                  ? submitDailyAnswer
+                  : item.label.includes("Read")
+                    ? () => setTab("ask")
+                    : () => setTab("chains")
+              }
+              type="button"
+            >
+              <CheckCircle2 size={15} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-live-section" aria-label="Live on HumanChain">
+        <div className="section-heading">
+          <span>Live on HumanChain</span>
+          <Radio size={18} />
+        </div>
+        <div className="home-live-filters" aria-label="Home filters">
+          {["For you", "Nearby", "Saved"].map((filter, index) => (
+            <button className={index === 0 ? "active" : ""} key={filter} type="button">
+              {filter}
+            </button>
+          ))}
+        </div>
+
+        <article className="home-preview-row ask-preview">
+          <div className="home-preview-icon">
+            <MessageCircleQuestion size={19} />
+          </div>
+          <div>
+            <span>Ask</span>
+            <strong>{askPreview.question}</strong>
+            <p>{getShortText(askPreview.topAnswer, 94)}</p>
+            <small>{askPreview.answers} answers today</small>
+          </div>
+          <button onClick={() => setTab("ask")} type="button">
+            Answer
+          </button>
+        </article>
+
+        <article className="home-preview-row moment-preview">
+          {momentPreview?.image ? (
+            <img alt={momentPreview.caption} src={momentPreview.image} />
+          ) : (
+            <div className="home-preview-icon">
+              <Sparkles size={19} />
+            </div>
+          )}
+          <div>
+            <span>Moment</span>
+            <strong>{momentPreview?.author ?? "Post a real moment"}</strong>
+            <p>{getShortText(momentPreview?.caption ?? "No live moment yet. Add the first recent photo from a verified human.", 96)}</p>
+            <small>{momentPreview ? `${momentPreview.loves} loves - ${momentPreview.comments.length} comments` : "Photo-first feed"}</small>
+          </div>
+          <button onClick={() => setTab("chains")} type="button">
+            View
+          </button>
+        </article>
+
+        <article className="home-preview-row market-preview">
+          {marketPreviewInfo?.image ? (
+            <img alt={marketPreviewInfo.title} src={marketPreviewInfo.image} />
+          ) : (
+            <div className="home-preview-icon">
+              <Store size={19} />
+            </div>
+          )}
+          <div>
+            <span>Market</span>
+            <strong>{marketPreviewInfo?.title ?? "Browse nearby listings"}</strong>
+            <p>
+              {marketPreviewInfo
+                ? `${marketPreviewInfo.price} by ${marketPreviewInfo.seller} in ${marketPreviewInfo.area}`
+                : "Clear item cards, real photos, seller chat, and inspect-before-pay cues."}
+            </p>
+            <small>Verified seller - chat first</small>
+          </div>
+          <button onClick={() => setTab("market")} type="button">
+            Browse
+          </button>
+        </article>
+      </section>
+
+      <section className="home-secondary-utilities" aria-label="Secondary utilities">
+        <button onClick={() => setTab("me")} type="button">
+          <BadgeCheck size={17} />
+          <span>View full passport</span>
+          <small>{passportMetrics.helpfulScore} helpful score</small>
+        </button>
+        <button onClick={() => setTab("stories")} type="button">
+          <BookOpen size={17} />
+          <span>Read human stories</span>
+          <small>{savedItems} saved items</small>
+        </button>
+      </section>
+    </div>
+  );
 
   return (
     <div className="screen">
@@ -6115,6 +6322,11 @@ function ChainsView({
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
   const [commentSort, setCommentSort] = useState<"relevant" | "newest">("relevant");
+  const [chainCommentDrafts, setChainCommentDrafts] = useState<Record<string, string>>({});
+  const [activeChainCommentKey, setActiveChainCommentKey] = useState<string | null>(null);
+  const [chainComments, setChainComments] = useState<Record<string, string[]>>(() =>
+    loadJsonFromStorage<Record<string, string[]>>(storageKeys.chainComments, {}),
+  );
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
   );
@@ -6140,6 +6352,10 @@ function ChainsView({
     commentSort === "newest"
       ? [...(activeCommentPost?.comments ?? [])]
       : [...(activeCommentPost?.comments ?? [])].sort((a, b) => b.length - a.length);
+  const activeChainCommentEntry = activeChainCommentKey
+    ? visibleLinks.find((link, index) => getChainCommentKey(link, index) === activeChainCommentKey)
+    : null;
+  const activeChainComments = activeChainCommentKey ? chainComments[activeChainCommentKey] ?? [] : [];
 
   useEffect(() => {
     scrollMiniAppToTop();
@@ -6148,6 +6364,14 @@ function ChainsView({
   useEffect(() => {
     saveJsonToStorage(storageKeys.chainPremium, chainPremium);
   }, [chainPremium]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.chainComments, chainComments);
+  }, [chainComments]);
+
+  function getChainCommentKey(link: ChainLink, index: number) {
+    return link.id ? `link:${link.id}` : `seed:${index}:${link.country}:${link.text.slice(0, 48)}`;
+  }
 
   function addLink() {
     if (!requireVerifiedPublicAction(humanIdentity, act, "adding a public moment link")) {
@@ -6372,6 +6596,38 @@ function ChainsView({
       kind: "comment",
     });
     earnPoints(7, "Your comment gave another human a real response.");
+  }
+
+  function commentOnChainLink(key: string, author: string) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "commenting on a chain link")) {
+      return;
+    }
+
+    const comment = chainCommentDrafts[key]?.trim();
+
+    if (!comment) {
+      act("Write a chain comment", "Add a useful response before sending.");
+      return;
+    }
+
+    const validation = validateAnswerInput(comment);
+
+    if (!validation.ok) {
+      act("Comment needs work", validation.issues[0] ?? "Adjust the chain comment before publishing.");
+      return;
+    }
+
+    setChainComments((current) => ({
+      ...current,
+      [key]: [`${humanIdentity?.username ?? "@you"}: ${comment}`, ...(current[key] ?? [])],
+    }));
+    setChainCommentDrafts((current) => ({ ...current, [key]: "" }));
+    recordHistory({
+      title: "Chain comment added",
+      detail: `${comment} Reply to ${author}.`,
+      kind: "comment",
+    });
+    earnPoints(7, "Your chain comment added context to a human link.");
   }
 
   function tipPost(post: HumanPost) {
@@ -6927,9 +7183,10 @@ function ChainsView({
                     </div>
                   )}
                 </div>
-                <div className="comment-sheet-composer">
+                <label className="comment-sheet-composer labeled">
+                  <span>Add a public comment</span>
                   <input
-                    aria-label="Write comment"
+                    aria-label="Add a public moment comment"
                     onChange={(event) =>
                       setCommentDrafts((current) => ({
                         ...current,
@@ -6939,10 +7196,14 @@ function ChainsView({
                     placeholder="Add a real comment..."
                     value={commentDrafts[activeCommentPost.id] ?? ""}
                   />
-                  <button onClick={() => commentOnPost(activeCommentPost.id)} type="button">
+                  <button
+                    disabled={!commentDrafts[activeCommentPost.id]?.trim()}
+                    onClick={() => commentOnPost(activeCommentPost.id)}
+                    type="button"
+                  >
                     Send
                   </button>
-                </div>
+                </label>
               </section>
             </div>
           ) : null}
@@ -7014,6 +7275,8 @@ function ChainsView({
           {visibleLinks.map((link, index) => {
             const author = getChainLinkAuthor(link, humanIdentity?.username ?? "@verified_human");
             const pulse = getChainLinkPulse(link, index);
+            const linkCommentKey = getChainCommentKey(link, index);
+            const linkComments = chainComments[linkCommentKey] ?? [];
 
             return (
             <article className={`thread-item lively ${link.pinned ? "pinned" : ""}`} key={`${author}-${link.text}-${index}`}>
@@ -7073,6 +7336,12 @@ function ChainsView({
                   >
                     Tip human
                   </button>
+                  <button
+                    onClick={() => setActiveChainCommentKey(linkCommentKey)}
+                    type="button"
+                  >
+                    Comments {linkComments.length}
+                  </button>
                   {link.owner ? (
                     <button
                       className="danger"
@@ -7083,10 +7352,91 @@ function ChainsView({
                     </button>
                   ) : null}
                 </div>
+                {linkComments.length ? (
+                  <div className="comment-list">
+                    <span>{linkComments[0]}</span>
+                    {linkComments.length > 1 ? (
+                      <button onClick={() => setActiveChainCommentKey(linkCommentKey)} type="button">
+                        View all {linkComments.length} comments
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </article>
             );
           })}
+          {activeChainCommentKey ? (
+            <div className="comment-sheet-backdrop" role="presentation">
+              <section
+                aria-label="Chain link comments"
+                aria-modal="true"
+                className="comment-sheet"
+                role="dialog"
+              >
+                <div className="comment-sheet-handle" />
+                <div className="comment-sheet-top">
+                  <div>
+                    <strong>{activeChainCommentEntry ? getChainLinkAuthor(activeChainCommentEntry, humanIdentity?.username ?? "@verified_human") : "Chain comments"}</strong>
+                    <span>{activeChainCommentEntry?.text ?? "Reply to this human chain link."}</span>
+                  </div>
+                  <button onClick={() => setActiveChainCommentKey(null)} type="button">
+                    Close
+                  </button>
+                </div>
+                <div className="comment-sort-row" aria-label="Chain comment sorting">
+                  <button className="active" type="button">Top</button>
+                  <button type="button">Newest</button>
+                </div>
+                <div className="comment-thread">
+                  {activeChainComments.length ? (
+                    activeChainComments.map((comment, index) => (
+                      <article key={`${activeChainCommentKey}-${comment}-${index}`}>
+                        <strong>{comment.includes(":") ? comment.split(":")[0] : "@verified_human"}</strong>
+                        <p>{comment.includes(":") ? comment.split(":").slice(1).join(":").trim() : comment}</p>
+                        <button onClick={() => act("Translate ready", "One-tap translation can be connected for this chain comment.")} type="button">
+                          Translate
+                        </button>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="comment-empty">
+                      <strong>No comments yet</strong>
+                      <span>Start a thoughtful reply to this chain link.</span>
+                    </div>
+                  )}
+                </div>
+                <label className="comment-sheet-composer labeled">
+                  <span>Add a public comment</span>
+                  <input
+                    aria-label="Add a public chain comment"
+                    onChange={(event) =>
+                      setChainCommentDrafts((current) => ({
+                        ...current,
+                        [activeChainCommentKey]: event.target.value,
+                      }))
+                    }
+                    placeholder="Write a useful reply..."
+                    value={chainCommentDrafts[activeChainCommentKey] ?? ""}
+                  />
+                  <button
+                    disabled={!chainCommentDrafts[activeChainCommentKey]?.trim()}
+                    onClick={() =>
+                      commentOnChainLink(
+                        activeChainCommentKey,
+                        activeChainCommentEntry
+                          ? getChainLinkAuthor(activeChainCommentEntry, humanIdentity?.username ?? "@verified_human")
+                          : "@verified_human",
+                      )
+                    }
+                    type="button"
+                  >
+                    Send
+                  </button>
+                </label>
+              </section>
+            </div>
+          ) : null}
         </section>
       )}
     </div>
@@ -8698,6 +9048,10 @@ function MarketplaceView({
       {},
     ),
   );
+  const [marketComments, setMarketComments] = useState<Record<string, string[]>>(() =>
+    loadJsonFromStorage<Record<string, string[]>>(storageKeys.marketComments, {}),
+  );
+  const [marketCommentDrafts, setMarketCommentDrafts] = useState<Record<string, string>>({});
   const [marketHolds, setMarketHolds] = useState<MarketHold[]>(() =>
     loadJsonFromStorage<MarketHold[]>(storageKeys.marketHolds, []),
   );
@@ -8805,6 +9159,10 @@ function MarketplaceView({
   useEffect(() => {
     saveJsonToStorage(storageKeys.marketRatings, marketRatings);
   }, [marketRatings]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.marketComments, marketComments);
+  }, [marketComments]);
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.marketHolds, marketHolds);
@@ -9107,6 +9465,59 @@ function MarketplaceView({
     });
   }
 
+  function submitMarketComment(item: MarketplaceItem | MarketplaceListing) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "commenting on marketplace listings")) {
+      return;
+    }
+
+    const key = getMarketItemKey(item);
+    const itemInfo = getMarketItemInfo(item);
+    const comment = marketCommentDrafts[key]?.trim();
+
+    if (!comment) {
+      act("Write a market comment", "Ask a public item question or leave useful listing context first.");
+      return;
+    }
+
+    const validation = validateAnswerInput(comment);
+
+    if (!validation.ok) {
+      act("Comment needs work", validation.issues[0] ?? "Adjust the marketplace comment before paying.");
+      return;
+    }
+
+    openPayment({
+      title: "Comment on market item",
+      amount: "0.5 WLD",
+      detail: `Post a public paid comment on ${itemInfo.title}. Seller chat stays free for private buying details.`,
+      success: "Marketplace comment payment confirmed. Your public listing comment is posted.",
+      feature: "marketplace-comment",
+      points: 5,
+      onConfirmed: () => {
+        const savedComment = `${humanIdentity?.username ?? "@you"}: ${comment}`;
+
+        setMarketComments((current) => ({
+          ...current,
+          [key]: [savedComment, ...(current[key] ?? [])],
+        }));
+        setMarketCommentDrafts((current) => ({ ...current, [key]: "" }));
+        recordHistory({
+          title: "Marketplace comment posted",
+          detail: `0.5 WLD comment on ${itemInfo.title}: ${comment}`,
+          kind: "market",
+        });
+        void storeSafeData("marketplace-listing", `comment-${key}-${Date.now()}`, {
+          amount: 0.5,
+          buyer: humanIdentity?.username ?? "@you",
+          comment,
+          item: itemInfo.title,
+          seller: itemInfo.seller,
+          token: "WLD",
+        });
+      },
+    });
+  }
+
   async function shareMarketItem(item: MarketplaceItem | MarketplaceListing) {
     const itemInfo = getMarketItemInfo(item);
     const busyKey = getMarketActionKey("share", item);
@@ -9405,6 +9816,8 @@ function MarketplaceView({
     const activeHold = marketHolds.find(
       (hold) => hold.itemKey === getMarketItemKey(activeMarketItem),
     );
+    const activeMarketCommentKey = getMarketItemKey(activeMarketItem);
+    const activeMarketComments = marketComments[activeMarketCommentKey] ?? [];
 
     return (
       <div className="screen market-detail-screen">
@@ -9467,6 +9880,48 @@ function MarketplaceView({
               type="button"
             >
               {isMarketActionBusy("chat", activeMarketItem) ? "Opening..." : "Talk to seller"}
+            </button>
+          </section>
+          <section className="market-comment-card" aria-label="Marketplace comments">
+            <div className="market-comment-head">
+              <div>
+                <span>Public item comments</span>
+                <strong>{activeMarketComments.length} comments</strong>
+              </div>
+              <small>0.5 WLD each</small>
+            </div>
+            {activeMarketComments.length ? (
+              <div className="market-comment-list">
+                {activeMarketComments.slice(0, 3).map((comment, index) => (
+                  <article key={`${activeMarketCommentKey}-${comment}-${index}`}>
+                    <strong>{comment.includes(":") ? comment.split(":")[0] : "@verified_human"}</strong>
+                    <p>{comment.includes(":") ? comment.split(":").slice(1).join(":").trim() : comment}</p>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p>No public item comments yet. Use comments for visible item questions; use seller chat for buying details.</p>
+            )}
+            <label className="market-comment-composer">
+              <span>Add a public listing comment</span>
+              <textarea
+                aria-label="Add a public marketplace comment"
+                onChange={(event) =>
+                  setMarketCommentDrafts((current) => ({
+                    ...current,
+                    [activeMarketCommentKey]: event.target.value,
+                  }))
+                }
+                placeholder="Ask about condition, receipt, defects, or pickup proof..."
+                value={marketCommentDrafts[activeMarketCommentKey] ?? ""}
+              />
+            </label>
+            <button
+              disabled={!marketCommentDrafts[activeMarketCommentKey]?.trim()}
+              onClick={() => submitMarketComment(activeMarketItem)}
+              type="button"
+            >
+              Post comment - 0.5 WLD
             </button>
           </section>
           {activeHold ? (
@@ -9997,6 +10452,7 @@ function MarketplaceView({
           {filteredItems.length ? filteredItems.map((item) => {
             const ratingKey = `${item.seller}:${item.title}`;
             const itemSocial = marketRatings[ratingKey] ?? { rating: 0, tips: 0 };
+            const itemComments = marketComments[getMarketItemKey(item)] ?? [];
 
             return (
             <article className={`market-item ${item.tone}`} key={item.title}>
@@ -10029,6 +10485,7 @@ function MarketplaceView({
                   <span>{item.trust}</span>
                   <span>{itemSocial.rating} look votes</span>
                   <span>{itemSocial.tips} tips</span>
+                  <span>{itemComments.length} comments</span>
                 </div>
                 <div className="market-trust-row">
                   <span>
@@ -10068,6 +10525,9 @@ function MarketplaceView({
                 </button>
                 <button onClick={() => tipMarketItem(item, item.title)} type="button">
                   Tip item
+                </button>
+                <button onClick={() => setActiveMarketItem(item)} type="button">
+                  Comment 0.5 WLD
                 </button>
                 <button
                   aria-busy={isMarketActionBusy("chat", item)}
