@@ -9430,11 +9430,13 @@ function MarketplaceView({
       success: `${plan[0]} is ready. Add your item, photos, location, and contact link after wallet setup.`,
       feature: normalizePaymentFeature(`marketplace-${plan[0]}`),
       points: 12,
-    });
-    recordHistory({
-      title: `${plan[0]} prepared`,
-      detail: `${plan[1]} marketplace action opened through World payment.`,
-      kind: "market",
+      onConfirmed: () => {
+        recordHistory({
+          title: `${plan[0]} payment confirmed`,
+          detail: `${plan[1]} marketplace action was verified by World payment and unlocked.`,
+          kind: "market",
+        });
+      },
     });
   }
 

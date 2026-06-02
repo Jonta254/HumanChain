@@ -11,6 +11,7 @@ export const humanChainPaymentFeatures = {
   "pin-chain-item": 4,
   "world-pulse": 1,
   "marketplace-business-ad": 4,
+  "marketplace-comment": 0.5,
   "marketplace-extra-photo-pack": 2,
   "marketplace-local-boost": 2,
   "marketplace-quick-listing": 2,

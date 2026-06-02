@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import type { PayResult } from "@worldcoin/minikit-js/commands";
+import { Tokens, tokenToDecimals } from "@worldcoin/minikit-js/commands";
 import {
   isHumanChainPaymentFeature,
   isHumanChainPaymentToken,
@@ -90,6 +91,18 @@ export async function POST(req: NextRequest) {
   const transactionRecord = transaction as Record<string, unknown>;
   const isMined = transactionRecord.transaction_status === "mined";
   const treasury = getHumanChainTreasury().toLowerCase();
+  const expectedTokenAmount = tokenToDecimals(amount, Tokens.WLD).toString();
+  const transactionReference =
+    typeof transactionRecord.reference === "string" ? transactionRecord.reference : "";
+  const transactionAppId =
+    typeof transactionRecord.app_id === "string" ? transactionRecord.app_id : "";
+  const transactionToken =
+    typeof transactionRecord.token === "string" ? transactionRecord.token.toUpperCase() : "";
+  const transactionTokenAmount =
+    typeof transactionRecord.token_amount === "string" ? transactionRecord.token_amount : "";
+  const transactionSender =
+    typeof transactionRecord.from === "string" ? transactionRecord.from.toLowerCase() : "";
+  const payloadSender = typeof payload.from === "string" ? payload.from.toLowerCase() : "";
   const transactionRecipients = [
     transactionRecord.to,
     transactionRecord.recipient,
@@ -99,11 +112,62 @@ export async function POST(req: NextRequest) {
     .filter((value): value is string => typeof value === "string")
     .map((value) => value.toLowerCase());
 
-  if (
-    isMined &&
-    transactionRecipients.length > 0 &&
-    !transactionRecipients.includes(treasury)
-  ) {
+  if (isMined && transactionReference !== reference) {
+    return noStoreJson(
+      {
+        ok: false,
+        error: "World payment reference did not match HumanChain reference.",
+        transaction,
+      },
+      { status: 400 },
+    );
+  }
+
+  if (isMined && transactionAppId !== appId) {
+    return noStoreJson(
+      {
+        ok: false,
+        error: "World payment app id did not match HumanChain app id.",
+        transaction,
+      },
+      { status: 400 },
+    );
+  }
+
+  if (isMined && transactionToken !== normalizedToken) {
+    return noStoreJson(
+      {
+        ok: false,
+        error: "World payment token did not match HumanChain WLD requirement.",
+        transaction,
+      },
+      { status: 400 },
+    );
+  }
+
+  if (isMined && transactionTokenAmount !== expectedTokenAmount) {
+    return noStoreJson(
+      {
+        ok: false,
+        error: "World payment amount did not match HumanChain payment request.",
+        transaction,
+      },
+      { status: 400 },
+    );
+  }
+
+  if (isMined && payloadSender && transactionSender && transactionSender !== payloadSender) {
+    return noStoreJson(
+      {
+        ok: false,
+        error: "World payment sender did not match the MiniKit payment payload.",
+        transaction,
+      },
+      { status: 400 },
+    );
+  }
+
+  if (isMined && !transactionRecipients.includes(treasury)) {
     return noStoreJson(
       {
         ok: false,

@@ -117,8 +117,26 @@ export function isWorldMiniAppReady() {
   return MiniKit.isInstalled();
 }
 
+function getActiveMiniKitValue<T>(key: string): T | undefined {
+  if (typeof window !== "undefined") {
+    const activeMiniKit = (window as unknown as {
+      MiniKit?: Record<string, T | undefined>;
+    }).MiniKit;
+    const activeValue = activeMiniKit?.[key];
+
+    if (activeValue !== undefined && activeValue !== null) {
+      return activeValue;
+    }
+  }
+
+  return undefined;
+}
+
 function readMiniKitValue<T>(key: string): T | undefined {
-  return (MiniKit as unknown as Record<string, T | undefined>)[key];
+  return (
+    getActiveMiniKitValue<T>(key) ??
+    (MiniKit as unknown as Record<string, T | undefined>)[key]
+  );
 }
 
 function normalizeWorldUserProfile(profile: RawWorldUserProfile): WorldUserProfile | null {
@@ -196,9 +214,7 @@ export async function getWorldUserByAddress(
     return cached.promise;
   }
 
-  const promise = MiniKit.getUserByAddress(address)
-    .then((profile) => normalizeWorldUserProfile(profile))
-    .catch(() => null);
+  const promise = resolveWorldUserByAddress(address);
 
   worldUserCache.set(cacheKey, {
     expiresAt: Date.now() + worldUserCacheMs,
@@ -212,6 +228,36 @@ export async function getWorldUserByAddress(
   }
 
   return profile;
+}
+
+async function resolveWorldUserByAddress(address: string) {
+  const fromMiniKit = await MiniKit.getUserByAddress(address)
+    .then((profile) => normalizeWorldUserProfile(profile))
+    .catch(() => null);
+
+  if (fromMiniKit?.username) {
+    return fromMiniKit;
+  }
+
+  const fromHumanChainApi = await fetch("/api/world/user-profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ address }),
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        return null;
+      }
+
+      const payload = (await response.json()) as {
+        profile?: RawWorldUserProfile;
+      };
+
+      return normalizeWorldUserProfile(payload.profile);
+    })
+    .catch(() => null);
+
+  return fromHumanChainApi?.username ? fromHumanChainApi : fromMiniKit;
 }
 
 export async function getWorldPermissions() {
