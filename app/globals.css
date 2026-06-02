@@ -446,7 +446,7 @@ html[data-world-mini-app="true"] .phone-frame {
   display: grid;
   justify-items: center;
   gap: 8px;
-  min-height: 320px;
+  min-height: clamp(260px, calc(var(--app-height) - 190px), 320px);
   border: 0;
   color: #fffdf8;
   background:
@@ -1330,6 +1330,13 @@ html[data-world-mini-app="true"] .v7-ai-assistant {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.floating-profile-button span {
+  color: var(--green);
+  font-size: 1rem;
+  font-weight: 950;
+  line-height: 1;
 }
 
 html[data-world-mini-app="true"] .floating-profile-button {

@@ -2680,6 +2680,19 @@ function getPaymentFeature(payment: PaymentRequest) {
   return normalizePaymentFeature(payment.feature ?? payment.title);
 }
 
+function getPrimaryProfileImage(
+  profileImage: string | null,
+  human: HumanIdentity | null,
+  worldContext: ReturnType<typeof getWorldMiniAppContext>,
+) {
+  const humanProfileImage =
+    human && "profilePictureUrl" in human && typeof human.profilePictureUrl === "string"
+      ? human.profilePictureUrl
+      : undefined;
+
+  return profileImage ?? humanProfileImage ?? worldContext.profilePictureUrl;
+}
+
 type DailyResponse = {
   user: string;
   text: string;
@@ -3323,6 +3336,9 @@ export default function HumanChainApp() {
     loadStoredNotifications,
   );
   const [worldContext, setWorldContext] = useState(getWorldMiniAppContext);
+  const [profileImage, setProfileImage] = useState<string | null>(() =>
+    loadJsonFromStorage<string | null>(storageKeys.profileImage, null),
+  );
   const [appLanguage, setAppLanguage] = useState<AppLanguage>(
     appLanguages.find((language) => language.code === storedAppMemory.appLanguageCode) ??
       appLanguages[0],
@@ -3371,6 +3387,14 @@ export default function HumanChainApp() {
     "idle" | "loading" | "ready" | "saving" | "offline"
   >(verifiedHuman?.mode === "world" ? "loading" : "idle");
   const [feedRefreshNonce, setFeedRefreshNonce] = useState(0);
+
+  useEffect(() => {
+    if (profileImage) {
+      saveJsonToStorage(storageKeys.profileImage, profileImage);
+    } else if (typeof window !== "undefined") {
+      window.localStorage.removeItem(storageKeys.profileImage);
+    }
+  }, [profileImage]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -4412,7 +4436,10 @@ export default function HumanChainApp() {
       if ("ok" in result && !result.ok) {
         setToast({
           title: "Payment not confirmed",
-          detail: "World payments are only counted after backend verification.",
+          detail:
+            "error" in result && result.error
+              ? result.error
+              : "World payments are only counted after backend verification.",
         });
         setPaymentBusy(false);
         return;
@@ -4556,6 +4583,7 @@ export default function HumanChainApp() {
             marketLocation={marketLocation}
             openPayment={openPayment}
             points={points}
+            profileImage={profileImage}
             lastCheckInAt={lastCheckInAt}
             lastCheckInDate={lastCheckInDate}
             onCheckIn={() => {
@@ -4579,6 +4607,7 @@ export default function HumanChainApp() {
             }}
             recordHistory={recordHistory}
             savedItems={savedItems}
+            setProfileImage={setProfileImage}
             setTab={setTab}
             streak={streak}
             verifiedHuman={verifiedHuman}
@@ -4617,6 +4646,7 @@ export default function HumanChainApp() {
             notificationUnreadCount={unreadNotificationCount}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             onOpenNotifications={() => setNotificationCenterOpen(true)}
+            profileImage={profileImage}
             recordHistory={recordHistory}
             setDailyAnsweredAt={setDailyAnsweredAt}
             setDailyAnsweredDate={setDailyAnsweredDate}
@@ -4656,13 +4686,19 @@ export default function HumanChainApp() {
             onClick={() => setTab("me")}
             type="button"
           >
-            {verifiedHuman.profilePictureUrl || worldContext.profilePictureUrl ? (
+            {getPrimaryProfileImage(profileImage, verifiedHuman, worldContext) ? (
               <img
                 alt=""
-                src={verifiedHuman.profilePictureUrl ?? worldContext.profilePictureUrl}
+                src={getPrimaryProfileImage(profileImage, verifiedHuman, worldContext)}
               />
             ) : (
-              <UserRound size={18} />
+              <span>
+                {getWorldDisplayUsername(worldContext, verifiedHuman)
+                  .replace(/^@/, "")
+                  .trim()
+                  .charAt(0)
+                  .toUpperCase() || "H"}
+              </span>
             )}
           </button>
         ) : null}
@@ -4925,6 +4961,7 @@ function HomeView({
   onEnableNotifications,
   onOpenNotifications,
   points,
+  profileImage,
   recordHistory,
   savedItems,
   setDailyAnsweredAt,
@@ -4951,6 +4988,7 @@ function HomeView({
   onEnableNotifications: () => void | Promise<void>;
   onOpenNotifications: () => void;
   points: number;
+  profileImage: string | null;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   savedItems: number;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
@@ -4967,6 +5005,7 @@ function HomeView({
   const [passportBackOpen, setPassportBackOpen] = useState(false);
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
+  const primaryProfileImage = getPrimaryProfileImage(profileImage, verifiedHuman, worldContext);
   const userPostCount = humanPosts.filter((post) => post.owner).length;
   const liveMomentPosts = humanPosts.filter(
     (post) => Boolean(post.image) && (post.owner || post.storageStatus === "cloud-safe"),
@@ -5238,8 +5277,8 @@ function HomeView({
           onClick={() => setTab("me")}
           type="button"
         >
-          {worldContext.profilePictureUrl ? (
-            <img alt="" src={worldContext.profilePictureUrl} />
+          {primaryProfileImage ? (
+            <img alt="" src={primaryProfileImage} />
           ) : (
             profileInitial
           )}
@@ -5276,7 +5315,7 @@ function HomeView({
           <>
             <span className="v7-section-label">Digital card</span>
             <div className="v7-card-avatar">
-              {worldContext.profilePictureUrl ? <img alt="" src={worldContext.profilePictureUrl} /> : profileInitial}
+              {primaryProfileImage ? <img alt="" src={primaryProfileImage} /> : profileInitial}
             </div>
             <strong>{worldHandle}</strong>
             <small>{verifiedHuman?.wallet ? `HC-${verifiedHuman.wallet.slice(2, 8).toUpperCase()}` : "HC-PREVIEW"}</small>
@@ -11185,8 +11224,10 @@ function MeView({
   onCheckIn,
   openPayment,
   points,
+  profileImage,
   recordHistory,
   savedItems,
+  setProfileImage,
   setTab,
   streak,
   verifiedHuman,
@@ -11206,17 +11247,16 @@ function MeView({
   onCheckIn: () => void;
   openPayment: OpenPayment;
   points: number;
+  profileImage: string | null;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   savedItems: number;
+  setProfileImage: React.Dispatch<React.SetStateAction<string | null>>;
   setTab: React.Dispatch<React.SetStateAction<Tab>>;
   streak: number;
   verifiedHuman: VerifiedHuman | null;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
-  const [profileImage, setProfileImage] = useState<string | null>(() =>
-    loadJsonFromStorage<string | null>(storageKeys.profileImage, null),
-  );
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
   const displayUsername = getWorldDisplayUsername(worldContext, verifiedHuman);
   const profileInitial =
@@ -11274,14 +11314,6 @@ function MeView({
       ]),
     ).values(),
   ).slice(0, 8);
-
-  useEffect(() => {
-    if (profileImage) {
-      saveJsonToStorage(storageKeys.profileImage, profileImage);
-    } else if (typeof window !== "undefined") {
-      window.localStorage.removeItem(storageKeys.profileImage);
-    }
-  }, [profileImage]);
 
   function openConnectionMap() {
     setQuickToolPanel("connections");

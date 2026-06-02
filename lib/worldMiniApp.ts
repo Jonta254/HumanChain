@@ -14,7 +14,7 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
 };
 
-const worldPaymentConfirmationDelays = [0, 1500, 3000, 5000, 8000, 12000];
+const worldPaymentConfirmationDelays = [0, 1500, 3000, 5000, 8000, 12000, 18000, 24000];
 
 const worldUserCache = new Map<
   string,
@@ -329,15 +329,31 @@ async function confirmWorldPayment(input: {
       await waitForWorldConfirmation(delayMs);
     }
 
-    const confirmationResponse = await fetch("/api/world/confirm-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    const confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
+    let confirmationResponse: Response;
+    let confirmation: WorldPaymentConfirmation;
+
+    try {
+      confirmationResponse = await fetch("/api/world/confirm-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
+    } catch (error) {
+      lastConfirmation = {
+        error: error instanceof Error ? error.message : "World payment confirmation request failed.",
+        ok: false,
+      };
+      continue;
+    }
+
     lastConfirmation = confirmation;
 
     if (!confirmationResponse.ok) {
+      if (confirmationResponse.status >= 500) {
+        continue;
+      }
+
       return {
         confirmation,
         error: confirmation.error ?? "World payment could not be confirmed.",
@@ -360,7 +376,9 @@ async function confirmWorldPayment(input: {
 
   return {
     confirmation: lastConfirmation,
-    error: "World payment is still pending. Please wait a moment and try the action again if it does not unlock.",
+    error:
+      lastConfirmation?.error ??
+      "World payment is still pending. Please wait a moment and try the action again if it does not unlock.",
     ok: false,
   };
 }
@@ -500,7 +518,17 @@ export async function payWithWorld({
       chain: "worldchain" as PayResult["chain"],
       timestamp: new Date().toISOString(),
     }),
-  });
+  }).catch((error) => ({
+    error: error instanceof Error ? error.message : "World payment command failed.",
+    executedWith: "error" as const,
+  }));
+
+  if (payment.executedWith === "error") {
+    return {
+      ok: false,
+      error: payment.error,
+    };
+  }
 
   if (payment.executedWith === "fallback") {
     return {
