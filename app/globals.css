@@ -5384,8 +5384,13 @@ button.danger {
 .treasure-mark .avatar {
   width: 68px;
   height: 68px;
+  display: grid;
+  place-items: center;
   border-radius: 22px;
+  color: #fffdf8;
   background: #17312f;
+  font-size: 1.55rem;
+  font-weight: 950;
   box-shadow: 0 14px 28px rgba(7, 18, 17, 0.28);
 }
 
@@ -6565,6 +6570,20 @@ button.danger {
   color: rgba(255, 253, 248, 0.7);
   font-size: 0.76rem;
   font-weight: 850;
+}
+
+.payment-loading-state {
+  min-height: 38px;
+  display: grid;
+  place-items: center;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  border-radius: 14px;
+  color: #fffdf8;
+  background: rgba(255, 253, 248, 0.1);
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-align: center;
 }
 
 .payment-token-grid {

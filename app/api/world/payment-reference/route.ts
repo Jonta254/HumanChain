@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   }
 
   return noStoreJson({
-    reference: `humanchain:${normalizedFeature}:${amount}:${normalizedToken}:${randomUUID()}`,
+    reference: randomUUID(),
     feature: normalizedFeature,
     token: normalizedToken,
   });

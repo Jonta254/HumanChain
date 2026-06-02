@@ -2678,7 +2678,9 @@ type PaymentRequest = {
 type OpenPayment = (payment: PaymentRequest) => void;
 
 function parsePaymentAmount(amount: string) {
-  return Number.parseFloat(amount);
+  const parsed = Number.parseFloat(amount.replace(/,/g, "").trim());
+
+  return Number.isFinite(parsed) ? parsed : Number.NaN;
 }
 
 function formatPaymentAmount(amount: number, token: HumanChainPaymentToken) {
@@ -2687,6 +2689,10 @@ function formatPaymentAmount(amount: number, token: HumanChainPaymentToken) {
 
 function getPaymentKind(feature: string): HistoryRecord["kind"] {
   return feature.startsWith("tip-") || feature.endsWith("-tip") ? "tip" : "payment";
+}
+
+function getPaymentFeature(payment: PaymentRequest) {
+  return normalizePaymentFeature(payment.feature ?? payment.title);
 }
 
 type DailyResponse = {
@@ -2976,6 +2982,7 @@ const storageKeys = {
   marketRatings: "humanchain_market_ratings",
   marketplace: "humanchain_marketplace",
   notifications: "humanchain_notifications",
+  profileImage: "humanchain_profile_image",
   posts: "humanchain_posts",
   chainComments: "humanchain_chain_comments",
   userStories: "humanchain_user_stories",
@@ -4136,6 +4143,7 @@ export default function HumanChainApp() {
     window.localStorage.removeItem(storageKeys.marketHolds);
     window.localStorage.removeItem(storageKeys.appMemory);
     window.localStorage.removeItem(storageKeys.userStories);
+    window.localStorage.removeItem(storageKeys.profileImage);
     setHumanPosts(initialHumanPosts);
     setLinks(initialLinks);
     setMarketplaceListings([]);
@@ -4211,6 +4219,17 @@ export default function HumanChainApp() {
       setToast({
         title: "Verify first",
         detail: "Continue with World App once, then every paid action and tip opens the World payment sheet.",
+      });
+      return;
+    }
+
+    const feature = getPaymentFeature(payment);
+    const amount = parsePaymentAmount(payment.amount);
+
+    if (!isValidHumanChainPaymentAmount(feature, amount)) {
+      setToast({
+        title: "Payment setup issue",
+        detail: `${payment.title} is not wired to a valid HumanChain WLD payment feature yet.`,
       });
       return;
     }
@@ -4358,7 +4377,7 @@ export default function HumanChainApp() {
     }
 
     const amount = customAmount ?? parsePaymentAmount(paymentPrompt.amount);
-    const feature = paymentPrompt.feature ?? normalizePaymentFeature(paymentPrompt.title);
+    const feature = getPaymentFeature(paymentPrompt);
 
     if (!isValidHumanChainPaymentAmount(feature, amount)) {
       setToast({
@@ -10983,9 +11002,13 @@ function MeView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(() =>
+    loadJsonFromStorage<string | null>(storageKeys.profileImage, null),
+  );
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
   const displayUsername = getWorldDisplayUsername(worldContext, verifiedHuman);
+  const profileInitial =
+    displayUsername.replace(/^@/, "").trim().charAt(0).toUpperCase() || "H";
   const todayKey = getLocalDateKey();
   const checkedInToday = lastCheckInDate === todayKey;
   const worldProfileImage = verifiedHuman?.profilePictureUrl ?? worldContext.profilePictureUrl;
@@ -11040,6 +11063,14 @@ function MeView({
     ).values(),
   ).slice(0, 8);
 
+  useEffect(() => {
+    if (profileImage) {
+      saveJsonToStorage(storageKeys.profileImage, profileImage);
+    } else if (typeof window !== "undefined") {
+      window.localStorage.removeItem(storageKeys.profileImage);
+    }
+  }, [profileImage]);
+
   function openConnectionMap() {
     setQuickToolPanel("connections");
     recordHistory({
@@ -11080,7 +11111,7 @@ function MeView({
             ) : worldProfileImage ? (
               <img alt={`${displayUsername} World profile`} src={worldProfileImage} />
             ) : (
-              <img alt="HumanChain H profile mark" src="/images/humanchain-logo.png" />
+              <span>{profileInitial}</span>
             )}
           </div>
           <BadgeCheck size={22} />
@@ -11534,12 +11565,12 @@ function PaymentSheet({
     ? Number.parseFloat(customAmount)
     : parsePaymentAmount(payment.amount);
   const amountValid = isValidHumanChainPaymentAmount(
-    payment.feature ?? normalizePaymentFeature(payment.title),
+    getPaymentFeature(payment),
     amount,
   );
 
   return (
-    <section className="payment-backdrop" role="dialog" aria-modal="true">
+    <section className="payment-backdrop" role="dialog" aria-busy={busy} aria-modal="true">
       <div className="payment-sheet">
         <span className="section-kicker">World App payment</span>
         <h2>{payment.title}</h2>
@@ -11579,6 +11610,11 @@ function PaymentSheet({
             World App confirms the transaction.
           </small>
         </div>
+        {busy ? (
+          <div className="payment-loading-state" role="status">
+            Opening World Pay and waiting for server verification...
+          </div>
+        ) : null}
         {payment.points ? (
           <small>Confirming this also records +{payment.points} HP value.</small>
         ) : null}

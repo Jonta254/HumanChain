@@ -407,6 +407,13 @@ export async function payWithWorld({
     };
   }
 
+  if (referencePayload.reference.length > 36) {
+    return {
+      ok: false,
+      error: "World payment reference is too long. Please try again.",
+    };
+  }
+
   if (!isHumanChainPaymentToken(token)) {
     return {
       ok: false,

@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     !isHumanChainPaymentToken(normalizedToken) ||
     !amount ||
     !isValidHumanChainPaymentAmount(normalizedFeature, amount) ||
-    !reference.startsWith(`humanchain:${normalizedFeature}:${amount}:${normalizedToken}:`)
+    reference.length > 36
   ) {
     return noStoreJson(
       { error: "Missing payment confirmation data." },
