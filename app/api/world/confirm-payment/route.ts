@@ -99,7 +99,11 @@ export async function POST(req: NextRequest) {
     .filter((value): value is string => typeof value === "string")
     .map((value) => value.toLowerCase());
 
-  if (isMined && !transactionRecipients.includes(treasury)) {
+  if (
+    isMined &&
+    transactionRecipients.length > 0 &&
+    !transactionRecipients.includes(treasury)
+  ) {
     return noStoreJson(
       {
         ok: false,

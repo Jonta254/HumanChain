@@ -174,6 +174,39 @@ html[data-world-mini-app="true"] .phone-frame {
   color: var(--green);
 }
 
+.settings-screen {
+  background:
+    radial-gradient(circle at 90% 6%, rgba(36, 107, 85, 0.12), transparent 11rem),
+    linear-gradient(180deg, #fffdf8, #f6efe4);
+}
+
+.settings-screen .app-settings-bar {
+  margin-top: 12px;
+}
+
+.settings-screen .settings-trigger {
+  display: none;
+}
+
+.settings-screen .settings-popover {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.settings-return-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-return-panel button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 14px;
+  color: #fffdf8;
+  background: var(--green);
+  font-weight: 900;
+}
+
 .settings-trigger {
   min-height: 42px;
   width: 100%;

@@ -2458,9 +2458,9 @@ type MarketLocationState = {
   status: "idle" | "requesting" | "ready" | "denied";
 };
 
-type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me";
+type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me" | "settings";
 
-const appTabs = new Set<Tab>(["home", "ask", "market", "chains", "stories", "me"]);
+const appTabs = new Set<Tab>(["home", "ask", "market", "chains", "stories", "me", "settings"]);
 
 function isVerifiedWorldHuman(human: HumanIdentity | null) {
   return Boolean(human?.wallet && ("mode" in human ? human.mode === "world" : true));
@@ -2747,36 +2747,36 @@ type NotificationItem = {
 const firstRunNotifications: NotificationItem[] = [
   {
     id: 101,
-    title: "Welcome to HumanChain",
+    title: "Mini app notifications",
     detail:
-      "You are entering a verified human network for honest questions, live wisdom, safer local trade, lasting stories, and a personal HumanChain vault.",
+      "HumanChain can send functional World App alerts after you grant notification permission inside World App.",
     time: "Now",
     sector: "welcome",
     read: false,
   },
   {
     id: 102,
-    title: "Start here",
+    title: "Inbox alerts",
     detail:
-      "Use Home for your live dashboard, Ask for replies from real humans, Chains for image posts, links, quote rooms, Pulse, Circle, and Pin.",
+      "Ask replies, comments, World Chat openings, and useful human responses belong in the inbox sector.",
     time: "Now",
-    sector: "account",
+    sector: "inbox",
     read: false,
   },
   {
     id: 103,
-    title: "Trade and build safely",
+    title: "Marketplace alerts",
     detail:
-      "Market keeps listings, holds, seller contact, distance context, bids, and receipts together. Stories stores human records, files, covers, and reader activity.",
+      "Bids, holds, accepted offers, boosts, listing expiry, and receipt updates use marketplace notifications.",
     time: "Now",
     sector: "marketplace",
     read: false,
   },
   {
     id: 104,
-    title: "Your profile is the vault",
+    title: "Account and payments",
     detail:
-      "Me shows your World username, points, streak, posts, saved items, payments, notifications, and activity history until you delete your own content.",
+      "Payment confirmations, safety notices, streak reminders, and account changes use account or payment sectors.",
     time: "Now",
     sector: "account",
     read: false,
@@ -2909,6 +2909,7 @@ function isWorldUsernamePlaceholder(username?: string) {
   return (
     !username ||
     username === "World username syncing" ||
+    username === "Resolving World username" ||
     username === "World account pending" ||
     isGeneratedHumanUsername(username)
   );
@@ -2923,7 +2924,7 @@ function getWorldDisplayUsername(
     (isWorldUsernamePlaceholder(verifiedHuman?.username)
       ? undefined
       : verifiedHuman?.username) ??
-    (verifiedHuman?.wallet ? "World username syncing" : "World account pending")
+    (verifiedHuman?.wallet ? "Resolving World username" : "World account pending")
   );
 }
 
@@ -2934,19 +2935,19 @@ async function resolveWorldProfileAfterAuth(address: string) {
   if (!snapshots[0].username && !worldUser?.username) {
     await new Promise((resolve) => window.setTimeout(resolve, 450));
     snapshots.push(getWorldMiniAppContext());
-    worldUser = worldUser ?? (await getWorldUserByAddress(address));
+    worldUser = (await getWorldUserByAddress(address)) ?? worldUser;
   }
 
   if (!snapshots.some((snapshot) => snapshot.username) && !worldUser?.username) {
     await new Promise((resolve) => window.setTimeout(resolve, 1200));
     snapshots.push(getWorldMiniAppContext());
-    worldUser = worldUser ?? (await getWorldUserByAddress(address));
+    worldUser = (await getWorldUserByAddress(address)) ?? worldUser;
   }
 
   const latestContext = snapshots.at(-1) ?? snapshots[0];
   const username = normalizeWorldUsername(
-    latestContext.username ??
-      worldUser?.username ??
+    worldUser?.username ??
+      latestContext.username ??
       snapshots.find((snapshot) => snapshot.username)?.username,
   );
   const profilePictureUrl =
@@ -3014,6 +3015,13 @@ function scrollMiniAppToTop() {
       left: 0,
       top: 0,
       behavior: "auto",
+    });
+    document.querySelectorAll<HTMLElement>(".phone-frame, .screen").forEach((element) => {
+      element.scrollTo({
+        left: 0,
+        top: 0,
+        behavior: "auto",
+      });
     });
   });
 }
@@ -3478,8 +3486,8 @@ export default function HumanChainApp() {
         const worldUser = await getWorldUserByAddress(wallet);
         const afterLookupContext = getWorldMiniAppContext();
         const username = normalizeWorldUsername(
-          afterLookupContext.username ??
-            worldUser?.username ??
+          worldUser?.username ??
+            afterLookupContext.username ??
             beforeLookupContext.username,
         );
         const profilePictureUrl =
@@ -3508,7 +3516,7 @@ export default function HumanChainApp() {
           const nextUsername =
             username ??
             (isWorldUsernamePlaceholder(current.username)
-              ? "World username syncing"
+              ? "Resolving World username"
               : current.username);
           const nextProfilePictureUrl =
             profilePictureUrl ?? current.profilePictureUrl;
@@ -3545,7 +3553,7 @@ export default function HumanChainApp() {
             return {
               ...current,
               lastSeenAt: new Date().toISOString(),
-              username: "World username syncing",
+              username: "Resolving World username",
             };
           });
         }
@@ -4077,19 +4085,6 @@ export default function HumanChainApp() {
       ...current,
     ]);
 
-    const sectorByKind: Record<HistoryRecord["kind"], NotificationItem["sector"]> = {
-      comment: "inbox",
-      delete: "account",
-      market: "marketplace",
-      payment: "payments",
-      post: "account",
-      profile: "account",
-      reaction: "inbox",
-      story: "stories",
-      tip: "payments",
-    };
-
-    addNotification(record.title, record.detail, sectorByKind[record.kind]);
   }
 
   function resetHistory() {
@@ -4322,7 +4317,7 @@ export default function HumanChainApp() {
         launchLocation:
           nextWorldContext.launchLocation ?? freshWorldContext.launchLocation,
         profilePictureUrl: worldProfilePictureUrl,
-        username: worldUsername ?? "World username syncing",
+        username: worldUsername ?? "Resolving World username",
         wallet: address,
         mode: "world",
       });
@@ -4330,7 +4325,7 @@ export default function HumanChainApp() {
       setNotificationPromptDismissed(false);
       setToast({
         title: "Verified human entered",
-        detail: `${worldUsername ?? "World username syncing"} is ready. You can now ask, post, trade, tip, and use paid actions.`,
+        detail: `${worldUsername ?? "World username will appear after World profile sync"} is ready. You can now ask, post, trade, tip, and use paid actions.`,
       });
     } catch (error) {
       setToast({
@@ -4549,7 +4544,6 @@ export default function HumanChainApp() {
             links={links}
             marketplaceListings={marketplaceListings}
             marketLocation={marketLocation}
-            notificationReady={notificationReady}
             openPayment={openPayment}
             points={points}
             lastCheckInAt={lastCheckInAt}
@@ -4581,24 +4575,35 @@ export default function HumanChainApp() {
             worldContext={worldContext}
           />
         );
+      case "settings":
+        return (
+          <SettingsView
+            activeLanguage={appLanguage}
+            clearMarketplaceData={clearMarketplaceData}
+            clearPostData={clearPostData}
+            deleteLocalAccount={deleteLocalAccount}
+            notificationReady={notificationReady}
+            onChangeLanguage={setAppLanguage}
+            onEnableNotifications={() => enableHumanChainNotifications("settings")}
+            resetHistory={resetHistory}
+            setTab={setTab}
+            worldContext={worldContext}
+          />
+        );
       default:
         return (
           <HomeView
             act={act}
             appLanguage={appLanguage}
-            clearMarketplaceData={clearMarketplaceData}
-            clearPostData={clearPostData}
             dailyAnswered={dailyAnswered}
             dailyAnsweredAt={dailyAnsweredAt}
             dailyResponses={dailyResponses}
-            deleteLocalAccount={deleteLocalAccount}
             earnPoints={earnPoints}
             humanPosts={humanPosts}
             links={links}
             marketplaceListings={marketplaceListings}
             notificationReady={notificationReady}
             notificationUnreadCount={unreadNotificationCount}
-            onChangeLanguage={setAppLanguage}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             onOpenNotifications={() => setNotificationCenterOpen(true)}
             recordHistory={recordHistory}
@@ -4609,7 +4614,6 @@ export default function HumanChainApp() {
             setDailyAnswered={setDailyAnswered}
             setDailyResponses={setDailyResponses}
             setTab={setTab}
-            resetHistory={resetHistory}
             savedItems={savedItems}
             streak={streak}
             verifiedHuman={verifiedHuman}
@@ -4855,11 +4859,11 @@ function NotificationCenter({
         <div className="notification-center-head">
           <div>
             <span className="section-kicker">Notification center</span>
-            <h2>HumanChain alerts</h2>
+            <h2>Mini app notifications</h2>
             <p>
               {notificationReady
-                ? "World App notifications are connected for important HumanChain activity."
-                : "Enable World App notifications to receive important HumanChain activity outside this screen."}
+                ? "World App notification permission is connected for HumanChain mini-app alerts."
+                : "Enable World App notifications for inbox, marketplace, payment, story, and account alerts."}
             </p>
           </div>
           <button onClick={onClose} type="button">
@@ -4872,14 +4876,23 @@ function NotificationCenter({
           </button>
         </div>
         <div className="notification-feed">
-          {notifications.map((notification) => (
-            <article className={notification.read ? "read" : ""} key={notification.id}>
-              <span>{notification.sector}</span>
-              <strong>{notification.title}</strong>
-              <p>{notification.detail}</p>
-              <small>{notification.time}</small>
+          {notifications.length ? (
+            notifications.map((notification) => (
+              <article className={notification.read ? "read" : ""} key={notification.id}>
+                <span>{notification.sector}</span>
+                <strong>{notification.title}</strong>
+                <p>{notification.detail}</p>
+                <small>{notification.time}</small>
+              </article>
+            ))
+          ) : (
+            <article className="read">
+              <span>mini app</span>
+              <strong>No notification messages yet</strong>
+              <p>HumanChain will only list functional mini-app alerts here after permission is granted.</p>
+              <small>Now</small>
             </article>
-          ))}
+          )}
         </div>
       </div>
     </section>
@@ -4889,24 +4902,19 @@ function NotificationCenter({
 function HomeView({
   act,
   appLanguage,
-  clearMarketplaceData,
-  clearPostData,
   dailyAnswered,
   dailyAnsweredAt,
   dailyResponses,
-  deleteLocalAccount,
   earnPoints,
   humanPosts,
   links,
   marketplaceListings,
   notificationReady,
   notificationUnreadCount,
-  onChangeLanguage,
   onEnableNotifications,
   onOpenNotifications,
   points,
   recordHistory,
-  resetHistory,
   savedItems,
   setDailyAnsweredAt,
   setDailyAnsweredDate,
@@ -4920,24 +4928,19 @@ function HomeView({
 }: {
   act: (title: string, detail: string) => void;
   appLanguage: AppLanguage;
-  clearMarketplaceData: () => void;
-  clearPostData: () => void;
   dailyAnswered: boolean;
   dailyAnsweredAt: string | null;
   dailyResponses: DailyResponse[];
-  deleteLocalAccount: () => void;
   earnPoints: EarnPoints;
   humanPosts: HumanPost[];
   links: typeof initialLinks;
   marketplaceListings: MarketplaceListing[];
   notificationReady: boolean;
   notificationUnreadCount: number;
-  onChangeLanguage: (language: AppLanguage) => void;
   onEnableNotifications: () => void | Promise<void>;
   onOpenNotifications: () => void;
   points: number;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
-  resetHistory: () => void;
   savedItems: number;
   setDailyAnsweredAt: React.Dispatch<React.SetStateAction<string | null>>;
   setDailyAnsweredDate: React.Dispatch<React.SetStateAction<string | null>>;
@@ -4950,7 +4953,6 @@ function HomeView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
-  const [homeSettingsOpen, setHomeSettingsOpen] = useState(false);
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const userPostCount = humanPosts.filter((post) => post.owner).length;
@@ -5199,29 +5201,14 @@ function HomeView({
           <Bell size={18} />
         </button>
         <button
-          aria-expanded={homeSettingsOpen}
           aria-label="Open settings and guide"
           className="home-guide-button"
-          onClick={() => setHomeSettingsOpen((current) => !current)}
+          onClick={() => setTab("settings")}
           type="button"
         >
           <Settings size={18} />
         </button>
       </header>
-
-      {homeSettingsOpen ? (
-        <AppSettingsBar
-          activeLanguage={appLanguage}
-          clearMarketplaceData={clearMarketplaceData}
-          clearPostData={clearPostData}
-          deleteLocalAccount={deleteLocalAccount}
-          notificationReady={notificationReady}
-          onEnableNotifications={onEnableNotifications}
-          onChange={onChangeLanguage}
-          resetHistory={resetHistory}
-          worldContext={worldContext}
-        />
-      ) : null}
 
       <section className="living-passport-strip" aria-label="Living passport">
         <div>
@@ -5792,17 +5779,6 @@ function HomeView({
         </div>
       </section>
 
-      <AppSettingsBar
-        activeLanguage={appLanguage}
-        clearMarketplaceData={clearMarketplaceData}
-        clearPostData={clearPostData}
-        deleteLocalAccount={deleteLocalAccount}
-        notificationReady={notificationReady}
-        onEnableNotifications={onEnableNotifications}
-        onChange={onChangeLanguage}
-        resetHistory={resetHistory}
-        worldContext={worldContext}
-      />
     </div>
   );
 }
@@ -10973,7 +10949,6 @@ function MeView({
   links,
   marketLocation,
   marketplaceListings,
-  notificationReady,
   onCheckIn,
   openPayment,
   points,
@@ -10995,7 +10970,6 @@ function MeView({
   links: ChainLink[];
   marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
-  notificationReady: boolean;
   onCheckIn: () => void;
   openPayment: OpenPayment;
   points: number;
@@ -11015,9 +10989,11 @@ function MeView({
   const worldProfileImage = verifiedHuman?.profilePictureUrl ?? worldContext.profilePictureUrl;
   const identityLabel =
     verifiedHuman?.mode === "world"
-      ? "World username verified"
+      ? isWorldUsernamePlaceholder(displayUsername)
+        ? "World profile syncing"
+        : "World username verified"
       : verifiedHuman?.wallet
-        ? "World username syncing"
+        ? "World profile syncing"
         : "World account pending";
   const syncLabel =
     accountSyncStatus === "ready"
@@ -11093,7 +11069,7 @@ function MeView({
 
   return (
     <div className="screen">
-      <TopBar title="Human Passport" subtitle="Who am I in the chain?" />
+      <TopBar title="Human Passport" subtitle="World profile, HP ledger, and trust status" />
       <section className="treasure-profile">
         <div className="treasure-mark">
           <div className="avatar">
@@ -11110,7 +11086,7 @@ function MeView({
         <div>
           <span className="section-kicker">Verified Human Passport</span>
           <h2>{displayUsername}</h2>
-          <p>{identityLabel}. {syncLabel}. Score shows trust. HP shows contribution. {notificationReady ? "Notifications active." : "Notifications off."}</p>
+          <p>{identityLabel}. {syncLabel}. Trust score, HP records, market activity, and mini-app notification status stay together here.</p>
         </div>
         <button
           disabled={checkedInToday}
@@ -11485,6 +11461,57 @@ function MeView({
   );
 }
 
+function SettingsView({
+  activeLanguage,
+  clearMarketplaceData,
+  clearPostData,
+  deleteLocalAccount,
+  notificationReady,
+  onChangeLanguage,
+  onEnableNotifications,
+  resetHistory,
+  setTab,
+  worldContext,
+}: {
+  activeLanguage: AppLanguage;
+  clearMarketplaceData: () => void;
+  clearPostData: () => void;
+  deleteLocalAccount: () => void;
+  notificationReady: boolean;
+  onChangeLanguage: (language: AppLanguage) => void;
+  onEnableNotifications: () => void | Promise<void>;
+  resetHistory: () => void;
+  setTab: React.Dispatch<React.SetStateAction<Tab>>;
+  worldContext: ReturnType<typeof getWorldMiniAppContext>;
+}) {
+  return (
+    <div className="screen settings-screen">
+      <TopBar title="Settings" subtitle="Mini app controls, guides, and World context" />
+      <AppSettingsBar
+        activeLanguage={activeLanguage}
+        clearMarketplaceData={clearMarketplaceData}
+        clearPostData={clearPostData}
+        defaultOpen
+        deleteLocalAccount={deleteLocalAccount}
+        notificationReady={notificationReady}
+        onEnableNotifications={onEnableNotifications}
+        onChange={onChangeLanguage}
+        resetHistory={resetHistory}
+        worldContext={worldContext}
+      />
+      <section className="panel settings-return-panel">
+        <div className="section-heading">
+          <span>Return</span>
+          <Home size={18} />
+        </div>
+        <button onClick={() => setTab("home")} type="button">
+          Back to Home
+        </button>
+      </section>
+    </div>
+  );
+}
+
 function PaymentSheet({
   busy,
   onCancel,
@@ -11570,6 +11597,7 @@ function AppSettingsBar({
   activeLanguage,
   clearMarketplaceData,
   clearPostData,
+  defaultOpen = false,
   deleteLocalAccount,
   notificationReady,
   onEnableNotifications,
@@ -11580,6 +11608,7 @@ function AppSettingsBar({
   activeLanguage: AppLanguage;
   clearMarketplaceData: () => void;
   clearPostData: () => void;
+  defaultOpen?: boolean;
   deleteLocalAccount: () => void;
   notificationReady: boolean;
   onEnableNotifications: () => void | Promise<void>;
@@ -11587,7 +11616,7 @@ function AppSettingsBar({
   resetHistory: () => void;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const settingsCopy = activeLanguage.settings;
   const essentials =
     settingsEssentialsByLanguage[activeLanguage.code] ??
