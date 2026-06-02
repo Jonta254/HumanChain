@@ -13,7 +13,7 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
-import { getWorldAppId } from "@/lib/worldConfig";
+import { getHumanChainTreasury, getWorldAppId } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "confirm-payment", 20)) {
@@ -88,6 +88,20 @@ export async function POST(req: NextRequest) {
   }
 
   const isMined = transaction.transaction_status === "mined";
+  const treasury = getHumanChainTreasury().toLowerCase();
+  const transactionRecipient =
+    typeof transaction.to === "string" ? transaction.to.toLowerCase() : "";
+
+  if (isMined && transactionRecipient !== treasury) {
+    return noStoreJson(
+      {
+        ok: false,
+        error: "World payment recipient did not match HumanChain treasury.",
+        transaction,
+      },
+      { status: 400 },
+    );
+  }
 
   return noStoreJson({
     ok: isMined,
@@ -95,6 +109,7 @@ export async function POST(req: NextRequest) {
     feature: normalizedFeature,
     amount,
     token: normalizedToken,
+    treasury,
     transaction,
   });
 }

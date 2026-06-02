@@ -56,6 +56,7 @@ import {
   normalizePaymentFeature,
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
+import { getHumanChainTreasury } from "@/lib/worldConfig";
 import {
   humanChainErrorStates,
   validateAnswerInput,
@@ -2651,6 +2652,7 @@ type PaymentRequest = {
   title: string;
   amount: string;
   detail: string;
+  context?: Record<string, string | number | undefined>;
   maxAmount?: number;
   minAmount?: number;
   success: string;
@@ -4323,6 +4325,7 @@ export default function HumanChainApp() {
     }
 
     setPaymentBusy(true);
+    let treasuryRecipient: string | undefined;
 
     try {
       const result = await payWithWorld({
@@ -4367,6 +4370,11 @@ export default function HumanChainApp() {
         setPaymentBusy(false);
         return;
       }
+
+      treasuryRecipient =
+        "recipient" in result && typeof result.recipient === "string"
+          ? result.recipient
+          : undefined;
     } catch (error) {
       setToast({
         title: "World payment failed",
@@ -4389,14 +4397,17 @@ export default function HumanChainApp() {
 
       recordHistory({
         title: getPaymentKind(feature) === "tip" ? "Tip payment confirmed" : "Payment confirmed",
-        detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`,
+        detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${treasuryRecipient ? `Recipient ${treasuryRecipient}. ` : ""}${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`,
         kind: getPaymentKind(feature),
       });
       void storeSafeData("payment", `${feature}-${Date.now()}`, {
         amount,
         feature,
         human: verifiedHuman?.username,
+        payerWallet: verifiedHuman?.wallet,
         paymentTitle: paymentPrompt.title,
+        ...paymentPrompt.context,
+        treasuryRecipient,
         token: paymentToken,
         wallet: verifiedHuman?.wallet,
       });
@@ -5758,6 +5769,8 @@ function AskView({
   const [voiceMode, setVoiceMode] = useState(false);
   const [askSearch, setAskSearch] = useState("");
   const [askFeedFilter, setAskFeedFilter] = useState("All");
+  const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
+  const [showAskAdvanced, setShowAskAdvanced] = useState(false);
 
   const visibleThreads = threads.filter((thread) => {
     const targetCountry = getAskThreadTargetCountry(thread);
@@ -5928,7 +5941,7 @@ function AskView({
           <span className="section-kicker">Verified answers</span>
           <h2>Ask clearly. Let real humans answer.</h2>
           <p>
-            Public questions are free. Private, country-routed, and deep verdict questions unlock when you choose them.
+            Ask verified humans. Open paid routes only when you need them.
           </p>
         </div>
         <button
@@ -6063,50 +6076,60 @@ function AskView({
           <span>{questionLength}/280 characters</span>
           <span>Asker trust score: {askerTrustScore}</span>
         </div>
-        <div className="ask-modes">
-          {[
-            ["Text", "Public question", "Free"],
-            ["Voice", "Hear my tone", "2 WLD"],
-            ["Private", "Hide identity", "4 WLD"],
-            ["Deep Verdict", "Human report", "6 WLD"],
-          ].map(([mode, label, amount]) => (
-            <button
-              aria-pressed={selectedMode === mode}
-              className={selectedMode === mode ? "active" : ""}
-              key={mode}
-              onClick={() => {
-                setSelectedMode(mode);
-                if (mode === "Text") {
-                  act("Text mode", "Public text question selected.");
-                  return;
-                }
+        <button
+          aria-expanded={showAskAdvanced}
+          className="ask-advanced-toggle"
+          onClick={() => setShowAskAdvanced((current) => !current)}
+          type="button"
+        >
+          {showAskAdvanced ? "Hide paid options" : "Open paid options"}
+        </button>
+        {showAskAdvanced ? (
+          <div className="ask-modes">
+            {[
+              ["Text", "Public question", "Free"],
+              ["Voice", "Hear my tone", "2 WLD"],
+              ["Private", "Hide identity", "4 WLD"],
+              ["Deep Verdict", "Human report", "6 WLD"],
+            ].map(([mode, label, amount]) => (
+              <button
+                aria-pressed={selectedMode === mode}
+                className={selectedMode === mode ? "active" : ""}
+                key={mode}
+                onClick={() => {
+                  setSelectedMode(mode);
+                  if (mode === "Text") {
+                    act("Text mode", "Public text question selected.");
+                    return;
+                  }
 
-                openPayment({
-                  title: `${mode} question`,
-                  amount,
-                  detail:
-                    mode === "Voice"
-                      ? "Ask with voice so verified humans hear your tone before answering."
-                      : mode === "Private"
-                        ? "Hide your public identity while verified humans answer."
-                        : "Turn answers into most-said, best answer, country differences, hard truth, and final verdict.",
-                  success: `${mode} flow is prepared for World App payment.`,
-                  feature:
-                    mode === "Voice"
-                      ? "voice-question"
-                      : mode === "Private"
-                        ? "private-question"
-                        : "deep-verdict-question",
-                  points: mode === "Deep Verdict" ? 12 : 6,
-                });
-              }}
-              type="button"
-            >
-              <strong>{mode}</strong>
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
+                  openPayment({
+                    title: `${mode} question`,
+                    amount,
+                    detail:
+                      mode === "Voice"
+                        ? "Ask with voice so verified humans hear your tone before answering."
+                        : mode === "Private"
+                          ? "Hide your public identity while verified humans answer."
+                          : "Turn answers into most-said, best answer, country differences, hard truth, and final verdict.",
+                    success: `${mode} flow is prepared for World App payment.`,
+                    feature:
+                      mode === "Voice"
+                        ? "voice-question"
+                        : mode === "Private"
+                          ? "private-question"
+                          : "deep-verdict-question",
+                    points: mode === "Deep Verdict" ? 12 : 6,
+                  });
+                }}
+                type="button"
+              >
+                <strong>{mode}</strong>
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
         <div className="chip-row">
           {["Life", "Money", "Business", "Family", "Love", "Culture"].map((chip) => (
             <button
@@ -6195,7 +6218,21 @@ function AskView({
               </div>
             ) : null}
             <Meter label={`${visibleAnswers.length} tracked answer${visibleAnswers.length === 1 ? "" : "s"}`} value={Math.min(92, 22 + visibleAnswers.length * 18)} />
-            <div className="answer-stack">
+            <button
+              className="answer-reveal-button"
+              onClick={() =>
+                setExpandedAnswerQuestion((current) =>
+                  current === thread.question ? null : thread.question,
+                )
+              }
+              type="button"
+            >
+              {expandedAnswerQuestion === thread.question
+                ? "Hide answers"
+                : `Read answers (${visibleAnswers.length})`}
+            </button>
+            {expandedAnswerQuestion === thread.question ? (
+              <div className="answer-stack">
               {visibleAnswers.length ? visibleAnswers.map((answer) => (
                 <div className="answer-card" key={`${thread.question}-${answer.user}-${answer.text}`}>
                   <strong>{answer.user} - {answer.country}</strong>
@@ -6221,6 +6258,7 @@ function AskView({
                 </div>
               )}
             </div>
+            ) : null}
             <textarea
               aria-label={`Answer ${thread.question}`}
               className="answer-input"
@@ -6737,6 +6775,11 @@ function ChainsView({
       title: post.mediaType === "video" ? "Tip video" : "Tip human",
       amount: "1 WLD",
       allowCustomAmount: true,
+      context: {
+        creatorWallet: post.authorWallet,
+        payerWallet: humanIdentity?.wallet,
+        tippedAuthor: post.author,
+      },
       detail: `Send a thank-you tip for ${post.author}. HumanChain records an 80/20 creator-platform split receipt for settlement.`,
       success: "Tip payment is confirmed and the split receipt is stored.",
       feature: "tip-human",
@@ -6758,6 +6801,7 @@ function ChainsView({
           author: post.author,
           authorWallet: post.authorWallet,
           amount: tipAmount,
+          payerWallet: humanIdentity?.wallet,
           token: "WLD",
           split: post.tipSplit ?? { creatorPercent: 80, platformPercent: 20 },
         });
@@ -7191,11 +7235,10 @@ function ChainsView({
                   ) : null}
                 </div>
                 <p className="post-caption">{post.caption}</p>
-                <button
-                  aria-label={`Open comments for ${post.author}'s moment`}
+                <div
+                  aria-label={`${post.author}'s moment media`}
                   className="image-post-media"
-                  onClick={() => setActiveCommentPostId(post.id)}
-                  type="button"
+                  role="group"
                 >
                   {post.mediaType === "video" ? (
                     <video controls src={post.image ?? undefined} />
@@ -7207,7 +7250,7 @@ function ChainsView({
                       src={post.image ?? ""}
                     />
                   )}
-                </button>
+                </div>
                 <div className="post-metrics">
                   <span>{post.reactions} reactions</span>
                   <span>{post.loves} loves</span>
@@ -7464,6 +7507,10 @@ function ChainsView({
                         title: "Tip chain link",
                         amount: "1 WLD",
                         allowCustomAmount: true,
+                        context: {
+                          payerWallet: humanIdentity?.wallet,
+                          tippedAuthor: author,
+                        },
                         detail: `Send a small thank-you to ${author}.`,
                         success: "Tip is ready for World App payment.",
                         feature: "tip-chain-link",
@@ -7804,6 +7851,11 @@ function StoriesView({
                 title: "Tip storyteller",
                 amount: "1 WLD",
                 allowCustomAmount: true,
+                context: {
+                  creatorWallet: activeUserStory.authorWallet,
+                  payerWallet: humanIdentity?.wallet,
+                  tippedAuthor: activeUserStory.author,
+                },
                 detail: `Support ${activeUserStory.author}.`,
                 success: "Story tip is prepared for World App.",
                 feature: "tip-storyteller",
@@ -7874,6 +7926,10 @@ function StoriesView({
                 title: "Tip storyteller",
                 amount: "1 WLD",
                 allowCustomAmount: true,
+                context: {
+                  payerWallet: humanIdentity?.wallet,
+                  tippedAuthor: activeAuthor,
+                },
                 detail: "Support the human behind this story.",
                 success: "Story tip is prepared for World App.",
                 feature: "tip-storyteller",
@@ -8324,6 +8380,10 @@ function StoriesView({
                 title: "Tip storyteller",
                 amount: "1 WLD",
                 allowCustomAmount: true,
+                context: {
+                  payerWallet: humanIdentity?.wallet,
+                  tippedAuthor: "storyteller",
+                },
                 detail: "Support the writer behind this story.",
                 success: "Storyteller tip is prepared for World App.",
                 feature: "tip-storyteller",
@@ -9577,6 +9637,11 @@ function MarketplaceView({
       title: "Tip market item",
       amount: "1 WLD",
       allowCustomAmount: true,
+      context: {
+        payerWallet: humanIdentity?.wallet,
+        sellerWallet: isStoredListing ? item.sellerWallet : undefined,
+        tippedAuthor: seller,
+      },
       detail: `Tip ${seller} for making ${label} worth noticing. HumanChain stores the 80/20 split receipt.`,
       success: "Market item tip confirmed and receipt stored.",
       feature: "tip-market-item",
@@ -9607,7 +9672,9 @@ function MarketplaceView({
         void storeSafeData("marketplace-listing", `tip-${key}-${Date.now()}`, {
           item: label,
           seller,
+          sellerWallet: isStoredListing ? item.sellerWallet : undefined,
           amount: tipAmount,
+          payerWallet: humanIdentity?.wallet,
           token: "WLD",
           split: { creatorPercent: 80, platformPercent: 20 },
         });
@@ -11356,6 +11423,7 @@ function PaymentSheet({
     payment.feature ?? normalizePaymentFeature(payment.title),
     amount,
   );
+  const treasuryAddress = getHumanChainTreasury();
 
   return (
     <section className="payment-backdrop" role="dialog" aria-modal="true">
@@ -11373,6 +11441,10 @@ function PaymentSheet({
           <span>
             HumanChain creates a backend reference first. This action unlocks only after World App payment and server verification.
           </span>
+        </div>
+        <div className="payment-recipient-note">
+          <span>Recipient</span>
+          <strong>{treasuryAddress}</strong>
         </div>
         {payment.allowCustomAmount ? (
           <label className="payment-amount-field">

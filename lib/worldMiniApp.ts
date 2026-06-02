@@ -427,6 +427,7 @@ export async function payWithWorld({
     ok: true,
     payment,
     confirmation,
+    recipient: treasuryAddress,
   };
 }
 
