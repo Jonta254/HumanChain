@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (isMined && transactionAppId !== appId) {
+  if (isMined && transactionAppId && transactionAppId !== appId) {
     return noStoreJson(
       {
         ok: false,
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (isMined && transactionToken !== normalizedToken) {
+  if (isMined && transactionToken && transactionToken !== normalizedToken) {
     return noStoreJson(
       {
         ok: false,
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (isMined && !transactionRecipients.includes(treasury)) {
+  if (isMined && transactionRecipients.length > 0 && !transactionRecipients.includes(treasury)) {
     return noStoreJson(
       {
         ok: false,
