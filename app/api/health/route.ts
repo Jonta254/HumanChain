@@ -1,10 +1,11 @@
 import { list } from "@vercel/blob";
 import { noStoreJson } from "@/lib/serverApi";
-import { getHumanChainTreasury, getWorldAppId } from "@/lib/worldConfig";
+import { getHumanChainTreasury, getWorldAppId, getWorldDevPortalApiKey } from "@/lib/worldConfig";
 
 export async function GET() {
   const worldAppId = getWorldAppId();
   const treasury = getHumanChainTreasury();
+  const devPortalApiKey = getWorldDevPortalApiKey();
   let blobStorageReady = false;
   let blobStorageStatus = process.env.BLOB_READ_WRITE_TOKEN
     ? "Cloud storage check running."
@@ -26,8 +27,8 @@ export async function GET() {
     accountSyncReady: blobStorageReady,
     blobStorageReady,
     blobStorageStatus,
-    paymentConfirmationReady: Boolean(worldAppId && process.env.DEV_PORTAL_API_KEY),
-    paymentsReady: Boolean(treasury && worldAppId && process.env.DEV_PORTAL_API_KEY),
+    paymentConfirmationReady: Boolean(worldAppId && devPortalApiKey),
+    paymentsReady: Boolean(treasury && worldAppId && devPortalApiKey),
     treasury,
     worldAppId,
     worldAppReady: Boolean(worldAppId),

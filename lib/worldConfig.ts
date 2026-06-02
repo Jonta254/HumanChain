@@ -14,3 +14,12 @@ export function getWorldRpId() {
 export function getHumanChainTreasury() {
   return process.env.NEXT_PUBLIC_HUMANCHAIN_TREASURY || defaultHumanChainTreasury;
 }
+
+export function getWorldDevPortalApiKey() {
+  return (
+    process.env.DEV_PORTAL_API_KEY ||
+    process.env.WORLD_DEV_PORTAL_API_KEY ||
+    process.env.MINIKIT_DEV_PORTAL_API_KEY ||
+    ""
+  );
+}

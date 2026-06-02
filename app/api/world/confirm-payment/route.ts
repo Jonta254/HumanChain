@@ -14,7 +14,7 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
-import { getHumanChainTreasury, getWorldAppId } from "@/lib/worldConfig";
+import { getHumanChainTreasury, getWorldAppId, getWorldDevPortalApiKey } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "confirm-payment", 20)) {
@@ -56,8 +56,9 @@ export async function POST(req: NextRequest) {
   }
 
   const appId = getWorldAppId();
+  const devPortalApiKey = getWorldDevPortalApiKey();
 
-  if (!appId || !process.env.DEV_PORTAL_API_KEY) {
+  if (!appId || !devPortalApiKey) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transactionId}?app_id=${appId}&type=payment`,
     {
       headers: {
-        Authorization: `Bearer ${process.env.DEV_PORTAL_API_KEY}`,
+        Authorization: `Bearer ${devPortalApiKey}`,
       },
     },
   );
