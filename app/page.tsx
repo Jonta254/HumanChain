@@ -2320,8 +2320,8 @@ const marketplaceItems = [
 ];
 
 const marketplacePlans = [
-  ["Quick listing", "2 WLD", "Publish one item with 3 included photos."],
-  ["Extra photo pack", "2 WLD", "Add up to 3 more photos to one listing."],
+  ["Quick listing", "2 WLD", "Publish one item with 2 included photos."],
+  ["Extra photo pack", "1.5 WLD", "Add up to 3 more photos to one listing."],
   ["Local boost", "2 WLD", "Push a listing higher in nearby discovery."],
   ["Business ad", "4 WLD", "Market a shop, service, event, or link."],
 ];
@@ -2336,7 +2336,7 @@ const marketplaceSignals = [
 ];
 
 const marketplaceChecklist = [
-  "3 real item photos",
+  "2 real item photos",
   "Price and condition",
   "Pickup area or delivery note",
   "Defects or warranty note",
@@ -2741,6 +2741,11 @@ type HpLedgerRecord = {
   wallet?: string;
 };
 
+type MomentReactionSelection = {
+  field: "reactions" | "loves";
+  reaction: string;
+};
+
 type NotificationItem = {
   id: number;
   title: string;
@@ -2984,6 +2989,7 @@ const storageKeys = {
   notifications: "humanchain_notifications",
   profileImage: "humanchain_profile_image",
   posts: "humanchain_posts",
+  momentReactions: "humanchain_moment_reactions",
   chainComments: "humanchain_chain_comments",
   userStories: "humanchain_user_stories",
 } as const;
@@ -6527,6 +6533,9 @@ function ChainsView({
   const [chainComments, setChainComments] = useState<Record<string, string[]>>(() =>
     loadJsonFromStorage<Record<string, string[]>>(storageKeys.chainComments, {}),
   );
+  const [momentReactions, setMomentReactions] = useState<Record<string, MomentReactionSelection>>(() =>
+    loadJsonFromStorage<Record<string, MomentReactionSelection>>(storageKeys.momentReactions, {}),
+  );
   const [chainView, setChainView] = useState<"images" | "quotes" | "groups">(
     "images",
   );
@@ -6569,6 +6578,10 @@ function ChainsView({
   useEffect(() => {
     saveJsonToStorage(storageKeys.chainComments, chainComments);
   }, [chainComments]);
+
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.momentReactions, momentReactions);
+  }, [momentReactions]);
 
   function getChainCommentKey(link: ChainLink, index: number) {
     return link.id ? `link:${link.id}` : `seed:${index}:${link.country}:${link.text.slice(0, 48)}`;
@@ -6749,20 +6762,64 @@ function ChainsView({
       return;
     }
 
+    const key = String(postId);
+    const currentSelection = momentReactions[key];
+    const isSameReaction = currentSelection?.reaction === reaction;
+
     setHumanPosts((current) =>
-      current.map((post) =>
-        post.id === postId
-          ? { ...post, [field]: post[field] + 1, reactions: field === "loves" ? post.reactions : post.reactions + 1 }
-          : post,
-      ),
+      current.map((post) => {
+        if (post.id !== postId) {
+          return post;
+        }
+
+        const nextPost = { ...post };
+
+        if (currentSelection) {
+          nextPost[currentSelection.field] = Math.max(0, nextPost[currentSelection.field] - 1);
+          if (currentSelection.field !== "reactions") {
+            nextPost.reactions = Math.max(0, nextPost.reactions - 1);
+          }
+        }
+
+        if (!isSameReaction) {
+          nextPost[field] = nextPost[field] + 1;
+          if (field !== "reactions") {
+            nextPost.reactions = nextPost.reactions + 1;
+          }
+        }
+
+        return nextPost;
+      }),
     );
-    recordHistory({
-      title: `${reaction} sent`,
-      detail: "You interacted with a human image post.",
-      kind: field === "loves" ? "reaction" : "reaction",
+
+    setMomentReactions((current) => {
+      if (isSameReaction) {
+        const next = { ...current };
+        delete next[key];
+        return next;
+      }
+
+      return {
+        ...current,
+        [key]: { field, reaction },
+      };
     });
+
+    recordHistory({
+      title: isSameReaction ? `${reaction} removed` : `${reaction} sent`,
+      detail: isSameReaction
+        ? "Your reaction was deselected from this moment."
+        : "You reacted once to this human moment.",
+      kind: "reaction",
+    });
+
+    if (isSameReaction) {
+      act("Reaction removed", "Your moment reaction was deselected.");
+      return;
+    }
+
     earnPoints(5, `Your ${reaction} reaction added life to a human post.`);
-    act("Reaction added", "You earned Human Points for reacting with meaning.");
+    act("Reaction recorded", "One human reaction is now attached to this moment.");
   }
 
   function commentOnPost(postId: number) {
@@ -7279,6 +7336,10 @@ function ChainsView({
           </div>
           {visiblePosts.map((post, index) => (
             <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
+              {(() => {
+                const selectedReaction = momentReactions[String(post.id)];
+
+                return (
               <div>
                 <div className="post-head">
                   <div>
@@ -7334,7 +7395,12 @@ function ChainsView({
                   >
                     Promote
                   </button>
-                  <button onClick={() => reactToPost(post.id, "Love", "loves")} type="button">
+                  <button
+                    aria-pressed={selectedReaction?.reaction === "Love"}
+                    className={selectedReaction?.reaction === "Love" ? "active" : ""}
+                    onClick={() => reactToPost(post.id, "Love", "loves")}
+                    type="button"
+                  >
                     Love
                   </button>
                   <button
@@ -7351,6 +7417,8 @@ function ChainsView({
                   </button>
                   {["Inspired"].map((reaction) => (
                     <button
+                      aria-pressed={selectedReaction?.reaction === reaction}
+                      className={selectedReaction?.reaction === reaction ? "active" : ""}
                       key={reaction}
                       onClick={() => reactToPost(post.id, reaction)}
                       type="button"
@@ -7372,6 +7440,8 @@ function ChainsView({
                   </div>
                 ) : null}
               </div>
+                );
+              })()}
             </article>
           ))}
           {activeCommentPost ? (
@@ -9318,6 +9388,7 @@ function MarketplaceView({
   const [listingPhotos, setListingPhotos] = useState<
     Array<{ id: number; name: string; src: string }>
   >([]);
+  const [listingPhotoPackUnlocked, setListingPhotoPackUnlocked] = useState(false);
   const [activeMarketItem, setActiveMarketItem] = useState<
     MarketplaceItem | MarketplaceListing | null
   >(null);
@@ -9558,7 +9629,7 @@ function MarketplaceView({
     if (!validation.ok) {
       act(
         validation.errorState === "listing_blocked_category" ? "Listing blocked category" : "Listing needs details",
-        validation.issues[0] ?? "Add title, positive price, condition, area, and at least 3 real photos.",
+        validation.issues[0] ?? "Add title, positive price, condition, area, and at least 2 real photos.",
       );
       return false;
     }
@@ -9625,6 +9696,7 @@ function MarketplaceView({
       title: "",
     });
     setListingPhotos([]);
+    setListingPhotoPackUnlocked(false);
     setMarketMode("browse");
     return true;
   }
@@ -9635,7 +9707,35 @@ function MarketplaceView({
     }
 
     const selectedFiles = Array.from(files);
-    const includedFiles = selectedFiles.slice(0, 9);
+    const maxFreePhotos = listingPhotoPackUnlocked ? 5 : 2;
+    const requestedTotal = selectedFiles.length;
+
+    if (requestedTotal > 5) {
+      act("Five photo maximum", "HumanChain Market accepts up to 5 listing photos for a clean buyer view.");
+    }
+
+    if (requestedTotal > 2 && !listingPhotoPackUnlocked) {
+      openPayment({
+        title: "Market photo pack",
+        amount: "1.5 WLD",
+        detail: "Unlock up to 5 listing photos for this seller session. Two photos are free.",
+        success: "Extra listing photos are unlocked. Add up to 5 item photos now.",
+        feature: "marketplace-photo-pack",
+        points: 6,
+        onConfirmed: () => {
+          setListingPhotoPackUnlocked(true);
+          recordHistory({
+            title: "Market photo pack unlocked",
+            detail: "1.5 WLD confirmed. Seller can add up to 5 listing photos this session.",
+            kind: "market",
+          });
+        },
+      });
+      act("Extra photos require WLD", "Two images are free. Pay 1.5 WLD once to add images 3-5, then select the photos again.");
+      return;
+    }
+
+    const includedFiles = selectedFiles.slice(0, maxFreePhotos);
 
     setListingPhotos([]);
 
@@ -9656,15 +9756,7 @@ function MarketplaceView({
       reader.readAsDataURL(file);
     });
 
-    if (selectedFiles.length > 6) {
-      publishListing(marketplacePlans[1]);
-      act(
-        "Extra photos reserved",
-        "Up to 6 photos are free at launch. Extra photos are queued behind the photo-pack fee.",
-      );
-    } else {
-      act("Photos added", `${includedFiles.length} listing photo slot${includedFiles.length > 1 ? "s" : ""} ready.`);
-    }
+    act("Photos added", `${includedFiles.length} listing photo slot${includedFiles.length > 1 ? "s" : ""} ready.`);
   }
 
   function rateMarketItem(item: MarketplaceItem | MarketplaceListing, label: string) {
@@ -10507,14 +10599,14 @@ function MarketplaceView({
           ))}
         </div>
         <p className="seller-flow-note">
-          Add 3-6 real item photos, clear defects, pickup area, and chat-first sale details. HumanChain stores coarse area, never a home address.
+          Add 2 free real item photos. Images 3-5 unlock with a 1.5 WLD photo pack. HumanChain stores coarse area, never a home address.
         </p>
         <div className="listing-section-label">1. Photos</div>
         <div className="listing-photo-zone">
           <label className="listing-upload">
             <Upload size={20} />
             <strong>Add item photos</strong>
-            <span>Add 3-6 photos of the actual item. Front, back, defects, receipt, and pickup proof help buyers trust you.</span>
+            <span>Add 2 photos free. Select 3-5 photos to unlock the 1.5 WLD photo pack for richer buyer proof.</span>
             <input
               accept="image/*"
               multiple
@@ -10522,8 +10614,8 @@ function MarketplaceView({
               type="file"
             />
           </label>
-          <div className="listing-photo-grid">
-            {Array.from({ length: 9 }, (_, slot) => slot).map((slot) => {
+          <div className="listing-photo-grid special">
+            {Array.from({ length: 5 }, (_, slot) => slot).map((slot) => {
               const photo = listingPhotos[slot];
 
               return (
@@ -10624,14 +10716,15 @@ function MarketplaceView({
             {listingDraft.price.trim() || "Price missing"} - {listingDraft.condition || "Condition missing"} - {listingDraft.area.trim() || "Area missing"}
           </p>
           <div className="stored-market-trust">
-            <span>{listingPhotos.length}/3 minimum photos</span>
+            <span>{listingPhotos.length}/2 free photos</span>
+            <span>{listingPhotoPackUnlocked ? "5-photo pack unlocked" : "3-5 photos: 1.5 WLD"}</span>
             <span>{listingDraft.saleMode === "bidding" ? "Timed bidding" : "Chat-first sale"}</span>
             <span>Verified username: {sellerHandle}</span>
           </div>
         </section>
         <button
           className="primary-command"
-          disabled={listingPhotos.length < 3 || !listingDraft.title.trim() || !listingDraft.price.trim()}
+          disabled={listingPhotos.length < 2 || !listingDraft.title.trim() || !listingDraft.price.trim()}
           onClick={() => {
             if (saveMarketplaceListing()) {
               publishListing(marketplacePlans[0]);

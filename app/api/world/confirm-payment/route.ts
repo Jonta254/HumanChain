@@ -91,7 +91,10 @@ export async function POST(req: NextRequest) {
   const transactionRecord = transaction as Record<string, unknown>;
   const isMined = transactionRecord.transaction_status === "mined";
   const treasury = getHumanChainTreasury().toLowerCase();
-  const expectedTokenAmount = tokenToDecimals(amount, Tokens.WLD).toString();
+  const expectedTokenAmounts = new Set([
+    tokenToDecimals(amount, Tokens.WLD).toString(),
+    Math.round(amount * 1_000_000).toString(),
+  ]);
   const transactionReference =
     typeof transactionRecord.reference === "string" ? transactionRecord.reference : "";
   const transactionAppId =
@@ -145,7 +148,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (isMined && transactionTokenAmount !== expectedTokenAmount) {
+  if (isMined && transactionTokenAmount && !expectedTokenAmounts.has(transactionTokenAmount)) {
     return noStoreJson(
       {
         ok: false,

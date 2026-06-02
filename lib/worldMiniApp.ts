@@ -14,6 +14,8 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
 };
 
+const worldPaymentConfirmationDelays = [0, 1500, 3000, 5000, 8000, 12000];
+
 const worldUserCache = new Map<
   string,
   {
@@ -29,6 +31,15 @@ type WorldPaymentInput = {
   description: string;
   feature: string;
   token?: HumanChainPaymentToken;
+};
+
+type WorldPaymentConfirmation = {
+  error?: string;
+  ok?: boolean;
+  pendingSetup?: boolean;
+  transaction?: {
+    transaction_status?: string;
+  };
 };
 
 type WorldShareInput = {
@@ -300,6 +311,60 @@ export async function getWorldPermissions() {
   return miniKitWithPermissions.getPermissions({});
 }
 
+function waitForWorldConfirmation(delayMs: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, delayMs));
+}
+
+async function confirmWorldPayment(input: {
+  amount: number;
+  feature: string;
+  payload: PayResult;
+  reference: string;
+  token: HumanChainPaymentToken;
+}) {
+  let lastConfirmation: WorldPaymentConfirmation | null = null;
+
+  for (const delayMs of worldPaymentConfirmationDelays) {
+    if (delayMs > 0) {
+      await waitForWorldConfirmation(delayMs);
+    }
+
+    const confirmationResponse = await fetch("/api/world/confirm-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    const confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
+    lastConfirmation = confirmation;
+
+    if (!confirmationResponse.ok) {
+      return {
+        confirmation,
+        error: confirmation.error ?? "World payment could not be confirmed.",
+        ok: false,
+      };
+    }
+
+    if (confirmation.pendingSetup) {
+      return {
+        confirmation,
+        error: confirmation.error ?? "World payment confirmation is not configured.",
+        ok: false,
+      };
+    }
+
+    if (confirmation.ok) {
+      return { confirmation, ok: true };
+    }
+  }
+
+  return {
+    confirmation: lastConfirmation,
+    error: "World payment is still pending. Please wait a moment and try the action again if it does not unlock.",
+    ok: false,
+  };
+}
+
 export async function authenticateHumanWallet() {
   if (!isWorldMiniAppReady()) {
     return {
@@ -446,33 +511,27 @@ export async function payWithWorld({
     };
   }
 
-  const confirmationResponse = await fetch("/api/world/confirm-payment", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      amount,
-      feature,
-      payload: payment.data,
-      reference: referencePayload.reference,
-      token,
-    }),
+  const confirmationResult = await confirmWorldPayment({
+    amount,
+    feature,
+    payload: payment.data,
+    reference: referencePayload.reference,
+    token,
   });
 
-  const confirmation = await confirmationResponse.json();
-
-  if (!confirmationResponse.ok || confirmation?.ok === false) {
+  if (!confirmationResult.ok) {
     return {
       ok: false,
-      error: confirmation?.error ?? "World payment could not be confirmed.",
+      error: confirmationResult.error ?? "World payment could not be confirmed.",
       payment,
-      confirmation,
+      confirmation: confirmationResult.confirmation,
     };
   }
 
   return {
     ok: true,
     payment,
-    confirmation,
+    confirmation: confirmationResult.confirmation,
     recipient: treasuryAddress,
   };
 }

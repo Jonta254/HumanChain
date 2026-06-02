@@ -109,7 +109,7 @@ export function validateListingInput(input: {
   if (!Number.isFinite(priceValue) || priceValue <= 0) issues.push("Listing price must be a positive amount.");
   if (!input.condition) issues.push("Condition is required.");
   if (!input.area?.trim()) issues.push("Area is required.");
-  if ((input.photos?.length ?? 0) < 3) issues.push("At least 3 listing photos are required.");
+  if ((input.photos?.length ?? 0) < 2) issues.push("At least 2 listing photos are required.");
   if (blockedListingTerms.some((term) => lowerText.includes(term))) {
     issues.push("This appears to match a blocked marketplace category.");
   }

@@ -6586,6 +6586,13 @@ button.danger {
   text-align: center;
 }
 
+.social-actions button.active,
+.reaction-row button.active {
+  color: #fffdf8;
+  border-color: rgba(36, 107, 85, 0.22);
+  background: var(--green);
+}
+
 .payment-token-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -7532,6 +7539,11 @@ button.danger {
   gap: 8px;
 }
 
+.listing-photo-grid.special {
+  grid-template-columns: 1.3fr 1fr 1fr;
+  grid-auto-rows: minmax(82px, auto);
+}
+
 .listing-photo-grid div {
   aspect-ratio: 1;
   display: grid;
@@ -7597,6 +7609,12 @@ button.danger {
   background: rgba(36, 107, 85, 0.08);
   font-size: 0.74rem;
   font-weight: 850;
+}
+
+.listing-photo-grid.special div:first-child {
+  grid-row: span 2;
+  aspect-ratio: auto;
+  border-radius: 20px;
 }
 
 .listing-review-card {
