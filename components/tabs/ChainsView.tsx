@@ -1753,6 +1753,12 @@ export function ChainsView({
           <div className="field-grid">
             {chainFields.map((field) => (
               <article className="field-card" key={field.name}>
+                <div className="field-card-meta">
+                  <span className="field-live-dot" aria-hidden="true" />
+                  <span>{field.members} members</span>
+                  <span>·</span>
+                  <span>Active now</span>
+                </div>
                 <div>
                   <strong>{field.name}</strong>
                 <span>Verified humans</span>

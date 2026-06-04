@@ -622,6 +622,22 @@ export function AskView({
                     <button onClick={() => act("Report queued", "Choose a report reason before moderator review.")} type="button">
                       Report
                     </button>
+                    {answer.user === (humanIdentity?.username ?? "@you") ? (
+                      <button
+                        className="answer-boost-btn"
+                        onClick={() => openPayment({
+                          title: "Boost this answer to top",
+                          amount: "0.5",
+                          detail: "Your answer moves to the top of this thread for 24 hours. Verified humans see it first.",
+                          success: "Answer boosted to top of thread for 24 hours.",
+                          feature: "quick-answer-boost",
+                          points: 8,
+                        })}
+                        type="button"
+                      >
+                        ↑ Boost · 0.5 WLD
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               )) : (

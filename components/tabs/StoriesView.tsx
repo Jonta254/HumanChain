@@ -1859,6 +1859,22 @@ export function StoriesView({
             Next
           </button>
         </section>
+        <section className="reader-bookmark-row">
+          <button
+            className="story-bookmark-btn"
+            onClick={() => openPayment({
+              title: "Bookmark this story",
+              amount: "0.5",
+              detail: "Save this story permanently to your HumanChain reading list. Access it from your profile any time.",
+              success: "Story bookmarked to your permanent reading list.",
+              feature: "story-bookmark",
+              points: 5,
+            })}
+            type="button"
+          >
+            ✦ Bookmark · 0.5 WLD
+          </button>
+        </section>
       </div>
     );
   }

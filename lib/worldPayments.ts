@@ -28,6 +28,10 @@ export const humanChainPaymentFeatures = {
   "tip-storyteller": 1,
   "voice-answer": 2,
   "voice-question": 2,
+  "quick-answer-boost": 0.5,
+  "link-reaction-pack": 0.5,
+  "story-bookmark": 0.5,
+  "market-hold-notify": 0.5,
 } as const;
 
 export type HumanChainPaymentFeature = keyof typeof humanChainPaymentFeatures;

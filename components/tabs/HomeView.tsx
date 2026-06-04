@@ -32,6 +32,7 @@ import {
   isVerifiedWorldHuman,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
+import { AIGuideSheet } from "@/components/layout/AIGuideSheet";
 import { Meter } from "@/components/ui/Meter";
 import { ActionButton } from "@/components/ui/ActionButton";
 import type { Tab, EarnPoints } from "@/types/ui";
@@ -203,6 +204,7 @@ export function HomeView({
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
   const [passportBackOpen, setPassportBackOpen] = useState(false);
+  const [aiGuideOpen, setAiGuideOpen] = useState(false);
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const primaryProfileImage = getPrimaryProfileImage(profileImage, verifiedHuman, worldContext);
@@ -725,11 +727,20 @@ export function HomeView({
 
       <button
         className="v7-ai-assistant"
-        onClick={() => act("AI Assistant", "Reputation Coach, Marketplace Guide, World Guide, Community Guide, and Safety Assistant are ready from this command button.")}
+        onClick={() => setAiGuideOpen(true)}
         type="button"
       >
         <Sparkles size={18} />
       </button>
+
+      {aiGuideOpen ? (
+        <AIGuideSheet
+          chainScore={chainScore}
+          onClose={() => setAiGuideOpen(false)}
+          points={points}
+          streak={streak}
+        />
+      ) : null}
 
       <section className="home-live-section home-legacy-section" hidden aria-label="Live on HumanChain">
         <div className="section-heading">
