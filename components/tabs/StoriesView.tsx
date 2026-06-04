@@ -1529,6 +1529,8 @@ export function StoriesView({
   const [userStories, setUserStories] = useState<UserStory[]>(() =>
     loadJsonFromStorage<UserStory[]>(storageKeys.userStories, []),
   );
+  const [unlockedBonusStories, setUnlockedBonusStories] = useState<Set<string>>(new Set());
+  const [unlockedReflections, setUnlockedReflections] = useState<Set<string>>(new Set());
   const [fileDraft, setFileDraft] = useState<{
     dataUrl?: string;
     fileName?: string;
@@ -2283,32 +2285,57 @@ export function StoriesView({
             Tip Storyteller
           </button>
           <button
-            onClick={() =>
+            className={activePublishedStory && unlockedBonusStories.has(activePublishedStory) ? "active" : ""}
+            onClick={() => {
+              if (activePublishedStory && unlockedBonusStories.has(activePublishedStory)) {
+                act("Bonus pages unlocked", "Author notes and reader reflections are already visible below.");
+                return;
+              }
               openPayment({
                 title: "Bonus story pages",
                 amount: "2 WLD",
-                detail: "Unlock author notes and reader reflections.",
-                success: "Bonus pages are prepared for unlock.",
+                detail: "Unlock author notes, writing reflections, and reader insights for this story.",
+                success: "Bonus pages unlocked. Author notes and reader reflections are now visible.",
+                feature: "bonus-story-pages",
                 points: 6,
-              })
-            }
+                onConfirmed: () => {
+                  if (activePublishedStory) {
+                    setUnlockedBonusStories((prev) => new Set([...prev, activePublishedStory]));
+                  }
+                  recordHistory({ title: "Bonus story pages unlocked", detail: `2 WLD confirmed. Author notes and reflections unlocked for ${activePublishedStory ?? "this story"}.`, kind: "story" });
+                },
+              });
+            }}
             type="button"
           >
-            Unlock Bonus Pages
+            {activePublishedStory && unlockedBonusStories.has(activePublishedStory) ? "✓ Bonus unlocked" : "Unlock Bonus Pages · 2 WLD"}
           </button>
           <button
-            onClick={() =>
+            className={activePublishedStory && unlockedReflections.has(activePublishedStory) ? "active" : ""}
+            onClick={() => {
+              if (activePublishedStory && unlockedReflections.has(activePublishedStory)) {
+                act("Reflection ready", "Your Deep Story Reflection is already saved.");
+                return;
+              }
               openPayment({
                 title: "Deep Story Reflection",
                 amount: "6 WLD",
-                detail: "Create a private reflection from the story and your answers.",
-                success: "Deep Story Reflection is prepared for World App.",
+                detail: "Create a private deep reflection from this story — your notes, questions it raised, and what it means for your life.",
+                success: "Deep Story Reflection saved to your Human Vault.",
+                feature: "deep-story-reflection",
                 points: 12,
-              })
-            }
+                onConfirmed: () => {
+                  if (activePublishedStory) {
+                    setUnlockedReflections((prev) => new Set([...prev, activePublishedStory]));
+                  }
+                  act("Reflection saved", "Your private Deep Story Reflection is saved in your Human Vault.");
+                  recordHistory({ title: "Deep Story Reflection created", detail: `6 WLD confirmed. Private reflection created for ${activePublishedStory ?? "this story"}.`, kind: "story" });
+                },
+              });
+            }}
             type="button"
           >
-            Create Deep Reflection
+            {activePublishedStory && unlockedReflections.has(activePublishedStory) ? "✓ Reflection saved" : "Create Deep Reflection · 6 WLD"}
           </button>
         </div>
       </section>

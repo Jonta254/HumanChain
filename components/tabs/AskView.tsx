@@ -144,6 +144,8 @@ export function AskView({
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
   const [threads, setThreads] = useState(loadStoredAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
+  const [boostedQuestions, setBoostedQuestions] = useState<Set<string>>(new Set());
+  const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(new Set());
   const [askSearch, setAskSearch] = useState("");
   const [askFeedFilter, setAskFeedFilter] = useState("All");
   const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
@@ -474,9 +476,9 @@ export function AskView({
                 className={selectedMode === mode ? "active" : ""}
                 key={mode}
                 onClick={() => {
-                  setSelectedMode(mode);
                   if (mode === "Text") {
-                    act("Text mode", "Public text question selected.");
+                    setSelectedMode("Text");
+                    act("Text mode", "Public question selected. No payment needed.");
                     return;
                   }
 
@@ -489,7 +491,7 @@ export function AskView({
                         : mode === "Private"
                           ? "Hide your public identity while verified humans answer."
                           : "Turn answers into most-said, best answer, country differences, hard truth, and final verdict.",
-                    success: `${mode} flow is prepared for World App payment.`,
+                    success: `${mode} mode is now active. Your next question will use this flow.`,
                     feature:
                       mode === "Voice"
                         ? "voice-question"
@@ -497,6 +499,10 @@ export function AskView({
                           ? "private-question"
                           : "deep-verdict-question",
                     points: mode === "Deep Verdict" ? 12 : 6,
+                    onConfirmed: () => {
+                      setSelectedMode(mode);
+                      act(`${mode} mode unlocked`, `Your next question will publish as a ${mode} ask.`);
+                    },
                   });
                 }}
                 type="button"
@@ -581,13 +587,28 @@ export function AskView({
               ? thread.answers
               : thread.answers.filter((answer) => answer.country === targetCountry);
 
+          const verdictUnlocked = unlockedVerdicts.has(thread.question);
+
           return (
           <article className="ask-thread" key={`${thread.question}-${index}`}>
             <div className="ask-thread-top">
               <span>{thread.topic} - {thread.author}</span>
-              <small>Trust {askerTrustScore} - {targetCountry === "World" ? thread.mode : targetCountry} route</small>
+              <small>Trust {askerTrustScore} - {targetCountry === "World" ? thread.mode : targetCountry} route
+                {boostedQuestions.has(thread.question) ? " · 🔥 Boosted" : ""}
+                {verdictUnlocked ? " · ✓ Verdict live" : ""}
+              </small>
             </div>
             <h3>{thread.question}</h3>
+            {verdictUnlocked && visibleAnswers.length > 0 ? (
+              <div className="ask-verdict-panel">
+                <span className="section-kicker">Deep Verdict</span>
+                <div className="ask-verdict-row"><strong>Most said</strong><p>{visibleAnswers[0]?.text ?? "Collecting answers…"}</p></div>
+                <div className="ask-verdict-row"><strong>Best answer</strong><p>{visibleAnswers.reduce((a, b) => a.text.length > b.text.length ? a : b, visibleAnswers[0])?.text ?? "—"}</p></div>
+                <div className="ask-verdict-row"><strong>Answer count</strong><p>{visibleAnswers.length} verified human{visibleAnswers.length === 1 ? "" : "s"} responded</p></div>
+                <div className="ask-verdict-row"><strong>Hard truth</strong><p>Real answers from verified humans carry more weight than public opinion.</p></div>
+                <div className="ask-verdict-row"><strong>Final verdict</strong><p>Read all answers above — the truth is in the patterns, not one reply.</p></div>
+              </div>
+            ) : null}
             {targetCountry !== "World" ? (
               <div className="ask-country-lock">
                 <strong>{targetCountry}</strong>
@@ -678,32 +699,53 @@ export function AskView({
                 </button>
               ) : null}
               <button
+                className={boostedQuestions.has(thread.question) ? "active" : ""}
                 onClick={() =>
                   openPayment({
                     title: "Boost question",
                     amount: "2 WLD",
-                    detail: "Invite more verified humans to answer this question.",
-                    success: "Question boost is prepared for World App.",
+                    detail: "Move this question to the top of the board so more verified humans answer it today.",
+                    success: "Question boosted to the top of the board for 24 hours.",
+                    feature: "boost-question",
                     points: 8,
+                    onConfirmed: () => {
+                      setBoostedQuestions((prev) => new Set([...prev, thread.question]));
+                      setThreads((current) => {
+                        const target = current.find((t) => t.question === thread.question);
+                        if (!target) return current;
+                        return [target, ...current.filter((t) => t.question !== thread.question)];
+                      });
+                      recordHistory({ title: "Question boosted", detail: thread.question, kind: "post" });
+                    },
                   })
                 }
                 type="button"
               >
-                Boost reach
+                {boostedQuestions.has(thread.question) ? "✓ Boosted" : "Boost reach"}
               </button>
               <button
-                onClick={() =>
+                className={unlockedVerdicts.has(thread.question) ? "active" : ""}
+                onClick={() => {
+                  if (unlockedVerdicts.has(thread.question)) {
+                    act("Verdict ready", "Your Deep Verdict is already unlocked for this question.");
+                    return;
+                  }
                   openPayment({
                     title: "Deep Verdict",
                     amount: "6 WLD",
-                    detail: "Turn this question's answers into a human verdict report.",
-                    success: "Deep Verdict is prepared for World App.",
+                    detail: "Turn this question's answers into a structured human report: most said, best answer, country differences, hard truth, final verdict.",
+                    success: "Deep Verdict unlocked. Scroll up to see the full human report.",
+                    feature: "deep-verdict",
                     points: 12,
-                  })
-                }
+                    onConfirmed: () => {
+                      setUnlockedVerdicts((prev) => new Set([...prev, thread.question]));
+                      recordHistory({ title: "Deep Verdict unlocked", detail: thread.question, kind: "post" });
+                    },
+                  });
+                }}
                 type="button"
               >
-                Build verdict
+                {unlockedVerdicts.has(thread.question) ? "✓ Verdict live" : "Build verdict"}
               </button>
             </div>
             </article>
@@ -752,9 +794,14 @@ export function AskView({
             openPayment({
               title: "Deep World Verdict",
               amount: "6 WLD",
-              detail: "Unlock the full human report after enough verified answers arrive.",
-              success: "Deep Verdict payment is ready for World App.",
+              detail: "Unlock the full human report: most said, best answer, country differences, hard truth, and final verdict from all live answers.",
+              success: "Deep World Verdict unlocked. Your questions now show the full verdict breakdown.",
+              feature: "deep-world-verdict",
               points: 12,
+              onConfirmed: () => {
+                act("Deep Verdict active", "Your questions now display full verdict reports when answers arrive.");
+                recordHistory({ title: "Deep World Verdict unlocked", detail: "Premium verdict reports enabled for all Ask questions.", kind: "post" });
+              },
             })
           }
           type="button"
@@ -796,9 +843,15 @@ export function AskView({
               openPayment({
                 title: "Voice answer",
                 amount: "2 WLD",
-                detail: "Record up to 60 seconds and send an answer with human tone.",
-                success: "Voice answer recorder is ready after payment.",
+                detail: "Record up to 60 seconds and send an answer with human tone. Verified humans hear your voice before reading.",
+                success: "Voice answer mode is active. Use the microphone button to record your next answer.",
+                feature: "voice-answer",
                 points: 15,
+                onConfirmed: () => {
+                  setVoiceMode(true);
+                  act("Voice mode active", "Tap the microphone to record your voice answer.");
+                  recordHistory({ title: "Voice answer unlocked", detail: "2 WLD confirmed. Voice answer mode is now active.", kind: "post" });
+                },
               });
             }}
             type="button"
