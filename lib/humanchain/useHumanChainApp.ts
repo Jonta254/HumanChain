@@ -394,6 +394,52 @@ export function useHumanChainApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verifiedHuman?.wallet]);
 
+  // ── Daily notification (up to 2 per day per portal config) ───────────────
+  useEffect(() => {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world" || !notificationReady) return;
+
+    const wallet = verifiedHuman.wallet.toLowerCase();
+    const today = getLocalDateKey();
+    const hour = new Date().getHours();
+
+    // Morning slot: 7am–11am — daily question reminder
+    const morningKey = `hc_notif_morning:${wallet}:${today}`;
+    if (hour >= 7 && hour < 11 && !window.localStorage.getItem(morningKey)) {
+      const t = window.setTimeout(async () => {
+        const sent = await sendWorldUserNotification({
+          title: "Daily Human Question",
+          detail: "A new question is waiting for your honest answer. Earn +18 HP today.",
+          sector: "daily",
+          path: "/?tab=ask",
+        });
+        if (sent) {
+          window.localStorage.setItem(morningKey, Date.now().toString());
+          addNotification("Daily Human Question", "Your daily question is ready. Tap to answer and earn +18 HP.", "daily");
+        }
+      }, 45_000);
+      return () => window.clearTimeout(t);
+    }
+
+    // Evening slot: 6pm–9pm — streak & activity reminder
+    const eveningKey = `hc_notif_evening:${wallet}:${today}`;
+    if (hour >= 18 && hour < 21 && !window.localStorage.getItem(eveningKey)) {
+      const t = window.setTimeout(async () => {
+        const sent = await sendWorldUserNotification({
+          title: "Keep your Human Streak",
+          detail: "Your chain is active today. Post a moment, check your passport, or browse the nearby market.",
+          sector: "account",
+          path: "/",
+        });
+        if (sent) {
+          window.localStorage.setItem(eveningKey, Date.now().toString());
+          addNotification("Keep your Human Streak", "Check in, post a moment, or browse the market before midnight.", "account");
+        }
+      }, 30_000);
+      return () => window.clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifiedHuman?.wallet, notificationReady]);
+
   // ── Debounced cloud save effect ────────────────────────────────────────────
   useEffect(() => {
     if (!accountSyncReady || !verifiedHuman?.wallet || verifiedHuman.mode !== "world") return;

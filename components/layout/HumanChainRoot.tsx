@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
@@ -37,6 +37,14 @@ export function HumanChainRoot(props: HumanChainAppState) {
     enableHumanChainNotifications, enterPreview, enterWithWorld, keepStreak,
     openPayment, recordHistory, resetHistory,
   } = props;
+
+  // Hydration guard — prevents blank flash before client-side state loads
+  const [appReady, setAppReady] = useState(false);
+  useEffect(() => {
+    // Small rAF to let MiniKit initialize before first paint
+    const frame = window.requestAnimationFrame(() => setAppReady(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   // Auto-dismiss toast after 4 seconds (World App UX guideline: avoid persistent overlays)
   useEffect(() => {
@@ -197,6 +205,20 @@ export function HumanChainRoot(props: HumanChainAppState) {
         );
     }
   })();
+
+  if (!appReady) {
+    return (
+      <main className="app-shell">
+        <section className="phone-frame app-splash">
+          <div className="app-splash-inner">
+            <img alt="HumanChain" className="app-splash-logo" src="/images/humanchain-logo.png" />
+            <strong>HumanChain</strong>
+            <span>Verified humans only</span>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="app-shell">
