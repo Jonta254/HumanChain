@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1035">
+<title>HumanChain — Meta Card 1035×720</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1035px;
+    height: 720px;
+    overflow: hidden;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #082622;
+  }
+
+  .card {
+    width: 1035px;
+    height: 720px;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 12% 14%, rgba(255, 242, 190, 0.18), transparent 28%),
+      radial-gradient(circle at 88% 10%, rgba(47, 111, 237, 0.22), transparent 28%),
+      radial-gradient(circle at 50% 90%, rgba(91, 178, 148, 0.18), transparent 32%),
+      linear-gradient(145deg, #061a18 0%, #0d3526 35%, #1a5240 60%, #082018 100%);
+  }
+
+  /* Decorative rings */
+  .ring1 {
+    position: absolute;
+    right: -120px;
+    bottom: -120px;
+    width: 480px;
+    height: 480px;
+    border: 1px solid rgba(255,253,248,0.08);
+    border-radius: 50%;
+  }
+  .ring2 {
+    position: absolute;
+    right: -60px;
+    bottom: -60px;
+    width: 360px;
+    height: 360px;
+    border: 1px solid rgba(255,253,248,0.06);
+    border-radius: 50%;
+  }
+  .ring3 {
+    position: absolute;
+    left: -80px;
+    top: -80px;
+    width: 300px;
+    height: 300px;
+    border: 1px solid rgba(255,253,248,0.05);
+    border-radius: 50%;
+  }
+
+  /* Shine stripe */
+  .shine {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(125deg, transparent 30%, rgba(255,253,248,0.04) 50%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Content */
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 52px 64px 56px;
+  }
+
+  /* Top section */
+  .top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .logo {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    background: rgba(255,253,248,0.12);
+    border: 1px solid rgba(255,253,248,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    color: #fffdf8;
+    letter-spacing: -1px;
+  }
+
+  .brand-text .label {
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(255,253,248,0.6);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .brand-text .name {
+    font-size: 32px;
+    font-weight: 950;
+    color: #fffdf8;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .world-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid rgba(255,253,248,0.18);
+    border-radius: 999px;
+    background: rgba(255,253,248,0.08);
+  }
+
+  .world-badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #20c866;
+  }
+
+  .world-badge span {
+    font-size: 13px;
+    font-weight: 850;
+    color: rgba(255,253,248,0.82);
+    letter-spacing: 0.3px;
+  }
+
+  /* Middle - headline */
+  .middle {
+    text-align: left;
+  }
+
+  .headline {
+    font-size: 54px;
+    font-weight: 950;
+    color: #fffdf8;
+    line-height: 1.0;
+    letter-spacing: -1.5px;
+    max-width: 560px;
+    margin-bottom: 20px;
+  }
+
+  .headline em {
+    font-style: normal;
+    color: #6ee7b7;
+  }
+
+  .subline {
+    font-size: 18px;
+    color: rgba(255,253,248,0.72);
+    font-weight: 500;
+    line-height: 1.5;
+    max-width: 520px;
+  }
+
+  /* Feature pills */
+  .pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .pill {
+    padding: 9px 16px;
+    border: 1px solid rgba(255,253,248,0.18);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 850;
+    color: rgba(255,253,248,0.86);
+    background: rgba(255,253,248,0.08);
+    letter-spacing: 0.2px;
+  }
+
+  .pill.accent {
+    background: rgba(36, 107, 85, 0.5);
+    border-color: rgba(110, 231, 183, 0.3);
+    color: #6ee7b7;
+  }
+
+  /* Bottom stats */
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .stats {
+    display: flex;
+    gap: 40px;
+  }
+
+  .stat {
+    text-align: left;
+  }
+
+  .stat-value {
+    font-size: 26px;
+    font-weight: 950;
+    color: #fffdf8;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 850;
+    color: rgba(255,253,248,0.52);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .cta {
+    padding: 14px 28px;
+    background: rgba(255,253,248,0.12);
+    border: 1px solid rgba(255,253,248,0.22);
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 950;
+    color: #fffdf8;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="ring1"></div>
+  <div class="ring2"></div>
+  <div class="ring3"></div>
+  <div class="shine"></div>
+  <div class="content">
+    <div class="top">
+      <div class="brand">
+        <div class="logo">HC</div>
+        <div class="brand-text">
+          <div class="label">Mini App</div>
+          <div class="name">HumanChain</div>
+        </div>
+      </div>
+      <div class="world-badge">
+        <div class="world-badge-dot"></div>
+        <span>World ID Verified</span>
+      </div>
+    </div>
+
+    <div class="middle">
+      <div class="headline">Real humans.<br><em>Real trust.</em></div>
+      <div class="subline">Ask questions, post moments, trade safely, and read stories — every human verified by World ID.</div>
+      <div class="pills">
+        <span class="pill accent">✓ World ID</span>
+        <span class="pill">Ask Real Humans</span>
+        <span class="pill">Safe Marketplace</span>
+        <span class="pill">Stories</span>
+        <span class="pill">WLD Payments</span>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">26</div>
+          <div class="stat-label">Premium Features</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Communities</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">World Verified</div>
+        </div>
+      </div>
+      <div class="cta">Open in World App →</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

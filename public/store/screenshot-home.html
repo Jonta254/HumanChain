@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=430">
+<title>HumanChain — Home Screenshot 430×932</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 430px;
+    height: 932px;
+    overflow: hidden;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f4efe6;
+    color: #202328;
+  }
+
+  .phone {
+    width: 430px;
+    height: 932px;
+    background: #fbf7ef;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: #082622;
+    color: rgba(255,253,248,0.9);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 20px;
+    background: #fbf7ef;
+  }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #eaf7ef, #fff8e6);
+    border: 1px solid rgba(36, 107, 85, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 950;
+    color: #246b55;
+  }
+
+  .user-info strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 950;
+  }
+  .user-info span {
+    font-size: 11px;
+    color: #6f746f;
+  }
+
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    background: rgba(255,253,248,0.92);
+    border: 1px solid rgba(232, 223, 210, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* Digital card */
+  .digital-card {
+    margin: 0 20px 16px;
+    border-radius: 24px;
+    padding: 20px;
+    background:
+      radial-gradient(circle at 88% 9%, rgba(214, 163, 58, 0.24), transparent 7rem),
+      linear-gradient(145deg, #082622, #1e6a53 58%, #08231f);
+    color: #fffdf8;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .digital-card::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: -50px;
+    width: 180px;
+    height: 180px;
+    border: 1px solid rgba(255,253,248,0.1);
+    border-radius: 50%;
+  }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 850;
+    color: rgba(255,253,248,0.6);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .card-avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .card-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: #fffdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 950;
+    color: #082622;
+  }
+
+  .card-user strong { font-size: 15px; display: block; }
+  .card-user span { font-size: 11px; color: rgba(255,253,248,0.6); }
+
+  .card-score {
+    font-size: 44px;
+    font-weight: 950;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .card-level {
+    font-size: 12px;
+    color: rgba(255,253,248,0.76);
+  }
+
+  .verified-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(32, 200, 102, 0.2);
+    border: 1px solid rgba(32, 200, 102, 0.3);
+    font-size: 11px;
+    font-weight: 850;
+    color: #6ee7b7;
+    margin-top: 10px;
+  }
+
+  .verified-dot { width: 6px; height: 6px; border-radius: 50%; background: #20c866; }
+
+  /* Quick nav */
+  .quick-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 0 20px 16px;
+  }
+
+  .nav-btn {
+    border-radius: 18px;
+    padding: 14px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #fffdf8;
+    position: relative;
+  }
+
+  .nav-btn.ask { background: linear-gradient(145deg, #1a3a8a, #0d1f4d); }
+  .nav-btn.moments { background: linear-gradient(145deg, #1d4f47, #0d2420); }
+  .nav-btn.market { background: linear-gradient(145deg, #7a5408, #3d2a04); }
+  .nav-btn.stories { background: linear-gradient(145deg, #3d2a8a, #1a1245); }
+
+  .nav-icon { font-size: 20px; }
+
+  .nav-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ef7d69;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 950;
+    padding: 2px 5px;
+    border-radius: 999px;
+  }
+
+  /* Next step */
+  .next-step {
+    margin: 0 20px 14px;
+    padding: 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #fffdf8, #edf7f3);
+    border: 1px solid rgba(36, 107, 85, 0.14);
+  }
+
+  .next-step-label {
+    font-size: 10px;
+    font-weight: 850;
+    color: #6f746f;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .next-step strong { font-size: 15px; display: block; margin-bottom: 4px; }
+  .next-step p { font-size: 12px; color: #6f746f; margin-bottom: 12px; }
+  .next-step button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    background: #246b55;
+    color: #fffdf8;
+    font-size: 13px;
+    font-weight: 950;
+    border: 0;
+  }
+
+  /* Score row */
+  .score-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 0 20px 14px;
+  }
+
+  .score-cell {
+    padding: 12px 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(36, 107, 85, 0.12);
+    background: #fffcf6;
+    text-align: center;
+  }
+
+  .score-cell .val { font-size: 18px; font-weight: 950; color: #246b55; display: block; }
+  .score-cell .lbl { font-size: 10px; color: #6f746f; font-weight: 850; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 82px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding: 10px 12px 20px;
+    background: rgba(255, 253, 248, 0.96);
+    border-top: 1px solid #e8dfd2;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 900;
+    color: #6f746f;
+  }
+
+  .nav-item.active {
+    background: rgba(36, 107, 85, 0.1);
+    color: #246b55;
+  }
+
+  .nav-item-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>HumanChain</span>
+    <span>●●●</span>
+  </div>
+
+  <div class="topbar">
+    <div class="avatar">B</div>
+    <div class="user-info">
+      <strong>@brian.human</strong>
+      <span>Ask, post, read, and trade with verified trust</span>
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">⚙</div>
+    </div>
+  </div>
+
+  <div class="digital-card">
+    <div class="card-label">Digital Card</div>
+    <div class="card-avatar-row">
+      <div class="card-avatar">B</div>
+      <div class="card-user">
+        <strong>@brian.human</strong>
+        <span>HC-A4F2E1</span>
+      </div>
+    </div>
+    <div class="card-score">420</div>
+    <div class="card-level">Gold Human · Top 5%</div>
+    <div class="verified-chip">
+      <span class="verified-dot"></span>
+      ✓ World ID Verified
+    </div>
+  </div>
+
+  <div class="quick-nav">
+    <div class="nav-btn ask">
+      <span class="nav-icon">💬</span>
+      <span>Ask</span>
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-btn moments">
+      <span class="nav-icon">✦</span>
+      <span>Moments</span>
+    </div>
+    <div class="nav-btn market">
+      <span class="nav-icon">🏪</span>
+      <span>Market</span>
+      <span class="nav-badge">7</span>
+    </div>
+    <div class="nav-btn stories">
+      <span class="nav-icon">📖</span>
+      <span>Stories</span>
+    </div>
+  </div>
+
+  <div class="next-step">
+    <div class="next-step-label">Your Next Step</div>
+    <strong>Answer today's question</strong>
+    <p>What truth did life teach you this week?</p>
+    <button>Answer Today +18 HP</button>
+  </div>
+
+  <div class="score-row">
+    <div class="score-cell"><span class="val">420</span><span class="lbl">Score</span></div>
+    <div class="score-cell"><span class="val">7d</span><span class="lbl">Streak</span></div>
+    <div class="score-cell"><span class="val">+12</span><span class="lbl">Growth</span></div>
+    <div class="score-cell"><span class="val">✓</span><span class="lbl">Safety</span></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <span class="nav-item-icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-item-icon">💬</span>
+      <span>Ask</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-item-icon">✦</span>
+      <span>Moments</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-item-icon">🏪</span>
+      <span>Market</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
