@@ -525,6 +525,12 @@ export function HomeView({
               {topBadges.map((badge) => <i key={badge}>{badge}</i>)}
               {hiddenBadgeCount ? <i>+{hiddenBadgeCount} More</i> : null}
             </div>
+            {isVerifiedWorldHuman(verifiedHuman) && (
+              <span className="v7-card-verified-chip">
+                <BadgeCheck size={12} />
+                World ID Verified
+              </span>
+            )}
           </>
         ) : (
           <>
@@ -542,8 +548,8 @@ export function HomeView({
         )}
       </button>
 
-      <section className="v7-command-center" aria-label="AI command center">
-        <span className="v7-section-label">AI Command Center</span>
+      <section className="v7-command-center" aria-label="Your next step">
+        <span className="v7-section-label">Your Next Step</span>
         <div>
           {nextBestAction.icon}
           <strong>{nextBestAction.title}</strong>
@@ -552,42 +558,87 @@ export function HomeView({
         <button onClick={nextBestAction.onClick} type="button">{nextBestAction.label}</button>
       </section>
 
-      <section className="v7-quick-actions" aria-label="Quick actions">
-        {[
-          { icon: <MessageCircleQuestion size={18} />, label: "Ask", onClick: () => setTab("ask") },
-          { icon: <Sparkles size={18} />, label: "Moment", onClick: () => setTab("chains") },
-          { icon: <Store size={18} />, label: "Sell", onClick: () => setTab("market") },
-          { icon: <Users size={18} />, label: "Community", onClick: () => setTab("chains") },
-          { icon: <CalendarCheck size={18} />, label: "Event", onClick: () => act("Events", "Community events will appear when verified hosts publish them.") },
-        ].map((action) => (
-          <button key={action.label} onClick={action.onClick} type="button">
-            {action.icon}
-            <span>{action.label}</span>
-          </button>
-        ))}
+      <section className="v7-quick-nav-grid" aria-label="Quick navigation">
+        <button onClick={() => setTab("ask")} type="button">
+          <MessageCircleQuestion size={22} />
+          <span>Ask</span>
+          {dailyResponses.length > 0 && <b className="v7-nav-btn-badge">{dailyResponses.length}</b>}
+        </button>
+        <button onClick={() => setTab("chains")} type="button">
+          <Sparkles size={22} />
+          <span>Moments</span>
+          {liveMomentPosts.length > 0 && <b className="v7-nav-btn-badge">{liveMomentPosts.length}</b>}
+        </button>
+        <button onClick={() => setTab("market")} type="button">
+          <Store size={22} />
+          <span>Market</span>
+          {liveMarketListings.length > 0 && <b className="v7-nav-btn-badge">{liveMarketListings.length}</b>}
+        </button>
+        <button onClick={() => setTab("stories")} type="button">
+          <BookOpen size={22} />
+          <span>Stories</span>
+        </button>
       </section>
 
-      <section className="v7-score-card" aria-label="Human score">
-        <div>
+      <section className="home-daily-question" aria-label="Daily question">
+        <div className="home-section-header">
+          <strong>Today&apos;s Question</strong>
+          <span className="home-daily-reward">+18 HP</span>
+        </div>
+        <p className="home-daily-q-text">{dailyHumanQuestion.title}</p>
+        {dailyAnswered ? (
+          <div className="home-daily-answered">
+            <CheckCircle2 size={16} />
+            <span>Answered at {dailyAnsweredAt ?? "today"} — come back tomorrow for a new question.</span>
+          </div>
+        ) : (
+          <>
+            <textarea
+              className="home-daily-textarea"
+              onChange={(event) => setDailyDraft(event.target.value)}
+              placeholder="Share your honest answer…"
+              rows={3}
+              value={dailyDraft}
+            />
+            <button
+              className="home-daily-submit"
+              disabled={dailyAnswered}
+              onClick={submitDailyAnswer}
+              type="button"
+            >
+              Submit Answer
+            </button>
+          </>
+        )}
+      </section>
+
+      <section className="v7-score-reputation" aria-label="Score and reputation">
+        <div className="v7-score-reputation-score">
           <span className="v7-section-label">Human Score</span>
           <strong>{chainScore}</strong>
-          <small>{passportRank} - {reputationGrowth}</small>
+          <small>{passportRank}</small>
         </div>
-        <button onClick={() => setTab("me")} type="button">View</button>
-      </section>
-
-      <section className="v7-reputation-health" aria-label="Reputation health">
-        <span className="v7-section-label">Reputation Health</span>
-        <div>
-          <strong>{passportMetrics.moderationState}</strong>
-          <span>{safetyStatus === "Clean" ? "No active warnings or reports" : "Review your safety center"}</span>
+        <div className="v7-score-reputation-streak">
+          <span className="v7-section-label">Streak</span>
+          <strong>{streak}d</strong>
+          <small>Keep going</small>
+        </div>
+        <div className="v7-score-reputation-growth">
+          <span className="v7-section-label">Growth</span>
+          <strong>{reputationGrowth}</strong>
+          <small>This week</small>
+        </div>
+        <div className="v7-score-reputation-safety">
+          <span className="v7-section-label">Safety</span>
+          <strong>{safetyStatus}</strong>
+          <small>{safetyStatus === "Clean" ? "No warnings" : "Review center"}</small>
         </div>
       </section>
 
       <section className="v7-opportunities" aria-label="Opportunities">
-        <div className="section-heading">
-          <span>Opportunities</span>
-          <Sparkles size={18} />
+        <div className="home-section-header">
+          <strong>Opportunities</strong>
+          <span>Earn HP</span>
         </div>
         {opportunities.map((item) => (
           <button key={item.title} onClick={item.onClick} type="button">
@@ -601,6 +652,7 @@ export function HomeView({
       <section className="v7-live-network" aria-label="Live network">
         <span className="v7-section-label">Live Network</span>
         <div>
+          <span className="live-pulse-dot" />
           <b>{dailyResponses.length + liveMomentPosts.length + liveMarketListings.length}</b>
           <span>Active Humans</span>
         </div>
@@ -615,9 +667,9 @@ export function HomeView({
       </section>
 
       <section className="v7-trending-humans" aria-label="Trending humans">
-        <div className="section-heading">
-          <span>Trending Humans</span>
-          <Users size={18} />
+        <div className="home-section-header">
+          <strong>Trending Humans</strong>
+          <span>This week</span>
         </div>
         <div>
           {trendingHumans.map((human) => (
@@ -646,9 +698,9 @@ export function HomeView({
       </section>
 
       <section className="v7-market-preview" aria-label="Market preview">
-        <div className="section-heading">
-          <span>Market Preview</span>
-          <Store size={18} />
+        <div className="home-section-header">
+          <strong>Market Preview</strong>
+          <span>Trust-first</span>
         </div>
         {marketPreviewItems.length ? marketPreviewItems.map((listing) => (
           <button key={listing.id} onClick={() => setTab("market")} type="button">
