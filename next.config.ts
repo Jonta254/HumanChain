@@ -2,19 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   experimental: {
     cpus: 1,
     workerThreads: true,
   },
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "*.public.blob.vercel-storage.com",
-      },
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "*.worldcoin.org" },
+      { protocol: "https", hostname: "*.world.org" },
     ],
   },
   reactStrictMode: true,
@@ -40,11 +37,11 @@ const nextConfig: NextConfig = {
           "default-src 'self'",
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
           "style-src 'self' 'unsafe-inline'",
-          "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com",
           "media-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com",
           "object-src 'self' data: blob:",
           "font-src 'self' data:",
-          "connect-src 'self' https://developer.world.org https://developer.worldcoin.org",
+          "connect-src 'self' https://developer.world.org https://developer.worldcoin.org https://usernames.worldcoin.org",
+          "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://images.unsplash.com https://*.worldcoin.org https://*.world.org",
           "base-uri 'self'",
           "form-action 'self'",
         ].join("; "),

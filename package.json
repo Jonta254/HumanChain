@@ -7,27 +7,28 @@
     "build": "next build",
     "build:webpack": "next build --webpack",
     "start": "next start",
-    "lint": "eslint app components lib --max-warnings=0",
+    "lint": "eslint app components lib types store --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "verify": "pnpm lint && pnpm typecheck && pnpm build:webpack"
   },
   "dependencies": {
     "@vercel/blob": "^2.3.3",
-    "@worldcoin/idkit": "latest",
-    "@worldcoin/mini-apps-ui-kit-react": "latest",
-    "@worldcoin/minikit-js": "latest",
-    "lucide-react": "latest",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "viem": "^2.48.4"
+    "@worldcoin/idkit": "4.1.2",
+    "@worldcoin/mini-apps-ui-kit-react": "1.6.0",
+    "@worldcoin/minikit-js": "2.0.3",
+    "lucide-react": "1.11.0",
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "viem": "^2.48.4",
+    "zustand": "5.0.6"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "latest",
-    "typescript": "latest"
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.4",
+    "typescript": "6.0.3"
   }
 }

@@ -12,47 +12,50 @@ importers:
         specifier: ^2.3.3
         version: 2.3.3
       '@worldcoin/idkit':
-        specifier: latest
+        specifier: 4.1.2
         version: 4.1.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@worldcoin/mini-apps-ui-kit-react':
-        specifier: latest
+        specifier: 1.6.0
         version: 1.6.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@worldcoin/minikit-js':
-        specifier: latest
+        specifier: 2.0.3
         version: 2.0.3(react@19.2.5)(typescript@6.0.3)(viem@2.48.4(typescript@6.0.3)(zod@4.3.6))(zod@4.3.6)
       lucide-react:
-        specifier: latest
+        specifier: 1.11.0
         version: 1.11.0(react@19.2.5)
       next:
-        specifier: latest
+        specifier: 16.2.4
         version: 16.2.4(@babel/core@7.29.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react:
-        specifier: latest
+        specifier: 19.2.5
         version: 19.2.5
       react-dom:
-        specifier: latest
+        specifier: 19.2.5
         version: 19.2.5(react@19.2.5)
       viem:
         specifier: ^2.48.4
         version: 2.48.4(typescript@6.0.3)(zod@4.3.6)
+      zustand:
+        specifier: 5.0.6
+        version: 5.0.6(@types/react@19.2.14)(react@19.2.5)
     devDependencies:
       '@types/node':
-        specifier: latest
+        specifier: 25.6.0
         version: 25.6.0
       '@types/react':
-        specifier: latest
+        specifier: 19.2.14
         version: 19.2.14
       '@types/react-dom':
-        specifier: latest
+        specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
       eslint:
-        specifier: ^9.39.4
+        specifier: 9.39.4
         version: 9.39.4
       eslint-config-next:
-        specifier: latest
+        specifier: 16.2.4
         version: 16.2.4(@typescript-eslint/parser@8.59.0(eslint@9.39.4)(typescript@6.0.3))(eslint@9.39.4)(typescript@6.0.3)
       typescript:
-        specifier: latest
+        specifier: 6.0.3
         version: 6.0.3
 
 packages:
@@ -2584,6 +2587,24 @@ packages:
 
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
+  zustand@5.0.6:
+    resolution: {integrity: sha512-ihAqNeUVhe0MAD+X8M5UzqyZ9k3FFZLBTtqo6JLPwV53cbRB/mJwBI0PxcIgqhBBHlEs8G45OTDTMq3gNcLq3A==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
 
 snapshots:
 
@@ -5329,3 +5350,8 @@ snapshots:
       zod: 4.3.6
 
   zod@4.3.6: {}
+
+  zustand@5.0.6(@types/react@19.2.14)(react@19.2.5):
+    optionalDependencies:
+      '@types/react': 19.2.14
+      react: 19.2.5
