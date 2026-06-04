@@ -18,6 +18,9 @@ export const storageKeys = {
   notifications: "humanchain_notifications",
   posts: "humanchain_posts",
   profileImage: "humanchain_profile_image",
+  referralBonusAwarded: "humanchain_referral_bonus_awarded",
+  referralBy: "humanchain_referral_by",
+  referralShareCount: "humanchain_referral_share_count",
   userStories: "humanchain_user_stories",
 } as const;
 

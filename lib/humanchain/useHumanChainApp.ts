@@ -29,6 +29,17 @@ import {
 } from "@/lib/humanchain/appHelpers";
 import { loadJsonFromStorage, loadLocalRecord, saveJsonToStorage, storageKeys } from "@/lib/humanchain/storage";
 import {
+  getReferralLink,
+  incrementReferralShareCount,
+  loadReferralBonusAwarded,
+  loadReferralShareCount,
+  loadReferredBy,
+  readRefFromUrl,
+  REFERRAL_BONUS_FOR_REFERRED,
+  saveReferralBonusAwarded,
+  saveReferredBy,
+} from "@/lib/humanchain/referral";
+import {
   formatCheckInTime,
   formatPaymentAmount,
   formatShortTime,
@@ -105,6 +116,8 @@ export function useHumanChainApp() {
     verifiedHuman?.mode === "world" ? "loading" : "idle",
   );
   const [feedRefreshNonce, setFeedRefreshNonce] = useState(0);
+  const [referredBy, setReferredBy] = useState<string | null>(loadReferredBy);
+  const [referralShareCount, setReferralShareCount] = useState<number>(loadReferralShareCount);
 
   // ── Persist profile image ──────────────────────────────────────────────────
   useEffect(() => {
@@ -124,6 +137,15 @@ export function useHumanChainApp() {
       setTab(requestedTab);
     });
     return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  // ── Referral detection on load ────────────────────────────────────────────
+  useEffect(() => {
+    const urlRef = readRefFromUrl();
+    if (urlRef && !loadReferredBy()) {
+      saveReferredBy(urlRef);
+      setReferredBy(urlRef);
+    }
   }, []);
 
   // ── Scroll to top on tab/auth change ──────────────────────────────────────
@@ -594,10 +616,61 @@ export function useHumanChainApp() {
       setWorldContext({ ...freshCtx, ...nextCtx, profilePictureUrl: worldPic, username: worldUsername, walletAddress: address });
       setVerifiedHuman({ deviceOS: nextCtx.deviceOS ?? freshCtx.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: nextCtx.launchLocation ?? freshCtx.launchLocation, profilePictureUrl: worldPic, username: worldUsername ?? "Resolving World username", wallet: address, mode: "world" });
       setTab("home"); setNotificationPromptDismissed(false);
+      // Award referral welcome bonus on first World login if referred
+      const storedRef = loadReferredBy();
+      if (storedRef && !loadReferralBonusAwarded()) {
+        saveReferralBonusAwarded();
+        earnPoints(REFERRAL_BONUS_FOR_REFERRED, `Welcome bonus — you were invited by @${storedRef}`);
+        addNotification(
+          "Referral welcome bonus",
+          `+${REFERRAL_BONUS_FOR_REFERRED} HP added. You were invited by @${storedRef}. Keep building your Human Passport.`,
+          "account",
+        );
+      }
       setToast({ title: "Verified human entered", detail: `${worldUsername ?? "World username will appear after World profile sync"} is ready. You can now ask, post, trade, tip, and use paid actions.` });
     } catch (error) {
       setToast({ title: "World login failed", detail: error instanceof Error ? error.message : "Try again inside World App." });
     } finally { setGateBusy(false); }
+  }
+
+  async function shareReferralLink() {
+    const username = verifiedHuman?.username ?? worldContext.username ?? "";
+    const link = getReferralLink(username);
+    const title = "Join HumanChain — real humans only";
+    const text = `I'm on HumanChain — the first trust-first human network inside World App. Ask real questions, post moments, trade nearby, and build your Human Passport. Join with my link and get +${REFERRAL_BONUS_FOR_REFERRED} HP bonus:`;
+    try {
+      const { shareWithWorld } = await import("@/lib/worldMiniApp");
+      await shareWithWorld({ title, text, url: link });
+    } catch {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(link);
+        setToast({ title: "Referral link copied", detail: "Share it with a friend to earn +50 HP when they join." });
+      }
+    }
+    const newCount = incrementReferralShareCount();
+    setReferralShareCount(newCount);
+    earnPoints(0, `Referral link shared (share #${newCount})`);
+    recordHistory({ title: "Referral link shared", detail: `Shared HumanChain invite link. Total shares: ${newCount}. Reward: +50 HP per verified human who joins.`, kind: "profile" });
+  }
+
+  async function copyReferralLink() {
+    const username = verifiedHuman?.username ?? worldContext.username ?? "";
+    const link = getReferralLink(username);
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const el = document.createElement("textarea");
+        el.value = link;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+      }
+      setToast({ title: "Referral link copied", detail: "Send it to a friend. You earn +50 HP when they join and verify." });
+    } catch {
+      setToast({ title: "Link ready", detail: link });
+    }
   }
 
   function enterPreview() {
@@ -645,7 +718,8 @@ export function useHumanChainApp() {
     historyRecords, hpLedger, humanPosts, lastCheckInAt, lastCheckInDate, links,
     marketLocation, marketplaceListings, notificationCenterOpen, notificationPromptDismissed,
     notificationReady, notifications, paymentBusy, paymentPrompt, paymentToken,
-    points, profileImage, savedItems, streak, tab, toast, verifiedHuman, worldContext,
+    points, profileImage, referralShareCount, referredBy, savedItems, streak,
+    tab, toast, verifiedHuman, worldContext,
     // setters
     setActiveField, setAppLanguage, setChainEntryNonce, setDailyAnswered, setDailyAnsweredAt,
     setDailyAnsweredDate, setDailyResponses, setHumanPosts, setLastCheckInAt, setLastCheckInDate,
@@ -654,8 +728,9 @@ export function useHumanChainApp() {
     setSavedItems, setTab, setToast,
     // callbacks
     act, addNotification, clearMarketplaceData, clearPostData, confirmPayment,
-    deleteLocalAccount, earnPoints, enableHumanChainNotifications,
+    copyReferralLink, deleteLocalAccount, earnPoints, enableHumanChainNotifications,
     enterPreview, enterWithWorld, keepStreak, openPayment, recordHistory, resetHistory,
+    shareReferralLink,
   };
 }
 

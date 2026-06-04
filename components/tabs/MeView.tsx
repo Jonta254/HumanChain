@@ -7,16 +7,28 @@ import {
   BookOpen,
   CalendarCheck,
   Compass,
+  Copy,
+  Gift,
   Library,
   LockKeyhole,
   Radio,
   Search,
+  Share2,
   ShieldCheck,
   Star,
   Store,
   Upload,
   Wallet,
 } from "lucide-react";
+import {
+  getNextMilestone,
+  getReachedMilestones,
+  getReferralLink,
+  getTotalReferralHp,
+  REFERRAL_BONUS_FOR_REFERRED,
+  REFERRAL_HP_PER_SHARE,
+  referralMilestones,
+} from "@/lib/humanchain/referral";
 import {
   Permission,
   requestWorldPermission,
@@ -126,6 +138,7 @@ const pointRules = [
 export function MeView({
   accountSyncStatus,
   act,
+  copyReferralLink,
   earnPoints,
   historyRecords,
   hpLedger,
@@ -140,15 +153,19 @@ export function MeView({
   points,
   profileImage,
   recordHistory,
+  referralShareCount,
+  referredBy,
   savedItems,
   setProfileImage,
   setTab,
+  shareReferralLink,
   streak,
   verifiedHuman,
   worldContext,
 }: {
   accountSyncStatus: "idle" | "loading" | "ready" | "saving" | "offline";
   act: (title: string, detail: string) => void;
+  copyReferralLink: () => Promise<void>;
   earnPoints: EarnPoints;
   historyRecords: HistoryRecord[];
   hpLedger: HpLedgerRecord[];
@@ -163,9 +180,12 @@ export function MeView({
   points: number;
   profileImage: string | null;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
+  referralShareCount: number;
+  referredBy: string | null;
   savedItems: number;
   setProfileImage: Dispatch<SetStateAction<string | null>>;
   setTab: Dispatch<SetStateAction<Tab>>;
+  shareReferralLink: () => Promise<void>;
   streak: number;
   verifiedHuman: VerifiedHuman | null;
   worldContext: WorldMiniAppContext;
@@ -403,6 +423,15 @@ export function MeView({
           <p>Check in, answer, post, trade, or confirm a WLD action to create your first HP record.</p>
         )}
       </section>
+      <ReferralCard
+        copyReferralLink={copyReferralLink}
+        displayUsername={displayUsername}
+        referralShareCount={referralShareCount}
+        referredBy={referredBy}
+        shareReferralLink={shareReferralLink}
+        verifiedHuman={verifiedHuman}
+      />
+
       <section className="chain-id-card">
         <div>
           <span>World username</span>
@@ -668,5 +697,129 @@ export function MeView({
         </>
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ReferralCard — standalone sub-component
+// ---------------------------------------------------------------------------
+
+function ReferralCard({
+  copyReferralLink,
+  displayUsername,
+  referralShareCount,
+  referredBy,
+  shareReferralLink,
+  verifiedHuman,
+}: {
+  copyReferralLink: () => Promise<void>;
+  displayUsername: string;
+  referralShareCount: number;
+  referredBy: string | null;
+  shareReferralLink: () => Promise<void>;
+  verifiedHuman: { username?: string | null; mode?: string } | null;
+}) {
+  const referralLink = getReferralLink(displayUsername);
+  const nextMilestone = getNextMilestone(referralShareCount);
+  const reachedMilestones = getReachedMilestones(referralShareCount);
+  const totalHpEstimate = getTotalReferralHp(referralShareCount);
+  const progressPct = nextMilestone
+    ? Math.round((referralShareCount / nextMilestone.count) * 100)
+    : 100;
+  const isVerified = verifiedHuman?.mode === "world";
+
+  return (
+    <section className="referral-card" aria-label="Invite a Human">
+      <div className="referral-card-header">
+        <div className="referral-card-icon">
+          <Gift size={20} />
+        </div>
+        <div>
+          <strong>Invite a Human</strong>
+          <span>+{REFERRAL_HP_PER_SHARE} HP per verified join · +{REFERRAL_BONUS_FOR_REFERRED} HP for them</span>
+        </div>
+        {totalHpEstimate > 0 && (
+          <b className="referral-hp-earned">+{totalHpEstimate} HP</b>
+        )}
+      </div>
+
+      {referredBy && (
+        <div className="referral-welcome-banner">
+          <BadgeCheck size={14} />
+          <span>You were invited by <strong>@{referredBy}</strong> — welcome bonus applied</span>
+        </div>
+      )}
+
+      <p className="referral-intro">
+        Share HumanChain with humans you trust. Every verified join through your link earns you +{REFERRAL_HP_PER_SHARE} HP and gives them a +{REFERRAL_BONUS_FOR_REFERRED} HP welcome bonus.
+      </p>
+
+      <div className="referral-link-row">
+        <code className="referral-link-display">{referralLink}</code>
+        <button
+          aria-label="Copy referral link"
+          className="referral-action-btn referral-copy"
+          onClick={copyReferralLink}
+          type="button"
+        >
+          <Copy size={15} />
+          Copy
+        </button>
+      </div>
+
+      <div className="referral-share-row">
+        <button
+          className="referral-share-btn"
+          disabled={!isVerified}
+          onClick={shareReferralLink}
+          type="button"
+        >
+          <Share2 size={16} />
+          Share via World App
+        </button>
+        {!isVerified && (
+          <small className="referral-verify-note">Verify with World ID to share</small>
+        )}
+      </div>
+
+      {nextMilestone && (
+        <div className="referral-progress">
+          <div className="referral-progress-header">
+            <span>Next: <strong>{nextMilestone.badge}</strong></span>
+            <span>{referralShareCount}/{nextMilestone.count} shares</span>
+          </div>
+          <div className="referral-progress-bar">
+            <div
+              className="referral-progress-fill"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <small>Reach {nextMilestone.count} shares → <strong>{nextMilestone.badge}</strong> badge + +{nextMilestone.hpBonus} HP bonus</small>
+        </div>
+      )}
+
+      <div className="referral-milestones">
+        {referralMilestones.map((m) => {
+          const reached = reachedMilestones.some((r) => r.count === m.count);
+          return (
+            <div
+              className={`referral-milestone ${reached ? "reached" : ""}`}
+              key={m.count}
+            >
+              <strong>{m.badge}</strong>
+              <span>{m.count} share{m.count > 1 ? "s" : ""} · +{m.hpBonus} HP</span>
+              {reached && <i>✓</i>}
+            </div>
+          );
+        })}
+      </div>
+
+      {referralShareCount > 0 && (
+        <div className="referral-stats-row">
+          <span>Shares sent: <strong>{referralShareCount}</strong></span>
+          <span>HP earned: <strong>+{totalHpEstimate}</strong></span>
+        </div>
+      )}
+    </section>
   );
 }

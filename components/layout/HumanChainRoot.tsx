@@ -26,16 +26,16 @@ export function HumanChainRoot(props: HumanChainAppState) {
     links, marketLocation, marketplaceListings, notificationCenterOpen,
     notificationPromptDismissed, notificationReady, notifications,
     paymentBusy, paymentPrompt, paymentToken, points, profileImage,
-    savedItems, streak, tab, toast, verifiedHuman, worldContext,
+    referralShareCount, referredBy, savedItems, streak, tab, toast, verifiedHuman, worldContext,
     setActiveField, setAppLanguage, setChainEntryNonce, setDailyAnswered,
     setDailyAnsweredAt, setDailyAnsweredDate, setDailyResponses, setHumanPosts,
     setLastCheckInAt, setLastCheckInDate,
     setLinks, setMarketLocation, setMarketplaceListings, setNotificationCenterOpen,
     setNotificationPromptDismissed, setNotifications, setPaymentPrompt,
     setProfileImage, setSavedItems, setTab, setToast,
-    act, clearMarketplaceData, clearPostData, confirmPayment, deleteLocalAccount,
-    enableHumanChainNotifications, enterPreview, enterWithWorld, keepStreak,
-    openPayment, recordHistory, resetHistory,
+    act, clearMarketplaceData, clearPostData, confirmPayment, copyReferralLink,
+    deleteLocalAccount, enableHumanChainNotifications, enterPreview, enterWithWorld,
+    keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink,
   } = props;
 
   // Hydration guard — prevents blank flash before client-side state loads
@@ -122,6 +122,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
           <MeView
             accountSyncStatus={accountSyncStatus}
             act={act}
+            copyReferralLink={copyReferralLink}
             earnPoints={earnPoints}
             historyRecords={historyRecords}
             hpLedger={hpLedger}
@@ -129,11 +130,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             links={links}
             marketplaceListings={marketplaceListings}
             marketLocation={marketLocation}
-            openPayment={openPayment}
-            points={points}
-            profileImage={profileImage}
-            lastCheckInAt={lastCheckInAt}
-            lastCheckInDate={lastCheckInDate}
             onCheckIn={() => {
               const now = new Date();
               const today = getLocalDateKey(now);
@@ -147,10 +143,18 @@ export function HumanChainRoot(props: HumanChainAppState) {
               earnPoints(10, "Daily check-in recorded with your device calendar and time.");
               keepStreak("Daily check-in sealed your Human Chain for today.");
             }}
+            openPayment={openPayment}
+            points={points}
+            profileImage={profileImage}
+            lastCheckInAt={lastCheckInAt}
+            lastCheckInDate={lastCheckInDate}
             recordHistory={recordHistory}
+            referralShareCount={referralShareCount}
+            referredBy={referredBy}
             savedItems={savedItems}
             setProfileImage={setProfileImage}
             setTab={setTab}
+            shareReferralLink={shareReferralLink}
             streak={streak}
             verifiedHuman={verifiedHuman}
             worldContext={worldContext}
