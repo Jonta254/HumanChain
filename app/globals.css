@@ -332,7 +332,7 @@ html[data-world-mini-app="true"] .phone-frame {
 
 .settings-language-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -399,14 +399,15 @@ html[data-world-mini-app="true"] .phone-frame {
 
 .v7-home {
   --v7-gap-1: 8px;
-  --v7-gap-2: 16px;
+  --v7-gap-2: 14px;
   --v7-gap-3: 24px;
   display: grid;
   align-content: start;
   gap: var(--v7-gap-2);
   background:
-    radial-gradient(circle at 92% 4%, rgba(47, 111, 237, 0.08), transparent 9rem),
-    linear-gradient(180deg, #fbf7ef, #f4efe6 52%, #fbf7ef);
+    radial-gradient(circle at 92% 4%, rgba(47, 111, 237, 0.1), transparent 10rem),
+    radial-gradient(circle at 8% 60%, rgba(36, 107, 85, 0.06), transparent 14rem),
+    linear-gradient(180deg, #fbf7ef 0%, #f2ede4 50%, #fbf7ef 100%);
 }
 
 .v7-home .section-heading {
@@ -450,10 +451,12 @@ html[data-world-mini-app="true"] .phone-frame {
   border: 0;
   color: #fffdf8;
   background:
-    radial-gradient(circle at 18% 14%, rgba(255, 242, 190, 0.22), transparent 8rem),
-    radial-gradient(circle at 88% 12%, rgba(47, 111, 237, 0.18), transparent 8rem),
-    linear-gradient(145deg, #0b2523, #185745 55%, #131a24);
+    radial-gradient(circle at 18% 14%, rgba(255, 242, 190, 0.28), transparent 9rem),
+    radial-gradient(circle at 88% 12%, rgba(47, 111, 237, 0.22), transparent 9rem),
+    radial-gradient(circle at 50% 92%, rgba(36, 107, 85, 0.32), transparent 8rem),
+    linear-gradient(145deg, #091e1c, #185745 52%, #0f1e2c);
   text-align: center;
+  box-shadow: 0 24px 64px rgba(10, 32, 28, 0.28), inset 0 1px 0 rgba(255, 253, 248, 0.12);
 }
 
 .v7-digital-card::after {
@@ -473,17 +476,18 @@ html[data-world-mini-app="true"] .phone-frame {
 }
 
 .v7-card-avatar {
-  width: 74px;
-  height: 74px;
+  width: 80px;
+  height: 80px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgba(255, 253, 248, 0.24);
-  border-radius: 24px;
+  border: 2px solid rgba(255, 253, 248, 0.32);
+  border-radius: 26px;
   color: #132420;
   background: #fffdf8;
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 950;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .v7-card-avatar img {
@@ -9633,20 +9637,23 @@ textarea:focus {
 .v7-score-reputation {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 16px;
-  border: 1px solid rgba(36, 107, 85, 0.14);
-  border-radius: 20px;
-  background: var(--paper-strong);
-  box-shadow: 0 14px 34px rgba(42, 50, 45, 0.08);
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(36, 107, 85, 0.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, #fffdf8, #f0f7f3),
+    radial-gradient(circle at 100% 0%, rgba(36, 107, 85, 0.1), transparent 9rem);
+  box-shadow: 0 14px 36px rgba(36, 85, 70, 0.1);
 }
 
 .v7-score-reputation > div {
   display: grid;
   gap: 3px;
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(36, 107, 85, 0.06);
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.9);
+  border: 1px solid rgba(36, 107, 85, 0.1);
 }
 
 .v7-score-reputation .v7-section-label {
@@ -9664,6 +9671,13 @@ textarea:focus {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 800;
+}
+
+.v7-score-reputation-score {
+  background:
+    radial-gradient(circle at 90% 10%, rgba(36, 107, 85, 0.14), transparent 6rem),
+    rgba(255, 253, 248, 0.9) !important;
+  border-color: rgba(36, 107, 85, 0.18) !important;
 }
 
 /* Highlight score cell */
