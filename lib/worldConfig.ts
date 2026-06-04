@@ -4,7 +4,14 @@ export const defaultHumanChainTreasury =
   "0x6588e8765c495a9d44e93b0293aedd7ecd6167fc";
 
 export function getWorldAppId() {
-  return process.env.NEXT_PUBLIC_WORLD_APP_ID || process.env.APP_ID || defaultWorldAppId;
+  return (
+    process.env.NEXT_PUBLIC_WORLD_APP_ID ||
+    // Common Vercel dashboard names
+    process.env.WORLD_APP_ID ||
+    process.env.NEW_WORLD_APP_ID ||
+    process.env.APP_ID ||
+    defaultWorldAppId
+  );
 }
 
 export function getWorldRpId() {
@@ -12,7 +19,14 @@ export function getWorldRpId() {
 }
 
 export function getHumanChainTreasury() {
-  return process.env.NEXT_PUBLIC_HUMANCHAIN_TREASURY || defaultHumanChainTreasury;
+  return (
+    process.env.NEXT_PUBLIC_HUMANCHAIN_TREASURY ||
+    // Common Vercel dashboard names
+    process.env.HUMANCHAIN_TREASURY_WALLET ||
+    process.env.HUMANCHAIN_TREASURY ||
+    process.env.TREASURY_WALLET ||
+    defaultHumanChainTreasury
+  );
 }
 
 export function getWorldDevPortalApiKey() {
