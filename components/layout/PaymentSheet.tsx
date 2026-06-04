@@ -76,8 +76,11 @@ export function PaymentSheet({
           </small>
         </div>
         {busy ? (
-          <div className="payment-loading-state" role="status">
-            Opening World Pay and waiting for server verification...
+          <div className="payment-loading-state" role="status" aria-live="polite">
+            <span className="payment-loading-dot" aria-hidden="true" />
+            <span className="payment-loading-dot" aria-hidden="true" />
+            <span className="payment-loading-dot" aria-hidden="true" />
+            <p>Opening World Pay — waiting for confirmation…</p>
           </div>
         ) : null}
         {payment.points ? (

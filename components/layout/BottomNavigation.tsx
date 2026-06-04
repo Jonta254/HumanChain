@@ -1,6 +1,7 @@
 "use client";
 
 import { Home, MessageCircleQuestion, Sparkles, Store } from "lucide-react";
+import { humanHaptic } from "@/lib/worldMiniApp";
 import type { Tab } from "@/types/ui";
 
 type NavLanguage = {
@@ -34,7 +35,7 @@ export function BottomNavigation({
           aria-current={active === key ? "page" : undefined}
           className={active === key ? "active" : ""}
           key={key}
-          onClick={() => onChange(key)}
+          onClick={() => { void humanHaptic("light"); onChange(key); }}
           type="button"
         >
           {icon}

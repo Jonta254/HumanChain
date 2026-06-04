@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   applicationName: "HumanChain",
   title: "HumanChain",
   description:
-    "Ask real humans, join daily chains, read stories, and trade in a verified nearby marketplace.",
+    "Ask real humans, post moments, trade nearby, and read stories — verified by World ID.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/images/humanchain-logo.png",

@@ -10,10 +10,10 @@
   --green: #246b55;
   --violet: #6657d9;
   --shadow: 0 18px 55px rgba(50, 40, 28, 0.12);
-  --world-safe-top: 0px;
-  --world-safe-right: 0px;
-  --world-safe-bottom: 0px;
-  --world-safe-left: 0px;
+  --world-safe-top: env(safe-area-inset-top, 0px);
+  --world-safe-right: env(safe-area-inset-right, 0px);
+  --world-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --world-safe-left: env(safe-area-inset-left, 0px);
   --app-height: 100dvh;
 }
 
@@ -8991,5 +8991,422 @@ html[data-world-mini-app="true"] .bottom-nav {
   html[data-world-mini-app="true"] .bottom-nav {
     bottom: max(6px, var(--world-safe-bottom));
     border-radius: 18px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCREEN TRANSITIONS — smooth tab entrance per World App UX guidelines
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes screenEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.screen-transition-wrapper {
+  min-height: 100%;
+  animation: screenEnter 0.2s ease both;
+  will-change: opacity, transform;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOAST — repositioned to top-below-header per World App design docs
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes toastSlideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes toastFadeOut {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--world-safe-top) + 60px);
+  bottom: auto;
+  z-index: 10;
+  width: min(calc(100% - 24px), 406px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(36, 107, 85, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 8px 32px rgba(23, 49, 47, 0.14), 0 2px 8px rgba(23, 49, 47, 0.08);
+  transform: translateX(-50%);
+  backdrop-filter: blur(14px);
+}
+
+.toast.toast-enter {
+  animation: toastSlideDown 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.toast button {
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: rgba(111, 116, 111, 0.1);
+  border: 0;
+}
+
+/* When in World Mini App, account for no top bar overlap */
+html[data-world-mini-app="true"] .toast {
+  top: calc(var(--world-safe-top) + 56px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUTTON PRESS FEEDBACK — tactile feel on all interactive elements
+   ═══════════════════════════════════════════════════════════════════ */
+
+.bottom-nav button {
+  transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+
+.bottom-nav button:active {
+  transform: scale(0.9);
+}
+
+.bottom-nav button.active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: rgba(36, 107, 85, 0.06);
+  pointer-events: none;
+}
+
+/* Primary CTA buttons — smooth hover/active */
+.gate-primary,
+.v7-command-center button,
+.v7-score-card button,
+.settings-return-panel button,
+.home-notification-toggle button {
+  transition: opacity 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.gate-primary:active,
+.v7-command-center button:active,
+.v7-score-card button:active,
+.settings-return-panel button:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+/* All opportunity/market item buttons */
+.v7-opportunities button,
+.v7-market-preview button,
+.market-item,
+.chain-link-row {
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.v7-opportunities button:active,
+.v7-market-preview button:active,
+.market-item:active {
+  transform: scale(0.985);
+}
+
+/* Payment confirm button */
+.payment-actions button:last-child {
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.payment-actions button:last-child:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOADING STATES — prevent infinite loading, add skeleton animation
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.skeleton {
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--line) 0%,
+    rgba(255, 253, 248, 0.7) 40%,
+    var(--line) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Payment loading dots */
+@keyframes dotPulse {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.payment-loading-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(36, 107, 85, 0.07);
+  font-size: 0.82rem;
+  color: var(--green);
+  font-weight: 850;
+}
+
+.payment-loading-state p {
+  margin: 0;
+  flex: 1;
+}
+
+.payment-loading-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: dotPulse 1.2s ease-in-out infinite;
+  flex: 0 0 auto;
+}
+
+.payment-loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.payment-loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCREEN PADDING — standardized to 24px per World App design guidelines
+   ═══════════════════════════════════════════════════════════════════ */
+
+.screen {
+  padding:
+    calc(20px + var(--world-safe-top))
+    max(16px, calc(20px + var(--world-safe-right)))
+    calc(110px + var(--world-safe-bottom))
+    max(16px, calc(20px + var(--world-safe-left)));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BOTTOM NAV ACTIVE PILL — cleaner active indicator
+   ═══════════════════════════════════════════════════════════════════ */
+
+.bottom-nav button {
+  position: relative;
+}
+
+.bottom-nav button.active {
+  color: var(--green);
+  background: rgba(36, 107, 85, 0.1);
+  font-weight: 950;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOGIN GATE — busy state spinner
+   ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.gate-primary:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.gate-primary:disabled::after {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 253, 248, 0.4);
+  border-top-color: rgba(255, 253, 248, 0.9);
+  border-radius: 50%;
+  margin-left: 8px;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESPONSIVE — better small device handling (320px–375px)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 360px) {
+  :root {
+    font-size: 15px;
+  }
+
+  .bottom-nav button span {
+    font-size: 0.6rem;
+  }
+
+  .v7-digital-card b {
+    font-size: 26px;
+  }
+
+  .v7-quick-actions button {
+    min-height: 68px;
+    border-radius: 14px;
+  }
+
+  .human-home-identity h1 {
+    font-size: 1.8rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FLOATING PROFILE BUTTON — improved tap area and feedback
+   ═══════════════════════════════════════════════════════════════════ */
+
+.floating-profile-button {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.floating-profile-button:active {
+  transform: scale(0.9);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   INPUT FOCUS — clear, accessible focus rings
+   ═══════════════════════════════════════════════════════════════════ */
+
+input:focus,
+textarea:focus {
+  outline: 2px solid rgba(36, 107, 85, 0.5);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAYMENT SHEET — improved layout and accessibility
+   ═══════════════════════════════════════════════════════════════════ */
+
+.payment-sheet {
+  display: grid;
+  gap: 14px;
+}
+
+.payment-sheet h2 {
+  margin: 0;
+  font-size: 1.18rem;
+  line-height: 1.2;
+}
+
+.payment-sheet > strong {
+  font-size: 2rem;
+  color: var(--green);
+  line-height: 1;
+}
+
+.payment-sheet p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.payment-verification-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(36, 107, 85, 0.14);
+  background: rgba(36, 107, 85, 0.06);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--green);
+}
+
+.payment-verification-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.payment-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 10px;
+}
+
+.payment-actions button:first-child {
+  min-height: 52px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.payment-actions button:last-child {
+  min-height: 52px;
+  border-radius: 16px;
+  border: 0;
+  color: #fffdf8;
+  background: var(--green);
+  font-weight: 950;
+}
+
+.payment-actions button:last-child:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SECTION SPACING — 32px between distinct sections per World App docs
+   ═══════════════════════════════════════════════════════════════════ */
+
+.screen > * + * {
+  margin-top: 0;
+}
+
+/* Panel/card components maintain consistent spacing */
+.panel + .panel,
+.section-heading + .panel,
+.screen > section + section {
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLL — smooth inertia on all scrollable containers
+   ═══════════════════════════════════════════════════════════════════ */
+
+.phone-frame,
+.screen,
+[class*="-scroll"],
+[class*="scroll-"] {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOTION SAFETY — respect prefers-reduced-motion
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-transition-wrapper,
+  .toast,
+  .toast.toast-enter,
+  .skeleton,
+  .payment-loading-dot,
+  .gate-primary:disabled::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

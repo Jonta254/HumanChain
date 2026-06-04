@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
@@ -36,6 +37,13 @@ export function HumanChainRoot(props: HumanChainAppState) {
     enableHumanChainNotifications, enterPreview, enterWithWorld, keepStreak,
     openPayment, recordHistory, resetHistory,
   } = props;
+
+  // Auto-dismiss toast after 4 seconds (World App UX guideline: avoid persistent overlays)
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 4000);
+    return () => window.clearTimeout(t);
+  }, [toast, setToast]);
 
   const unreadNotificationCount = Math.max(
     notifications.filter((n) => !n.read).length,
@@ -193,7 +201,11 @@ export function HumanChainRoot(props: HumanChainAppState) {
   return (
     <main className="app-shell">
       <section className="phone-frame">
-        {verifiedHuman ? activeView : (
+        {verifiedHuman ? (
+          <div key={tab} className="screen-transition-wrapper">
+            {activeView}
+          </div>
+        ) : (
           <LoginGate
             appLanguage={appLanguage}
             busy={gateBusy}
@@ -222,13 +234,13 @@ export function HumanChainRoot(props: HumanChainAppState) {
           </button>
         ) : null}
         {toast ? (
-          <div className="toast" role="status">
+          <div aria-live="polite" className="toast toast-enter" role="status">
             <CheckCircle2 size={18} />
             <div>
               <strong>{toast.title}</strong>
               <span>{toast.detail}</span>
             </div>
-            <button onClick={() => setToast(null)} type="button">Close</button>
+            <button aria-label="Dismiss" onClick={() => setToast(null)} type="button">✕</button>
           </div>
         ) : null}
         {paymentPrompt ? (
