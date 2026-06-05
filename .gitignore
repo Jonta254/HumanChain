@@ -9,3 +9,9 @@ dist/
 vercel.json
 profile-repo/
 .mcp.json
+.vercel
+.claude/
+
+# Script artefacts with embedded secrets / temp outputs
+scripts/fix-localisations-graphql.js
+scripts/_compact_desc_final.txt
