@@ -37,61 +37,59 @@ export function PaymentSheet({
   return (
     <section className="payment-backdrop" role="dialog" aria-busy={busy} aria-modal="true">
       <div className="payment-sheet">
-        <span className="section-kicker">World App payment</span>
-        <h2>{payment.title}</h2>
-        <strong>
-          {Number.isFinite(amount)
-            ? formatPaymentAmount(amount, selectedToken)
-            : `0 ${humanChainPaymentTokens[selectedToken].label}`}
-        </strong>
-        <p>{payment.detail}</p>
-        <div className="payment-verification-note">
-          <ShieldCheck size={16} />
-          <span>
-            HumanChain creates a backend reference first. This action unlocks only after World App payment and server verification.
-          </span>
+        <div className="payment-sheet-header">
+          <span className="section-kicker">Pay with World App</span>
+          <strong>
+            {Number.isFinite(amount)
+              ? formatPaymentAmount(amount, selectedToken)
+              : `0 ${humanChainPaymentTokens[selectedToken].label}`}
+          </strong>
         </div>
+
+        <h2>{payment.title}</h2>
+
         {payment.allowCustomAmount ? (
           <label className="payment-amount-field">
-            <span>Tip amount</span>
+            <span>Amount <em>(0.1 – 100 WLD)</em></span>
             <input
-              aria-label="Tip amount in WLD"
+              aria-label="Amount in WLD"
               inputMode="decimal"
               min={payment.minAmount ?? 0.1}
               max={payment.maxAmount ?? 100}
               onChange={(event) => setCustomAmount(event.target.value)}
-              placeholder="Enter WLD amount"
+              placeholder="0.0"
               step="0.1"
               type="number"
               value={customAmount}
             />
-            <small>Choose 0.1-100 WLD. HumanChain records the selected tip amount in the receipt.</small>
           </label>
         ) : null}
-        <div className="payment-token-picker" aria-label="Payment currency">
-          <span>Pay with WLD</span>
-          <small>
-            HumanChain accepts WLD only. The recipient is verified by the server after
-            World App confirms the transaction.
-          </small>
+
+        <div className="payment-meta-row">
+          <div className="payment-verification-note">
+            <ShieldCheck size={14} />
+            <span>Verified on-chain · WLD only</span>
+          </div>
+          {payment.points ? (
+            <span className="payment-hp-badge">+{payment.points} HP</span>
+          ) : null}
         </div>
+
         {busy ? (
           <div className="payment-loading-state" role="status" aria-live="polite">
             <span className="payment-loading-dot" aria-hidden="true" />
             <span className="payment-loading-dot" aria-hidden="true" />
             <span className="payment-loading-dot" aria-hidden="true" />
-            <p>Opening World Pay — waiting for confirmation…</p>
+            <p>Confirming transaction…</p>
           </div>
         ) : null}
-        {payment.points ? (
-          <small>Confirming this also records +{payment.points} HP value.</small>
-        ) : null}
+
         <div className="payment-actions">
           <button disabled={busy} onClick={onCancel} type="button">
             Cancel
           </button>
           <button disabled={!amountValid || busy} onClick={() => onConfirm(amount)} type="button">
-            {busy ? "Verifying..." : "Confirm in World App"}
+            {busy ? "Confirming…" : "Pay with World App"}
           </button>
         </div>
       </div>

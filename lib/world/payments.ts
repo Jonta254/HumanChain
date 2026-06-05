@@ -16,7 +16,8 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
 };
 
-const worldPaymentConfirmationDelays = [0, 1500, 3000, 5000, 8000, 12000, 18000, 24000];
+// Retry schedule: immediate, then exponential back-off up to ~60 s total.
+const worldPaymentConfirmationDelays = [0, 2000, 4000, 6000, 9000, 13000, 18000, 25000];
 
 function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));
@@ -56,11 +57,8 @@ async function confirmWorldPayment(input: {
 
     lastConfirmation = confirmation;
 
+    // Hard server error (4xx wrapped as 502) — stop retrying immediately.
     if (!confirmationResponse.ok) {
-      if (confirmationResponse.status >= 500) {
-        continue;
-      }
-
       return {
         confirmation,
         error: confirmation.error ?? "World payment could not be confirmed.",
@@ -68,6 +66,7 @@ async function confirmWorldPayment(input: {
       };
     }
 
+    // Setup not complete — no point polling.
     if (confirmation.pendingSetup) {
       return {
         confirmation,
@@ -76,9 +75,12 @@ async function confirmWorldPayment(input: {
       };
     }
 
+    // Confirmed.
     if (confirmation.ok) {
       return { confirmation, ok: true };
     }
+
+    // Transaction pending (not yet mined) — keep polling.
   }
 
   return {

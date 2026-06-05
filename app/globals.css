@@ -7053,64 +7053,73 @@ button.danger {
 }
 
 .payment-sheet {
-  width: min(100%, 398px);
-  max-height: min(82dvh, 680px);
+  width: min(100%, 390px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 18px;
-  border: 1px solid rgba(255, 253, 248, 0.18);
+  padding: 20px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
   border-radius: 24px;
   color: var(--paper-strong);
   background:
-    linear-gradient(135deg, rgba(32, 35, 40, 0.98), rgba(36, 107, 85, 0.92)),
-    radial-gradient(circle at 80% 10%, rgba(185, 130, 24, 0.3), transparent 28%);
+    linear-gradient(150deg, rgba(28, 32, 37, 0.99), rgba(36, 107, 85, 0.94)),
+    radial-gradient(circle at 78% 8%, rgba(185, 130, 24, 0.28), transparent 30%);
   box-shadow: var(--shadow);
 }
 
-.payment-sheet h2 {
-  margin: 8px 0;
-  font-size: 1.28rem;
+.payment-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
 }
 
-.payment-sheet strong {
-  display: inline-flex;
-  margin-bottom: 10px;
-  padding: 7px 10px;
+.payment-sheet-header strong {
+  padding: 5px 12px;
   border-radius: 999px;
-  background: rgba(255, 253, 248, 0.12);
+  background: rgba(185, 130, 24, 0.18);
   color: var(--gold);
+  font-size: 1.05rem;
+  font-weight: 900;
 }
 
-.payment-sheet p,
-.payment-sheet small {
-  display: block;
-  margin: 0;
-  color: rgba(255, 253, 248, 0.76);
-  line-height: 1.42;
+.payment-sheet h2 {
+  margin: 0 0 14px;
+  font-size: 1.18rem;
+  font-weight: 800;
+  line-height: 1.3;
 }
 
-.payment-sheet small {
-  margin-top: 8px;
-  font-size: 0.78rem;
+.payment-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
 }
 
 .payment-verification-note {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 8px;
+  display: flex;
   align-items: center;
-  margin-top: 12px;
-  padding: 10px;
+  gap: 6px;
+  padding: 6px 10px;
   border: 1px solid rgba(255, 253, 248, 0.14);
-  border-radius: 14px;
-  color: #fffdf8;
-  background: rgba(255, 253, 248, 0.08);
+  border-radius: 999px;
+  flex: 1;
 }
 
 .payment-verification-note span {
-  color: rgba(255, 253, 248, 0.78);
+  color: rgba(255, 253, 248, 0.72);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.payment-hp-badge {
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(185, 130, 24, 0.18);
+  color: var(--gold);
   font-size: 0.78rem;
-  line-height: 1.34;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
 .payment-token-picker {
@@ -7126,19 +7135,27 @@ button.danger {
 }
 
 .payment-amount-field span {
-  color: rgba(255, 253, 248, 0.7);
+  color: rgba(255, 253, 248, 0.68);
   font-size: 0.76rem;
-  font-weight: 850;
+  font-weight: 700;
+}
+
+.payment-amount-field span em {
+  font-style: normal;
+  color: rgba(255, 253, 248, 0.42);
+  font-weight: 500;
 }
 
 .payment-amount-field input {
-  min-height: 44px;
+  min-height: 48px;
   width: 100%;
   border: 1px solid rgba(255, 253, 248, 0.18);
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 10px 14px;
   color: var(--paper-strong);
-  background: rgba(255, 253, 248, 0.1);
+  background: rgba(255, 253, 248, 0.09);
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .payment-token-picker span {

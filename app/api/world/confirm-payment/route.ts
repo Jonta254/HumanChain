@@ -78,19 +78,31 @@ export async function POST(req: NextRequest) {
 
   const transaction = await response.json();
 
-  if (!response.ok) {
+  // 4xx from World means bad credentials or malformed request — hard fail so the
+  // client stops retrying immediately.
+  if (response.status >= 400 && response.status < 500) {
     return noStoreJson(
-      {
-        ok: false,
-        error: "World payment status lookup failed.",
-        transaction,
-      },
+      { ok: false, error: "World payment lookup failed.", transaction },
       { status: 502 },
     );
   }
 
+  // 5xx or network error — return 200+pending so the client keeps polling.
+  if (!response.ok) {
+    return noStoreJson({ ok: false, pending: true });
+  }
+
   const transactionRecord = transaction as Record<string, unknown>;
-  const isMined = transactionRecord.transaction_status === "mined";
+  const isMined =
+    transactionRecord.transaction_status === "mined" ||
+    transactionRecord.status === "mined" ||
+    transactionRecord.transaction_status === "confirmed" ||
+    transactionRecord.status === "confirmed";
+
+  // Transaction found but not yet mined — return 200+pending so client keeps polling.
+  if (!isMined) {
+    return noStoreJson({ ok: false, pending: true });
+  }
   const treasury = getHumanChainTreasury().toLowerCase();
   const expectedTokenAmounts = new Set([
     tokenToDecimals(amount, Tokens.WLD).toString(),

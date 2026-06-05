@@ -12,9 +12,11 @@ export type WorldPaymentInput = {
 export type WorldPaymentConfirmation = {
   error?: string;
   ok?: boolean;
+  pending?: boolean;
   pendingSetup?: boolean;
   transaction?: {
     transaction_status?: string;
+    status?: string;
   };
 };
 
