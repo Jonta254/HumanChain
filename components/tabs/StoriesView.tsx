@@ -1745,8 +1745,6 @@ export function StoriesView({
             <div className="story-file-preview">
               <strong>{activeUserStory.fileName ?? "Uploaded story file"}</strong>
               {activeUserStory.fileType === "application/pdf" && activeUserStory.fileDataUrl ? (
-                {/* <object> and bare <a> are blocked in World App WebView.
-                    Show the extracted text if available, else a neutral message. */}
                 <p className="story-file-note">PDF preview is not supported inside World App.</p>
               ) : activeUserStory.fileText ? (
                 <pre>{activeUserStory.fileText}</pre>
