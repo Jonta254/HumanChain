@@ -80,10 +80,25 @@ html[data-world-mini-app="true"] body {
   touch-action: pan-y;
 }
 
+/* Scroll-lock: applied to <body> when a modal/sheet is open.
+   Prevents background content scrolling while overlay is visible. */
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
 button,
 input,
 textarea {
   font: inherit;
+}
+
+/* iOS Safari zooms into focused inputs when font-size < 16px.
+   Force 16px minimum on ALL inputs/textareas — World App requirement. */
+input,
+textarea,
+select {
+  font-size: max(1rem, 16px);
 }
 
 button {
@@ -94,6 +109,15 @@ button {
 img,
 video {
   max-width: 100%;
+  /* Prevent long-press "Save Image" / "Open Link" sheets in World App WebView */
+  -webkit-touch-callout: none;
+  pointer-events: auto;
+}
+
+img {
+  /* Prevent drag-and-drop on images */
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 p,
@@ -2443,6 +2467,10 @@ html[data-world-mini-app="true"] .floating-profile-button {
   min-height: 100dvh;
   min-height: var(--app-height);
   overflow-x: hidden;
+  overflow-y: auto;
+  /* Contain overscroll so bounce stays inside this element, never hits WebView root */
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
   padding:
     calc(18px + var(--world-safe-top))
     max(12px, calc(16px + var(--world-safe-right)))
@@ -10538,4 +10566,59 @@ button.active.story-bookmark-btn,
 
 .referral-stats-row strong {
   color: var(--green);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   WORLD APP DESIGN GUIDELINES — Final compliance block
+   All rules here are required by the World App mini-app review process.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Story file: neutral message when PDF/object not renderable in WebView */
+.story-file-note {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-align: center;
+  background: rgba(36, 107, 85, 0.04);
+}
+
+/* All horizontal scrollers must not bounce vertically */
+[class*="-scroll"],
+[class*="scroll-"] {
+  overscroll-behavior: contain;
+}
+
+/* Touch targets: every interactive element must be at least 44×44px */
+button,
+[role="button"],
+[role="tab"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exception: icon-only utility buttons inside lists may be smaller
+   if they have a visible hit-area wrapper; override as needed. */
+.bottom-nav button {
+  min-height: 56px;
+}
+
+/* Prevent focus outline flash from showing on tap in World App */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Accessible focus ring for keyboard / switch access */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Ensure every scrollable list/panel respects overscroll containment */
+.screen,
+.phone-frame {
+  overscroll-behavior: contain;
 }

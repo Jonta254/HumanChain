@@ -601,19 +601,11 @@ function scrollMiniAppToTop() {
   if (typeof window === "undefined") {
     return;
   }
-
+  // In World App, html/body overflow is hidden — window.scrollTo is a no-op.
+  // Scroll the actual scrollable containers directly.
   window.requestAnimationFrame(() => {
-    window.scrollTo({
-      left: 0,
-      top: 0,
-      behavior: "auto",
-    });
-    document.querySelectorAll<HTMLElement>(".phone-frame, .screen").forEach((element) => {
-      element.scrollTo({
-        left: 0,
-        top: 0,
-        behavior: "auto",
-      });
+    document.querySelectorAll<HTMLElement>(".phone-frame, .screen").forEach((el) => {
+      el.scrollTo({ left: 0, top: 0, behavior: "auto" });
     });
   });
 }

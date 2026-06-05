@@ -874,19 +874,10 @@ function scrollMiniAppToTop() {
   if (typeof window === "undefined") {
     return;
   }
-
+  // In World App, html/body overflow is hidden — window.scrollTo is a no-op.
   window.requestAnimationFrame(() => {
-    window.scrollTo({
-      left: 0,
-      top: 0,
-      behavior: "auto",
-    });
-    document.querySelectorAll<HTMLElement>(".phone-frame, .screen").forEach((element) => {
-      element.scrollTo({
-        left: 0,
-        top: 0,
-        behavior: "auto",
-      });
+    document.querySelectorAll<HTMLElement>(".phone-frame, .screen").forEach((el) => {
+      el.scrollTo({ left: 0, top: 0, behavior: "auto" });
     });
   });
 }
@@ -1754,17 +1745,13 @@ export function StoriesView({
             <div className="story-file-preview">
               <strong>{activeUserStory.fileName ?? "Uploaded story file"}</strong>
               {activeUserStory.fileType === "application/pdf" && activeUserStory.fileDataUrl ? (
-                <object
-                  aria-label={`${activeUserStory.title} PDF preview`}
-                  data={activeUserStory.fileDataUrl}
-                  type="application/pdf"
-                >
-                  <a href={activeUserStory.fileDataUrl}>Open PDF story</a>
-                </object>
+                {/* <object> and bare <a> are blocked in World App WebView.
+                    Show the extracted text if available, else a neutral message. */}
+                <p className="story-file-note">PDF preview is not supported inside World App.</p>
               ) : activeUserStory.fileText ? (
                 <pre>{activeUserStory.fileText}</pre>
               ) : activeUserStory.fileDataUrl ? (
-                <a href={activeUserStory.fileDataUrl}>Open uploaded story file</a>
+                <p className="story-file-note">File preview is not available inside World App.</p>
               ) : (
                 <p>Story file preview is unavailable on this device.</p>
               )}

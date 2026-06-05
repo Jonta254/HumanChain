@@ -53,6 +53,13 @@ export function HumanChainRoot(props: HumanChainAppState) {
     return () => window.clearTimeout(t);
   }, [toast, setToast]);
 
+  // Scroll-lock: prevent background scroll while any modal/sheet is open
+  const anyModalOpen = Boolean(paymentPrompt || notificationCenterOpen);
+  useEffect(() => {
+    document.body.classList.toggle("modal-open", anyModalOpen);
+    return () => document.body.classList.remove("modal-open");
+  }, [anyModalOpen]);
+
   const unreadNotificationCount = Math.max(
     notifications.filter((n) => !n.read).length,
     worldContext.pendingNotifications ?? 0,
