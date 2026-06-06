@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
+import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
 import { BottomNavigation as BottomNav } from "@/components/layout/BottomNavigation";
@@ -42,9 +43,28 @@ export function HumanChainRoot(props: HumanChainAppState) {
   const [appReady, setAppReady] = useState(false);
   useEffect(() => {
     // Small rAF to let MiniKit initialize before first paint
-    const frame = window.requestAnimationFrame(() => setAppReady(true));
+    const frame = window.requestAnimationFrame(() => {
+      setAppReady(true);
+      // Mark <html> so all World App CSS rules activate (scroll containment,
+      // bottom-nav floating, safe-area overrides, etc.)
+      if (MiniKit.isInstalled()) {
+        document.documentElement.setAttribute("data-world-mini-app", "true");
+      }
+    });
     return () => window.cancelAnimationFrame(frame);
   }, []);
+
+  // Apply MiniKit safe-area insets as CSS variables so layout adapts to the
+  // exact device notch/home-indicator geometry reported by World App.
+  useEffect(() => {
+    const insets = worldContext.safeAreaInsets;
+    if (!insets) return;
+    const s = document.documentElement.style;
+    s.setProperty("--world-safe-top", `${insets.top ?? 0}px`);
+    s.setProperty("--world-safe-right", `${insets.right ?? 0}px`);
+    s.setProperty("--world-safe-bottom", `${insets.bottom ?? 0}px`);
+    s.setProperty("--world-safe-left", `${insets.left ?? 0}px`);
+  }, [worldContext.safeAreaInsets]);
 
   // Auto-dismiss toast after 4 seconds (World App UX guideline: avoid persistent overlays)
   useEffect(() => {

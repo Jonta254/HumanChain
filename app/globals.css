@@ -174,12 +174,7 @@ html[data-world-mini-app="true"] .phone-frame {
   height: var(--app-height);
   min-height: 100dvh;
   min-height: var(--app-height);
-  overflow-x: hidden;
-  overflow-y: auto;
-  /* contain keeps inner momentum scrolling without letting it bubble to the WebView */
-  overscroll-behavior: contain;
-  /* Use momentum scrolling inside the frame, not on the WebView root */
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden; /* clip — .screen is the scroll container, not phone-frame */
   touch-action: pan-y;
   box-shadow: none;
 }
@@ -9091,7 +9086,28 @@ html[data-world-mini-app="true"] .bottom-nav {
 .screen-transition-wrapper {
   min-height: 100%;
   animation: screenEnter 0.2s ease both;
-  will-change: opacity, transform;
+  /* Note: will-change intentionally omitted — adding it creates a GPU
+     compositing layer that breaks -webkit-overflow-scrolling: touch on
+     iOS WebKit/World App. The animation runs fine without it. */
+}
+
+/* In World App the phone-frame is overflow:hidden and acts as the viewport.
+   The wrapper must fill it exactly so .screen can use height:100% to
+   become the sole scroll container per tab. */
+html[data-world-mini-app="true"] .screen-transition-wrapper {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* .screen is THE scroll container in World App — a fixed-height element
+   whose content overflows and scrolls with momentum inside it. */
+html[data-world-mini-app="true"] .screen {
+  height: 100%;
+  min-height: unset;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
