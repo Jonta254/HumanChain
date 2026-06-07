@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
@@ -39,19 +39,11 @@ export function HumanChainRoot(props: HumanChainAppState) {
     keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink,
   } = props;
 
-  // Hydration guard — prevents blank flash before client-side state loads
-  const [appReady, setAppReady] = useState(false);
   useEffect(() => {
-    // Small rAF to let MiniKit initialize before first paint
-    const frame = window.requestAnimationFrame(() => {
-      setAppReady(true);
-      // Mark <html> so all World App CSS rules activate (scroll containment,
-      // bottom-nav floating, safe-area overrides, etc.)
-      if (MiniKit.isInstalled()) {
-        document.documentElement.setAttribute("data-world-mini-app", "true");
-      }
-    });
-    return () => window.cancelAnimationFrame(frame);
+    // Mark <html> so World App CSS rules activate without delaying first paint.
+    if (MiniKit.isInstalled()) {
+      document.documentElement.setAttribute("data-world-mini-app", "true");
+    }
   }, []);
 
   // Apply MiniKit safe-area insets as CSS variables so layout adapts to the
@@ -208,7 +200,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             dailyResponses={dailyResponses}
             earnPoints={earnPoints}
             humanPosts={humanPosts}
-            links={links}
             marketplaceListings={marketplaceListings}
             notificationReady={notificationReady}
             notificationUnreadCount={unreadNotificationCount}
@@ -231,20 +222,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
         );
     }
   })();
-
-  if (!appReady) {
-    return (
-      <main className="app-shell">
-        <section className="phone-frame app-splash">
-          <div className="app-splash-inner">
-            <img alt="HumanChain" className="app-splash-logo" src="/images/humanchain-logo.png" />
-            <strong>HumanChain</strong>
-            <span>Verified humans only</span>
-          </div>
-        </section>
-      </main>
-    );
-  }
 
   return (
     <main className="app-shell">

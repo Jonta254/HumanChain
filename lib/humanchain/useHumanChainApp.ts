@@ -144,7 +144,8 @@ export function useHumanChainApp() {
     const urlRef = readRefFromUrl();
     if (urlRef && !loadReferredBy()) {
       saveReferredBy(urlRef);
-      setReferredBy(urlRef);
+      const frame = window.requestAnimationFrame(() => setReferredBy(urlRef));
+      return () => window.cancelAnimationFrame(frame);
     }
   }, []);
 

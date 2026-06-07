@@ -41,7 +41,6 @@ import type { Tab, EarnPoints } from "@/types/ui";
 import type { VerifiedHuman } from "@/types/user";
 import type { HumanPost, DailyResponse } from "@/types/content";
 import type { MarketplaceListing } from "@/types/market";
-import type { ChainLink } from "@/types/chain";
 import type { HistoryRecord } from "@/types/reputation";
 
 // ---------------------------------------------------------------------------
@@ -188,7 +187,6 @@ export function HomeView({
   dailyResponses,
   earnPoints,
   humanPosts,
-  links,
   marketplaceListings,
   notificationReady,
   notificationUnreadCount,
@@ -215,7 +213,6 @@ export function HomeView({
   dailyResponses: DailyResponse[];
   earnPoints: EarnPoints;
   humanPosts: HumanPost[];
-  links: ChainLink[];
   marketplaceListings: MarketplaceListing[];
   notificationReady: boolean;
   notificationUnreadCount: number;
@@ -252,7 +249,6 @@ export function HomeView({
   const chainScore = Math.max(151, Math.round(points / 4) + streak * 7 + userPostCount * 12 + savedItems * 5);
   const communitySpotlight = chainFields[(new Date().getDate() - 1) % chainFields.length];
   const greeting = getGreeting();
-  const firstName = worldHandle.replace(/^@/, "").split("_")[0] ?? worldHandle.replace(/^@/, "");
 
   function submitDailyAnswer() {
     if (!requireVerifiedPublicAction(verifiedHuman, act, "answering today's question")) return;
@@ -493,7 +489,7 @@ export function HomeView({
               </div>
             </div>
             <blockquote className="h9-success-quote">
-              "{story.quote}"
+              &ldquo;{story.quote}&rdquo;
             </blockquote>
             <button
               className="h9-success-cta"

@@ -87,7 +87,7 @@ export function PaymentSheet({
 
         {/* Trust row */}
         <div className="ps-trust-row">
-          <span><ShieldCheck size={12} />On-chain verified</span>
+          <span><ShieldCheck size={12} />Backend verified</span>
           <span>WLD only</span>
           {payment.points ? (
             <span className="ps-hp-badge"><Zap size={11} />+{payment.points} HP</span>
@@ -125,7 +125,7 @@ export function PaymentSheet({
         </div>
 
         <p className="ps-note">
-          World App opens for biometric confirmation. No payment is processed outside World Chain.
+          World App opens for confirmation. HumanChain unlocks this only after backend payment verification.
         </p>
       </div>
     </div>

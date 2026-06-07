@@ -67,16 +67,26 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const response = await fetch(
-    `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transactionId}?app_id=${appId}&type=payment`,
-    {
-      headers: {
-        Authorization: `Bearer ${devPortalApiKey}`,
-      },
-    },
-  );
+  let response: Response;
+  let transaction: unknown;
 
-  const transaction = await response.json();
+  try {
+    response = await fetch(
+      `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transactionId}?app_id=${appId}&type=payment`,
+      {
+        headers: {
+          Authorization: `Bearer ${devPortalApiKey}`,
+        },
+      },
+    );
+    transaction = await response.json();
+  } catch (error) {
+    return noStoreJson({
+      ok: false,
+      pending: true,
+      error: error instanceof Error ? error.message : "World payment lookup is temporarily unavailable.",
+    });
+  }
 
   // 4xx from World means bad credentials or malformed request — hard fail so the
   // client stops retrying immediately.
