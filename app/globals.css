@@ -12276,6 +12276,50 @@ button,
 
 /* ── Generic section ─────────────────────── */
 
+.mk-pulse-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 16px 0;
+}
+
+.mk-pulse-strip button {
+  min-height: 78px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid rgba(36,107,85,0.14);
+  border-radius: 16px;
+  padding: 11px;
+  color: var(--ink);
+  background:
+    linear-gradient(135deg, rgba(255,253,248,0.96), rgba(241,248,244,0.9)),
+    radial-gradient(circle at 94% 0%, rgba(185,130,24,0.13), transparent 5rem);
+  box-shadow: 0 8px 22px rgba(61,45,27,0.06);
+  text-align: left;
+}
+
+.mk-pulse-strip span {
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 950;
+  line-height: 1.1;
+}
+
+.mk-pulse-strip strong {
+  color: var(--green);
+  font-size: 0.88rem;
+  font-weight: 950;
+  line-height: 1.05;
+}
+
+.mk-pulse-strip small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 750;
+  line-height: 1.18;
+}
+
 .mk-section {
   padding: 18px 16px 0;
 }

@@ -20,17 +20,15 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
-import { chatWithWorld, getWorldMiniAppContext } from "@/lib/world";
+import { chatWithWorld } from "@/lib/world";
 import {
   formatShortTime,
-  isVerifiedWorldHuman,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { saveJsonToStorage, loadJsonFromStorage } from "@/lib/humanchain/storage";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HumanIdentity } from "@/types/user";
 import type { HistoryRecord } from "@/types/reputation";
-import type { MarketLocationState, MarketplaceListing } from "@/types/market";
 
 // ---------------------------------------------------------------------------
 // Static data
@@ -106,6 +104,12 @@ const SEED_PROVIDERS = [
 const DEADLINE_OPTIONS = ["3 days", "1 week", "2 weeks", "1 month", "Flexible"];
 const BUDGET_PRESETS   = ["WLD 25", "WLD 50", "WLD 100", "WLD 200", "WLD 500"];
 
+const MARKET_PULSE = [
+  ["Verified scope", "Jobs + services", "Deliverables, budget, and deadline before chat."],
+  ["Payment rail", "WLD escrow", "Posting fees are shown before public listings go live."],
+  ["Market reach", "Region-first", "Search by specialty, language, client region, or provider base."],
+] as const;
+
 // ---------------------------------------------------------------------------
 // Local types
 // ---------------------------------------------------------------------------
@@ -135,24 +139,14 @@ export function MarketplaceView({
   act,
   earnPoints,
   humanIdentity,
-  marketLocation,
-  marketplaceListings,
   openPayment,
   recordHistory,
-  setMarketLocation,
-  setMarketplaceListings,
-  worldContext,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   humanIdentity: HumanIdentity | null;
-  marketLocation: MarketLocationState;
-  marketplaceListings: MarketplaceListing[];
   openPayment: OpenPayment;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
-  setMarketLocation: React.Dispatch<React.SetStateAction<MarketLocationState>>;
-  setMarketplaceListings: React.Dispatch<React.SetStateAction<MarketplaceListing[]>>;
-  worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [mode, setMode]               = useState<MarketMode>("browse");
   const [activeNiche, setActiveNiche] = useState("all");
@@ -580,6 +574,22 @@ export function MarketplaceView({
           })}
         </div>
       </div>
+
+      {activeNiche === "all" && !search && (
+        <section className="mk-pulse-strip" aria-label="Marketplace quality signals">
+          {MARKET_PULSE.map(([label, value, detail]) => (
+            <button
+              key={label}
+              onClick={() => act(label, detail)}
+              type="button"
+            >
+              <span>{label}</span>
+              <strong>{value}</strong>
+              <small>{detail}</small>
+            </button>
+          ))}
+        </section>
+      )}
 
       {/* Featured urgent — only on All + no search */}
       {activeNiche === "all" && !search && (

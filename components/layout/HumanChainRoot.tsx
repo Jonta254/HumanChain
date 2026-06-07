@@ -31,7 +31,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
     setActiveField, setAppLanguage, setChainEntryNonce, setDailyAnswered,
     setDailyAnsweredAt, setDailyAnsweredDate, setDailyResponses, setHumanPosts,
     setLastCheckInAt, setLastCheckInDate,
-    setLinks, setMarketLocation, setMarketplaceListings, setNotificationCenterOpen,
+    setLinks, setNotificationCenterOpen,
     setNotificationPromptDismissed, setNotifications, setPaymentPrompt,
     setProfileImage, setSavedItems, setTab, setToast,
     act, clearMarketplaceData, clearPostData, confirmPayment, copyReferralLink,
@@ -135,13 +135,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
             act={act}
             earnPoints={earnPoints}
             humanIdentity={verifiedHuman}
-            marketLocation={marketLocation}
-            marketplaceListings={marketplaceListings}
             openPayment={openPayment}
             recordHistory={recordHistory}
-            setMarketLocation={setMarketLocation}
-            setMarketplaceListings={setMarketplaceListings}
-            worldContext={worldContext}
           />
         );
       case "me":
