@@ -10,24 +10,33 @@ export const humanChainPaymentFeatures = {
   "chain-circle": 3,
   "pin-chain-item": 4,
   "world-pulse": 1,
+  // Marketplace — post, list, boost
   "marketplace-business-ad": 4,
   "marketplace-comment": 0.5,
   "marketplace-extra-photo-pack": 1.5,
   "marketplace-photo-pack": 1.5,
   "marketplace-local-boost": 2,
   "marketplace-quick-listing": 2,
+  "marketplace-job-post": 2,
+  "marketplace-service-listing": 2,
+  "marketplace-featured-listing": 4,
+  // Private / premium
   "private-question": 4,
   "private-reach": 4,
   "video-post": 2,
+  // Stories
   "story-tip": 1,
   "story-file-publish": 4,
   "storyteller-tip": 1,
+  // Tips
   "tip-market-item": 1,
   "tip-chain-link": 1,
   "tip-human": 1,
   "tip-storyteller": 1,
+  // Voice
   "voice-answer": 2,
   "voice-question": 2,
+  // Micro-actions
   "quick-answer-boost": 0.5,
   "link-reaction-pack": 0.5,
   "story-bookmark": 0.5,

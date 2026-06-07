@@ -2,11 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  compress: true,
   experimental: {
-    cpus: 1,
+    optimizePackageImports: ["lucide-react", "@worldcoin/minikit-js"],
     workerThreads: true,
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
       { protocol: "https", hostname: "images.unsplash.com" },

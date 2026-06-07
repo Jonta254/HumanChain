@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, X, Zap } from "lucide-react";
 import {
   humanChainPaymentTokens,
   isValidHumanChainPaymentAmount,
@@ -26,73 +26,108 @@ export function PaymentSheet({
   const [customAmount, setCustomAmount] = useState(() =>
     parsePaymentAmount(payment.amount).toString(),
   );
+
   const amount = payment.allowCustomAmount
     ? Number.parseFloat(customAmount)
     : parsePaymentAmount(payment.amount);
-  const amountValid = isValidHumanChainPaymentAmount(
-    getPaymentFeature(payment),
-    amount,
-  );
+
+  const amountValid = isValidHumanChainPaymentAmount(getPaymentFeature(payment), amount);
+  const tokenLabel = humanChainPaymentTokens[selectedToken].label;
+  const displayAmount = Number.isFinite(amount)
+    ? formatPaymentAmount(amount, selectedToken)
+    : `0 ${tokenLabel}`;
 
   return (
-    <section className="payment-backdrop" role="dialog" aria-busy={busy} aria-modal="true">
-      <div className="payment-sheet">
-        <div className="payment-sheet-header">
-          <span className="section-kicker">Pay with World App</span>
-          <strong>
-            {Number.isFinite(amount)
-              ? formatPaymentAmount(amount, selectedToken)
-              : `0 ${humanChainPaymentTokens[selectedToken].label}`}
-          </strong>
+    <div className="ps-backdrop" role="dialog" aria-modal="true" aria-label="Payment">
+      <div className="ps-sheet">
+
+        {/* Header */}
+        <div className="ps-header">
+          <div className="ps-header-left">
+            <span className="ps-world-badge">
+              <ShieldCheck size={13} />
+              World App Pay
+            </span>
+            <strong className="ps-amount">{displayAmount}</strong>
+          </div>
+          <button
+            className="ps-close"
+            onClick={onCancel}
+            disabled={busy}
+            aria-label="Cancel payment"
+            type="button"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        <h2>{payment.title}</h2>
+        {/* Title */}
+        <p className="ps-title">{payment.title}</p>
 
-        {payment.allowCustomAmount ? (
-          <label className="payment-amount-field">
-            <span>Amount <em>(0.1 – 100 WLD)</em></span>
-            <input
-              aria-label="Amount in WLD"
-              inputMode="decimal"
-              min={payment.minAmount ?? 0.1}
-              max={payment.maxAmount ?? 100}
-              onChange={(event) => setCustomAmount(event.target.value)}
-              placeholder="0.0"
-              step="0.1"
-              type="number"
-              value={customAmount}
-            />
+        {/* Custom amount input */}
+        {payment.allowCustomAmount && (
+          <label className="ps-amount-field">
+            <span>Amount (WLD)</span>
+            <div className="ps-amount-input-wrap">
+              <input
+                aria-label="Tip amount in WLD"
+                inputMode="decimal"
+                min={payment.minAmount ?? 0.1}
+                max={payment.maxAmount ?? 100}
+                onChange={(e) => setCustomAmount(e.target.value)}
+                placeholder="1.0"
+                step="0.1"
+                type="number"
+                value={customAmount}
+              />
+              <span className="ps-amount-unit">WLD</span>
+            </div>
           </label>
-        ) : null}
+        )}
 
-        <div className="payment-meta-row">
-          <div className="payment-verification-note">
-            <ShieldCheck size={14} />
-            <span>Verified on-chain · WLD only</span>
-          </div>
+        {/* Trust row */}
+        <div className="ps-trust-row">
+          <span><ShieldCheck size={12} />On-chain verified</span>
+          <span>WLD only</span>
           {payment.points ? (
-            <span className="payment-hp-badge">+{payment.points} HP</span>
+            <span className="ps-hp-badge"><Zap size={11} />+{payment.points} HP</span>
           ) : null}
         </div>
 
-        {busy ? (
-          <div className="payment-loading-state" role="status" aria-live="polite">
-            <span className="payment-loading-dot" aria-hidden="true" />
-            <span className="payment-loading-dot" aria-hidden="true" />
-            <span className="payment-loading-dot" aria-hidden="true" />
-            <p>Confirming transaction…</p>
+        {/* Confirming state */}
+        {busy && (
+          <div className="ps-confirming" role="status" aria-live="polite">
+            <span className="ps-dot" />
+            <span className="ps-dot" />
+            <span className="ps-dot" />
+            <span>Confirming on World Chain…</span>
           </div>
-        ) : null}
+        )}
 
-        <div className="payment-actions">
-          <button disabled={busy} onClick={onCancel} type="button">
+        {/* Actions */}
+        <div className="ps-actions">
+          <button
+            className="ps-cancel"
+            disabled={busy}
+            onClick={onCancel}
+            type="button"
+          >
             Cancel
           </button>
-          <button disabled={!amountValid || busy} onClick={() => onConfirm(amount)} type="button">
-            {busy ? "Confirming…" : "Pay with World App"}
+          <button
+            className="ps-pay"
+            disabled={!amountValid || busy}
+            onClick={() => void onConfirm(amount)}
+            type="button"
+          >
+            {busy ? "Confirming…" : `Pay ${displayAmount}`}
           </button>
         </div>
+
+        <p className="ps-note">
+          World App opens for biometric confirmation. No payment is processed outside World Chain.
+        </p>
       </div>
-    </section>
+    </div>
   );
 }
