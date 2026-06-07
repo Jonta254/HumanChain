@@ -8,16 +8,20 @@ import {
   BookOpen,
   Briefcase,
   CheckCircle2,
+  Clock,
+  DollarSign,
   Globe2,
   Languages,
   MessageCircleQuestion,
   Scale,
+  Search,
   Settings,
   ShieldCheck,
   Sparkles,
   Star,
   Store,
   TrendingUp,
+  Users,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -41,245 +45,136 @@ import type { ChainLink } from "@/types/chain";
 import type { HistoryRecord } from "@/types/reputation";
 
 // ---------------------------------------------------------------------------
-// Specialized service categories
+// Static data
 // ---------------------------------------------------------------------------
 
 const serviceCategories = [
-  {
-    id: "legal",
-    label: "Legal",
-    sub: "African & regional law",
-    icon: Scale,
-    color: "var(--blue)",
-    bg: "rgba(47,111,237,0.08)",
-    count: "1.2k providers",
-  },
-  {
-    id: "translation",
-    label: "Translation",
-    sub: "Rare languages",
-    icon: Languages,
-    color: "var(--green)",
-    bg: "rgba(36,107,85,0.08)",
-    count: "3.4k providers",
-  },
-  {
-    id: "manufacturing",
-    label: "Manufacturing",
-    sub: "LatAm & Asia niche parts",
-    icon: Wrench,
-    color: "var(--coral)",
-    bg: "rgba(239,125,105,0.08)",
-    count: "890 providers",
-  },
-  {
-    id: "consulting",
-    label: "Consulting",
-    sub: "Regional expertise",
-    icon: Briefcase,
-    color: "var(--gold)",
-    bg: "rgba(185,130,24,0.08)",
-    count: "2.1k providers",
-  },
+  { id: "legal",         label: "Legal Consulting",      sub: "African & regional law",       icon: Scale,     color: "#2f6fed", bg: "rgba(47,111,237,0.09)"  },
+  { id: "translation",  label: "Translation",            sub: "100+ rare languages",           icon: Languages, color: "#246b55", bg: "rgba(36,107,85,0.09)"   },
+  { id: "manufacturing",label: "Manufacturing",          sub: "LatAm & Asia niche parts",      icon: Wrench,    color: "#ef7d69", bg: "rgba(239,125,105,0.09)" },
+  { id: "consulting",   label: "Consulting",             sub: "Regional expertise",            icon: Briefcase, color: "#b98218", bg: "rgba(185,130,24,0.09)"  },
 ];
-
-// ---------------------------------------------------------------------------
-// Featured open opportunities
-// ---------------------------------------------------------------------------
 
 const openOpportunities = [
   {
     id: "opp-1",
     title: "Swahili–Portuguese Medical Document Translation",
     budget: "WLD 85",
-    niche: "Healthcare Translation",
+    niche: "Healthcare",
     region: "Kenya → Brazil",
     deadline: "5 days",
     proposals: 3,
     urgent: true,
-    skills: ["Medical terminology", "Swahili", "Portuguese"],
+    color: "#2f6fed",
+    skills: ["Medical terms", "Swahili", "Portuguese"],
   },
   {
     id: "opp-2",
     title: "South African Mining Regulation Consultant",
     budget: "WLD 220",
-    niche: "Legal Consulting",
+    niche: "Legal",
     region: "South Africa",
     deadline: "12 days",
     proposals: 7,
     urgent: false,
+    color: "#246b55",
     skills: ["SA mining law", "MPRDA", "Compliance"],
   },
   {
     id: "opp-3",
     title: "Custom Motorcycle Parts — Colombia Fabricator",
     budget: "WLD 340",
-    niche: "Niche Manufacturing",
+    niche: "Manufacturing",
     region: "Latin America",
     deadline: "21 days",
     proposals: 2,
     urgent: false,
-    skills: ["CNC machining", "Steel fabrication", "Custom parts"],
+    color: "#ef7d69",
+    skills: ["CNC machining", "Steel fab", "Custom parts"],
   },
   {
     id: "opp-4",
     title: "Hausa Business Contract Review",
     budget: "WLD 60",
-    niche: "Legal Translation",
+    niche: "Legal",
     region: "Nigeria",
     deadline: "3 days",
     proposals: 1,
     urgent: true,
-    skills: ["Hausa", "Nigerian law", "Business contracts"],
+    color: "#b98218",
+    skills: ["Hausa", "Nigerian law", "Contracts"],
   },
 ];
-
-// ---------------------------------------------------------------------------
-// Top-rated providers
-// ---------------------------------------------------------------------------
 
 const topProviders = [
+  { handle: "@dr_amara_legal",   name: "Amara D.",     specialty: "West African Commercial Law", region: "Senegal",         rating: 4.9, jobs: 84,  color: "#2f6fed", badge: "Legal"         },
+  { handle: "@kwame_translate",  name: "Kwame A.",     specialty: "Medical & Legal Translation", region: "Ghana",           rating: 5.0, jobs: 132, color: "#246b55", badge: "Translation"   },
+  { handle: "@lena_mx_parts",   name: "Lena M.",      specialty: "CNC & Custom Fabrication",    region: "Guadalajara MX",  rating: 4.8, jobs: 61,  color: "#ef7d69", badge: "Manufacturing" },
+  { handle: "@priya_regional",  name: "Priya N.",     specialty: "South Asian Healthcare",      region: "Bangalore, India",rating: 4.7, jobs: 49,  color: "#b98218", badge: "Consulting"    },
+  { handle: "@fatou_law",       name: "Fatou B.",     specialty: "Francophone African Law",     region: "Dakar, Senegal",  rating: 4.8, jobs: 37,  color: "#6657d9", badge: "Legal"         },
+];
+
+const successStories = [
   {
-    handle: "@dr_amara_legal",
-    name: "Amara Diallo",
-    specialty: "West African Commercial Law",
-    region: "Senegal",
-    rating: 4.9,
-    jobs: 84,
-    badge: "Top Legal",
-    initial: "A",
-    verified: true,
-  },
-  {
-    handle: "@lena_mx_parts",
-    name: "Lena Morales",
-    specialty: "CNC & Custom Fabrication",
-    region: "Guadalajara, MX",
-    rating: 4.8,
-    jobs: 61,
-    badge: "Top Manufacturing",
-    initial: "L",
-    verified: true,
-  },
-  {
-    handle: "@kwame_translate",
-    name: "Kwame Asante",
-    specialty: "Medical & Legal Translation",
-    region: "Ghana",
-    rating: 5.0,
-    jobs: 132,
-    badge: "Elite Translator",
+    provider: "Kwame Asante",
     initial: "K",
-    verified: true,
-  },
-  {
-    handle: "@priya_regional",
-    name: "Priya Nair",
-    specialty: "South Asian Healthcare Consulting",
-    region: "Bangalore, India",
-    rating: 4.7,
-    jobs: 49,
-    badge: "Top Consultant",
-    initial: "P",
-    verified: true,
+    color: "#246b55",
+    job: "Translated 8 medical case files Swahili → Portuguese for a São Paulo hospital",
+    earned: "WLD 340",
+    region: "Ghana → Brazil",
+    time: "6 days",
+    quote: "HumanChain connected me with a client 9,000 km away. The escrow meant I started with confidence.",
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Regional spotlights
-// ---------------------------------------------------------------------------
-
-const regionalSpotlights = [
-  {
-    region: "Africa",
-    focus: "Legal & Healthcare",
-    description: "Expert legal consultants and certified medical translators across 54 African nations.",
-    active: "4.2k active providers",
-    growth: "+38% this month",
-    color: "var(--gold)",
-  },
-  {
-    region: "Latin America",
-    focus: "Niche Manufacturing",
-    description: "Precision fabricators, custom parts suppliers, and industrial specialists from Mexico to Argentina.",
-    active: "2.8k active providers",
-    growth: "+24% this month",
-    color: "var(--coral)",
-  },
-  {
-    region: "Southeast Asia",
-    focus: "Language Services",
-    description: "Rare dialect translators, regional legal advisors, and market entry specialists across ASEAN.",
-    active: "3.6k active providers",
-    growth: "+51% this month",
-    color: "var(--blue)",
-  },
+const howItWorks = [
+  { step: "1", icon: Search,      title: "Post Your Need",     detail: "Describe the job, budget, region, and timeline in 2 minutes." },
+  { step: "2", icon: Sparkles,    title: "AI Matches You",     detail: "Receive verified proposals from specialists in your niche." },
+  { step: "3", icon: ShieldCheck, title: "Work & Pay Safely",  detail: "Milestones released from WLD escrow only when you approve." },
 ];
 
-// ---------------------------------------------------------------------------
-// Trust pillars
-// ---------------------------------------------------------------------------
+const activityFeed = [
+  "Kwame completed a Medical Translation in Ghana · 2m ago",
+  "Amara posted a new Legal Consulting offer · 5m ago",
+  "Lena accepted a CNC parts job from Mexico · 8m ago",
+  "New job posted: Hausa Contract Review · 12m ago",
+  "Priya earned WLD 180 for a Healthcare report · 17m ago",
+];
+
+const liveStats = [
+  { value: "12k+",  label: "Verified Providers" },
+  { value: "68",    label: "Countries" },
+  { value: "340+",  label: "Niche Categories" },
+  { value: "94%",   label: "Satisfaction" },
+];
 
 const trustPillars = [
-  {
-    icon: ShieldCheck,
-    title: "Escrow Protected",
-    detail: "Funds locked in WLD escrow until milestones confirmed.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "World ID Verified",
-    detail: "Every provider verified as a unique real human.",
-  },
-  {
-    icon: Star,
-    title: "Work Samples",
-    detail: "Providers upload proven work before your first hire.",
-  },
-  {
-    icon: Globe2,
-    title: "Local Currency",
-    detail: "Pay in WLD with local mobile money rails.",
-  },
+  { icon: ShieldCheck, title: "Escrow Protected",    detail: "Funds locked until milestones confirmed." },
+  { icon: BadgeCheck,  title: "World ID Verified",   detail: "Every provider is a real, unique human." },
+  { icon: Star,        title: "Work Samples",        detail: "Portfolios vetted before your first hire." },
+  { icon: DollarSign,  title: "Local Currency",      detail: "WLD with mobile money rails globally." },
 ];
-
-// ---------------------------------------------------------------------------
-// Platform stats
-// ---------------------------------------------------------------------------
-
-const platformStats = [
-  { value: "12k+", label: "Verified Providers" },
-  { value: "68", label: "Countries" },
-  { value: "340+", label: "Niche Categories" },
-  { value: "94%", label: "Satisfaction" },
-];
-
-// ---------------------------------------------------------------------------
-// Daily question
-// ---------------------------------------------------------------------------
-
-const dailyHumanQuestion = {
-  title: "What truth did life teach you this week?",
-  detail: "Every verified human can answer once. Best answers become tomorrow's World Verdict.",
-  reward: "+18 HP",
-};
-
-// ---------------------------------------------------------------------------
-// Chain fields (for community spotlight)
-// ---------------------------------------------------------------------------
 
 const chainFields = [
-  { name: "Faith & Prayer", members: "18.4k", mood: "hope", detail: "Christians, Hindus, Muslims, Rastafari, and spiritual humans sharing daily strength." },
-  { name: "Builders & Money", members: "31.2k", mood: "ambition", detail: "Business ideas, WLD use, startup truth, and small wins from verified humans." },
-  { name: "Love & Family", members: "27.8k", mood: "care", detail: "Relationship wisdom, family repair, parenting, loneliness, and forgiveness." },
-  { name: "Culture Rooms", members: "44.1k", mood: "belonging", detail: "Language, food, music, migration, identity, and human customs across countries." },
-  { name: "Health & Healing", members: "22.6k", mood: "recovery", detail: "Daily strength, mental health, caregiving, body changes, and honest survival notes." },
-  { name: "Migration & Home", members: "16.9k", mood: "memory", detail: "Humans between countries sharing documents, loneliness, hope, work, and belonging." },
-  { name: "Youth & Future", members: "39.7k", mood: "future", detail: "Young humans asking about skills, identity, ambition, school, pressure, and purpose." },
-  { name: "Parents & Children", members: "20.5k", mood: "care", detail: "Real lessons from parents, guardians, children, teachers, and family builders." },
+  { name: "Builders & Money",  members: "31.2k", mood: "ambition",  detail: "Business ideas, WLD use, startup truth." },
+  { name: "Health & Healing",  members: "22.6k", mood: "recovery",  detail: "Daily strength, mental health, caregiving." },
+  { name: "Culture Rooms",     members: "44.1k", mood: "belonging", detail: "Language, food, music, migration, identity." },
+  { name: "Faith & Prayer",    members: "18.4k", mood: "hope",      detail: "Sharing daily strength across beliefs." },
+  { name: "Youth & Future",    members: "39.7k", mood: "future",    detail: "Skills, identity, ambition, and purpose." },
+  { name: "Love & Family",     members: "27.8k", mood: "care",      detail: "Family repair, parenting, forgiveness." },
+  { name: "Migration & Home",  members: "16.9k", mood: "memory",   detail: "Documents, loneliness, work, belonging." },
+  { name: "Parents & Children",members: "20.5k", mood: "care",      detail: "Lessons from parents, teachers, builders." },
 ];
-
 type ChainField = (typeof chainFields)[number];
+
+const dailyHumanQuestion = "What truth did life teach you this week?";
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -342,23 +237,22 @@ export function HomeView({
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
+  const [activityIdx, setActivityIdx] = useState(0);
+
   const homeCopy = appLanguage.home;
-  const navCopy = appLanguage.nav;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
   const primaryProfileImage = getPrimaryProfileImage(profileImage, verifiedHuman, worldContext);
-  const userPostCount = humanPosts.filter((post) => post.owner).length;
+  const userPostCount = humanPosts.filter((p) => p.owner).length;
   const profileInitial = worldHandle.replace(/^@/, "").trim().charAt(0).toUpperCase() || "H";
+  const isVerified = isVerifiedWorldHuman(verifiedHuman);
   const passportMetrics = getTrustPassportMetrics({
     completedTrades: marketplaceListings.filter((l) => l.status === "payment-ready").length,
-    human: verifiedHuman,
-    points,
-    posts: userPostCount,
-    savedItems,
-    streak,
+    human: verifiedHuman, points, posts: userPostCount, savedItems, streak,
   });
   const chainScore = Math.max(151, Math.round(points / 4) + streak * 7 + userPostCount * 12 + savedItems * 5);
-  const isVerified = isVerifiedWorldHuman(verifiedHuman);
   const communitySpotlight = chainFields[(new Date().getDate() - 1) % chainFields.length];
+  const greeting = getGreeting();
+  const firstName = worldHandle.replace(/^@/, "").split("_")[0] ?? worldHandle.replace(/^@/, "");
 
   function submitDailyAnswer() {
     if (!requireVerifiedPublicAction(verifiedHuman, act, "answering today's question")) return;
@@ -368,373 +262,393 @@ export function HomeView({
     const time = formatShortTime(now);
     setDailyAnsweredAt(time);
     setDailyAnsweredDate(getLocalDateKey(now));
-    setDailyResponses((current) => [
+    setDailyResponses((cur) => [
       { user: verifiedHuman?.username ?? "@human", text: dailyDraft.trim() || "Life taught me that a real answer can carry another human.", time },
-      ...current,
+      ...cur,
     ]);
     recordHistory({ title: "Daily Human answer", detail: dailyDraft.trim() || "Answered today's HumanChain question.", kind: "post" });
     earnPoints(18, "Your Daily Human answer entered today's global verdict.");
   }
 
   return (
-    <div className="screen home-v8">
-      {/* ── Top bar ── */}
-      <header className="hv8-topbar">
-        <button
-          aria-label="Open Human Passport"
-          className="hv8-avatar"
-          onClick={() => setTab("me")}
-          type="button"
-        >
-          {primaryProfileImage ? <img alt="" src={primaryProfileImage} /> : profileInitial}
-          {isVerified && <span className="hv8-avatar-verified" aria-label="Verified"><BadgeCheck size={11} /></span>}
+    <div className="screen home-v9">
+
+      {/* ── Topbar ───────────────────────────────────── */}
+      <header className="h9-topbar">
+        <button className="h9-avatar-btn" onClick={() => setTab("me")} type="button" aria-label="Open passport">
+          <span className="h9-avatar" style={{ background: primaryProfileImage ? "transparent" : "linear-gradient(135deg,#2f6fed,#6657d9)" }}>
+            {primaryProfileImage ? <img alt="" src={primaryProfileImage} /> : profileInitial}
+            {isVerified && <span className="h9-avatar-pip"><BadgeCheck size={10} /></span>}
+          </span>
         </button>
-        <div className="hv8-topbar-copy">
-          <strong>{worldHandle}</strong>
-          <span>Specialized Services · Worldwide</span>
+        <div className="h9-topbar-text">
+          <span className="h9-greeting">{greeting},</span>
+          <strong className="h9-handle">{worldHandle}</strong>
         </div>
-        <button
-          aria-label={notificationReady ? "Notifications" : "Enable notifications"}
-          className={`hv8-icon-btn ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
-          onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
-          type="button"
-        >
-          <Bell size={19} />
-        </button>
-        <button
-          aria-label="Settings"
-          className="hv8-icon-btn"
-          onClick={() => setTab("settings")}
-          type="button"
-        >
-          <Settings size={19} />
-        </button>
+        <div className="h9-topbar-actions">
+          <button
+            className={`h9-icon-btn ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
+            onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
+            aria-label="Notifications"
+            type="button"
+          >
+            <Bell size={18} />
+          </button>
+          <button className="h9-icon-btn" onClick={() => setTab("settings")} aria-label="Settings" type="button">
+            <Settings size={18} />
+          </button>
+        </div>
       </header>
 
-      {/* ── Hero ── */}
-      <section className="hv8-hero" aria-label="App hero">
-        <div className="hv8-hero-inner">
-          <span className="hv8-hero-kicker">
-            <Globe2 size={13} />
-            World's Under-served Niches Marketplace
-          </span>
-          <h1>Find Specialized <br />Services Globally</h1>
-          <p>Legal consulting in Africa. Rare language translators. Niche manufacturing in Latin America. Real experts, verified humans, escrow-protected.</p>
-          <div className="hv8-hero-ctas">
-            <button
-              className="hv8-hero-primary"
-              onClick={() => setTab("market")}
-              type="button"
+      {/* ── Live activity ticker ─────────────────────── */}
+      <div className="h9-ticker" aria-live="polite">
+        <span className="h9-ticker-dot" />
+        <div className="h9-ticker-track">
+          {activityFeed.map((item, i) => (
+            <span
+              key={i}
+              className={`h9-ticker-item ${i === activityIdx % activityFeed.length ? "active" : ""}`}
+              onClick={() => setActivityIdx((c) => (c + 1) % activityFeed.length)}
             >
-              <Sparkles size={16} />
-              Find a Specialist
-            </button>
-            <button
-              className="hv8-hero-secondary"
-              onClick={() => {
-                act("Post a Job", "Describe your need and receive proposals from verified specialists worldwide.");
-                setTab("market");
-              }}
-              type="button"
-            >
-              Post a Job
-              <ArrowRight size={14} />
-            </button>
-          </div>
+              {item}
+            </span>
+          ))}
         </div>
+      </div>
 
-        {/* Stats strip */}
-        <div className="hv8-stats-strip">
-          {platformStats.map((stat) => (
-            <div key={stat.label} className="hv8-stat">
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
-            </div>
+      {/* ── Hero — search-first ──────────────────────── */}
+      <section className="h9-hero" aria-label="Search">
+        <div className="h9-hero-copy">
+          <h1>Find the Specialist <br /><em>Nobody Else Has</em></h1>
+          <p>Legal help in Africa. Rare language translation. Niche manufacturing. Verified humans, escrow-safe payments.</p>
+        </div>
+        <button
+          className="h9-search-bar"
+          onClick={() => { act("Search Specialists", "Browse verified providers by niche, region, language, or expertise."); setTab("market"); }}
+          type="button"
+          aria-label="Search for specialists"
+        >
+          <Search size={17} />
+          <span>Search specialists, niches, regions…</span>
+          <span className="h9-search-badge">AI</span>
+        </button>
+        <div className="h9-hero-chips">
+          {["African Legal", "Medical Translation", "CNC Parts", "Hausa Contracts", "Mining Law"].map((chip) => (
+            <button key={chip} className="h9-chip" onClick={() => { act(chip, `Browsing ${chip} specialists worldwide.`); setTab("market"); }} type="button">
+              {chip}
+            </button>
           ))}
         </div>
       </section>
 
-      {/* ── AI Match ── */}
-      {isVerified && (
-        <section className="hv8-ai-match" aria-label="AI matching">
-          <div className="hv8-ai-match-inner">
-            <div className="hv8-ai-icon"><Sparkles size={20} /></div>
-            <div>
-              <strong>AI-Matched for You</strong>
-              <p>Based on your profile and region, we found 3 specialists ready to start.</p>
-            </div>
+      {/* ── Live stats ───────────────────────────────── */}
+      <div className="h9-stats-row">
+        {liveStats.map((s) => (
+          <div key={s.label} className="h9-stat">
+            <strong>{s.value}</strong>
+            <span>{s.label}</span>
           </div>
-          <button
-            className="hv8-ai-match-btn"
-            onClick={() => setAiGuideOpen(true)}
-            type="button"
-          >
-            View Matches
-            <ArrowRight size={14} />
-          </button>
-        </section>
-      )}
+        ))}
+      </div>
 
-      {/* ── Service categories ── */}
-      <section className="hv8-section" aria-label="Service categories">
-        <div className="hv8-section-head">
+      {/* ── How it works ─────────────────────────────── */}
+      <section className="h9-section" aria-label="How it works">
+        <div className="h9-section-head">
+          <strong>How It Works</strong>
+          <span className="h9-section-sub">3 simple steps</span>
+        </div>
+        <div className="h9-how-row">
+          {howItWorks.map((step, i) => {
+            const Icon = step.icon;
+            return (
+              <div key={step.step} className="h9-how-card">
+                <span className="h9-how-num">{step.step}</span>
+                <span className="h9-how-icon"><Icon size={20} /></span>
+                <strong>{step.title}</strong>
+                <p>{step.detail}</p>
+                {i < howItWorks.length - 1 && <span className="h9-how-arrow" aria-hidden="true">›</span>}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Open opportunities ───────────────────────── */}
+      <section className="h9-section" aria-label="Open opportunities">
+        <div className="h9-section-head">
+          <strong>Open Right Now</strong>
+          <span className="h9-live-pill"><span className="h9-pulse" />Live</span>
+        </div>
+        <div className="h9-opps">
+          {openOpportunities.map((opp) => (
+            <button
+              key={opp.id}
+              className="h9-opp"
+              style={{ "--opp-color": opp.color } as React.CSSProperties}
+              onClick={() => { act(opp.title, `${opp.niche} in ${opp.region}. Budget: ${opp.budget}. ${opp.proposals} proposals so far.`); setTab("market"); }}
+              type="button"
+            >
+              <div className="h9-opp-top">
+                <span className="h9-opp-tag" style={{ color: opp.color, background: `${opp.color}18` }}>{opp.niche}</span>
+                {opp.urgent && <span className="h9-opp-urgent">Urgent</span>}
+                <span className="h9-opp-deadline"><Clock size={11} />{opp.deadline}</span>
+              </div>
+              <strong className="h9-opp-title">{opp.title}</strong>
+              <div className="h9-opp-meta">
+                <span><Globe2 size={12} />{opp.region}</span>
+                <span><Users size={12} />{opp.proposals} proposals</span>
+              </div>
+              <div className="h9-opp-skills">
+                {opp.skills.map((s) => <i key={s}>{s}</i>)}
+              </div>
+              <div className="h9-opp-footer">
+                <strong>{opp.budget}</strong>
+                <span className="h9-opp-apply">Apply <ArrowRight size={12} /></span>
+              </div>
+              <span className="h9-opp-bar" style={{ background: opp.color }} />
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Service categories ───────────────────────── */}
+      <section className="h9-section" aria-label="Browse by specialty">
+        <div className="h9-section-head">
           <strong>Browse by Specialty</strong>
-          <button onClick={() => setTab("market")} type="button" className="hv8-see-all">
-            See all <ArrowRight size={13} />
+          <button className="h9-text-btn" onClick={() => setTab("market")} type="button">
+            All categories <ArrowRight size={13} />
           </button>
         </div>
-        <div className="hv8-categories">
+        <div className="h9-cats">
           {serviceCategories.map((cat) => {
             const Icon = cat.icon;
             return (
               <button
                 key={cat.id}
-                className="hv8-cat-card"
+                className="h9-cat"
                 style={{ "--cat-color": cat.color, "--cat-bg": cat.bg } as React.CSSProperties}
                 onClick={() => setTab("market")}
                 type="button"
               >
-                <span className="hv8-cat-icon"><Icon size={22} /></span>
+                <span className="h9-cat-icon"><Icon size={20} /></span>
                 <strong>{cat.label}</strong>
                 <small>{cat.sub}</small>
-                <span className="hv8-cat-count">{cat.count}</span>
               </button>
             );
           })}
         </div>
       </section>
 
-      {/* ── Open opportunities ── */}
-      <section className="hv8-section" aria-label="Open opportunities">
-        <div className="hv8-section-head">
-          <strong>Open Opportunities</strong>
-          <span className="hv8-live-chip"><span className="live-pulse-dot" />Live</span>
-        </div>
-        <div className="hv8-opportunities">
-          {openOpportunities.map((opp) => (
-            <button
-              key={opp.id}
-              className={`hv8-opp-card ${opp.urgent ? "urgent" : ""}`}
-              onClick={() => {
-                act(opp.title, `${opp.niche} in ${opp.region}. Budget: ${opp.budget}. ${opp.proposals} proposals so far.`);
-                setTab("market");
-              }}
-              type="button"
-            >
-              <div className="hv8-opp-top">
-                <span className="hv8-opp-niche">{opp.niche}</span>
-                {opp.urgent && <span className="hv8-opp-urgent">Urgent</span>}
-              </div>
-              <strong>{opp.title}</strong>
-              <div className="hv8-opp-meta">
-                <span><Globe2 size={12} />{opp.region}</span>
-                <span><TrendingUp size={12} />{opp.proposals} proposals</span>
-                <span>{opp.deadline} left</span>
-              </div>
-              <div className="hv8-opp-skills">
-                {opp.skills.map((s) => <i key={s}>{s}</i>)}
-              </div>
-              <div className="hv8-opp-footer">
-                <strong>{opp.budget}</strong>
-                <span>Apply now <ArrowRight size={12} /></span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Top providers ── */}
-      <section className="hv8-section" aria-label="Top rated providers">
-        <div className="hv8-section-head">
+      {/* ── Top providers ────────────────────────────── */}
+      <section className="h9-section" aria-label="Top rated specialists">
+        <div className="h9-section-head">
           <strong>Top-Rated Specialists</strong>
-          <button onClick={() => setTab("market")} type="button" className="hv8-see-all">
+          <button className="h9-text-btn" onClick={() => setTab("market")} type="button">
             View all <ArrowRight size={13} />
           </button>
         </div>
-        <div className="hv8-providers">
-          {topProviders.map((provider) => (
+        <div className="h9-providers-scroll">
+          {topProviders.map((p) => (
             <button
-              key={provider.handle}
-              className="hv8-provider-card"
-              onClick={() => {
-                act(provider.name, `${provider.specialty} specialist in ${provider.region}. ${provider.jobs} completed jobs. Rating: ${provider.rating}/5.`);
-              }}
+              key={p.handle}
+              className="h9-provider"
+              onClick={() => act(p.name, `${p.specialty} · ${p.region} · ${p.jobs} jobs · ${p.rating}/5`)}
               type="button"
             >
-              <div className="hv8-provider-avatar">
-                {provider.initial}
-                {provider.verified && <span className="hv8-verified-pip"><BadgeCheck size={10} /></span>}
+              <div className="h9-provider-av" style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}88)` }}>
+                {p.name.charAt(0)}
+                <span className="h9-provider-pip"><BadgeCheck size={9} /></span>
               </div>
-              <strong>{provider.name}</strong>
-              <span className="hv8-provider-specialty">{provider.specialty}</span>
-              <div className="hv8-provider-meta">
-                <span><Star size={11} fill="currentColor" />{provider.rating}</span>
-                <span>{provider.jobs} jobs</span>
+              <strong>{p.name}</strong>
+              <span className="h9-provider-spec">{p.specialty}</span>
+              <div className="h9-provider-row">
+                <span className="h9-provider-rating"><Star size={10} fill="currentColor" />{p.rating}</span>
+                <span className="h9-provider-jobs">{p.jobs} jobs</span>
               </div>
-              <span className="hv8-provider-badge">{provider.badge}</span>
+              <span className="h9-provider-badge" style={{ color: p.color, background: `${p.color}18` }}>{p.badge}</span>
             </button>
           ))}
         </div>
       </section>
 
-      {/* ── Regional spotlights ── */}
-      <section className="hv8-section" aria-label="Regional spotlights">
-        <div className="hv8-section-head">
-          <strong>Regional Spotlights</strong>
-        </div>
-        <div className="hv8-regions">
-          {regionalSpotlights.map((r) => (
+      {/* ── Success story ────────────────────────────── */}
+      {successStories.map((story) => (
+        <section key={story.provider} className="h9-section" aria-label="Success story">
+          <div className="h9-success">
+            <div className="h9-success-head">
+              <span className="h9-success-kicker"><TrendingUp size={13} />Real Success Story</span>
+            </div>
+            <div className="h9-success-body">
+              <div className="h9-success-av" style={{ background: `linear-gradient(135deg,${story.color}cc,${story.color}88)` }}>
+                {story.initial}
+              </div>
+              <div className="h9-success-info">
+                <strong>{story.provider}</strong>
+                <p>{story.job}</p>
+                <div className="h9-success-chips">
+                  <span><Globe2 size={11} />{story.region}</span>
+                  <span><Clock size={11} />{story.time}</span>
+                  <span><DollarSign size={11} />{story.earned}</span>
+                </div>
+              </div>
+            </div>
+            <blockquote className="h9-success-quote">
+              "{story.quote}"
+            </blockquote>
             <button
-              key={r.region}
-              className="hv8-region-card"
-              style={{ "--region-color": r.color } as React.CSSProperties}
-              onClick={() => {
-                act(r.region, r.description);
-                setTab("market");
-              }}
+              className="h9-success-cta"
+              onClick={() => { act("Become a Provider", "List your specialty, set your rate, and get found by clients worldwide."); setTab("market"); }}
               type="button"
             >
-              <span className="hv8-region-label">{r.region}</span>
-              <strong>{r.focus}</strong>
-              <p>{r.description}</p>
-              <div className="hv8-region-meta">
-                <span>{r.active}</span>
-                <span className="hv8-region-growth">{r.growth}</span>
-              </div>
+              Earn like this — become a provider <ArrowRight size={14} />
             </button>
-          ))}
+          </div>
+        </section>
+      ))}
+
+      {/* ── Earn as provider ─────────────────────────── */}
+      <section className="h9-section" aria-label="Earn as provider">
+        <div className="h9-earn">
+          <div className="h9-earn-text">
+            <span className="h9-earn-kicker">For Specialists</span>
+            <strong>Earn in WLD. Work Globally.</strong>
+            <p>List your expertise, receive verified job proposals, and get paid through escrow — from any country.</p>
+          </div>
+          <div className="h9-earn-perks">
+            <span><BadgeCheck size={13} />World ID verified</span>
+            <span><ShieldCheck size={13} />Escrow protected</span>
+            <span><Globe2 size={13} />68 countries</span>
+          </div>
+          <button
+            className="h9-earn-btn"
+            onClick={() => { act("Become a Provider", "Set up your specialist profile, add work samples, and start receiving job proposals."); setTab("market"); }}
+            type="button"
+          >
+            <Sparkles size={16} />
+            Start as a Provider
+          </button>
         </div>
       </section>
 
-      {/* ── Trust pillars ── */}
-      <section className="hv8-section hv8-trust-section" aria-label="Trust and safety">
-        <div className="hv8-section-head">
+      {/* ── Trust pillars ────────────────────────────── */}
+      <section className="h9-section" aria-label="Trust and safety">
+        <div className="h9-section-head">
           <strong>Built for Trust</strong>
-          <span className="hv8-trust-kicker">Every transaction protected</span>
+          <span className="h9-section-sub">Every transaction protected</span>
         </div>
-        <div className="hv8-trust-grid">
-          {trustPillars.map((pillar) => {
-            const Icon = pillar.icon;
+        <div className="h9-trust-grid">
+          {trustPillars.map((t) => {
+            const Icon = t.icon;
             return (
-              <div key={pillar.title} className="hv8-trust-card">
-                <span className="hv8-trust-icon"><Icon size={20} /></span>
-                <strong>{pillar.title}</strong>
-                <p>{pillar.detail}</p>
+              <div key={t.title} className="h9-trust">
+                <span className="h9-trust-icon"><Icon size={18} /></span>
+                <strong>{t.title}</strong>
+                <p>{t.detail}</p>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* ── Quick nav ── */}
-      <section className="hv8-quick-nav" aria-label="Quick navigation">
+      {/* ── Verified human passport strip ────────────── */}
+      <section className="h9-section" aria-label="Your passport">
+        <button className="h9-passport" onClick={() => setTab("me")} type="button">
+          <div className="h9-passport-left">
+            <span className="h9-passport-av" style={{ background: primaryProfileImage ? "transparent" : "linear-gradient(135deg,#2f6fed,#6657d9)" }}>
+              {primaryProfileImage ? <img alt="" src={primaryProfileImage} /> : profileInitial}
+            </span>
+            <div>
+              <strong>Human Passport</strong>
+              <span>Score {chainScore} · {isVerified ? "World ID Verified ✓" : "Preview Mode"}</span>
+            </div>
+          </div>
+          <div className="h9-passport-right">
+            <span className="h9-passport-streak"><Zap size={13} />{streak}d streak</span>
+            <ArrowRight size={16} />
+          </div>
+        </button>
+      </section>
+
+      {/* ── Community + Daily question ───────────────── */}
+      <section className="h9-section" aria-label="Community and daily question">
+        <div className="h9-community">
+          <div className="h9-community-head">
+            <div>
+              <span className="h9-section-sub">Community today</span>
+              <strong>{communitySpotlight.name}</strong>
+              <p>{communitySpotlight.detail}</p>
+            </div>
+            <button
+              className="h9-community-join"
+              onClick={() => { setActiveField(communitySpotlight); setTab("chains"); }}
+              type="button"
+            >
+              Join <ArrowRight size={12} />
+            </button>
+          </div>
+          <div className="h9-community-stats">
+            <div><strong>{communitySpotlight.members}</strong><span>Members</span></div>
+            <div><strong>{streak}d</strong><span>Your streak</span></div>
+            <div><strong>{passportMetrics.helpfulScore}</strong><span>Trust score</span></div>
+          </div>
+        </div>
+
+        <div className="h9-daily">
+          <div className="h9-daily-head">
+            <strong>{homeCopy.dailyTitle}</strong>
+            <span className="h9-daily-reward"><Zap size={12} />+18 HP</span>
+          </div>
+          <p className="h9-daily-q">{dailyHumanQuestion}</p>
+          {dailyAnswered ? (
+            <div className="h9-daily-done">
+              <CheckCircle2 size={15} />
+              <span>Answered {dailyAnsweredAt ?? "today"} — {homeCopy.answeredToday}</span>
+            </div>
+          ) : (
+            <>
+              <textarea
+                className="h9-daily-area"
+                onChange={(e) => setDailyDraft(e.target.value)}
+                placeholder={homeCopy.dailyPlaceholder}
+                rows={3}
+                value={dailyDraft}
+              />
+              <button className="h9-daily-submit" disabled={dailyAnswered} onClick={submitDailyAnswer} type="button">
+                {homeCopy.answerDaily}
+              </button>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* ── Bottom quick nav ─────────────────────────── */}
+      <section className="h9-quick-nav" aria-label="Quick navigation">
         <button onClick={() => setTab("ask")} type="button">
-          <MessageCircleQuestion size={20} />
-          <span>{navCopy.ask}</span>
+          <MessageCircleQuestion size={19} />
+          <span>{appLanguage.nav.ask}</span>
           {dailyResponses.length > 0 && <b>{dailyResponses.length}</b>}
         </button>
         <button onClick={() => setTab("chains")} type="button">
-          <Sparkles size={20} />
-          <span>{navCopy.chains}</span>
+          <Sparkles size={19} />
+          <span>Moments</span>
         </button>
         <button onClick={() => setTab("market")} type="button">
-          <Store size={20} />
+          <Store size={19} />
           <span>Services</span>
         </button>
         <button onClick={() => setTab("stories")} type="button">
-          <BookOpen size={20} />
-          <span>{navCopy.stories}</span>
+          <BookOpen size={19} />
+          <span>{appLanguage.nav.stories}</span>
         </button>
       </section>
 
-      {/* ── Community spotlight ── */}
-      <section className="hv8-community" aria-label="Community spotlight">
-        <div className="hv8-community-inner">
-          <span className="hv8-section-kicker">Community today</span>
-          <strong>{communitySpotlight.name}</strong>
-          <p>{communitySpotlight.detail}</p>
-          <button
-            onClick={() => { setActiveField(communitySpotlight); setTab("chains"); }}
-            type="button"
-          >
-            Open community <ArrowRight size={13} />
-          </button>
-        </div>
-        <div className="hv8-community-stats">
-          <div><strong>{communitySpotlight.members}</strong><span>Members</span></div>
-          <div><strong>{streak}d</strong><span>Your streak</span></div>
-          <div><strong>{passportMetrics.helpfulScore}</strong><span>Trust score</span></div>
-        </div>
-      </section>
-
-      {/* ── Daily question ── */}
-      <section className="hv8-daily" aria-label="Daily question">
-        <div className="hv8-daily-head">
-          <strong>{homeCopy.dailyTitle}</strong>
-          <span className="hv8-daily-reward"><Zap size={13} />+18 HP</span>
-        </div>
-        <p className="hv8-daily-q">{dailyHumanQuestion.title}</p>
-        {dailyAnswered ? (
-          <div className="hv8-daily-done">
-            <CheckCircle2 size={16} />
-            <span>Answered {dailyAnsweredAt ?? "today"} — {homeCopy.answeredToday}.</span>
-          </div>
-        ) : (
-          <>
-            <textarea
-              className="hv8-daily-textarea"
-              onChange={(e) => setDailyDraft(e.target.value)}
-              placeholder={homeCopy.dailyPlaceholder}
-              rows={3}
-              value={dailyDraft}
-            />
-            <button
-              className="hv8-daily-submit"
-              disabled={dailyAnswered}
-              onClick={submitDailyAnswer}
-              type="button"
-            >
-              {homeCopy.answerDaily}
-            </button>
-          </>
-        )}
-      </section>
-
-      {/* ── Passport score strip ── */}
-      <section className="hv8-passport-strip" aria-label="Your passport">
-        <button
-          className="hv8-passport-btn"
-          onClick={() => setTab("me")}
-          type="button"
-        >
-          <div className="hv8-passport-avatar">
-            {primaryProfileImage ? <img alt="" src={primaryProfileImage} /> : profileInitial}
-          </div>
-          <div>
-            <strong>Human Passport</strong>
-            <span>Score {chainScore} · {isVerified ? "World ID Verified" : "Preview"}</span>
-          </div>
-          <ArrowRight size={16} />
-        </button>
-      </section>
-
-      {/* ── AI guide button ── */}
-      <button
-        className="hv8-fab"
-        onClick={() => setAiGuideOpen(true)}
-        aria-label="Open AI guide"
-        type="button"
-      >
+      {/* ── AI guide FAB ─────────────────────────────── */}
+      <button className="h9-fab" onClick={() => setAiGuideOpen(true)} aria-label="Open AI guide" type="button">
         <Sparkles size={20} />
       </button>
 
       {aiGuideOpen && (
-        <AIGuideSheet
-          chainScore={chainScore}
-          onClose={() => setAiGuideOpen(false)}
-          points={points}
-          streak={streak}
-        />
+        <AIGuideSheet chainScore={chainScore} onClose={() => setAiGuideOpen(false)} points={points} streak={streak} />
       )}
     </div>
   );
