@@ -13,6 +13,7 @@ import {
   Globe2,
   Languages,
   MessageCircleQuestion,
+  Package,
   Scale,
   Search,
   Settings,
@@ -347,6 +348,43 @@ export function HomeView({
         ))}
       </div>
 
+      {/* ── Nearby Market preview ────────────────────── */}
+      <section className="h9-section" aria-label="Nearby market">
+        <div className="h9-section-head">
+          <strong>Nearby Market</strong>
+          <button className="h9-text-btn" onClick={() => setTab("market")} type="button">
+            Browse all <ArrowRight size={13} />
+          </button>
+        </div>
+        <div className="h9-providers-scroll">
+          {[
+            { emoji: "📱", title: "Samsung Galaxy A54 5G", price: "WLD 45", area: "1.2 km · Nairobi West", cond: "Used · Good", color: "#1a73e8" },
+            { emoji: "👜", title: "Handmade Ankara Tote Bag", price: "WLD 8",  area: "0.4 km · CBD Market",   cond: "Brand New",    color: "#e91e8c" },
+            { emoji: "🍱", title: "Home-cooked Lunch Boxes",  price: "WLD 2",  area: "0.8 km · Westlands",     cond: "Today Only",   color: "#f57c00" },
+            { emoji: "✂️", title: "Mobile Barber Service",   price: "WLD 5",  area: "2.1 km · Kilimani",      cond: "Available",    color: "#6657d9" },
+          ].map((item) => (
+            <button
+              key={item.title}
+              className="h9-mkt-preview-card"
+              onClick={() => setTab("market")}
+              type="button"
+            >
+              <div className="h9-mkt-preview-img" style={{ background: `linear-gradient(145deg, ${item.color}dd, ${item.color}88)` }}>
+                <span>{item.emoji}</span>
+              </div>
+              <strong>{item.title}</strong>
+              <span className="h9-mkt-price">{item.price}</span>
+              <span className="h9-mkt-area">{item.area}</span>
+              <span className="h9-mkt-cond">{item.cond}</span>
+            </button>
+          ))}
+        </div>
+        <button className="h9-mkt-sell-row" onClick={() => setTab("market")} type="button">
+          <Package size={14} />
+          <span>Have something to sell? <strong>List free →</strong></span>
+        </button>
+      </section>
+
       {/* ── How it works ─────────────────────────────── */}
       <section className="h9-section" aria-label="How it works">
         <div className="h9-section-head">
@@ -630,7 +668,7 @@ export function HomeView({
         </button>
         <button onClick={() => setTab("market")} type="button">
           <Store size={19} />
-          <span>Services</span>
+          <span>Market</span>
         </button>
         <button onClick={() => setTab("stories")} type="button">
           <BookOpen size={19} />

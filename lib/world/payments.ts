@@ -17,7 +17,7 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
 };
 
 // Retry schedule: immediate, then exponential back-off up to ~60 s total.
-const worldPaymentConfirmationDelays = [0, 2000, 4000, 6000, 9000, 13000, 18000, 25000];
+const worldPaymentConfirmationDelays = [0, 1000, 2500, 4500, 7000, 11000, 17000];
 
 function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));
