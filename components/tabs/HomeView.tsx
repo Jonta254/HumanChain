@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Clock,
   DollarSign,
+  Flame,
   Globe2,
   Languages,
   MessageCircleQuestion,
@@ -298,20 +299,25 @@ export function HomeView({
       </header>
 
       {/* ── Live activity ticker ─────────────────────── */}
-      <div className="h9-ticker" aria-live="polite">
+      <button
+        className="h9-ticker"
+        aria-live="polite"
+        onClick={() => { setActivityIdx((c) => (c + 1) % activityFeed.length); setTab("market"); }}
+        type="button"
+      >
         <span className="h9-ticker-dot" />
         <div className="h9-ticker-track">
           {activityFeed.map((item, i) => (
             <span
               key={i}
               className={`h9-ticker-item ${i === activityIdx % activityFeed.length ? "active" : ""}`}
-              onClick={() => setActivityIdx((c) => (c + 1) % activityFeed.length)}
             >
               {item}
             </span>
           ))}
         </div>
-      </div>
+        <Flame size={13} className="h9-ticker-flame" />
+      </button>
 
       {/* ── Hero — search-first ──────────────────────── */}
       <section className="h9-hero" aria-label="Search">
@@ -358,10 +364,38 @@ export function HomeView({
         </div>
         <div className="h9-providers-scroll">
           {[
-            { emoji: "📱", title: "Samsung Galaxy A54 5G", price: "WLD 45", area: "1.2 km · Nairobi West", cond: "Used · Good", color: "#1a73e8" },
-            { emoji: "👜", title: "Handmade Ankara Tote Bag", price: "WLD 8",  area: "0.4 km · CBD Market",   cond: "Brand New",    color: "#e91e8c" },
-            { emoji: "🍱", title: "Home-cooked Lunch Boxes",  price: "WLD 2",  area: "0.8 km · Westlands",     cond: "Today Only",   color: "#f57c00" },
-            { emoji: "✂️", title: "Mobile Barber Service",   price: "WLD 5",  area: "2.1 km · Kilimani",      cond: "Available",    color: "#6657d9" },
+            {
+              photo: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=300&h=200&fit=crop",
+              title: "Samsung Galaxy A54 5G",
+              price: "WLD 45",
+              area: "1.2 km · Nairobi West",
+              cond: "Used · Good",
+              bid: "2 bids",
+            },
+            {
+              photo: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=300&h=200&fit=crop",
+              title: "Handmade Ankara Tote",
+              price: "WLD 8",
+              area: "0.4 km · CBD Market",
+              cond: "Brand New",
+              bid: "1 bid",
+            },
+            {
+              photo: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=300&h=200&fit=crop",
+              title: "Mama Nia Lunch Boxes",
+              price: "WLD 2",
+              area: "0.8 km · Westlands",
+              cond: "Today Only",
+              bid: null,
+            },
+            {
+              photo: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop",
+              title: "GlowBarber Weekend Slot",
+              price: "WLD 5",
+              area: "2.1 km · Kilimani",
+              cond: "Available Now",
+              bid: null,
+            },
           ].map((item) => (
             <button
               key={item.title}
@@ -369,8 +403,9 @@ export function HomeView({
               onClick={() => setTab("market")}
               type="button"
             >
-              <div className="h9-mkt-preview-img" style={{ background: `linear-gradient(145deg, ${item.color}dd, ${item.color}88)` }}>
-                <span>{item.emoji}</span>
+              <div className="h9-mkt-preview-img">
+                <img alt={item.title} src={item.photo} />
+                {item.bid && <span className="h9-mkt-bid-tag">{item.bid}</span>}
               </div>
               <strong>{item.title}</strong>
               <span className="h9-mkt-price">{item.price}</span>
@@ -383,6 +418,36 @@ export function HomeView({
           <Package size={14} />
           <span>Have something to sell? <strong>List free →</strong></span>
         </button>
+      </section>
+
+      {/* ── Hot Bids Live ─────────────────────────────── */}
+      <section className="h9-section" aria-label="Hot bids">
+        <div className="h9-section-head">
+          <strong>Hot Bids</strong>
+          <span className="h9-live-pill"><span className="h9-pulse" />Live</span>
+        </div>
+        <div className="h9-bids-scroll">
+          {[
+            { photo: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=120&h=90&fit=crop", title: "Samsung Galaxy A54", floor: "WLD 60", top: "WLD 68", bids: 2, left: "18h", color: "#2f6fed" },
+            { photo: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=120&h=90&fit=crop",    title: "Used Study Desk",    floor: "WLD 11", top: "WLD 13", bids: 3, left: "9h",  color: "#b98218" },
+            { photo: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=120&h=90&fit=crop",    title: "Ankara Tote Bag",    floor: "WLD 5",  top: "WLD 6",  bids: 1, left: "2d",  color: "#e91e8c" },
+          ].map((bid) => (
+            <button key={bid.title} className="h9-bid-card" onClick={() => setTab("market")} type="button" style={{ "--bid-color": bid.color } as React.CSSProperties}>
+              <div className="h9-bid-photo">
+                <img alt={bid.title} src={bid.photo} />
+              </div>
+              <div className="h9-bid-body">
+                <strong>{bid.title}</strong>
+                <span className="h9-bid-top-row">
+                  <b>{bid.top}</b>
+                  <span className="h9-bid-meta">{bid.bids} bids · {bid.left} left</span>
+                </span>
+                <span className="h9-bid-floor">Floor {bid.floor}</span>
+              </div>
+              <span className="h9-bid-bar" style={{ background: bid.color }} />
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* ── How it works ─────────────────────────────── */}

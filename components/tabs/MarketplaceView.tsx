@@ -1,147 +1,281 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
   Briefcase,
   Camera,
+  CheckCircle2,
+  CircleDollarSign,
   Clock,
+  Flame,
+  Gavel,
   Globe2,
+  HandCoins,
   Languages,
+  Library,
+  LockKeyhole,
   MapPin,
   MessageCircle,
+  MessageCircleQuestion,
   Package,
-  Plus,
+  PlusCircle,
   Scale,
   Search,
+  Send,
   ShieldCheck,
+  ShoppingBag,
   Sparkles,
   Star,
+  Store,
   Tag,
+  Upload,
   Users,
   Wrench,
   Zap,
 } from "lucide-react";
-import { chatWithWorld } from "@/lib/world";
+import {
+  chatWithWorld,
+  getWorldMiniAppContext,
+  shareWithWorld,
+} from "@/lib/world";
+import { normalizePaymentFeature } from "@/lib/worldPayments";
+import { validateAnswerInput, validateListingInput } from "@/lib/humanchainPolicy";
+import {
+  loadJsonFromStorage,
+  saveJsonToStorage,
+  storageKeys,
+} from "@/lib/humanchain/storage";
 import {
   formatShortTime,
+  formatWorldLaunchLocation,
+  getMarketVerificationTier,
+  getShortText,
+  isVerifiedWorldHuman,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
-import { saveJsonToStorage, loadJsonFromStorage } from "@/lib/humanchain/storage";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HumanIdentity } from "@/types/user";
 import type { HistoryRecord } from "@/types/reputation";
+import type {
+  MarketBid,
+  MarketHold,
+  MarketLocationState,
+  MarketplaceListing,
+} from "@/types/market";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NEARBY MARKET — static seed data
+// NEARBY MARKET — seed data (restored from original with real Unsplash photos)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ITEM_CATEGORIES = [
-  { id: "all",         label: "All",        color: "#2f6fed" },
-  { id: "electronics", label: "Electronics",color: "#2f6fed" },
-  { id: "fashion",     label: "Fashion",    color: "#b98218" },
-  { id: "food",        label: "Food",       color: "#246b55" },
-  { id: "furniture",   label: "Furniture",  color: "#ef7d69" },
-  { id: "services",    label: "Services",   color: "#6657d9" },
-];
-
-const SEED_ITEMS = [
+const MARKET_ITEMS = [
   {
-    id: "mi1",
-    category: "electronics",
+    id: "seed-1",
     title: "Samsung Galaxy A54 5G",
-    detail: "Bought 8 months ago. Excellent condition, no scratches. Comes with original charger and box. Unlocked for all networks.",
-    price: "WLD 45",
-    condition: "Used · Good",
-    area: "Nairobi West",
-    distance: "1.2 km",
-    seller: "@james_ng",
-    sellerInitial: "J",
-    bids: 3,
-    bidDeadline: "6h left",
-    gradient: ["#1a73e8", "#0d47a1"],
-    emoji: "📱",
-    postedAt: "2h ago",
-    negotiable: true,
+    seller: "@mombasa_mobiles",
+    condition: "Second hand",
+    price: "WLD 68",
+    distance: "4.8 km",
+    location: "Nyali, Mombasa",
+    tag: "Electronics",
+    trust: "World ID seller",
+    tone: "blue",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=800&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1605236453806-6ff36851218e?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=800&q=82",
+    ],
+    quality: "Front, back, screen-on, charger included. Small edge marks disclosed.",
+    bidding: {
+      target: 68,
+      floor: 60,
+      ends: "18h left",
+      offers: [
+        { buyer: "@coast_buyer", amount: 60, note: "Can inspect in Nyali this evening." },
+        { buyer: "@techmama", amount: 64, note: "Cashless pickup after screen test." },
+      ],
+    },
+    isFeatured: true,
   },
   {
-    id: "mi2",
-    category: "fashion",
+    id: "seed-2",
     title: "Handmade Ankara Tote Bag",
-    detail: "Fresh from the workshop. 100% cotton Ankara print. Large enough for a laptop. Handstitched lining. Available in 3 colours — contact to confirm stock.",
-    price: "WLD 8",
+    seller: "@amina_makes",
     condition: "Brand New",
-    area: "CBD Market",
-    distance: "0.4 km",
-    seller: "@aisha_crafts",
-    sellerInitial: "A",
-    bids: 0,
-    bidDeadline: null,
-    gradient: ["#e91e8c", "#9c27b0"],
-    emoji: "👜",
-    postedAt: "45m ago",
-    negotiable: false,
+    price: "WLD 6",
+    distance: "6.2 km",
+    location: "Milimani, Kisumu",
+    tag: "Fashion",
+    trust: "3 verified buyers",
+    tone: "gold",
+    photos: 4,
+    image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=82",
+    ],
+    quality: "Fresh photos of fabric, stitching, lining, and size held by seller.",
+    bidding: {
+      target: 6,
+      floor: 5,
+      ends: "2d left",
+      offers: [
+        { buyer: "@giftbuyer", amount: 5, note: "Need two bags if available." },
+      ],
+    },
+    isFeatured: false,
   },
   {
-    id: "mi3",
-    category: "food",
-    title: "Home-cooked Lunch Boxes",
-    detail: "Today's special: rice, stewed beef, kachumbari, chapati. Cooked fresh every morning. Delivery within 1 km radius. Order before 11 AM.",
-    price: "WLD 2",
-    condition: "Today Only",
-    area: "Westlands",
-    distance: "0.8 km",
-    seller: "@mama_grace",
-    sellerInitial: "G",
-    bids: 0,
-    bidDeadline: null,
-    gradient: ["#f57c00", "#e65100"],
-    emoji: "🍱",
-    postedAt: "30m ago",
-    negotiable: false,
-  },
-  {
-    id: "mi4",
-    category: "services",
-    title: "Mobile Barber — Home Visits",
-    detail: "Professional barber. Haircut, beard trim, line-up. Come to your location. Nairobi area. Book a slot and I will come to you.",
-    price: "WLD 5",
+    id: "seed-3",
+    title: "Mama Nia Lunch Bowls",
+    seller: "@mamania_eats",
     condition: "Available Today",
-    area: "Kilimani",
-    distance: "2.1 km",
-    seller: "@razor_kelvin",
-    sellerInitial: "K",
-    bids: 0,
-    bidDeadline: null,
-    gradient: ["#6657d9", "#4527a0"],
-    emoji: "✂️",
-    postedAt: "1h ago",
-    negotiable: true,
+    price: "WLD 1.2",
+    distance: "2.7 km",
+    location: "Milimani, Nakuru",
+    tag: "Food",
+    trust: "Repeat local buyers",
+    tone: "green",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=700&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=700&q=82",
+    ],
+    quality: "Food close-up, packaging, and pickup counter photos.",
+    bidding: null,
+    isFeatured: false,
   },
   {
-    id: "mi5",
-    category: "furniture",
-    title: "Office Desk + Ergonomic Chair",
-    detail: "Moving out sale. Solid wood desk 120×60 cm with cable management. Mesh back chair adjustable height. Both for one price. Self-collect only.",
-    price: "WLD 20",
-    condition: "Used · Fair",
-    area: "Industrial Area",
-    distance: "1.5 km",
-    seller: "@mike_relocate",
-    sellerInitial: "M",
-    bids: 1,
-    bidDeadline: "14h left",
-    gradient: ["#546e7a", "#263238"],
-    emoji: "🪑",
-    postedAt: "3h ago",
-    negotiable: true,
+    id: "seed-4",
+    title: "GlowBarber — Weekend Slots",
+    seller: "@glowbarber_ke",
+    condition: "Service",
+    price: "Book slot",
+    distance: "7.1 km",
+    location: "Rupa Mall, Eldoret",
+    tag: "Services",
+    trust: "Verified service owner",
+    tone: "gold",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=700&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1512690459411-b9245aed614b?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=700&q=82",
+    ],
+    quality: "Shop-front, chair setup, and finished cut photos.",
+    bidding: null,
+    isFeatured: true,
+  },
+  {
+    id: "seed-5",
+    title: "Used Study Desk",
+    seller: "@student_chain",
+    condition: "Second hand",
+    price: "WLD 14",
+    distance: "1.6 km",
+    location: "Section 58, Nakuru",
+    tag: "Furniture",
+    trust: "Pickup only",
+    tone: "violet",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=82",
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=800&q=82",
+    ],
+    quality: "Wide angle, drawer close-up, scratch disclosure, and pickup doorway view.",
+    bidding: {
+      target: 14,
+      floor: 11,
+      ends: "9h left",
+      offers: [
+        { buyer: "@campusbuyer", amount: 11, note: "Can collect near Ngong Road." },
+      ],
+    },
+    isFeatured: false,
+  },
+  {
+    id: "seed-6",
+    title: "Studio Kitenge Photoshoot",
+    seller: "@studio_kitenge",
+    condition: "Service",
+    price: "WLD 8",
+    distance: "5.2 km",
+    location: "Kisumu CBD",
+    tag: "Creative",
+    trust: "Portfolio verified",
+    tone: "violet",
+    photos: 3,
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=82",
+    gallery: [
+      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?auto=format&fit=crop&w=700&q=82",
+      "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=700&q=82",
+    ],
+    quality: "Portfolio sample, studio corner, and camera setup photos.",
+    bidding: null,
+    isFeatured: false,
   },
 ];
 
+type SeedItem = typeof MARKET_ITEMS[number];
+
+const BUSINESS_ADS = [
+  {
+    title: "Taste 254 Lunch Launch",
+    owner: "@taste254",
+    area: "Kileleshwa, Nairobi",
+    offer: "Fresh lunch bowls, office delivery 11:30–14:30. WLD 2 booking.",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=700&q=82",
+    tag: "Food",
+    signal: "18 saved this week",
+  },
+  {
+    title: "GlowBarber Weekend Slots",
+    owner: "@glowbarber_ke",
+    area: "Rupa Mall, Eldoret",
+    offer: "Haircuts, beard lineups, clean chair photos before booking.",
+    image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=700&q=82",
+    tag: "Service",
+    signal: "Open slots today",
+  },
+  {
+    title: "Studio Kitenge Portraits",
+    owner: "@studio_kitenge",
+    area: "Kisumu CBD",
+    offer: "Portrait sessions for founders, families, products, and events.",
+    image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=700&q=82",
+    tag: "Creative",
+    signal: "Portfolio verified",
+  },
+];
+
+const MARKET_PLANS = [
+  ["Quick listing",  "2 WLD",   "Publish one item with 2 included photos."],
+  ["Extra photos",   "1.5 WLD", "Add up to 3 more photos to one listing."],
+  ["Local boost",    "2 WLD",   "Push a listing higher in nearby discovery."],
+  ["Business ad",    "4 WLD",   "Market a shop, service, event, or link."],
+] as const;
+
+const MARKET_CHECKLIST = [
+  "2 real item photos", "Price and condition",
+  "Pickup area or delivery note", "Defects noted",
+  "Seller chat enabled", "No off-app prepayment pressure",
+];
+
+const MARKET_FILTERS = ["All", "Electronics", "Fashion", "Food", "Furniture", "Services", "Creative"];
+
 // ─────────────────────────────────────────────────────────────────────────────
-// SERVICES — static seed data
+// SERVICES — seed data
 // ─────────────────────────────────────────────────────────────────────────────
 
 const NICHES = [
@@ -196,30 +330,21 @@ const SEED_JOBS = [
 ];
 
 const SEED_PROVIDERS = [
-  { id: "p1", name: "Kwame Asante", initial: "K", specialty: "Medical & Legal Translation",  niche: "translation",   region: "Ghana",           rating: 5.0, jobs: 132, color: "#246b55" },
-  { id: "p2", name: "Amara Diallo", initial: "A", specialty: "West African Commercial Law",  niche: "legal",         region: "Senegal",         rating: 4.9, jobs: 84,  color: "#2f6fed" },
-  { id: "p3", name: "Lena Morales", initial: "L", specialty: "CNC & Custom Fabrication",     niche: "manufacturing", region: "Guadalajara, MX", rating: 4.8, jobs: 61,  color: "#ef7d69" },
-  { id: "p4", name: "Priya Nair",   initial: "P", specialty: "South Asian Healthcare",       niche: "consulting",    region: "Bangalore, IN",   rating: 4.7, jobs: 49,  color: "#b98218" },
+  { id: "p1", name: "Kwame Asante", initial: "K", specialty: "Medical & Legal Translation", niche: "translation",   region: "Ghana",          rating: 5.0, jobs: 132, color: "#246b55" },
+  { id: "p2", name: "Amara Diallo", initial: "A", specialty: "West African Commercial Law", niche: "legal",         region: "Senegal",        rating: 4.9, jobs: 84,  color: "#2f6fed" },
+  { id: "p3", name: "Lena Morales", initial: "L", specialty: "CNC & Custom Fabrication",    niche: "manufacturing", region: "Guadalajara MX", rating: 4.8, jobs: 61,  color: "#ef7d69" },
+  { id: "p4", name: "Priya Nair",   initial: "P", specialty: "South Asian Healthcare",      niche: "consulting",    region: "Bangalore, IN",  rating: 4.7, jobs: 49,  color: "#b98218" },
 ];
 
-const DEADLINE_OPTIONS = ["3 days", "1 week", "2 weeks", "1 month", "Flexible"];
 const BUDGET_PRESETS   = ["WLD 25", "WLD 50", "WLD 100", "WLD 200", "WLD 500"];
+const DEADLINE_OPTIONS = ["3 days", "1 week", "2 weeks", "1 month", "Flexible"];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-type TopTab   = "market" | "services";
-type SvcMode  = "browse" | "post-job" | "offer-service";
-
-interface MarketItem {
-  id: string; category: string; title: string; detail: string;
-  price: string; condition: string; area: string; distance: string;
-  seller: string; sellerInitial: string; bids: number;
-  bidDeadline: string | null; gradient: string[];
-  emoji: string; postedAt: string; negotiable: boolean;
-  photos?: string[];
-}
+type TopTab  = "market" | "services";
+type SvcMode = "browse" | "post-job" | "offer-service";
 
 interface LocalJob {
   id: string; type: "job"; niche: string; title: string; detail: string;
@@ -233,8 +358,44 @@ interface LocalService {
   rating: number; jobs: number; color: string; postedAt: string;
 }
 
-type AnyJob = typeof SEED_JOBS[number] | LocalJob;
+type AnyJob     = typeof SEED_JOBS[number] | LocalJob;
 type SvcListing = AnyJob | LocalService;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper — notification cooldown
+// ─────────────────────────────────────────────────────────────────────────────
+
+function canNotify(wallet: string, key: string, coolMs = 3_600_000) {
+  try {
+    const k = `hc_notif:${wallet}:${key}`;
+    if (Date.now() - Number(localStorage.getItem(k) ?? 0) < coolMs) return false;
+    localStorage.setItem(k, Date.now().toString());
+    return true;
+  } catch { return true; }
+}
+
+async function storeData(kind: string, id: string | number, data: unknown) {
+  try {
+    const r = await fetch("/api/data/store", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, id, kind }),
+    });
+    const p = (await r.json()) as { ok?: boolean; url?: string };
+    return { ok: Boolean(p.ok && p.url), url: p.url };
+  } catch { return { ok: false }; }
+}
+
+function getInitialBids() {
+  return Object.fromEntries(
+    MARKET_ITEMS.map((item) => [
+      item.id,
+      (item.bidding?.offers ?? []).map((o, i) => ({
+        ...o, id: i + 1, createdAt: "Seed", status: "sent" as const,
+      })),
+    ]),
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
@@ -244,39 +405,75 @@ export function MarketplaceView({
   act,
   earnPoints,
   humanIdentity,
+  marketLocation,
+  marketplaceListings,
   openPayment,
   recordHistory,
+  setMarketLocation,
+  setMarketplaceListings,
+  worldContext,
 }: {
   act: (title: string, detail: string) => void;
   earnPoints: EarnPoints;
   humanIdentity: HumanIdentity | null;
+  marketLocation: MarketLocationState;
+  marketplaceListings: MarketplaceListing[];
   openPayment: OpenPayment;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
+  setMarketLocation: React.Dispatch<React.SetStateAction<MarketLocationState>>;
+  setMarketplaceListings: React.Dispatch<React.SetStateAction<MarketplaceListing[]>>;
+  worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
-  // ── Top-level tab ─────────────────────────────────────────────────────────
+  // ── Top tab ───────────────────────────────────────────────────────────────
   const [topTab, setTopTab] = useState<TopTab>("market");
 
   // ── Market state ──────────────────────────────────────────────────────────
-  const [itemSearch, setItemSearch]     = useState("");
-  const [itemCat, setItemCat]           = useState("all");
-  const [activeItem, setActiveItem]     = useState<MarketItem | null>(null);
-  const [showPostItem, setShowPostItem] = useState(false);
-  const [localItems, setLocalItems]     = useState<MarketItem[]>(() =>
-    loadJsonFromStorage<MarketItem[]>("hc_market_items", []),
+  const [marketFilter, setMarketFilter] = useState("All");
+  const [marketSearch, setMarketSearch] = useState("");
+  const [manualArea, setManualArea]     = useState(() =>
+    marketLocation.source === "manual"
+      ? marketLocation.label.replace(/^Manual area:\s*/, "")
+      : "Nairobi",
   );
-  const [itemForm, setItemFormState] = useState({
-    title: "", detail: "", price: "", condition: "Used · Good",
-    area: "", category: "electronics", negotiable: false,
-  });
+  const [activeItem, setActiveItem]   = useState<SeedItem | MarketplaceListing | null>(null);
+  const [showSell, setShowSell]       = useState(false);
+  const [galleryIdx, setGalleryIdx]   = useState(0);
   const photoInputRef = useRef<HTMLInputElement>(null);
-  const [photoCount, setPhotoCount] = useState(0);
+
+  // Bids
+  const [bidDrafts, setBidDrafts]   = useState<Record<string, string>>({});
+  const [marketBids, setMarketBids] = useState<Record<string, MarketBid[]>>(() =>
+    loadJsonFromStorage(storageKeys.bids, getInitialBids()),
+  );
+  // Ratings + tips
+  const [marketRatings, setMarketRatings] = useState<Record<string, { rating: number; tips: number }>>(() =>
+    loadJsonFromStorage(storageKeys.marketRatings, {}),
+  );
+  // Comments
+  const [marketComments, setMarketComments] = useState<Record<string, string[]>>(() =>
+    loadJsonFromStorage(storageKeys.marketComments, {}),
+  );
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  // Holds
+  const [marketHolds, setMarketHolds] = useState<MarketHold[]>(() =>
+    loadJsonFromStorage(storageKeys.marketHolds, []),
+  );
+  // Listing wizard
+  const [listingPhotos, setListingPhotos] = useState<Array<{ id: number; name: string; src: string }>>([]);
+  const [photoPackUnlocked, setPhotoPackUnlocked] = useState(false);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [listingDraft, setListingDraft] = useState({
+    area: "", bidFloor: "", condition: "", details: "",
+    duration: "3 days", link: "", price: "", saleMode: "direct" as MarketplaceListing["saleMode"],
+    title: "",
+  });
 
   // ── Services state ────────────────────────────────────────────────────────
-  const [svcMode, setSvcMode]           = useState<SvcMode>("browse");
-  const [activeNiche, setActiveNiche]   = useState("all");
-  const [svcSearch, setSvcSearch]       = useState("");
-  const [activeSvc, setActiveSvc]       = useState<SvcListing | null>(null);
-  const [localJobs, setLocalJobs]       = useState<LocalJob[]>(() =>
+  const [svcMode, setSvcMode]     = useState<SvcMode>("browse");
+  const [activeNiche, setActiveNiche] = useState("all");
+  const [svcSearch, setSvcSearch] = useState("");
+  const [activeSvc, setActiveSvc] = useState<SvcListing | null>(null);
+  const [localJobs, setLocalJobs] = useState<LocalJob[]>(() =>
     loadJsonFromStorage<LocalJob[]>("hc_local_jobs", []),
   );
   const [localServices, setLocalServices] = useState<LocalService[]>(() =>
@@ -289,76 +486,332 @@ export function MarketplaceView({
     title: "", detail: "", niche: "translation", rate: "", region: "", languages: "",
   });
 
-  const handle = humanIdentity?.username ?? "@you";
+  // ── Persist ───────────────────────────────────────────────────────────────
+  useEffect(() => { saveJsonToStorage(storageKeys.bids, marketBids); }, [marketBids]);
+  useEffect(() => { saveJsonToStorage(storageKeys.marketRatings, marketRatings); }, [marketRatings]);
+  useEffect(() => { saveJsonToStorage(storageKeys.marketComments, marketComments); }, [marketComments]);
+  useEffect(() => { saveJsonToStorage(storageKeys.marketHolds, marketHolds); }, [marketHolds]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  function setItem(field: keyof typeof itemForm, value: string | boolean) {
-    setItemFormState((c) => ({ ...c, [field]: value }));
-  }
-  function setJob(field: keyof typeof jobForm, value: string) {
-    setJobFormState((c) => ({ ...c, [field]: value }));
-  }
-  function setService(field: keyof typeof serviceForm, value: string) {
-    setServiceFormState((c) => ({ ...c, [field]: value }));
-  }
-  function nicheColor(niche: string) {
-    return NICHES.find((n) => n.id === niche)?.color ?? "#2f6fed";
+  const handle = humanIdentity?.username ?? "@preview_human";
+  const locationReady = marketLocation.status === "ready";
+  const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
+  const marketUsageRatings = Object.values(marketRatings).reduce((t, r) => t + r.rating, 0) +
+    marketplaceListings.reduce((t, l) => t + (l.ratings ?? 0), 0);
+  const marketUsageTips = Object.values(marketRatings).reduce((t, r) => t + r.tips, 0) +
+    marketplaceListings.reduce((t, l) => t + (l.tips ?? 0), 0);
+  const tier = getMarketVerificationTier({
+    isVerified: isVerifiedWorldHuman(humanIdentity),
+    listingCount: marketplaceListings.length,
+    locationReady,
+    ratingCount: marketUsageRatings,
+    tipCount: marketUsageTips,
+  });
+
+  function itemKey(item: SeedItem | MarketplaceListing) {
+    return "id" in item && typeof item.id === "number" ? `stored:${item.id}` : `seed:${(item as SeedItem).id}`;
   }
 
-  async function openChat(seller: string, title: string) {
-    try {
-      await chatWithWorld({
-        message: `Hi ${seller}, I saw "${title}" on HumanChain. Is it still available?`,
-        to: [seller.replace(/^@/, "")],
-      });
-      act("World Chat opened", `Chat with ${seller} is ready.`);
-    } catch {
-      act("Chat unavailable", "Try opening World App chat directly.");
+  function getImages(item: SeedItem | MarketplaceListing): string[] {
+    if ("gallery" in item && Array.isArray(item.gallery)) return item.gallery.slice(0, 3);
+    if ("photos" in item && Array.isArray((item as MarketplaceListing).photos)) {
+      return (item as MarketplaceListing).photos.slice(0, 3).map((p) => p.src);
     }
+    return [];
   }
 
-  // ── Market: post item ─────────────────────────────────────────────────────
-  function submitItem() {
-    if (!requireVerifiedPublicAction(humanIdentity, act, "posting items")) return;
-    const { title, detail, price, condition, area, category, negotiable } = itemForm;
-    if (!title.trim() || !price.trim() || !area.trim()) {
-      act("Missing info", "Add a title, price, and area to post your item.");
+  function getInfo(item: SeedItem | MarketplaceListing) {
+    const isStored = typeof (item as MarketplaceListing).id === "number";
+    return {
+      title:     item.title,
+      price:     item.price,
+      condition: item.condition,
+      area:      isStored ? (item as MarketplaceListing).area : (item as SeedItem).location,
+      seller:    item.seller,
+      sellerWallet: isStored ? (item as MarketplaceListing).sellerWallet : undefined,
+      detail:    isStored ? (item as MarketplaceListing).details || "No extra details." : (item as SeedItem).quality,
+      photos:    isStored ? (item as MarketplaceListing).photos.length : (item as SeedItem).photos,
+      distance:  locationReady
+        ? "distance" in item ? `${(item as SeedItem).distance}` : "Nearby"
+        : "Connect location to see distance",
+      receipt: isStored
+        ? (item as MarketplaceListing).dataStorageStatus === "cloud-safe" ? "Cloud receipt" : "Local receipt"
+        : "Seed listing · verified signals",
+    };
+  }
+
+  function topBid(item: SeedItem) {
+    const bids = marketBids[item.id] ?? [];
+    return bids.reduce<MarketBid | null>((b, o) => (!b || o.amount > b.amount ? o : b), null);
+  }
+
+  function minNextBid(item: SeedItem) {
+    if (!item.bidding) return 0;
+    const top = topBid(item);
+    return top ? Math.max(item.bidding.floor, top.amount + 0.5) : item.bidding.floor;
+  }
+
+  function setJob(f: keyof typeof jobForm, v: string) { setJobFormState((c) => ({ ...c, [f]: v })); }
+  function setSvc(f: keyof typeof serviceForm, v: string) { setServiceFormState((c) => ({ ...c, [f]: v })); }
+  function nicheColor(n: string) { return NICHES.find((x) => x.id === n)?.color ?? "#2f6fed"; }
+
+  // ── GPS ───────────────────────────────────────────────────────────────────
+  function requestGps() {
+    if (marketLocation.status === "requesting") return;
+    setMarketLocation((c) => ({ ...c, label: "Requesting GPS…", status: "requesting" }));
+    if (!navigator.geolocation) {
+      setMarketLocation({ label: "GPS unavailable", source: "unavailable", status: "denied" });
+      act("Location unavailable", "Use manual area matching instead.");
       return;
     }
-    const newItem: MarketItem = {
-      id: `mi-${Date.now()}`, category, title: title.trim(),
-      detail: detail.trim() || "No description provided.",
-      price: price.trim().startsWith("WLD") ? price.trim() : `WLD ${price.trim()}`,
-      condition, area: area.trim(), distance: "Nearby",
-      seller: handle, sellerInitial: handle.replace(/^@/, "").charAt(0).toUpperCase(),
-      bids: 0, bidDeadline: null,
-      gradient: ["#2f6fed", "#1a4ec7"], emoji: "📦",
-      postedAt: formatShortTime(), negotiable,
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const label = `GPS: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`;
+        setMarketLocation({ accuracy: pos.coords.accuracy, label, lat: pos.coords.latitude, lng: pos.coords.longitude, source: "browser-gps", status: "ready" });
+        setListingDraft((c) => ({ ...c, area: label }));
+        earnPoints(5, "Nearby market connected with GPS consent.");
+      },
+      () => {
+        setMarketLocation({ label: "Location not allowed", source: "unavailable", status: "denied" });
+        act("Location not connected", "Enter your area manually below.");
+      },
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 10_000 },
+    );
+  }
+
+  function applyManualArea() {
+    const area = manualArea.trim();
+    if (!area) { act("Area needed", "Enter a town, estate, or zone."); return; }
+    setMarketLocation({ label: `Manual area: ${area}`, source: "manual", status: "ready" });
+    setListingDraft((c) => ({ ...c, area }));
+    earnPoints(3, "Manual marketplace area connected.");
+  }
+
+  // ── Rate / Tip ────────────────────────────────────────────────────────────
+  function rateItem(item: SeedItem | MarketplaceListing) {
+    const k = itemKey(item);
+    if (typeof (item as MarketplaceListing).id === "number") {
+      setMarketplaceListings((c) => c.map((l) => l.id === (item as MarketplaceListing).id ? { ...l, ratings: (l.ratings ?? 0) + 1 } : l));
+    } else {
+      setMarketRatings((c) => ({ ...c, [k]: { rating: (c[k]?.rating ?? 0) + 1, tips: c[k]?.tips ?? 0 } }));
+    }
+    earnPoints(3, `Rated ${item.title}.`);
+    act("Look vote saved!", `You rated ${item.title}. Buyers see this signal.`);
+  }
+
+  function tipItem(item: SeedItem | MarketplaceListing) {
+    const isStored = typeof (item as MarketplaceListing).id === "number";
+    const k = itemKey(item);
+    openPayment({
+      title: `Tip ${item.seller}`,
+      amount: "1 WLD",
+      allowCustomAmount: true,
+      detail: `Tip ${item.seller} for ${item.title}. 80% goes to seller, 20% platform.`,
+      success: "Tip confirmed. 80/20 split receipt stored.",
+      feature: "tip-market-item",
+      points: 4,
+      onConfirmed: (amount) => {
+        if (isStored) {
+          setMarketplaceListings((c) => c.map((l) => l.id === (item as MarketplaceListing).id ? { ...l, tips: (l.tips ?? 0) + 1 } : l));
+        } else {
+          setMarketRatings((c) => ({ ...c, [k]: { rating: c[k]?.rating ?? 0, tips: (c[k]?.tips ?? 0) + 1 } }));
+        }
+        recordHistory({ title: "Tip confirmed", detail: `${amount} WLD tip to ${item.seller} for ${item.title}.`, kind: "tip" });
+        void storeData("marketplace-listing", `tip-${k}-${Date.now()}`, { item: item.title, seller: item.seller, amount, split: { creatorPercent: 80, platformPercent: 20 } });
+      },
+    });
+  }
+
+  // ── Comment ───────────────────────────────────────────────────────────────
+  function submitComment(item: SeedItem | MarketplaceListing) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "commenting on listings")) return;
+    const k = itemKey(item);
+    const draft = commentDrafts[k]?.trim();
+    if (!draft) { act("Write a comment", "Add your question or context first."); return; }
+    const validation = validateAnswerInput(draft);
+    if (!validation.ok) { act("Comment needs work", validation.issues[0] ?? "Adjust before posting."); return; }
+    openPayment({
+      title: "Post public comment",
+      amount: "0.5 WLD",
+      detail: `Post a visible comment on ${item.title}. Private buying details stay in seller chat.`,
+      success: "Comment posted and stored.",
+      feature: "marketplace-comment",
+      points: 5,
+      onConfirmed: () => {
+        const saved = `${handle}: ${draft}`;
+        setMarketComments((c) => ({ ...c, [k]: [saved, ...(c[k] ?? [])] }));
+        setCommentDrafts((c) => ({ ...c, [k]: "" }));
+        recordHistory({ title: "Comment posted", detail: `0.5 WLD comment on ${item.title}.`, kind: "market" });
+      },
+    });
+  }
+
+  // ── Bid ───────────────────────────────────────────────────────────────────
+  async function placeBid(item: SeedItem) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "placing bids")) return;
+    if (!item.bidding) { act("Direct sale", "This item uses chat-first buying."); return; }
+    const amount = Number.parseFloat(bidDrafts[item.id] ?? "");
+    const min = minNextBid(item);
+    if (!Number.isFinite(amount) || amount < min) {
+      act("Bid too low", `Enter at least ${min} WLD.`);
+      return;
+    }
+    const bKey = `bid:${item.id}`;
+    if (busyAction) return;
+    setBusyAction(bKey);
+    const bid: MarketBid = {
+      amount, buyer: handle,
+      createdAt: new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit" }).format(new Date()),
+      id: (marketBids[item.id]?.length ?? 0) + 1,
+      note: amount >= item.bidding.target ? "Meets seller target." : "Saved offer.",
+      status: "saved",
     };
-    const next = [newItem, ...localItems];
-    setLocalItems(next);
-    saveJsonToStorage("hc_market_items", next);
-    recordHistory({ title: "Item listed", detail: `${title} · ${price}`, kind: "market" });
-    earnPoints(8, "Item posted to nearby market.");
-    setItemFormState({ title: "", detail: "", price: "", condition: "Used · Good", area: "", category: "electronics", negotiable: false });
-    setPhotoCount(0);
-    setShowPostItem(false);
-    act("Item listed!", `"${title}" is now live in the Nearby Market.`);
+    try {
+      setMarketBids((c) => ({ ...c, [item.id]: [bid, ...(c[item.id] ?? [])] }));
+      void storeData("marketplace-bid", `${item.id}-${bid.id}`, { ...bid, listing: item.title, seller: item.seller });
+      setBidDrafts((c) => ({ ...c, [item.id]: "" }));
+      recordHistory({ title: "Bid placed", detail: `${amount} WLD on ${item.title}.`, kind: "market" });
+      await chatWithWorld({ message: `I placed a ${amount} WLD bid on ${item.title}. Let me know if you can accept.`, to: [item.seller.replace(/^@/, "")] });
+      setMarketBids((c) => ({ ...c, [item.id]: (c[item.id] ?? []).map((b) => b.id === bid.id ? { ...b, status: "sent" } : b) }));
+      act("Bid sent!", "World Chat opened to confirm with seller.");
+    } catch {
+      act("Bid saved", "Stored locally. Chat separately to confirm.");
+    } finally {
+      setBusyAction((c) => c === bKey ? null : c);
+    }
+  }
+
+  // ── Hold ──────────────────────────────────────────────────────────────────
+  async function holdItem(item: SeedItem | MarketplaceListing) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "placing holds")) return;
+    if (!locationReady) { act("Location required", "Connect GPS or manual area before holding."); return; }
+    const k = itemKey(item);
+    const bKey = `hold:${k}`;
+    if (busyAction) return;
+    setBusyAction(bKey);
+    const info = getInfo(item);
+    const hold: MarketHold = {
+      area: info.area, buyer: handle, buyerWallet: humanIdentity?.wallet,
+      createdAt: formatShortTime(), distance: info.distance,
+      id: Date.now(), itemKey: k, itemTitle: info.title,
+      note: `Hold from ${marketLocation.label}.`, seller: info.seller,
+      sellerWallet: info.sellerWallet, status: info.sellerWallet ? "notified" : "local",
+    };
+    try {
+      setMarketHolds((c) => [hold, ...c.filter((h) => h.itemKey !== k)]);
+      recordHistory({ title: "Hold started", detail: `${info.title} held by ${handle}.`, kind: "market" });
+      void storeData("marketplace-bid", `hold-${k}`, hold);
+      if (info.sellerWallet && canNotify(info.sellerWallet, `hold:${k}`)) {
+        await fetch("/api/world/send-notification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ walletAddresses: [info.sellerWallet], title: "Market item interest", message: `${handle} wants to hold ${info.title}.`, path: "/?tab=market", sector: "marketplace" }),
+        }).catch(() => null);
+      }
+      await chatWithWorld({ message: `Hi ${info.seller}, I want to hold ${info.title} on HumanChain. From: ${marketLocation.label}. Still available?`, to: [info.seller.replace(/^@/, "")] });
+      act("Hold confirmed!", "World Chat opened. Seller notified.");
+    } catch {
+      act("Hold saved", "Stored locally. Chat seller to confirm.");
+    } finally {
+      setBusyAction((c) => c === bKey ? null : c);
+    }
+  }
+
+  // ── Share ─────────────────────────────────────────────────────────────────
+  async function shareItem(item: SeedItem | MarketplaceListing) {
+    const info = getInfo(item);
+    try {
+      await shareWithWorld({ title: `${info.title} on HumanChain Market`, text: `${info.title} — ${info.price} near ${info.area}. ${info.condition}, ${info.photos} photos.`, url: process.env.NEXT_PUBLIC_APP_URL });
+      act("Shared!", "World Share opened.");
+    } catch { act("Share unavailable", "Try from World App."); }
+  }
+
+  // ── Chat ──────────────────────────────────────────────────────────────────
+  async function chatSeller(item: SeedItem | MarketplaceListing) {
+    const info = getInfo(item);
+    const bKey = `chat:${itemKey(item)}`;
+    if (busyAction) return;
+    setBusyAction(bKey);
+    try {
+      await chatWithWorld({ message: `Hi ${info.seller}, I saw ${info.title} on HumanChain Market. Is it still available near ${info.area}?`, to: [info.seller.replace(/^@/, "")] });
+      recordHistory({ title: "Chat opened", detail: `Chat for ${info.title} with ${info.seller}.`, kind: "market" });
+      act("World Chat opened", `${info.seller}'s inbox is ready.`);
+    } catch { act("Chat unavailable", "Try from World App."); }
+    finally { setBusyAction((c) => c === bKey ? null : c); }
+  }
+
+  // ── Listing wizard ────────────────────────────────────────────────────────
+  function updateDraft(f: keyof typeof listingDraft, v: string) {
+    setListingDraft((c) => ({ ...c, [f]: v }));
+  }
+
+  function handlePhotos(files: FileList | null) {
+    if (!files?.length) return;
+    const arr = Array.from(files);
+    const max = photoPackUnlocked ? 5 : 2;
+    if (arr.length > 2 && !photoPackUnlocked) {
+      openPayment({
+        title: "Photo pack — 1.5 WLD",
+        amount: "1.5 WLD",
+        detail: "Unlock up to 5 listing photos this session. 2 are free.",
+        success: "Extra photos unlocked. Add up to 5 images now.",
+        feature: "marketplace-photo-pack",
+        points: 6,
+        onConfirmed: () => {
+          setPhotoPackUnlocked(true);
+          recordHistory({ title: "Photo pack unlocked", detail: "1.5 WLD photo pack.", kind: "market" });
+        },
+      });
+      act("Extra photos need WLD", "2 photos are free. Pay 1.5 WLD for up to 5, then re-select.");
+      return;
+    }
+    setListingPhotos([]);
+    arr.slice(0, max).forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = () => setListingPhotos((c) => [...c, { id: Date.now() + i, name: file.name, src: String(reader.result) }]);
+      reader.readAsDataURL(file);
+    });
+    act("Photos ready", `${Math.min(arr.length, max)} photos loaded.`);
+  }
+
+  function saveListing() {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "publishing listings")) return false;
+    const v = validateListingInput({ area: listingDraft.area, condition: listingDraft.condition, photos: listingPhotos, price: listingDraft.price, title: listingDraft.title });
+    if (!v.ok) { act("Listing needs details", v.issues[0] ?? "Add title, price, condition, area, and 2 photos."); return false; }
+    const listing: MarketplaceListing = {
+      id: Date.now(), seller: handle, sellerWallet: humanIdentity?.wallet,
+      title: listingDraft.title.trim(), price: listingDraft.price.trim(),
+      bidFloor: listingDraft.bidFloor.trim(), duration: listingDraft.duration,
+      saleMode: listingDraft.saleMode, condition: listingDraft.condition,
+      area: listingDraft.area, link: listingDraft.link.trim(), details: listingDraft.details.trim(),
+      photos: listingPhotos, ratings: 0, tips: 0, status: "payment-ready",
+      createdAt: new Intl.DateTimeFormat("en", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "short" }).format(new Date()),
+      dataStorageStatus: "local-safe",
+    };
+    setMarketplaceListings((c) => [listing, ...c]);
+    void storeData("marketplace-listing", listing.id, listing).then((r) => {
+      if (!r.ok) return;
+      setMarketplaceListings((c) => c.map((l) => l.id === listing.id ? { ...l, dataReceiptUrl: r.url, dataStorageStatus: "cloud-safe" } : l));
+    });
+    recordHistory({ title: "Listing stored", detail: `${listing.title} saved with ${listingPhotos.length} photos.`, kind: "market" });
+    earnPoints(10, "Marketplace listing stored.");
+    setListingDraft({ area: "", bidFloor: "", condition: "", details: "", duration: "3 days", link: "", price: "", saleMode: "direct", title: "" });
+    setListingPhotos([]);
+    setPhotoPackUnlocked(false);
+    setShowSell(false);
+    return true;
   }
 
   // ── Services: submit job ──────────────────────────────────────────────────
   function submitJob() {
     if (!requireVerifiedPublicAction(humanIdentity, act, "posting jobs")) return;
     const { title, detail, budget } = jobForm;
-    if (!title.trim() || !detail.trim() || !budget.trim()) {
-      act("Missing details", "Add a title, description, and budget.");
-      return;
-    }
+    if (!title.trim() || !detail.trim() || !budget.trim()) { act("Missing details", "Add title, description, and budget."); return; }
     openPayment({
       title: "Post a Job — 2 WLD",
       amount: "2 WLD",
       detail: "Your job goes live to verified specialists worldwide.",
-      success: "Job posted! Verified providers will send proposals.",
+      success: "Job posted! Providers will send proposals.",
       feature: "marketplace-job-post",
       points: 10,
       onConfirmed: () => {
@@ -375,26 +828,22 @@ export function MarketplaceView({
         setLocalJobs(next);
         saveJsonToStorage("hc_local_jobs", next);
         recordHistory({ title: "Job posted", detail: `${title} · ${budget}`, kind: "market" });
-        earnPoints(10, "Job posted to HumanChain marketplace.");
+        earnPoints(10, "Job posted.");
         setJobFormState({ title: "", detail: "", niche: "legal", budget: "", deadline: "1 week", region: "" });
         setSvcMode("browse");
       },
     });
   }
 
-  // ── Services: submit service ──────────────────────────────────────────────
   function submitService() {
     if (!requireVerifiedPublicAction(humanIdentity, act, "listing services")) return;
     const { title, detail, rate } = serviceForm;
-    if (!title.trim() || !detail.trim() || !rate.trim()) {
-      act("Missing details", "Add a title, description, and rate.");
-      return;
-    }
+    if (!title.trim() || !detail.trim() || !rate.trim()) { act("Missing details", "Add title, description, and rate."); return; }
     openPayment({
       title: "List Your Service — 2 WLD",
       amount: "2 WLD",
       detail: "Your profile goes live to clients worldwide.",
-      success: "Service listed! Clients can now find and contact you.",
+      success: "Service listed! Clients can now find you.",
       feature: "marketplace-service-listing",
       points: 12,
       onConfirmed: () => {
@@ -411,827 +860,848 @@ export function MarketplaceView({
         setLocalServices(next);
         saveJsonToStorage("hc_local_services", next);
         recordHistory({ title: "Service listed", detail: `${title} · ${rate}`, kind: "market" });
-        earnPoints(12, "Service listing published.");
+        earnPoints(12, "Service listed.");
         setServiceFormState({ title: "", detail: "", niche: "translation", rate: "", region: "", languages: "" });
         setSvcMode("browse");
       },
     });
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RENDER — Item detail
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER — Item / Service detail
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (activeItem) {
-    const [g0, g1] = activeItem.gradient;
+    const info   = getInfo(activeItem);
+    const images = getImages(activeItem);
+    const isSeed = !("id" in activeItem && typeof (activeItem as MarketplaceListing).id === "number");
+    const seedItem = isSeed ? (activeItem as SeedItem) : null;
+    const k      = itemKey(activeItem);
+    const itemComments = marketComments[k] ?? [];
+    const hold   = marketHolds.find((h) => h.itemKey === k);
+    const curImg = images[galleryIdx] ?? images[0];
+
     return (
-      <div className="screen mkt-detail-screen">
-        <div className="mkt-detail-hero" style={{ background: `linear-gradient(145deg, ${g0}, ${g1})` }}>
-          <button className="mkt-back" onClick={() => setActiveItem(null)} type="button">
+      <div className="screen hcm-detail">
+        {/* Gallery */}
+        <div className="hcm-gallery">
+          {curImg ? (
+            <img className="hcm-gallery-main" src={curImg} alt={info.title} />
+          ) : (
+            <div className="hcm-gallery-empty"><Tag size={32} /></div>
+          )}
+          {images.length > 1 && (
+            <div className="hcm-gallery-dots">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  className={`hcm-gdot ${i === galleryIdx ? "active" : ""}`}
+                  onClick={() => setGalleryIdx(i)}
+                  type="button"
+                  aria-label={`Photo ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
+          <button className="hcm-back-btn" onClick={() => { setActiveItem(null); setGalleryIdx(0); }} type="button">
             <ArrowLeft size={15} /> Back
           </button>
-          <div className="mkt-hero-emoji">{activeItem.emoji}</div>
-          <div className="mkt-hero-badge">{activeItem.condition}</div>
+          <div className="hcm-gallery-badges">
+            <span className="hcm-badge-cond">{info.condition}</span>
+            {seedItem?.isFeatured && <span className="hcm-badge-feat"><Flame size={10} />Featured</span>}
+          </div>
         </div>
 
-        <div className="mkt-detail-body">
-          <div className="mkt-detail-title-row">
-            <h1>{activeItem.title}</h1>
-            <strong className="mkt-detail-price">{activeItem.price}</strong>
+        <div className="hcm-detail-body">
+          {/* Title + price */}
+          <div className="hcm-detail-titlerow">
+            <div>
+              <span className="hcm-detail-tag">{isSeed ? (activeItem as SeedItem).tag : "Listed"}</span>
+              <h1>{info.title}</h1>
+            </div>
+            <strong className="hcm-detail-price">{info.price}</strong>
           </div>
 
-          <div className="mkt-detail-meta-row">
-            <span><MapPin size={12} />{activeItem.area} · {activeItem.distance}</span>
-            <span><Clock size={12} />{activeItem.postedAt}</span>
-            {activeItem.negotiable && <span className="mkt-negotiable">Negotiable</span>}
+          <div className="hcm-detail-metarow">
+            <span><MapPin size={12} />{info.area}</span>
+            <span>{info.distance}</span>
+            <span><Camera size={12} />{info.photos} photos</span>
           </div>
 
-          {activeItem.bids > 0 && activeItem.bidDeadline && (
-            <div className="mkt-bid-banner">
-              <Zap size={13} />
-              <span><strong>{activeItem.bids} bid{activeItem.bids !== 1 ? "s" : ""}</strong> · {activeItem.bidDeadline}</span>
-              <button
-                onClick={() => {
-                  if (!requireVerifiedPublicAction(humanIdentity, act, "placing bids")) return;
-                  act("Bid placed!", `You bid on "${activeItem.title}". Seller will be notified via World Chat.`);
-                }}
-                type="button"
-              >
-                Place Bid
-              </button>
+          {/* Bid console */}
+          {seedItem?.bidding && (
+            <div className="hcm-bid-console">
+              <div className="hcm-bid-top">
+                <span><Gavel size={13} />Bidding · {seedItem.bidding.ends}</span>
+                <strong>Top: {topBid(seedItem)?.amount ?? seedItem.bidding.floor} WLD</strong>
+              </div>
+              <p>Target {seedItem.bidding.target} WLD · Min next bid {minNextBid(seedItem)} WLD</p>
+              <div className="hcm-bid-quickbtns">
+                <button onClick={() => setBidDrafts((c) => ({ ...c, [seedItem.id]: String(minNextBid(seedItem)) }))} type="button">Min bid</button>
+                <button onClick={() => setBidDrafts((c) => ({ ...c, [seedItem.id]: String(seedItem.bidding!.target) }))} type="button">Target</button>
+              </div>
+              <div className="hcm-bid-row">
+                <input
+                  aria-label="Bid amount"
+                  inputMode="decimal"
+                  placeholder={`${seedItem.bidding.floor}+ WLD`}
+                  value={bidDrafts[seedItem.id] ?? ""}
+                  onChange={(e) => setBidDrafts((c) => ({ ...c, [seedItem.id]: e.target.value }))}
+                />
+                <button
+                  className="hcm-bid-submit"
+                  aria-busy={busyAction === `bid:${seedItem.id}`}
+                  disabled={Boolean(busyAction)}
+                  onClick={() => void placeBid(seedItem)}
+                  type="button"
+                >
+                  {busyAction === `bid:${seedItem.id}` ? "Sending…" : "Place Bid"}
+                </button>
+              </div>
+              {/* Existing bids */}
+              {(marketBids[seedItem.id] ?? []).slice(0, 3).map((bid) => (
+                <div key={bid.id} className="hcm-bid-row-item">
+                  <span>{bid.buyer}</span>
+                  <strong>{bid.amount} WLD</strong>
+                  <span className="hcm-bid-status">{bid.status === "sent" ? "✓ sent" : "saved"}</span>
+                </div>
+              ))}
             </div>
           )}
 
-          <section className="mkt-detail-section">
+          {/* Description */}
+          <section className="hcm-detail-section">
             <strong>Description</strong>
-            <p>{activeItem.detail}</p>
+            <p>{info.detail}</p>
           </section>
 
-          <div className="mkt-detail-trust">
-            <span><BadgeCheck size={12} />World ID verified seller</span>
-            <span><ShieldCheck size={12} />WLD escrow available</span>
-            <span><Star size={12} />Rated on delivery</span>
+          {/* Trust */}
+          <div className="hcm-detail-trust">
+            <span><ShieldCheck size={12} />{info.seller} verified</span>
+            <span><LockKeyhole size={12} />{info.receipt}</span>
+            <span><MessageCircleQuestion size={12} />Chat before pay</span>
           </div>
 
-          <div className="mkt-detail-seller">
-            <div className="mkt-seller-av" style={{ background: `linear-gradient(135deg, ${g0}cc, ${g1}55)` }}>
-              {activeItem.sellerInitial}
-              <span className="mkt-seller-pip"><BadgeCheck size={8} /></span>
-            </div>
+          {/* Seller card */}
+          <div className="hcm-seller-card">
+            <div className="hcm-seller-av">{info.seller.replace(/^@/, "").charAt(0).toUpperCase()}</div>
             <div>
-              <strong>{activeItem.seller}</strong>
-              <span>World ID Verified</span>
+              <strong>{info.seller}</strong>
+              <span>{info.area} · World ID Verified</span>
             </div>
             <BadgeCheck size={16} color="#2f6fed" />
           </div>
 
-          <div className="mkt-detail-actions">
+          {/* Hold status */}
+          {hold && (
+            <div className="hcm-hold-banner">
+              <CheckCircle2 size={14} />
+              <span>Hold active · {hold.status === "notified" ? "Seller notified" : "Local hold"} · {hold.createdAt}</span>
+            </div>
+          )}
+
+          {/* Comments */}
+          <section className="hcm-comments">
+            <div className="hcm-comments-head">
+              <strong>Public Comments <span>{itemComments.length}</span></strong>
+              <small>0.5 WLD each</small>
+            </div>
+            {itemComments.length > 0 ? (
+              <div className="hcm-comment-list">
+                {itemComments.slice(0, 4).map((c, i) => {
+                  const parts = c.includes(":") ? c.split(":") : ["@human", c];
+                  return (
+                    <div key={i} className="hcm-comment-item">
+                      <strong>{parts[0]}</strong>
+                      <p>{parts.slice(1).join(":").trim()}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="hcm-comments-empty">No comments yet. Ask about condition, pickup, or inspection.</p>
+            )}
+            <div className="hcm-comment-compose">
+              <textarea
+                aria-label="Add comment"
+                placeholder="Ask about condition, receipt, defects, or pickup proof…"
+                rows={2}
+                value={commentDrafts[k] ?? ""}
+                onChange={(e) => setCommentDrafts((c) => ({ ...c, [k]: e.target.value }))}
+              />
+              <button
+                disabled={!commentDrafts[k]?.trim()}
+                onClick={() => submitComment(activeItem)}
+                type="button"
+              >
+                Post — 0.5 WLD
+              </button>
+            </div>
+          </section>
+
+          {/* Actions */}
+          <div className="hcm-detail-actions">
             <button
-              className="mkt-cta-primary"
-              onClick={() => {
-                if (!requireVerifiedPublicAction(humanIdentity, act, "contacting sellers")) return;
-                void openChat(activeItem.seller, activeItem.title);
-              }}
+              className="hcm-act-primary"
+              aria-busy={busyAction === `hold:${k}`}
+              disabled={Boolean(busyAction)}
+              onClick={() => void holdItem(activeItem)}
               type="button"
             >
-              <MessageCircle size={15} /> Chat with Seller
+              {busyAction === `hold:${k}` ? "Holding…" : "Book / Hold Item"}
             </button>
-            <button className="mkt-cta-secondary" onClick={() => setActiveItem(null)} type="button">
-              Back to Market
+            <button
+              className="hcm-act-chat"
+              aria-busy={busyAction === `chat:${k}`}
+              disabled={Boolean(busyAction)}
+              onClick={() => void chatSeller(activeItem)}
+              type="button"
+            >
+              <MessageCircle size={15} />
+              {busyAction === `chat:${k}` ? "Opening…" : "Message Seller"}
             </button>
+            <div className="hcm-act-row">
+              <button onClick={() => rateItem(activeItem)} type="button"><Star size={14} />Rate</button>
+              <button onClick={() => tipItem(activeItem)} type="button"><Zap size={14} />Tip</button>
+              <button onClick={() => void shareItem(activeItem)} type="button"><Send size={14} />Share</button>
+            </div>
           </div>
+
+          {/* Detail dl */}
+          <dl className="hcm-detail-dl">
+            {[
+              ["Seller", info.seller],
+              ["Condition", info.condition],
+              ["Area", info.area],
+              ["Distance", info.distance],
+              ["Photos", `${info.photos} images`],
+            ].map(([k2, v]) => (
+              <div key={k2}><dt>{k2}</dt><dd>{v}</dd></div>
+            ))}
+          </dl>
         </div>
       </div>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RENDER — Post item form
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER — Sell wizard
+  // ─────────────────────────────────────────────────────────────────────────
 
-  if (showPostItem) {
-    const CONDITIONS = ["Brand New", "Used · Like New", "Used · Good", "Used · Fair", "For Parts"];
+  if (showSell) {
     return (
-      <div className="screen mk-form-screen">
-        <div className="mk-form-header">
-          <button className="mk-back" onClick={() => setShowPostItem(false)} type="button">
-            <ArrowLeft size={15} /> Back
+      <div className="screen hcm-sell-screen">
+        <div className="hcm-sell-header">
+          <button className="hcm-back-text" onClick={() => setShowSell(false)} type="button">
+            <ArrowLeft size={15} /> Market
           </button>
-          <h1>Post an Item</h1>
-          <p>Sell or trade with people nearby. 2 photos free.</p>
+          <h1>List an Item</h1>
+          <p>2 photos free · Location private · Chat-first sale</p>
         </div>
 
-        <div className="mk-form-body">
-          {/* Photo upload */}
-          <div className="mkt-photo-row">
-            <button
-              className="mkt-photo-add"
-              onClick={() => photoInputRef.current?.click()}
-              type="button"
-              disabled={photoCount >= 2}
-            >
-              <Camera size={20} />
-              <span>{photoCount === 0 ? "Add photos" : `${photoCount}/2`}</span>
-            </button>
-            {photoCount > 0 && (
-              <div className="mkt-photo-thumb">
-                <Package size={20} />
-                <span>{photoCount} photo{photoCount > 1 ? "s" : ""}</span>
-              </div>
-            )}
-            {photoCount >= 2 && (
-              <button
-                className="mkt-photo-more"
-                onClick={() => openPayment({
-                  title: "More Photos — 1.5 WLD",
-                  amount: "1.5 WLD",
-                  detail: "Add up to 5 additional photos to your listing.",
-                  success: "Extra photos unlocked!",
-                  feature: "marketplace-featured-listing",
-                  onConfirmed: () => { setPhotoCount((c) => Math.min(c + 3, 7)); },
-                })}
-                type="button"
-              >
-                +More · 1.5 WLD
-              </button>
-            )}
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="mkt-hidden-input"
-              onChange={(e) => {
-                if (e.target.files) setPhotoCount((c) => Math.min(c + e.target.files!.length, 2));
-              }}
-            />
-          </div>
+        <div className="hcm-sell-steps">
+          {["Photos", "Details", "Trust", "Review", "Publish"].map((s, i) => (
+            <span key={s}><b>{i + 1}</b>{s}</span>
+          ))}
+        </div>
 
-          <label className="mk-field">
-            <span>What are you selling? <em>*</em></span>
-            <input
-              placeholder="e.g. Samsung Galaxy A54, Handmade bag, Lunch boxes…"
-              value={itemForm.title}
-              onChange={(e) => setItem("title", e.target.value)}
-            />
-          </label>
-
-          <label className="mk-field">
-            <span>Description</span>
-            <textarea
-              placeholder="Condition, size, what's included, delivery or pickup…"
-              rows={3}
-              value={itemForm.detail}
-              onChange={(e) => setItem("detail", e.target.value)}
-            />
-          </label>
-
-          <label className="mk-field">
-            <span>Price <em>*</em></span>
-            <input
-              placeholder="e.g. 15 or WLD 15"
-              value={itemForm.price}
-              onChange={(e) => setItem("price", e.target.value)}
-              inputMode="decimal"
-            />
-          </label>
-
-          <div className="mk-field">
-            <span className="mk-label">Category</span>
-            <div className="mk-presets" style={{ flexWrap: "wrap" }}>
-              {ITEM_CATEGORIES.filter((c) => c.id !== "all").map((c) => (
-                <button
-                  key={c.id}
-                  className={`mk-preset ${itemForm.category === c.id ? "active" : ""}`}
-                  onClick={() => setItem("category", c.id)}
-                  type="button"
-                >
-                  {c.label}
-                </button>
-              ))}
+        <div className="hcm-sell-body">
+          {/* Photos */}
+          <div className="hcm-field-label">1. Photos</div>
+          <div className="hcm-photo-zone">
+            <label className="hcm-photo-upload">
+              <Upload size={22} />
+              <strong>Add Item Photos</strong>
+              <span>2 free · 3-5 need 1.5 WLD photo pack</span>
+              <input ref={photoInputRef} type="file" accept="image/*" multiple onChange={(e) => handlePhotos(e.target.files)} />
+            </label>
+            <div className="hcm-photo-grid">
+              {Array.from({ length: 5 }, (_, slot) => {
+                const p = listingPhotos[slot];
+                return (
+                  <div key={slot} className={`hcm-photo-slot ${p ? "filled" : ""}`}>
+                    {p ? <img src={p.src} alt={p.name} /> : <span>{slot + 1}</span>}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <div className="mk-field">
-            <span className="mk-label">Condition</span>
-            <div className="mk-presets" style={{ flexWrap: "wrap" }}>
-              {CONDITIONS.map((c) => (
-                <button
-                  key={c}
-                  className={`mk-preset ${itemForm.condition === c ? "active" : ""}`}
-                  onClick={() => setItem("condition", c)}
-                  type="button"
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
+          {/* Price + details */}
+          <div className="hcm-field-label">2. Price & Facts</div>
+          <input className="hcm-input" placeholder="Item title, e.g. iPhone 12 clean" value={listingDraft.title} onChange={(e) => updateDraft("title", e.target.value)} />
+          <input className="hcm-input" placeholder="Price, e.g. 18 WLD or KES 12,000" value={listingDraft.price} onChange={(e) => updateDraft("price", e.target.value)} />
+          <select className="hcm-select" value={listingDraft.saleMode} onChange={(e) => updateDraft("saleMode", e.target.value)}>
+            <option value="direct">Direct chat sale</option>
+            <option value="bidding">Timed bidding</option>
+          </select>
+          {listingDraft.saleMode === "bidding" && (
+            <input className="hcm-input" placeholder="Minimum bid, e.g. 15 WLD" value={listingDraft.bidFloor} onChange={(e) => updateDraft("bidFloor", e.target.value)} />
+          )}
+          <select className="hcm-select" value={listingDraft.duration} onChange={(e) => updateDraft("duration", e.target.value)}>
+            <option>24 hours</option><option>3 days</option><option>7 days</option><option>14 days</option>
+          </select>
+          <select className="hcm-select" value={listingDraft.condition} onChange={(e) => updateDraft("condition", e.target.value)}>
+            <option disabled value="">Condition</option>
+            <option>Brand New</option><option>Second hand</option><option>Refurbished</option><option>Service or business</option>
+          </select>
+
+          {/* Trust */}
+          <div className="hcm-field-label">3. Location & Trust</div>
+          <input className="hcm-input" placeholder="Pickup area or delivery route" value={listingDraft.area} onChange={(e) => updateDraft("area", e.target.value)} />
+          <input className="hcm-input" placeholder="Optional link: shop, WhatsApp, website" value={listingDraft.link} onChange={(e) => updateDraft("link", e.target.value)} />
+          <textarea className="hcm-textarea" placeholder="Defects, warranty, receipt, pickup safety notes…" rows={3} value={listingDraft.details} onChange={(e) => updateDraft("details", e.target.value)} />
+
+          {/* Checklist */}
+          <div className="hcm-checklist">
+            {MARKET_CHECKLIST.map((item) => <span key={item}><CheckCircle2 size={13} />{item}</span>)}
           </div>
 
-          <label className="mk-field">
-            <span>Your area <em>*</em></span>
-            <input
-              placeholder="e.g. Westlands, CBD, Kilimani…"
-              value={itemForm.area}
-              onChange={(e) => setItem("area", e.target.value)}
-            />
-          </label>
-
-          <label className="mkt-check-field">
-            <input
-              type="checkbox"
-              checked={itemForm.negotiable}
-              onChange={(e) => setItem("negotiable", e.target.checked)}
-            />
-            <span>Price is negotiable</span>
-          </label>
-
-          <div className="mk-form-trust">
-            <ShieldCheck size={13} />
-            <span>Free to list · 2 photos included · WLD escrow on sale</span>
+          {/* Review card */}
+          <div className="hcm-review-card">
+            <div className="hcm-field-label" style={{ margin: 0 }}>4. Review</div>
+            <strong>{listingDraft.title.trim() || "Title missing"}</strong>
+            <p>{listingDraft.price || "Price missing"} · {listingDraft.condition || "Condition missing"} · {listingDraft.area || "Area missing"}</p>
+            <div className="hcm-review-meta">
+              <span>{listingPhotos.length}/2 photos</span>
+              <span>{photoPackUnlocked ? "5-photo pack ✓" : "3-5 photos: 1.5 WLD"}</span>
+              <span>Seller: {handle}</span>
+            </div>
           </div>
 
           <button
-            className="mk-submit"
-            disabled={!itemForm.title.trim() || !itemForm.price.trim() || !itemForm.area.trim()}
-            onClick={submitItem}
+            className="hcm-publish-btn"
+            disabled={listingPhotos.length < 2 || !listingDraft.title.trim() || !listingDraft.price.trim()}
+            onClick={() => { if (saveListing()) { openPayment({ title: "Publish Listing — 2 WLD", amount: "2 WLD", detail: "Your item goes live to verified buyers nearby.", success: "Listing published! Buyers can find and bid.", feature: "marketplace-quick-listing", points: 12, onConfirmed: () => { recordHistory({ title: "Listing published", detail: `${listingDraft.title} · 2 WLD fee confirmed.`, kind: "market" }); } }); } }}
             type="button"
           >
-            List Item — Free
+            Publish Listing — 2 WLD
           </button>
         </div>
       </div>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
   // RENDER — Services: post-job form
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (topTab === "services" && svcMode === "post-job") {
     return (
-      <div className="screen mk-form-screen">
-        <div className="mk-form-header">
-          <button className="mk-back" onClick={() => setSvcMode("browse")} type="button">
-            <ArrowLeft size={15} /> Back
-          </button>
+      <div className="screen hcm-sell-screen">
+        <div className="hcm-sell-header">
+          <button className="hcm-back-text" onClick={() => setSvcMode("browse")} type="button"><ArrowLeft size={15} /> Services</button>
           <h1>Post a Job</h1>
-          <p>Verified specialists worldwide will send proposals.</p>
+          <p>Verified specialists worldwide will apply.</p>
         </div>
-        <div className="mk-form-body">
-          <label className="mk-field">
-            <span>What do you need? <em>*</em></span>
-            <input placeholder="e.g. Translate 3 medical documents Swahili → English"
-              value={jobForm.title} onChange={(e) => setJob("title", e.target.value)} />
-          </label>
-          <label className="mk-field">
-            <span>Details <em>*</em></span>
-            <textarea placeholder="Scope, timeline, deliverables, special requirements…"
-              rows={4} value={jobForm.detail} onChange={(e) => setJob("detail", e.target.value)} />
-          </label>
-          <div className="mk-field">
-            <span className="mk-label">Specialty</span>
-            <div className="mk-niche-picker">
-              {NICHES.filter((n) => n.id !== "all").map((n) => {
-                const Icon = n.icon;
-                return (
-                  <button key={n.id}
-                    className={`mk-niche-btn ${jobForm.niche === n.id ? "active" : ""}`}
-                    style={{ "--n-color": n.color } as React.CSSProperties}
-                    onClick={() => setJob("niche", n.id)} type="button">
-                    <Icon size={14} />{n.label}
-                  </button>
-                );
-              })}
+        <div className="hcm-sell-body">
+          <label className="hcm-field"><span>What do you need? <em>*</em></span>
+            <input className="hcm-input" placeholder="e.g. Translate 3 medical documents Swahili → English" value={jobForm.title} onChange={(e) => setJob("title", e.target.value)} /></label>
+          <label className="hcm-field"><span>Details <em>*</em></span>
+            <textarea className="hcm-textarea" placeholder="Scope, timeline, deliverables…" rows={4} value={jobForm.detail} onChange={(e) => setJob("detail", e.target.value)} /></label>
+          <div className="hcm-field"><span className="hcm-label">Specialty</span>
+            <div className="hcm-niche-picker">
+              {NICHES.filter((n) => n.id !== "all").map((n) => { const I = n.icon; return (
+                <button key={n.id} className={`hcm-niche-btn ${jobForm.niche === n.id ? "active" : ""}`} style={{ "--n-color": n.color } as React.CSSProperties} onClick={() => setJob("niche", n.id)} type="button"><I size={14} />{n.label}</button>
+              ); })}
             </div>
           </div>
-          <label className="mk-field">
-            <span>Budget <em>*</em></span>
-            <div className="mk-presets">
-              {BUDGET_PRESETS.map((p) => (
-                <button key={p} className={`mk-preset ${jobForm.budget === p ? "active" : ""}`}
-                  onClick={() => setJob("budget", p)} type="button">{p}</button>
-              ))}
-            </div>
-            <input placeholder="Or type custom, e.g. WLD 75"
-              value={jobForm.budget} onChange={(e) => setJob("budget", e.target.value)} />
-          </label>
-          <div className="mk-field">
-            <span className="mk-label">Deadline</span>
-            <div className="mk-presets">
-              {DEADLINE_OPTIONS.map((d) => (
-                <button key={d} className={`mk-preset ${jobForm.deadline === d ? "active" : ""}`}
-                  onClick={() => setJob("deadline", d)} type="button">{d}</button>
-              ))}
-            </div>
+          <label className="hcm-field"><span>Budget <em>*</em></span>
+            <div className="hcm-presets">{BUDGET_PRESETS.map((p) => <button key={p} className={`hcm-preset ${jobForm.budget === p ? "active" : ""}`} onClick={() => setJob("budget", p)} type="button">{p}</button>)}</div>
+            <input className="hcm-input" placeholder="Or type: WLD 75" value={jobForm.budget} onChange={(e) => setJob("budget", e.target.value)} /></label>
+          <div className="hcm-field"><span className="hcm-label">Deadline</span>
+            <div className="hcm-presets">{DEADLINE_OPTIONS.map((d) => <button key={d} className={`hcm-preset ${jobForm.deadline === d ? "active" : ""}`} onClick={() => setJob("deadline", d)} type="button">{d}</button>)}</div>
           </div>
-          <label className="mk-field">
-            <span>Region</span>
-            <input placeholder="e.g. West Africa, or Worldwide"
-              value={jobForm.region} onChange={(e) => setJob("region", e.target.value)} />
-          </label>
-          <div className="mk-form-trust">
-            <ShieldCheck size={13} />
-            <span>2 WLD posting fee · Escrow on hire · Milestone payments</span>
-          </div>
-          <button className="mk-submit"
-            disabled={!jobForm.title.trim() || !jobForm.detail.trim() || !jobForm.budget.trim()}
-            onClick={submitJob} type="button">
-            Post Job — 2 WLD
-          </button>
+          <label className="hcm-field"><span>Region</span>
+            <input className="hcm-input" placeholder="e.g. West Africa, Worldwide" value={jobForm.region} onChange={(e) => setJob("region", e.target.value)} /></label>
+          <div className="hcm-form-trust"><ShieldCheck size={13} /><span>2 WLD fee · Escrow on hire · Milestone payments</span></div>
+          <button className="hcm-publish-btn" disabled={!jobForm.title.trim() || !jobForm.detail.trim() || !jobForm.budget.trim()} onClick={submitJob} type="button">Post Job — 2 WLD</button>
         </div>
       </div>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
   // RENDER — Services: offer-service form
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (topTab === "services" && svcMode === "offer-service") {
     return (
-      <div className="screen mk-form-screen">
-        <div className="mk-form-header">
-          <button className="mk-back" onClick={() => setSvcMode("browse")} type="button">
-            <ArrowLeft size={15} /> Back
-          </button>
+      <div className="screen hcm-sell-screen">
+        <div className="hcm-sell-header">
+          <button className="hcm-back-text" onClick={() => setSvcMode("browse")} type="button"><ArrowLeft size={15} /> Services</button>
           <h1>List Your Service</h1>
-          <p>Tell clients what you offer. Get hired via World Chat.</p>
+          <p>Clients find and hire you. Get paid in WLD via escrow.</p>
         </div>
-        <div className="mk-form-body">
-          <label className="mk-field">
-            <span>What do you offer? <em>*</em></span>
-            <input placeholder="e.g. Medical document translation Swahili ↔ English"
-              value={serviceForm.title} onChange={(e) => setService("title", e.target.value)} />
-          </label>
-          <label className="mk-field">
-            <span>Description <em>*</em></span>
-            <textarea placeholder="Your expertise, experience, certifications…"
-              rows={4} value={serviceForm.detail} onChange={(e) => setService("detail", e.target.value)} />
-          </label>
-          <div className="mk-field">
-            <span className="mk-label">Your specialty</span>
-            <div className="mk-niche-picker">
-              {NICHES.filter((n) => n.id !== "all").map((n) => {
-                const Icon = n.icon;
-                return (
-                  <button key={n.id}
-                    className={`mk-niche-btn ${serviceForm.niche === n.id ? "active" : ""}`}
-                    style={{ "--n-color": n.color } as React.CSSProperties}
-                    onClick={() => setService("niche", n.id)} type="button">
-                    <Icon size={14} />{n.label}
-                  </button>
-                );
-              })}
+        <div className="hcm-sell-body">
+          <label className="hcm-field"><span>What do you offer? <em>*</em></span>
+            <input className="hcm-input" placeholder="e.g. Medical translation Swahili ↔ English" value={serviceForm.title} onChange={(e) => setSvc("title", e.target.value)} /></label>
+          <label className="hcm-field"><span>Description <em>*</em></span>
+            <textarea className="hcm-textarea" placeholder="Your expertise, experience, certifications…" rows={4} value={serviceForm.detail} onChange={(e) => setSvc("detail", e.target.value)} /></label>
+          <div className="hcm-field"><span className="hcm-label">Specialty</span>
+            <div className="hcm-niche-picker">
+              {NICHES.filter((n) => n.id !== "all").map((n) => { const I = n.icon; return (
+                <button key={n.id} className={`hcm-niche-btn ${serviceForm.niche === n.id ? "active" : ""}`} style={{ "--n-color": n.color } as React.CSSProperties} onClick={() => setSvc("niche", n.id)} type="button"><I size={14} />{n.label}</button>
+              ); })}
             </div>
           </div>
-          <label className="mk-field">
-            <span>Starting rate <em>*</em></span>
-            <div className="mk-presets">
-              {BUDGET_PRESETS.map((p) => (
-                <button key={p} className={`mk-preset ${serviceForm.rate === p ? "active" : ""}`}
-                  onClick={() => setService("rate", p)} type="button">{p}</button>
-              ))}
-            </div>
-            <input placeholder="Or type custom, e.g. WLD 30 per 1,000 words"
-              value={serviceForm.rate} onChange={(e) => setService("rate", e.target.value)} />
-          </label>
-          <label className="mk-field">
-            <span>Languages</span>
-            <input placeholder="e.g. Swahili, English, French"
-              value={serviceForm.languages} onChange={(e) => setService("languages", e.target.value)} />
-          </label>
-          <label className="mk-field">
-            <span>Regions you serve</span>
-            <input placeholder="e.g. East Africa, or Worldwide"
-              value={serviceForm.region} onChange={(e) => setService("region", e.target.value)} />
-          </label>
-          <div className="mk-form-trust">
-            <ShieldCheck size={13} />
-            <span>2 WLD listing fee · World ID verified profile</span>
-          </div>
-          <button className="mk-submit"
-            disabled={!serviceForm.title.trim() || !serviceForm.detail.trim() || !serviceForm.rate.trim()}
-            onClick={submitService} type="button">
-            List Service — 2 WLD
-          </button>
+          <label className="hcm-field"><span>Starting rate <em>*</em></span>
+            <div className="hcm-presets">{BUDGET_PRESETS.map((p) => <button key={p} className={`hcm-preset ${serviceForm.rate === p ? "active" : ""}`} onClick={() => setSvc("rate", p)} type="button">{p}</button>)}</div>
+            <input className="hcm-input" placeholder="Or type: WLD 30 per 1,000 words" value={serviceForm.rate} onChange={(e) => setSvc("rate", e.target.value)} /></label>
+          <label className="hcm-field"><span>Languages</span>
+            <input className="hcm-input" placeholder="e.g. Swahili, English, French" value={serviceForm.languages} onChange={(e) => setSvc("languages", e.target.value)} /></label>
+          <label className="hcm-field"><span>Regions</span>
+            <input className="hcm-input" placeholder="e.g. East Africa, Worldwide" value={serviceForm.region} onChange={(e) => setSvc("region", e.target.value)} /></label>
+          <div className="hcm-form-trust"><ShieldCheck size={13} /><span>2 WLD fee · World ID verified profile</span></div>
+          <button className="hcm-publish-btn" disabled={!serviceForm.title.trim() || !serviceForm.detail.trim() || !serviceForm.rate.trim()} onClick={submitService} type="button">List Service — 2 WLD</button>
         </div>
       </div>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RENDER — Services: detail
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER — Services: listing detail
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (topTab === "services" && activeSvc) {
-    const isJob     = activeSvc.type === "job";
-    const color     = activeSvc.color;
-    const poster    = isJob ? (activeSvc as AnyJob).poster   : (activeSvc as LocalService).provider;
-    const budget    = isJob ? (activeSvc as AnyJob).budget   : (activeSvc as LocalService).rate;
-    const deadline  = isJob ? (activeSvc as AnyJob).deadline : null;
-    const proposals = isJob ? (activeSvc as AnyJob).proposals : null;
-    const skills    = isJob ? (activeSvc as AnyJob).skills   : [];
-    const languages = !isJob ? (activeSvc as LocalService).languages : null;
-
+    const isJob = activeSvc.type === "job";
+    const color = activeSvc.color;
+    const poster = isJob ? (activeSvc as AnyJob).poster : (activeSvc as LocalService).provider;
+    const budget = isJob ? (activeSvc as AnyJob).budget : (activeSvc as LocalService).rate;
     return (
-      <div className="screen mk-detail">
-        <div className="mk-detail-hero" style={{ "--dc": color } as React.CSSProperties}>
-          <button className="mk-back" onClick={() => setActiveSvc(null)} type="button">
-            <ArrowLeft size={15} />Back
-          </button>
-          <span className="mk-detail-niche">{activeSvc.niche}</span>
+      <div className="screen hcm-svc-detail">
+        <div className="hcm-svc-hero" style={{ background: `linear-gradient(135deg, ${color}22, ${color}08)`, borderBottom: `3px solid ${color}44` }}>
+          <button className="hcm-back-text" onClick={() => setActiveSvc(null)} type="button"><ArrowLeft size={15} /> Services</button>
+          <span className="hcm-svc-niche" style={{ color, background: `${color}18` }}>{activeSvc.niche}</span>
           <h1>{activeSvc.title}</h1>
-          <div className="mk-detail-meta">
+          <div className="hcm-svc-meta">
             <span><Globe2 size={12} />{activeSvc.region}</span>
-            {deadline    && <span><Clock size={12} />{deadline} left</span>}
-            {proposals !== null && <span><Users size={12} />{proposals} proposals</span>}
+            {isJob && <span><Clock size={12} />{(activeSvc as AnyJob).deadline} left</span>}
+            {isJob && <span><Users size={12} />{(activeSvc as AnyJob).proposals} proposals</span>}
           </div>
         </div>
-        <div className="mk-detail-body">
-          <div className="mk-detail-budget-row">
-            <div>
-              <span>{isJob ? "Budget" : "Starting rate"}</span>
-              <strong>{budget}</strong>
-            </div>
-            <span className="mk-escrow-badge"><ShieldCheck size={12} />Escrow</span>
+        <div className="hcm-svc-body">
+          <div className="hcm-svc-budget-row">
+            <div><span>{isJob ? "Budget" : "Starting rate"}</span><strong>{budget}</strong></div>
+            <span className="hcm-escrow-badge"><ShieldCheck size={12} />Escrow</span>
           </div>
-          <section className="mk-detail-section">
-            <strong>Description</strong>
-            <p>{activeSvc.detail}</p>
-          </section>
-          {skills.length > 0 && (
-            <section className="mk-detail-section">
+          <section className="hcm-detail-section"><strong>Description</strong><p>{activeSvc.detail}</p></section>
+          {isJob && (activeSvc as AnyJob).skills.length > 0 && (
+            <section className="hcm-detail-section">
               <strong>Skills needed</strong>
-              <div className="mk-skill-chips">
-                {skills.map((s) => <span key={s}>{s}</span>)}
-              </div>
+              <div className="hcm-skill-chips">{(activeSvc as AnyJob).skills.map((s) => <span key={s}>{s}</span>)}</div>
             </section>
           )}
-          {languages && (
-            <section className="mk-detail-section">
-              <strong>Languages / regions</strong>
-              <p>{languages}</p>
-            </section>
-          )}
-          <div className="mk-detail-trust">
+          <div className="hcm-detail-trust">
             <span><BadgeCheck size={12} />World ID verified</span>
             <span><ShieldCheck size={12} />WLD escrow on hire</span>
             <span><Zap size={12} />Milestone payments</span>
           </div>
-          <div className="mk-detail-actions">
-            <button
-              className="mk-cta-primary"
-              onClick={() => {
-                if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying to jobs" : "contacting providers")) return;
-                void openChat(poster, activeSvc.title);
-              }}
-              type="button"
-            >
-              <MessageCircle size={15} />
-              {isJob ? "Apply via World Chat" : "Contact Provider"}
-            </button>
-            <button className="mk-cta-secondary" onClick={() => setActiveSvc(null)} type="button">
-              Back to listings
-            </button>
+          <div className="hcm-seller-card">
+            <div className="hcm-seller-av" style={{ background: `${color}44` }}>{poster.replace(/^@/, "").charAt(0).toUpperCase()}</div>
+            <div><strong>{poster}</strong><span>World ID Verified</span></div>
+            <BadgeCheck size={16} color="#2f6fed" />
           </div>
-          <div className="mk-detail-poster">
-            <div className="mk-poster-av" style={{ background: `linear-gradient(135deg,${color}cc,${color}55)` }}>
-              {poster.replace(/^@/, "").charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <strong>{poster}</strong>
-              <span>World ID Verified</span>
-            </div>
-            <BadgeCheck size={15} color="#2f6fed" />
+          <div className="hcm-detail-actions">
+            <button className="hcm-act-primary" onClick={() => { if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying" : "contacting providers")) return; void chatWithWorld({ message: `Hi ${poster}, I'm interested in "${activeSvc.title}" on HumanChain.`, to: [poster.replace(/^@/, "")] }).then(() => act("World Chat opened", `Chat with ${poster} ready.`)).catch(() => act("Chat unavailable", "Try from World App.")); }} type="button">
+              <MessageCircle size={15} />{isJob ? "Apply via World Chat" : "Contact Provider"}
+            </button>
+            <button className="hcm-act-chat" onClick={() => setActiveSvc(null)} type="button">Back to Services</button>
           </div>
         </div>
       </div>
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // RENDER — Main browse (both tabs)
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER — Main browse
+  // ─────────────────────────────────────────────────────────────────────────
 
-  const allItems = [...SEED_ITEMS, ...localItems];
-  const filteredItems = allItems.filter((item) => {
-    const matchesCat = itemCat === "all" || item.category === itemCat;
-    const q = itemSearch.trim().toLowerCase();
-    return matchesCat && (!q || `${item.title} ${item.area} ${item.category}`.toLowerCase().includes(q));
+  const filteredItems = MARKET_ITEMS.filter((item) => {
+    const q = marketSearch.trim().toLowerCase();
+    const matchFilter = marketFilter === "All" || item.tag === marketFilter;
+    return matchFilter && (!q || `${item.title} ${item.seller} ${item.location} ${item.tag}`.toLowerCase().includes(q));
   });
 
-  const allListings: SvcListing[] = [...SEED_JOBS, ...localJobs, ...localServices];
-  const filteredSvc = allListings.filter((item) => {
-    const matchesNiche = activeNiche === "all" || item.niche === activeNiche;
+  const allSvcListings: SvcListing[] = [...SEED_JOBS, ...localJobs, ...localServices];
+  const filtSvc = allSvcListings.filter((item) => {
+    const matchNiche = activeNiche === "all" || item.niche === activeNiche;
     const q = svcSearch.trim().toLowerCase();
-    return matchesNiche && (!q || `${item.title} ${item.niche} ${item.region ?? ""}`.toLowerCase().includes(q));
+    return matchNiche && (!q || `${item.title} ${item.niche} ${item.region ?? ""}`.toLowerCase().includes(q));
   });
-  const svcJobs     = filteredSvc.filter((i) => i.type === "job") as AnyJob[];
-  const svcServices = filteredSvc.filter((i) => i.type === "service") as LocalService[];
+  const svcJobs     = filtSvc.filter((i) => i.type === "job") as AnyJob[];
+  const svcServices = filtSvc.filter((i) => i.type === "service") as LocalService[];
   const urgentJobs  = SEED_JOBS.filter((j) => j.urgent);
 
   return (
-    <div className="screen mkt-root">
+    <div className="screen hcm-root">
 
-      {/* ── Top header with dual tabs ─────────────────────────────────────── */}
-      <div className="mkt-topbar">
-        <div className="mkt-tabs">
-          <button
-            className={`mkt-tab ${topTab === "market" ? "active" : ""}`}
-            onClick={() => setTopTab("market")}
-            type="button"
-          >
-            <Tag size={14} /> Nearby Market
+      {/* ── Dual-tab topbar ───────────────────────────────────────────────── */}
+      <div className="hcm-topbar">
+        <div className="hcm-tabs">
+          <button className={`hcm-tab ${topTab === "market" ? "active" : ""}`} onClick={() => setTopTab("market")} type="button">
+            <Store size={14} /> Market
           </button>
-          <button
-            className={`mkt-tab ${topTab === "services" ? "active" : ""}`}
-            onClick={() => setTopTab("services")}
-            type="button"
-          >
+          <button className={`hcm-tab ${topTab === "services" ? "active" : ""}`} onClick={() => setTopTab("services")} type="button">
             <Briefcase size={14} /> Services
           </button>
         </div>
-
         {topTab === "market" ? (
-          <button className="mkt-post-btn" onClick={() => setShowPostItem(true)} type="button">
-            <Plus size={14} /> Sell
-          </button>
+          <div className="hcm-topbar-actions">
+            <button className="hcm-boost-btn" onClick={() => { if (!marketplaceListings.length) { setShowSell(true); return; } openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: () => recordHistory({ title: "Listing boosted", detail: "2 WLD boost confirmed.", kind: "market" }) }); }} type="button">
+              <Flame size={13} />Boost
+            </button>
+            <button className="hcm-sell-btn" onClick={() => setShowSell(true)} type="button">
+              <PlusCircle size={14} />Sell
+            </button>
+          </div>
         ) : (
-          <div className="mk-header-btns">
-            <button className="mk-btn-offer" onClick={() => setSvcMode("offer-service")} type="button">
-              <Star size={13} />Offer
-            </button>
-            <button className="mk-btn-post" onClick={() => setSvcMode("post-job")} type="button">
-              <Plus size={13} />Post Job
-            </button>
+          <div className="hcm-topbar-actions">
+            <button className="hcm-boost-btn" onClick={() => setSvcMode("offer-service")} type="button"><Star size={13} />Offer</button>
+            <button className="hcm-sell-btn" onClick={() => setSvcMode("post-job")} type="button"><PlusCircle size={14} />Post Job</button>
           </div>
         )}
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
+      {/* ════════════════════════════════════════════════════════════════════
           NEARBY MARKET TAB
-          ══════════════════════════════════════════════════════════════════ */}
+          ════════════════════════════════════════════════════════════════ */}
       {topTab === "market" && (
         <>
-          {/* Search + category */}
-          <div className="mkt-search-row">
-            <div className="mkt-search">
-              <Search size={14} />
-              <input
-                aria-label="Search market"
-                placeholder="Search items, food, services…"
-                value={itemSearch}
-                onChange={(e) => setItemSearch(e.target.value)}
-              />
-              {itemSearch && <button onClick={() => setItemSearch("")} type="button" aria-label="Clear">×</button>}
+          {/* Verification tier */}
+          <div className={`hcm-tier-band ${tier.className}`}>
+            <BadgeCheck size={16} />
+            <div>
+              <span>{tier.label}</span>
+              <small>{tier.next}</small>
             </div>
+            <span className="hcm-tier-score">{tier.score}/100</span>
           </div>
 
-          <div className="mkt-cat-row">
-            {ITEM_CATEGORIES.map((c) => (
-              <button
-                key={c.id}
-                className={`mkt-cat-chip ${itemCat === c.id ? "active" : ""}`}
-                style={{ "--cat-color": c.color } as React.CSSProperties}
-                onClick={() => setItemCat(c.id)}
-                type="button"
-              >
-                {c.label}
+          {/* Location */}
+          {!locationReady ? (
+            <div className="hcm-location-card">
+              <MapPin size={18} />
+              <div>
+                <strong>Connect Nearby Market</strong>
+                <span>Allow GPS or enter an area for nearby ranking.</span>
+                <small>Opened from {worldLaunchLabel}</small>
+              </div>
+              <button disabled={marketLocation.status === "requesting"} onClick={requestGps} type="button">
+                {marketLocation.status === "requesting" ? "…" : "GPS"}
               </button>
+            </div>
+          ) : (
+            <div className="hcm-location-ready">
+              <MapPin size={14} />
+              <span>{marketLocation.source === "manual" ? "Area" : "GPS"}: {marketLocation.label}</span>
+            </div>
+          )}
+          {!locationReady && (
+            <div className="hcm-manual-row">
+              <input
+                aria-label="Manual area"
+                placeholder="Area, e.g. Westlands"
+                value={manualArea}
+                onChange={(e) => setManualArea(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && applyManualArea()}
+              />
+              <button onClick={applyManualArea} type="button">Use area</button>
+            </div>
+          )}
+
+          {/* Search + filter */}
+          <div className="hcm-search-wrap">
+            <Search size={15} />
+            <input
+              aria-label="Search market"
+              placeholder="Search items, sellers, areas…"
+              value={marketSearch}
+              onChange={(e) => setMarketSearch(e.target.value)}
+            />
+            {marketSearch && <button onClick={() => setMarketSearch("")} type="button" aria-label="Clear">×</button>}
+          </div>
+          <div className="hcm-filter-row">
+            {MARKET_FILTERS.map((f) => (
+              <button key={f} className={`hcm-filter-chip ${marketFilter === f ? "active" : ""}`} onClick={() => setMarketFilter(f)} type="button">{f}</button>
             ))}
           </div>
 
-          {/* Location context strip */}
-          {itemCat === "all" && !itemSearch && (
-            <div className="mkt-location-strip">
-              <MapPin size={12} />
-              <span>Showing items near you · <strong>Nairobi</strong></span>
-              <button type="button" onClick={() => act("Change location", "GPS location update coming soon.")}>
-                Change
-              </button>
-            </div>
+          {/* Action buttons */}
+          <div className="hcm-market-actions">
+            <button onClick={() => setShowSell(true)} type="button">
+              <PlusCircle size={17} /><span>Sell Item</span><strong>Start</strong>
+            </button>
+            <button onClick={() => openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: () => recordHistory({ title: "Boosted", detail: "2 WLD boost.", kind: "market" }) })} type="button">
+              <Flame size={17} /><span>Boost</span><strong>2 WLD</strong>
+            </button>
+            <button onClick={() => openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Market a verified shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: () => recordHistory({ title: "Business ad live", detail: "4 WLD ad confirmed.", kind: "market" }) })} type="button">
+              <HandCoins size={17} /><span>Ad</span><strong>4 WLD</strong>
+            </button>
+          </div>
+
+          {/* Your listings */}
+          {marketplaceListings.length > 0 && (
+            <section className="hcm-section">
+              <div className="hcm-section-head"><Library size={14} /><strong>Your Listings</strong></div>
+              <div className="hcm-stored-list">
+                {marketplaceListings.slice(0, 3).map((listing) => (
+                  <div key={listing.id} className="hcm-stored-row">
+                    <button className="hcm-stored-thumb" onClick={() => setActiveItem(listing)} type="button">
+                      {listing.photos[0] ? <img src={listing.photos[0].src} alt={listing.photos[0].name} /> : <Tag size={18} />}
+                    </button>
+                    <div>
+                      <strong>{listing.title}</strong>
+                      <span>{listing.price} · {listing.condition} · {listing.area}</span>
+                      <small>{listing.saleMode === "bidding" ? `Bidding, floor ${listing.bidFloor}` : "Chat-first"} · {listing.ratings ?? 0} votes · {listing.tips ?? 0} tips · {listing.dataStorageStatus === "cloud-safe" ? "☁ safe" : "local"}</small>
+                    </div>
+                    <div className="hcm-stored-acts">
+                      <button onClick={() => rateItem(listing)} type="button"><Star size={12} /></button>
+                      <button onClick={() => tipItem(listing)} type="button"><Zap size={12} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
-          {/* Items grid */}
-          <div className="mkt-items-grid">
-            {filteredItems.map((item) => {
-              const [g0, g1] = item.gradient;
-              return (
-                <button
-                  key={item.id}
-                  className="mkt-item-card"
-                  onClick={() => setActiveItem(item)}
-                  type="button"
-                >
-                  <div className="mkt-item-photo" style={{ background: `linear-gradient(145deg, ${g0}, ${g1})` }}>
-                    <span className="mkt-item-emoji">{item.emoji}</span>
-                    {item.bids > 0 && (
-                      <span className="mkt-bid-pip"><Zap size={9} />{item.bids}</span>
-                    )}
-                  </div>
-                  <div className="mkt-item-info">
-                    <strong>{item.title}</strong>
-                    <span className="mkt-item-price">{item.price}</span>
-                    <div className="mkt-item-meta">
-                      <span className="mkt-item-cond">{item.condition}</span>
-                      <span><MapPin size={9} />{item.distance}</span>
+          {/* Discover */}
+          <section className="hcm-section">
+            <div className="hcm-section-head">
+              <ShoppingBag size={14} /><strong>Discover Near You</strong>
+              <span className="hcm-live-pill"><span className="hcm-pulse" />Live</span>
+            </div>
+            <div className="hcm-items-list">
+              {filteredItems.length ? filteredItems.map((item) => {
+                const rk = `seed:${item.id}`;
+                const social = marketRatings[rk] ?? { rating: 0, tips: 0 };
+                const comments = marketComments[rk] ?? [];
+                const imgs = getImages(item);
+
+                return (
+                  <article key={item.id} className={`hcm-item-card hcm-tone-${item.tone}`}>
+                    {/* Photo stack — clicking opens detail */}
+                    <button className="hcm-item-photos" onClick={() => { setActiveItem(item); setGalleryIdx(0); }} type="button" aria-label={`View ${item.title}`}>
+                      {imgs.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img}
+                          alt={`${item.title} ${i + 1}`}
+                          className={`hcm-item-photo-img hcm-photo-${i}`}
+                        />
+                      ))}
+                      {item.bidding && (
+                        <div className="hcm-bid-indicator">
+                          <Gavel size={10} />
+                          <span>{(marketBids[item.id] ?? []).length} bids · {item.bidding.ends}</span>
+                        </div>
+                      )}
+                      {item.isFeatured && <span className="hcm-feat-badge"><Flame size={9} />Featured</span>}
+                    </button>
+
+                    {/* Info */}
+                    <div className="hcm-item-info">
+                      <div className="hcm-item-top">
+                        <strong>{item.title}</strong>
+                        <span className="hcm-item-price">{item.price}</span>
+                      </div>
+                      <p className="hcm-item-sub">{item.condition} · {item.seller} · {item.location}</p>
+                      <div className="hcm-item-meta-row">
+                        <span><MapPin size={10} />{item.distance}</span>
+                        <span>{item.tag}</span>
+                        <span><Camera size={10} />{item.photos}</span>
+                        <span>{item.trust}</span>
+                      </div>
+                      <div className="hcm-item-social">
+                        <span>{social.rating} votes</span>
+                        <span>{social.tips} tips</span>
+                        <span>{comments.length} comments</span>
+                      </div>
+                      <p className="hcm-item-quality">{getShortText(item.quality, 90)}</p>
+                      {item.bidding && (
+                        <div className="hcm-item-bid-row">
+                          <span>Best: {topBid(item)?.amount ?? item.bidding.floor} WLD</span>
+                          <span>Closes {item.bidding.ends}</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="mkt-item-footer">
-                      <span>{item.area}</span>
-                      <span className="mkt-item-time">{item.postedAt}</span>
+
+                    {/* Actions */}
+                    <div className="hcm-item-actions">
+                      <button className="hcm-act-view" onClick={() => { setActiveItem(item); setGalleryIdx(0); }} type="button">View</button>
+                      <button onClick={() => rateItem(item)} type="button"><Star size={13} /></button>
+                      <button onClick={() => tipItem(item)} type="button"><Zap size={13} /></button>
+                      <button aria-busy={busyAction === `chat:${itemKey(item)}`} disabled={Boolean(busyAction)} onClick={() => void chatSeller(item)} type="button">
+                        <MessageCircle size={13} />
+                      </button>
+                      <button aria-busy={busyAction === `share:${itemKey(item)}`} disabled={Boolean(busyAction)} onClick={() => void shareItem(item)} type="button">
+                        <Send size={13} />
+                      </button>
                     </div>
+                  </article>
+                );
+              }) : (
+                <div className="hcm-empty"><Package size={28} /><strong>No items found</strong><p>{marketSearch ? `No results for "${marketSearch}"` : "Be the first to list something nearby."}</p></div>
+              )}
+            </div>
+          </section>
+
+          {/* Business ads */}
+          <section className="hcm-section">
+            <div className="hcm-section-head"><Send size={14} /><strong>Business Ads</strong><small>4 WLD to promote</small></div>
+            <div className="hcm-ads-grid">
+              {BUSINESS_ADS.map((ad) => (
+                <article key={ad.title} className="hcm-ad-card">
+                  <img src={ad.image} alt={ad.title} className="hcm-ad-img" />
+                  <div className="hcm-ad-body">
+                    <span className="hcm-ad-tag">{ad.tag} · {ad.area}</span>
+                    <strong>{ad.title}</strong>
+                    <p>{ad.offer}</p>
+                    <small>{ad.owner} · {ad.signal}</small>
                   </div>
+                  <button onClick={() => { recordHistory({ title: "Ad viewed", detail: `${ad.title} by ${ad.owner}`, kind: "market" }); act(ad.title, "Business ad preview. Chat and booking stay user-controlled."); }} type="button">View</button>
+                </article>
+              ))}
+            </div>
+            <button className="hcm-ad-post-btn" onClick={() => openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Promote your shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: () => recordHistory({ title: "Business ad live", detail: "4 WLD.", kind: "market" }) })} type="button">
+              <Send size={14} /> Post Your Business Ad — 4 WLD
+            </button>
+          </section>
+
+          {/* Pricing plans */}
+          <section className="hcm-section">
+            <div className="hcm-section-head"><CircleDollarSign size={14} /><strong>Publishing Fees</strong></div>
+            <div className="hcm-plans">
+              {MARKET_PLANS.map((plan) => (
+                <button key={plan[0]} className="hcm-plan-row" onClick={() => openPayment({ title: `${plan[0]} — ${plan[1]}`, amount: plan[1], detail: plan[2], success: `${plan[0]} unlocked!`, feature: normalizePaymentFeature(`marketplace-${plan[0]}`), points: 10, onConfirmed: () => recordHistory({ title: `${plan[0]} payment`, detail: `${plan[1]} confirmed.`, kind: "market" }) })} type="button">
+                  <div><strong>{plan[0]}</strong><span>{plan[2]}</span></div>
+                  <b>{plan[1]}</b>
                 </button>
-              );
-            })}
-          </div>
-
-          {filteredItems.length === 0 && (
-            <div className="mk-empty">
-              <Package size={30} />
-              <strong>No items found</strong>
-              <p>{itemSearch ? `No results for "${itemSearch}"` : "Be the first to list something nearby."}</p>
-              <button onClick={() => setShowPostItem(true)} type="button"><Plus size={14} />Sell an Item</button>
+              ))}
             </div>
-          )}
-
-          {/* Sell FAB strip */}
-          <div className="mkt-sell-strip">
-            <button onClick={() => setShowPostItem(true)} type="button">
-              <Camera size={14} /><span>Sell Something</span><small>Free listing</small>
-            </button>
-            <button onClick={() => act("Bid alerts", "You will be notified when someone outbids you.")} type="button">
-              <Zap size={14} /><span>My Bids</span><small>Track</small>
-            </button>
-          </div>
+          </section>
         </>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════════════
+      {/* ════════════════════════════════════════════════════════════════════
           SERVICES TAB
-          ══════════════════════════════════════════════════════════════════ */}
+          ════════════════════════════════════════════════════════════════ */}
       {topTab === "services" && (
         <>
-          <div className="mk-search">
+          <div className="hcm-search-wrap">
             <Search size={15} />
-            <input aria-label="Search services" placeholder="Search jobs, services, regions…"
-              value={svcSearch} onChange={(e) => setSvcSearch(e.target.value)} />
+            <input aria-label="Search services" placeholder="Search jobs, services, regions…" value={svcSearch} onChange={(e) => setSvcSearch(e.target.value)} />
             {svcSearch && <button onClick={() => setSvcSearch("")} type="button" aria-label="Clear">×</button>}
           </div>
 
-          <div className="mk-niche-tabs">
-            {NICHES.map((n) => {
-              const Icon = n.icon;
-              return (
-                <button key={n.id}
-                  className={`mk-niche-tab ${activeNiche === n.id ? "active" : ""}`}
-                  style={{ "--n-color": n.color } as React.CSSProperties}
-                  onClick={() => setActiveNiche(n.id)} type="button">
-                  <Icon size={13} />{n.label}
-                </button>
-              );
-            })}
+          <div className="hcm-filter-row">
+            {NICHES.map((n) => { const I = n.icon; return (
+              <button key={n.id} className={`hcm-filter-chip ${activeNiche === n.id ? "active" : ""}`} style={{ "--n-color": n.color } as React.CSSProperties} onClick={() => setActiveNiche(n.id)} type="button">
+                <I size={12} />{n.label}
+              </button>
+            ); })}
           </div>
 
-          {/* Urgent jobs strip */}
+          {/* Urgent jobs */}
           {activeNiche === "all" && !svcSearch && (
-            <div className="mk-section">
-              <div className="mk-section-head">
-                <strong>Urgent — Apply Now</strong>
-                <span className="mk-live-pill"><span className="mk-pulse" />Live</span>
-              </div>
-              <div className="mk-featured-scroll">
+            <section className="hcm-section">
+              <div className="hcm-section-head"><Flame size={14} /><strong>Urgent — Apply Now</strong><span className="hcm-live-pill"><span className="hcm-pulse" />Live</span></div>
+              <div className="hcm-urgent-scroll">
                 {urgentJobs.map((job) => (
-                  <button key={job.id} className="mk-featured-card"
-                    style={{ "--fc": job.color } as React.CSSProperties}
-                    onClick={() => setActiveSvc(job)} type="button">
-                    <span className="mk-fc-niche">{job.niche}</span>
+                  <button key={job.id} className="hcm-urgent-card" style={{ "--uc": job.color } as React.CSSProperties} onClick={() => setActiveSvc(job)} type="button">
+                    <span className="hcm-uc-niche">{job.niche}</span>
                     <strong>{job.title}</strong>
-                    <div className="mk-fc-meta">
+                    <div className="hcm-uc-meta">
                       <span><Globe2 size={11} />{job.region}</span>
                       <span><Clock size={11} />{job.deadline}</span>
                     </div>
-                    <div className="mk-fc-footer">
+                    <div className="hcm-uc-footer">
                       <strong>{job.budget}</strong>
-                      <span>{job.proposals} proposals</span>
+                      <span>{job.proposals} proposals <ArrowRight size={10} /></span>
                     </div>
                   </button>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {/* Top providers */}
           {activeNiche === "all" && !svcSearch && (
-            <div className="mk-section">
-              <div className="mk-section-head"><strong>Top Specialists</strong></div>
-              <div className="mk-providers-row">
+            <section className="hcm-section">
+              <div className="hcm-section-head"><Star size={14} /><strong>Top Specialists</strong></div>
+              <div className="hcm-providers-row">
                 {SEED_PROVIDERS.map((p) => (
-                  <div key={p.id} className="mk-provider-chip">
-                    <div className="mk-pav" style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}55)` }}>
+                  <div key={p.id} className="hcm-provider-chip">
+                    <div className="hcm-pav" style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}44)` }}>
                       {p.initial}
-                      <span className="mk-pip"><BadgeCheck size={8} /></span>
+                      <span className="hcm-pip"><BadgeCheck size={8} /></span>
                     </div>
                     <span>{p.name.split(" ")[0]}</span>
-                    <span className="mk-prating"><Star size={9} fill="currentColor" />{p.rating}</span>
+                    <span className="hcm-prating"><Star size={9} fill="currentColor" />{p.rating}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Jobs list */}
+          {/* Jobs */}
           {svcJobs.length > 0 && (
-            <div className="mk-section">
-              <div className="mk-section-head">
-                <strong>{activeNiche === "all" ? "Open Jobs" : `${NICHES.find(n => n.id === activeNiche)?.label} Jobs`}</strong>
-                <span className="mk-count">{svcJobs.length}</span>
-              </div>
-              <div className="mk-list">
+            <section className="hcm-section">
+              <div className="hcm-section-head"><strong>Open Jobs</strong><span className="hcm-count">{svcJobs.length}</span></div>
+              <div className="hcm-svc-list">
                 {svcJobs.map((job) => (
-                  <button key={job.id} className="mk-card"
-                    style={{ "--cc": job.color } as React.CSSProperties}
-                    onClick={() => setActiveSvc(job)} type="button">
-                    <span className="mk-card-bar" />
-                    <div className="mk-card-top">
-                      <span className="mk-card-niche" style={{ color: job.color, background: `${job.color}18` }}>{job.niche}</span>
-                      {job.urgent && <span className="mk-urgent">Urgent</span>}
-                      <span className="mk-card-dl"><Clock size={10} />{job.deadline}</span>
+                  <button key={job.id} className="hcm-svc-card" style={{ "--cc": job.color } as React.CSSProperties} onClick={() => setActiveSvc(job)} type="button">
+                    <span className="hcm-svc-bar" />
+                    <div className="hcm-svc-top">
+                      <span style={{ color: job.color, background: `${job.color}18` }}>{job.niche}</span>
+                      {job.urgent && <span className="hcm-urgent-tag">Urgent</span>}
+                      <span><Clock size={10} />{job.deadline}</span>
                     </div>
-                    <strong className="mk-card-title">{job.title}</strong>
-                    <div className="mk-card-meta">
+                    <strong>{job.title}</strong>
+                    <div className="hcm-svc-meta">
                       <span><Globe2 size={11} />{job.region}</span>
                       <span><Users size={11} />{job.proposals} proposals</span>
                     </div>
                     {"skills" in job && job.skills.length > 0 && (
-                      <div className="mk-card-skills">
-                        {job.skills.slice(0, 3).map((s) => <i key={s}>{s}</i>)}
-                      </div>
+                      <div className="hcm-skill-chips">{job.skills.slice(0, 3).map((s) => <i key={s}>{s}</i>)}</div>
                     )}
-                    <div className="mk-card-footer">
-                      <strong>{job.budget}</strong>
-                      <span>Apply <ArrowRight size={11} /></span>
+                    <div className="hcm-svc-footer">
+                      <strong>{job.budget}</strong><span>Apply <ArrowRight size={11} /></span>
                     </div>
                   </button>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Services list */}
+          {/* Service providers */}
           {svcServices.length > 0 && (
-            <div className="mk-section">
-              <div className="mk-section-head">
-                <strong>Service Providers</strong>
-                <span className="mk-count">{svcServices.length}</span>
-              </div>
-              <div className="mk-list">
+            <section className="hcm-section">
+              <div className="hcm-section-head"><strong>Service Providers</strong><span className="hcm-count">{svcServices.length}</span></div>
+              <div className="hcm-svc-list">
                 {svcServices.map((svc) => (
-                  <button key={svc.id} className="mk-card mk-svc-card"
-                    style={{ "--cc": svc.color } as React.CSSProperties}
-                    onClick={() => setActiveSvc(svc)} type="button">
-                    <span className="mk-card-bar" />
-                    <div className="mk-card-top">
-                      <span className="mk-card-niche" style={{ color: svc.color, background: `${svc.color}18` }}>{svc.niche}</span>
-                      <span className="mk-card-provider">
-                        <span className="mk-mini-av" style={{ background: `${svc.color}aa` }}>
-                          {svc.provider.replace(/^@/, "").charAt(0).toUpperCase()}
-                        </span>
-                        {svc.provider}
-                      </span>
+                  <button key={svc.id} className="hcm-svc-card" style={{ "--cc": svc.color } as React.CSSProperties} onClick={() => setActiveSvc(svc)} type="button">
+                    <span className="hcm-svc-bar" />
+                    <div className="hcm-svc-top">
+                      <span style={{ color: svc.color, background: `${svc.color}18` }}>{svc.niche}</span>
+                      <span className="hcm-svc-provider"><span className="hcm-mini-av" style={{ background: `${svc.color}aa` }}>{svc.provider.replace(/^@/, "").charAt(0).toUpperCase()}</span>{svc.provider}</span>
                     </div>
-                    <strong className="mk-card-title">{svc.title}</strong>
-                    {svc.detail && <p className="mk-card-detail">{svc.detail.slice(0, 90)}{svc.detail.length > 90 ? "…" : ""}</p>}
-                    <div className="mk-card-footer">
-                      <strong>from {svc.rate}</strong>
-                      <span>View <ArrowRight size={11} /></span>
-                    </div>
+                    <strong>{svc.title}</strong>
+                    <p className="hcm-svc-detail">{svc.detail.slice(0, 80)}{svc.detail.length > 80 ? "…" : ""}</p>
+                    <div className="hcm-svc-footer"><strong>from {svc.rate}</strong><span>View <ArrowRight size={11} /></span></div>
                   </button>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
           {svcJobs.length === 0 && svcServices.length === 0 && (
-            <div className="mk-empty">
-              <Sparkles size={30} />
-              <strong>No listings found</strong>
-              <p>{svcSearch ? `No results for "${svcSearch}"` : "Post a job or list your service."}</p>
-              <div className="mk-empty-btns">
-                <button onClick={() => setSvcMode("post-job")} type="button"><Plus size={14} />Post a Job</button>
-                <button onClick={() => setSvcMode("offer-service")} type="button"><Star size={14} />Offer Service</button>
-              </div>
-            </div>
+            <div className="hcm-empty"><Sparkles size={28} /><strong>No listings</strong><p>{svcSearch ? `No results for "${svcSearch}"` : "Post a job or list your service."}</p></div>
           )}
 
-          <div className="mk-bottom-strip">
-            <button onClick={() => setSvcMode("post-job")} type="button">
-              <Plus size={15} /><span>Post a Job</span><small>2 WLD</small>
-            </button>
-            <button onClick={() => setSvcMode("offer-service")} type="button">
-              <Star size={15} /><span>List Service</span><small>2 WLD</small>
-            </button>
+          <div className="hcm-svc-bottom">
+            <button onClick={() => setSvcMode("post-job")} type="button"><PlusCircle size={15} /><span>Post a Job</span><small>2 WLD</small></button>
+            <button onClick={() => setSvcMode("offer-service")} type="button"><Star size={15} /><span>List Service</span><small>2 WLD</small></button>
           </div>
         </>
       )}

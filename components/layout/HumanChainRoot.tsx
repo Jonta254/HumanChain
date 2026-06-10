@@ -127,8 +127,13 @@ export function HumanChainRoot(props: HumanChainAppState) {
             act={act}
             earnPoints={earnPoints}
             humanIdentity={verifiedHuman}
+            marketLocation={marketLocation}
+            marketplaceListings={marketplaceListings}
             openPayment={openPayment}
             recordHistory={recordHistory}
+            setMarketLocation={props.setMarketLocation}
+            setMarketplaceListings={props.setMarketplaceListings}
+            worldContext={worldContext}
           />
         );
       case "me":
