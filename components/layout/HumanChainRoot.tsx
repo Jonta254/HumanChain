@@ -22,7 +22,7 @@ import type { HumanChainAppState } from "@/lib/humanchain/useHumanChainApp";
 export function HumanChainRoot(props: HumanChainAppState) {
   const {
     accountSyncStatus, activeField, appLanguage, chainEntryNonce,
-    dailyAnswered, dailyAnsweredAt, dailyResponses, earnPoints, feedRefreshNonce,
+    dailyAnswered, dailyAnsweredAt, earnPoints, feedRefreshNonce,
     gateBusy, historyRecords, hpLedger, humanPosts, lastCheckInAt, lastCheckInDate,
     links, marketLocation, marketplaceListings, notificationCenterOpen,
     notificationPromptDismissed, notificationReady, notifications,
@@ -202,7 +202,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             appLanguage={appLanguage}
             dailyAnswered={dailyAnswered}
             dailyAnsweredAt={dailyAnsweredAt}
-            dailyResponses={dailyResponses}
             earnPoints={earnPoints}
             humanPosts={humanPosts}
             marketplaceListings={marketplaceListings}
@@ -214,7 +213,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             recordHistory={recordHistory}
             setDailyAnsweredAt={setDailyAnsweredAt}
             setDailyAnsweredDate={setDailyAnsweredDate}
-            setActiveField={setActiveField}
             points={points}
             setDailyAnswered={setDailyAnswered}
             setDailyResponses={setDailyResponses}

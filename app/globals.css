@@ -14219,3 +14219,313 @@ button,
 /* Ticker button / flame */
 .h9-ticker { display:flex; align-items:center; gap:8px; padding:8px 14px; background:#f0ece4; margin:0 16px 0; border-radius:12px; border:0; text-align:left; cursor:pointer; }
 .h9-ticker-flame { color:#ef7d69; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   HOME v10 — Premium focused home + global layout fixes
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Design token aliases (semantic names → existing palette) ────── */
+
+:root {
+  --bg: var(--paper);
+  --surface: var(--paper-strong);
+  --surface-soft: #f6efe4;
+  --primary: var(--green);
+  --primary-dark: #16453a;
+  --accent: var(--gold);
+  --text: var(--ink);
+  --border: var(--line);
+  --radius: 18px;
+}
+
+/* ── Layout fix: full-bleed screens that own a sticky header ───────
+   These screens manage their own horizontal gutters, so the generic
+   .screen padding caused (a) double 36px gutters and (b) content
+   scrolling past the sticky header in the exposed side strips.      */
+
+.screen.home-v9,
+.screen.hcm-root {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Bottom padding must always clear the floating bottom nav (~70px tall,
+   12px off the bottom edge) plus device safe-area. */
+.screen.home-v9 {
+  padding-bottom: calc(122px + var(--world-safe-bottom, 0px));
+}
+
+.screen.hcm-root {
+  padding-bottom: calc(132px + var(--world-safe-bottom, 0px));
+}
+
+/* Sticky headers absorb the device safe-area top inset themselves. */
+.h9-topbar {
+  padding-top: calc(11px + var(--world-safe-top, 0px));
+}
+
+.hcm-topbar {
+  flex-wrap: wrap;
+  padding: calc(12px + var(--world-safe-top, 0px)) 16px 10px;
+  background: rgba(255, 253, 248, 0.93);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(232, 223, 210, 0.55);
+}
+
+/* Story reader sticky bar: extend full-bleed so content never scrolls
+   past it in the screen's side gutters. */
+.reader-top {
+  margin: 0 -20px;
+  padding: calc(8px + var(--world-safe-top, 0px)) 20px 8px;
+}
+
+/* ── Topbar verified chip ──────────────────────────────────────────── */
+
+.hv-handle-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hv-verify-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(47, 111, 237, 0.1);
+  color: var(--blue);
+  font-size: 0.6rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.hv-verify-chip.preview {
+  background: rgba(185, 130, 24, 0.12);
+  color: var(--gold);
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────── */
+
+.hv-hero {
+  margin: 14px 16px 0;
+  padding: 22px 18px 18px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% -4%, rgba(214, 163, 58, 0.3), transparent 44%),
+    radial-gradient(circle at 0% 100%, rgba(47, 111, 237, 0.16), transparent 38%),
+    linear-gradient(150deg, #0d2d27 0%, #16453a 55%, #246b55 100%);
+  color: var(--paper-strong);
+  box-shadow: 0 16px 36px rgba(23, 49, 47, 0.22);
+}
+
+.hv-hero-kicker {
+  display: block;
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #ecd9a8;
+}
+
+.hv-hero h1 {
+  margin: 8px 0;
+  font-size: 1.62rem;
+  font-weight: 950;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--paper-strong);
+}
+
+.hv-hero h1 em {
+  font-style: normal;
+  color: #f0d28c;
+}
+
+.hv-hero > p {
+  margin: 0 0 14px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: rgba(255, 253, 248, 0.84);
+}
+
+.hv-hero-ctas {
+  display: flex;
+  gap: 8px;
+}
+
+.hv-cta-primary {
+  flex: 1.2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #e2b54e, #b98218);
+  color: #221a05;
+  font-size: 0.9rem;
+  font-weight: 900;
+  box-shadow: 0 8px 20px rgba(185, 130, 24, 0.35);
+}
+
+.hv-cta-secondary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 253, 248, 0.35);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.1);
+  color: var(--paper-strong);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.hv-trust-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 13px;
+}
+
+.hv-trust-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.1);
+  color: rgba(255, 253, 248, 0.9);
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.hv-trust-chip svg {
+  color: #ecd9a8;
+  flex: 0 0 auto;
+}
+
+/* ── Action grid ───────────────────────────────────────────────────── */
+
+.hv-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.hv-action {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 118px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper-strong);
+  text-align: left;
+  box-shadow: 0 2px 10px rgba(50, 40, 28, 0.05);
+}
+
+.hv-action:active {
+  transform: scale(0.98);
+}
+
+.hv-action-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(50, 40, 28, 0.05);
+  background: color-mix(in srgb, var(--hv-color, #246b55) 11%, transparent);
+  color: var(--hv-color, #246b55);
+}
+
+.hv-action strong {
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.hv-action p {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.hv-action-arrow {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+/* ── Trust section ─────────────────────────────────────────────────── */
+
+.hv-trust-lead {
+  margin: -4px 0 12px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.hv-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hv-trust-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper-strong);
+}
+
+.hv-trust-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(36, 107, 85, 0.1);
+  color: var(--green);
+}
+
+.hv-trust-card strong {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.hv-trust-card p {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+/* ── Spacing tail ──────────────────────────────────────────────────── */
+
+.hv-last-section {
+  padding-bottom: 6px;
+}

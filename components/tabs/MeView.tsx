@@ -37,6 +37,7 @@ import {
   getLocalDateKey,
   getTrustPassportMetrics,
   getWorldDisplayUsername,
+  handleImageFallback,
   isVerifiedWorldHuman,
   isWorldUsernamePlaceholder,
 } from "@/lib/humanchain/utils";
@@ -470,7 +471,7 @@ export function MeView({
             .map((post) => (
               <article className="history-post-card" key={post.id}>
                 {post.image ? (
-                  <img alt={post.caption} src={post.image} />
+                  <img alt={post.caption} onError={handleImageFallback} src={post.image} />
                 ) : (
                   <div className="history-post-symbol" />
                 )}

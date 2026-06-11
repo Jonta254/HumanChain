@@ -53,9 +53,11 @@ import {
   formatWorldLaunchLocation,
   getMarketVerificationTier,
   getShortText,
+  handleImageFallback,
   isVerifiedWorldHuman,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
+import { consumeMarketIntent } from "@/lib/humanchain/marketIntent";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HumanIdentity } from "@/types/user";
 import type { HistoryRecord } from "@/types/reputation";
@@ -425,7 +427,10 @@ export function MarketplaceView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   // ── Top tab ───────────────────────────────────────────────────────────────
-  const [topTab, setTopTab] = useState<TopTab>("market");
+  // Home CTAs ("Find Specialists", "Sell item", "View all jobs") leave a
+  // one-shot intent before switching tabs; honor it on first render.
+  const [initialIntent] = useState(() => consumeMarketIntent());
+  const [topTab, setTopTab] = useState<TopTab>(initialIntent === "services" ? "services" : "market");
 
   // ── Market state ──────────────────────────────────────────────────────────
   const [marketFilter, setMarketFilter] = useState("All");
@@ -436,7 +441,7 @@ export function MarketplaceView({
       : "Nairobi",
   );
   const [activeItem, setActiveItem]   = useState<SeedItem | MarketplaceListing | null>(null);
-  const [showSell, setShowSell]       = useState(false);
+  const [showSell, setShowSell]       = useState(initialIntent === "sell");
   const [galleryIdx, setGalleryIdx]   = useState(0);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -886,7 +891,7 @@ export function MarketplaceView({
         {/* Gallery */}
         <div className="hcm-gallery">
           {curImg ? (
-            <img className="hcm-gallery-main" src={curImg} alt={info.title} />
+            <img className="hcm-gallery-main" src={curImg} alt={info.title} onError={handleImageFallback} />
           ) : (
             <div className="hcm-gallery-empty"><Tag size={32} /></div>
           )}
@@ -1448,7 +1453,7 @@ export function MarketplaceView({
                 {marketplaceListings.slice(0, 3).map((listing) => (
                   <div key={listing.id} className="hcm-stored-row">
                     <button className="hcm-stored-thumb" onClick={() => setActiveItem(listing)} type="button">
-                      {listing.photos[0] ? <img src={listing.photos[0].src} alt={listing.photos[0].name} /> : <Tag size={18} />}
+                      {listing.photos[0] ? <img src={listing.photos[0].src} alt={listing.photos[0].name} onError={handleImageFallback} /> : <Tag size={18} />}
                     </button>
                     <div>
                       <strong>{listing.title}</strong>
@@ -1488,6 +1493,8 @@ export function MarketplaceView({
                           src={img}
                           alt={`${item.title} ${i + 1}`}
                           className={`hcm-item-photo-img hcm-photo-${i}`}
+                          loading="lazy"
+                          onError={handleImageFallback}
                         />
                       ))}
                       {item.bidding && (
@@ -1552,7 +1559,7 @@ export function MarketplaceView({
             <div className="hcm-ads-grid">
               {BUSINESS_ADS.map((ad) => (
                 <article key={ad.title} className="hcm-ad-card">
-                  <img src={ad.image} alt={ad.title} className="hcm-ad-img" />
+                  <img src={ad.image} alt={ad.title} className="hcm-ad-img" loading="lazy" onError={handleImageFallback} />
                   <div className="hcm-ad-body">
                     <span className="hcm-ad-tag">{ad.tag} · {ad.area}</span>
                     <strong>{ad.title}</strong>

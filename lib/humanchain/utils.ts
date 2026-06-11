@@ -1,5 +1,6 @@
 "use client";
 
+import type { SyntheticEvent } from "react";
 import { getWorldMiniAppContext } from "@/lib/world/context";
 import { humanChainErrorStates } from "@/lib/humanchainPolicy";
 import {
@@ -10,6 +11,21 @@ import {
 import type { HumanIdentity, VerifiedHuman } from "@/types/user";
 import type { HistoryRecord } from "@/types/reputation";
 import type { PaymentRequest } from "@/types/ui";
+
+// Image helpers
+
+export const IMAGE_FALLBACK_SRC = "/images/market/placeholder.svg";
+
+/**
+ * Swap a broken <img> to the local placeholder exactly once so listing and
+ * preview cards never render an empty/broken image frame inside World App.
+ */
+export function handleImageFallback(event: SyntheticEvent<HTMLImageElement>) {
+  const img = event.currentTarget;
+  if (img.dataset.fallbackApplied === "true") return;
+  img.dataset.fallbackApplied = "true";
+  img.src = IMAGE_FALLBACK_SRC;
+}
 
 // Identity helpers
 

@@ -15,6 +15,7 @@ import {
 import {
   formatCheckInTime,
   formatShortTime,
+  handleImageFallback,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { TopBar } from "@/components/layout/TopBar";
@@ -1419,13 +1420,12 @@ export function ChainsView({
               <span>Community Rules</span>
               <ShieldCheck size={18} />
             </div>
-            <p>Allowed: travel, projects, achievements, learning, community events, and daily life.</p>
             <div>
-              {["Respect others", "No harassment", "No pornography", "No hate speech", "No violence", "No scams", "No illegal content", "No spam"].map((rule) => (
+              {["Respect others", "No hate or harassment", "No explicit content", "No scams or spam"].map((rule) => (
                 <span key={rule}>{rule}</span>
               ))}
             </div>
-            <small>Every image is checked before it appears. Blocked content never enters Moments.</small>
+            <small>Every image is checked before it appears in Moments.</small>
           </section>
           {!showPostComposer && !postPreview ? (
             <section className="moment-create-prompt">
@@ -1571,6 +1571,7 @@ export function ChainsView({
                       alt={post.caption}
                       decoding="async"
                       loading={index < 3 ? "eager" : "lazy"}
+                      onError={handleImageFallback}
                       src={post.image ?? ""}
                     />
                   )}
