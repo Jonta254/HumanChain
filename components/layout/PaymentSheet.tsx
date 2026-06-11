@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck, X, Zap } from "lucide-react";
+import { Check, ShieldCheck, X, Zap } from "lucide-react";
 import {
   humanChainPaymentTokens,
   isValidHumanChainPaymentAmount,
@@ -10,18 +10,22 @@ import {
 import { formatPaymentAmount, getPaymentFeature, parsePaymentAmount } from "@/lib/humanchain/utils";
 import type { PaymentRequest } from "@/types/ui";
 
+const quickAmounts = [0.5, 1, 2, 5];
+
 export function PaymentSheet({
   busy,
   onCancel,
   onConfirm,
   payment,
   selectedToken,
+  success,
 }: {
   busy: boolean;
   onCancel: () => void;
   onConfirm: (amount?: number) => void | Promise<void>;
   payment: PaymentRequest;
   selectedToken: HumanChainPaymentToken;
+  success: { amount: string; points: number; title: string } | null;
 }) {
   const [customAmount, setCustomAmount] = useState(() =>
     parsePaymentAmount(payment.amount).toString(),
@@ -36,6 +40,25 @@ export function PaymentSheet({
   const displayAmount = Number.isFinite(amount)
     ? formatPaymentAmount(amount, selectedToken)
     : `0 ${tokenLabel}`;
+
+  // ── Quick confirmation state ─────────────────────────────────────────────
+  if (success) {
+    return (
+      <div className="ps-backdrop" role="dialog" aria-modal="true" aria-label="Payment confirmed">
+        <div className="ps-sheet ps-sheet-success">
+          <span className="ps-success-ring" aria-hidden="true">
+            <Check size={30} strokeWidth={3} />
+          </span>
+          <strong className="ps-success-amount">{success.amount}</strong>
+          <p className="ps-success-title">Payment confirmed</p>
+          <span className="ps-success-detail">{success.title}</span>
+          {success.points > 0 && (
+            <span className="ps-success-hp"><Zap size={12} />+{success.points} HP earned</span>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="ps-backdrop" role="dialog" aria-modal="true" aria-label="Payment">
@@ -66,23 +89,40 @@ export function PaymentSheet({
 
         {/* Custom amount input */}
         {payment.allowCustomAmount && (
-          <label className="ps-amount-field">
-            <span>Amount (WLD)</span>
-            <div className="ps-amount-input-wrap">
-              <input
-                aria-label="Tip amount in WLD"
-                inputMode="decimal"
-                min={payment.minAmount ?? 0.1}
-                max={payment.maxAmount ?? 100}
-                onChange={(e) => setCustomAmount(e.target.value)}
-                placeholder="1.0"
-                step="0.1"
-                type="number"
-                value={customAmount}
-              />
-              <span className="ps-amount-unit">WLD</span>
+          <>
+            <div className="ps-quick-row" role="group" aria-label="Quick amounts">
+              {quickAmounts
+                .filter((value) => value >= (payment.minAmount ?? 0.1) && value <= (payment.maxAmount ?? 100))
+                .map((value) => (
+                  <button
+                    key={value}
+                    className={`ps-quick-chip ${Number.parseFloat(customAmount) === value ? "active" : ""}`}
+                    disabled={busy}
+                    onClick={() => setCustomAmount(value.toString())}
+                    type="button"
+                  >
+                    {value} WLD
+                  </button>
+                ))}
             </div>
-          </label>
+            <label className="ps-amount-field">
+              <span>Custom amount (WLD)</span>
+              <div className="ps-amount-input-wrap">
+                <input
+                  aria-label="Tip amount in WLD"
+                  inputMode="decimal"
+                  min={payment.minAmount ?? 0.1}
+                  max={payment.maxAmount ?? 100}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                  placeholder="1.0"
+                  step="0.1"
+                  type="number"
+                  value={customAmount}
+                />
+                <span className="ps-amount-unit">WLD</span>
+              </div>
+            </label>
+          </>
         )}
 
         {/* Trust row */}

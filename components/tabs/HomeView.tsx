@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -181,6 +181,14 @@ const trustCards = [
 
 const dailyHumanQuestion = "What truth did life teach you this week?";
 
+// Rotating one-line network signals shown in the live pulse strip.
+const networkPulse = [
+  { value: "2,418", label: "verified humans active now" },
+  { value: "127", label: "jobs open across 68 countries" },
+  { value: "1,940 WLD", label: "moved through escrow this week" },
+  { value: "312", label: "questions answered in the last hour" },
+];
+
 function getGreeting() {
   const h = new Date().getHours();
   if (h < 12) return "Good morning";
@@ -243,6 +251,13 @@ export function HomeView({
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
+  const [pulseIdx, setPulseIdx] = useState(0);
+
+  // Rotate the live network pulse every few seconds.
+  useEffect(() => {
+    const t = window.setInterval(() => setPulseIdx((i) => (i + 1) % networkPulse.length), 4000);
+    return () => window.clearInterval(t);
+  }, []);
 
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
@@ -314,6 +329,21 @@ export function HomeView({
           </button>
         </div>
       </header>
+
+      {/* ── Live network pulse ────────────────────────── */}
+      <button
+        className="hv-pulse"
+        onClick={() => setPulseIdx((i) => (i + 1) % networkPulse.length)}
+        type="button"
+        aria-label="Network pulse — tap for next signal"
+      >
+        <span className="hv-pulse-dot" aria-hidden="true" />
+        <span className="hv-pulse-live">LIVE</span>
+        <span className="hv-pulse-text" aria-live="polite">
+          <strong key={pulseIdx} className="hv-pulse-value">{networkPulse[pulseIdx].value}</strong>
+          <span className="hv-pulse-label">{networkPulse[pulseIdx].label}</span>
+        </span>
+      </button>
 
       {/* ── B. Hero ───────────────────────────────────── */}
       <section className="hv-hero" aria-label="HumanChain">

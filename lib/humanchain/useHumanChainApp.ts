@@ -111,6 +111,7 @@ export function useHumanChainApp() {
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
   const [paymentToken] = useState<HumanChainPaymentToken>(defaultHumanChainPaymentToken);
   const [paymentBusy, setPaymentBusy] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState<{ amount: string; points: number; title: string } | null>(null);
   const [accountSyncReady, setAccountSyncReady] = useState(verifiedHuman?.mode !== "world");
   const [accountSyncStatus, setAccountSyncStatus] = useState<"idle" | "loading" | "ready" | "saving" | "offline">(
     verifiedHuman?.mode === "world" ? "loading" : "idle",
@@ -563,7 +564,7 @@ export function useHumanChainApp() {
   }
 
   function openPayment(payment: PaymentRequest) {
-    if (paymentBusy) return;
+    if (paymentBusy || paymentSuccess) return;
     if (!isVerifiedWorldHuman(verifiedHuman)) {
       setToast({ title: "Verify first", detail: "Continue with World App once, then every paid action and tip opens the World payment sheet." });
       return;
@@ -707,8 +708,16 @@ export function useHumanChainApp() {
       const formattedAmount = formatPaymentAmount(amount, paymentToken);
       recordHistory({ title: getPaymentKind(feature) === "tip" ? "Tip payment confirmed" : "Payment confirmed", detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`, kind: getPaymentKind(feature) });
       void storeSafeData("payment", `${feature}-${Date.now()}`, { amount, feature, human: verifiedHuman?.username, payerWallet: verifiedHuman?.wallet, paymentTitle: paymentPrompt.title, ...paymentPrompt.context, treasuryRecipient, token: paymentToken, wallet: verifiedHuman?.wallet });
-      setToast({ title: `${formattedAmount} confirmed`, detail: paymentPrompt.success });
-      setPaymentPrompt(null);
+      // Quick confirmation: show the in-sheet success state with a haptic,
+      // then auto-dismiss — no extra tap needed to continue.
+      void humanHaptic("medium");
+      const successDetail = paymentPrompt.success;
+      setPaymentSuccess({ amount: formattedAmount, points: earnedPoints, title: paymentPrompt.title });
+      window.setTimeout(() => {
+        setPaymentSuccess(null);
+        setPaymentPrompt(null);
+        setToast({ title: `${formattedAmount} confirmed`, detail: successDetail });
+      }, 1500);
     } finally { setPaymentBusy(false); }
   }
 
@@ -718,7 +727,7 @@ export function useHumanChainApp() {
     dailyAnsweredAt, dailyAnsweredDate, dailyResponses, feedRefreshNonce, gateBusy,
     historyRecords, hpLedger, humanPosts, lastCheckInAt, lastCheckInDate, links,
     marketLocation, marketplaceListings, notificationCenterOpen, notificationPromptDismissed,
-    notificationReady, notifications, paymentBusy, paymentPrompt, paymentToken,
+    notificationReady, notifications, paymentBusy, paymentPrompt, paymentSuccess, paymentToken,
     points, profileImage, referralShareCount, referredBy, savedItems, streak,
     tab, toast, verifiedHuman, worldContext,
     // setters

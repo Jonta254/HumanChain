@@ -278,6 +278,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             busy={paymentBusy}
             payment={paymentPrompt}
             selectedToken={paymentToken}
+            success={props.paymentSuccess}
           />
         ) : null}
         {notificationCenterOpen ? (

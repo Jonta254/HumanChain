@@ -14529,3 +14529,209 @@ button,
 .hv-last-section {
   padding-bottom: 6px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ONE-CHAIN HOME + QUICK-CONFIRM PAYMENTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Live network pulse strip ──────────────────────────────────────
+   A single rotating digital signal line; replaces noisy tickers and
+   keeps Home feeling alive without competing with the hero.         */
+
+.hv-pulse {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 32px);
+  min-height: 38px;
+  margin: 10px 16px 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(36, 107, 85, 0.16);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(36, 107, 85, 0.07), rgba(36, 107, 85, 0.02));
+  text-align: left;
+}
+
+.hv-pulse-dot {
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--green);
+  animation: h9pulse 1.8s infinite;
+}
+
+.hv-pulse-live {
+  flex: 0 0 auto;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--green);
+}
+
+.hv-pulse-text {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hv-pulse-value {
+  font-size: 0.8rem;
+  font-weight: 950;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  animation: hvPulseIn 0.35s ease;
+}
+
+.hv-pulse-label {
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes hvPulseIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Chain spine ───────────────────────────────────────────────────
+   Every Home section hangs off one visible vertical thread with a
+   link node, so the page reads as a single connected chain instead
+   of stacked, divided blocks. On-brand for HumanChain.              */
+
+.home-v9 > .h9-section {
+  position: relative;
+  padding-top: 36px;
+}
+
+.home-v9 > .h9-section::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 14px;
+  background: linear-gradient(180deg, rgba(36, 107, 85, 0.04), rgba(36, 107, 85, 0.42));
+}
+
+.home-v9 > .h9-section::after {
+  content: "";
+  position: absolute;
+  top: 21px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--paper-strong);
+  border: 2px solid rgba(36, 107, 85, 0.45);
+  box-shadow: 0 0 0 3px rgba(36, 107, 85, 0.08);
+}
+
+/* Digital numerals across stat displays */
+.h9-stat strong,
+.ps-amount,
+.h9-opp-footer > strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Payment quick-amount chips ────────────────────────────────────── */
+
+.ps-quick-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ps-quick-chip {
+  flex: 1;
+  min-height: 38px;
+  border: 1.5px solid var(--line);
+  border-radius: 11px;
+  background: var(--paper-strong);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.ps-quick-chip.active {
+  border-color: var(--green);
+  background: rgba(36, 107, 85, 0.08);
+  color: var(--green);
+}
+
+/* ── Payment success (quick confirmation) ──────────────────────────── */
+
+.ps-sheet-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 32px 20px 28px;
+  text-align: center;
+}
+
+.ps-success-ring {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #2e8b6b, var(--green));
+  box-shadow: 0 10px 30px rgba(36, 107, 85, 0.35);
+  animation: psPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes psPop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.ps-success-amount {
+  font-size: 1.5rem;
+  font-weight: 950;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-success-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 850;
+  color: var(--green);
+}
+
+.ps-success-detail {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.ps-success-hp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 7px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(185, 130, 24, 0.12);
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hv-pulse-value,
+  .ps-success-ring {
+    animation: none;
+  }
+}
