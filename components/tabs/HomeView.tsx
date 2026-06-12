@@ -155,10 +155,10 @@ const marketPreviewItems = [
 ];
 
 const liveStats = [
-  { value: "12k+", label: "Verified providers" },
-  { value: "68", label: "Countries" },
-  { value: "340+", label: "Niches" },
-  { value: "94%", label: "Satisfaction" },
+  { target: 12, suffix: "k+", label: "Verified providers" },
+  { target: 68, suffix: "", label: "Countries" },
+  { target: 340, suffix: "+", label: "Niches" },
+  { target: 94, suffix: "%", label: "Satisfaction" },
 ];
 
 const trustCards = [
@@ -194,6 +194,46 @@ function getGreeting() {
   if (h < 12) return "Good morning";
   if (h < 17) return "Good afternoon";
   return "Good evening";
+}
+
+// Deterministic display code for the digital Human Passport card.
+function getPassportCode(seed: string) {
+  let h = 0;
+  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const hex = h.toString(16).toUpperCase().padStart(8, "0");
+  return `HC-${hex.slice(0, 4)}-${hex.slice(4)}`;
+}
+
+// Count a number up from 0 once on mount (digital odometer feel).
+function useCountUp(target: number, durationMs = 900) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      if (reduceMotion) {
+        setValue(target);
+        return;
+      }
+      const p = Math.min(1, (now - start) / durationMs);
+      setValue(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, durationMs]);
+  return value;
+}
+
+function CountStat({ label, suffix, target }: { label: string; suffix: string; target: number }) {
+  const value = useCountUp(target);
+  return (
+    <div className="h9-stat">
+      <strong>{value}{suffix}</strong>
+      <span>{label}</span>
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -399,20 +439,47 @@ export function HomeView({
         </div>
       </section>
 
+      {/* ── Digital Human Passport card ───────────────── */}
+      <section className="h9-section" aria-label="Your Human Passport">
+        <button className="hv-id-card" onClick={() => setTab("me")} type="button">
+          <span className="hv-id-scan" aria-hidden="true" />
+          <div className="hv-id-top">
+            <span className="hv-id-brand">⛓ HUMAN PASSPORT</span>
+            <span className={`hv-id-seal ${isVerified ? "" : "preview"}`}>
+              <BadgeCheck size={11} />
+              {isVerified ? "WORLD ID" : "PREVIEW"}
+            </span>
+          </div>
+          <div className="hv-id-main">
+            <span className="hv-id-avatar" style={{ background: primaryProfileImage ? "transparent" : "linear-gradient(135deg,#2f6fed,#6657d9)" }}>
+              {primaryProfileImage ? <img alt="" src={primaryProfileImage} onError={handleImageFallback} /> : profileInitial}
+            </span>
+            <div className="hv-id-holder">
+              <strong>{worldHandle}</strong>
+              <span className="hv-id-code">{getPassportCode(worldHandle + (verifiedHuman?.wallet ?? ""))}</span>
+            </div>
+            <ArrowRight size={16} className="hv-id-arrow" />
+          </div>
+          <div className="hv-id-readout">
+            <div><span>SCORE</span><strong>{passportMetrics.helpfulScore}</strong></div>
+            <div><span>STREAK</span><strong>{streak}d</strong></div>
+            <div><span>HP</span><strong>{points}</strong></div>
+            <div><span>CHAIN</span><strong>{chainScore}</strong></div>
+          </div>
+        </button>
+      </section>
+
       {/* ── D. Live proof strip ───────────────────────── */}
       <div className="h9-stats-row" aria-label="Network proof">
         {liveStats.map((s) => (
-          <div key={s.label} className="h9-stat">
-            <strong>{s.value}</strong>
-            <span>{s.label}</span>
-          </div>
+          <CountStat key={s.label} label={s.label} suffix={s.suffix} target={s.target} />
         ))}
       </div>
 
       {/* ── E. Featured opportunities ─────────────────── */}
       <section className="h9-section" aria-label="Featured opportunities">
         <div className="h9-section-head">
-          <strong>Featured Opportunities</strong>
+          <strong><i className="hv-idx">01</i>Featured Opportunities</strong>
           <button
             className="h9-text-btn"
             onClick={() => openServices("All jobs", "Browse every open job and opportunity in Services.")}
@@ -456,7 +523,7 @@ export function HomeView({
       {/* ── F. Nearby market preview ──────────────────── */}
       <section className="h9-section" aria-label="Nearby market">
         <div className="h9-section-head">
-          <strong>Nearby Market</strong>
+          <strong><i className="hv-idx">02</i>Nearby Market</strong>
           <button className="h9-text-btn" onClick={() => setTab("market")} type="button">
             Browse market <ArrowRight size={13} />
           </button>
@@ -493,7 +560,7 @@ export function HomeView({
       {/* ── G. Trust section ──────────────────────────── */}
       <section className="h9-section" aria-label="Trust and safety">
         <div className="h9-section-head">
-          <strong>Built for Trust</strong>
+          <strong><i className="hv-idx">03</i>Built for Trust</strong>
         </div>
         <p className="hv-trust-lead">
           Protected by World ID, escrow milestones, verified profiles, and public work history.
@@ -534,25 +601,6 @@ export function HomeView({
             Start as Provider
           </button>
         </div>
-      </section>
-
-      {/* ── Human Passport strip ──────────────────────── */}
-      <section className="h9-section" aria-label="Your passport">
-        <button className="h9-passport" onClick={() => setTab("me")} type="button">
-          <div className="h9-passport-left">
-            <span className="h9-passport-av" style={{ background: primaryProfileImage ? "transparent" : "linear-gradient(135deg,#2f6fed,#6657d9)" }}>
-              {primaryProfileImage ? <img alt="" src={primaryProfileImage} onError={handleImageFallback} /> : profileInitial}
-            </span>
-            <div>
-              <strong>Human Passport</strong>
-              <span>Human score {passportMetrics.helpfulScore} · Chain {chainScore} · {isVerified ? "World ID verified ✓" : "Preview mode"}</span>
-            </div>
-          </div>
-          <div className="h9-passport-right">
-            <span className="h9-passport-streak"><Zap size={13} />{streak}d streak</span>
-            <ArrowRight size={16} />
-          </div>
-        </button>
       </section>
 
       {/* ── Daily question ────────────────────────────── */}
