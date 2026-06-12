@@ -15006,3 +15006,49 @@ html[data-world-mini-app="true"] body {
     display: none;
   }
 }
+
+/* ── Fresh Moments strip — unified content preview on Home ─────────── */
+
+.hv-moments-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hv-moment-tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f0ece4;
+}
+
+.hv-moment-tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hv-moment-tile span {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(18, 22, 20, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fffdf8;
+  font-size: 0.58rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}

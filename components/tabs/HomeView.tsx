@@ -476,10 +476,64 @@ export function HomeView({
         ))}
       </div>
 
-      {/* ── E. Featured opportunities ─────────────────── */}
+      {/* ── 01. Today's question (Ask) ────────────────── */}
+      <section className="h9-section" aria-label="Today's question">
+        <div className="h9-section-head">
+          <strong><i className="hv-idx">01</i>Today&apos;s Question</strong>
+          <button className="h9-text-btn" onClick={() => setTab("ask")} type="button">
+            Open Ask <ArrowRight size={13} />
+          </button>
+        </div>
+        <div className="h9-daily">
+          <div className="h9-daily-head">
+            <strong>{homeCopy.dailyTitle}</strong>
+            <span className="h9-daily-reward"><Zap size={12} />+18 HP</span>
+          </div>
+          <p className="h9-daily-q">{dailyHumanQuestion}</p>
+          {dailyAnswered ? (
+            <div className="h9-daily-done">
+              <CheckCircle2 size={15} />
+              <span>Answered {dailyAnsweredAt ?? "today"} — {homeCopy.answeredToday}</span>
+            </div>
+          ) : (
+            <>
+              <textarea
+                className="h9-daily-area"
+                onChange={(e) => setDailyDraft(e.target.value)}
+                placeholder={homeCopy.dailyPlaceholder}
+                rows={3}
+                value={dailyDraft}
+              />
+              <button className="h9-daily-submit" disabled={dailyAnswered} onClick={submitDailyAnswer} type="button">
+                {homeCopy.answerDaily}
+              </button>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* ── 02. Fresh moments ─────────────────────────── */}
+      <section className="h9-section" aria-label="Fresh moments">
+        <div className="h9-section-head">
+          <strong><i className="hv-idx">02</i>Fresh Moments</strong>
+          <button className="h9-text-btn" onClick={() => setTab("chains")} type="button">
+            Open Moments <ArrowRight size={13} />
+          </button>
+        </div>
+        <div className="hv-moments-row">
+          {humanPosts.filter((p) => p.image && p.mediaType !== "video").slice(0, 3).map((post) => (
+            <button key={post.id} className="hv-moment-tile" onClick={() => setTab("chains")} type="button">
+              <img alt={post.caption} src={post.image ?? ""} loading="lazy" onError={handleImageFallback} />
+              <span>{post.author}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 03. Featured opportunities ────────────────── */}
       <section className="h9-section" aria-label="Featured opportunities">
         <div className="h9-section-head">
-          <strong><i className="hv-idx">01</i>Featured Opportunities</strong>
+          <strong><i className="hv-idx">03</i>Featured Opportunities</strong>
           <button
             className="h9-text-btn"
             onClick={() => openServices("All jobs", "Browse every open job and opportunity in Services.")}
@@ -523,7 +577,7 @@ export function HomeView({
       {/* ── F. Nearby market preview ──────────────────── */}
       <section className="h9-section" aria-label="Nearby market">
         <div className="h9-section-head">
-          <strong><i className="hv-idx">02</i>Nearby Market</strong>
+          <strong><i className="hv-idx">04</i>Nearby Market</strong>
           <button className="h9-text-btn" onClick={() => setTab("market")} type="button">
             Browse market <ArrowRight size={13} />
           </button>
@@ -560,7 +614,7 @@ export function HomeView({
       {/* ── G. Trust section ──────────────────────────── */}
       <section className="h9-section" aria-label="Trust and safety">
         <div className="h9-section-head">
-          <strong><i className="hv-idx">03</i>Built for Trust</strong>
+          <strong><i className="hv-idx">05</i>Built for Trust</strong>
         </div>
         <p className="hv-trust-lead">
           Protected by World ID, escrow milestones, verified profiles, and public work history.
@@ -580,7 +634,7 @@ export function HomeView({
       </section>
 
       {/* ── H. Provider CTA ───────────────────────────── */}
-      <section className="h9-section" aria-label="Earn as provider">
+      <section className="h9-section hv-last-section" aria-label="Earn as provider">
         <div className="h9-earn">
           <div className="h9-earn-text">
             <span className="h9-earn-kicker">For Specialists</span>
@@ -600,36 +654,6 @@ export function HomeView({
             <Sparkles size={16} />
             Start as Provider
           </button>
-        </div>
-      </section>
-
-      {/* ── Daily question ────────────────────────────── */}
-      <section className="h9-section hv-last-section" aria-label="Daily question">
-        <div className="h9-daily">
-          <div className="h9-daily-head">
-            <strong>{homeCopy.dailyTitle}</strong>
-            <span className="h9-daily-reward"><Zap size={12} />+18 HP</span>
-          </div>
-          <p className="h9-daily-q">{dailyHumanQuestion}</p>
-          {dailyAnswered ? (
-            <div className="h9-daily-done">
-              <CheckCircle2 size={15} />
-              <span>Answered {dailyAnsweredAt ?? "today"} — {homeCopy.answeredToday}</span>
-            </div>
-          ) : (
-            <>
-              <textarea
-                className="h9-daily-area"
-                onChange={(e) => setDailyDraft(e.target.value)}
-                placeholder={homeCopy.dailyPlaceholder}
-                rows={3}
-                value={dailyDraft}
-              />
-              <button className="h9-daily-submit" disabled={dailyAnswered} onClick={submitDailyAnswer} type="button">
-                {homeCopy.answerDaily}
-              </button>
-            </>
-          )}
         </div>
       </section>
 
