@@ -132,6 +132,10 @@ export function AskView({
   const [askFeedFilter, setAskFeedFilter] = useState("All");
   const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
   const [showAskAdvanced, setShowAskAdvanced] = useState(false);
+  const [answerAnonymous, setAnswerAnonymous] = useState(false);
+  const [answerCountry, setAnswerCountry] = useState("");
+  const [showCountryInput, setShowCountryInput] = useState(false);
+  const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
 
   const visibleThreads = threads.filter((thread) => {
     const targetCountry = getAskThreadTargetCountry(thread);
@@ -243,19 +247,21 @@ export function AskView({
   }
 
   function answerThread(questionText: string) {
-    if (!requireVerifiedPublicAction(humanIdentity, act, "answering publicly")) {
+    if (!requireVerifiedPublicAction(humanIdentity, act, "answering publicly")) return;
+
+    const draft = answerDrafts[questionText]?.trim();
+    if (!draft) {
+      act("Write your answer", "Add your real human answer in the box before submitting.");
       return;
     }
-
-    const draft =
-      answerDrafts[questionText]?.trim() ||
-      "My honest answer: begin with the smallest action that proves life can still move.";
     const validation = validateAnswerInput(draft);
-
     if (!validation.ok) {
       act("Answer needs work", validation.issues[0] ?? "Adjust the answer before publishing.");
       return;
     }
+
+    const authorDisplay = answerAnonymous ? "@anon_verified" : (humanIdentity?.username ?? "@you");
+    const countryDisplay = answerCountry.trim() || "Verified human";
 
     setThreads((current) =>
       current.map((thread) =>
@@ -263,14 +269,7 @@ export function AskView({
           ? {
               ...thread,
               answers: [
-                {
-                  user: humanIdentity?.username ?? "@you",
-                  country:
-                    getAskThreadTargetCountry(thread) === "World"
-                      ? "Verified human"
-                      : getAskThreadTargetCountry(thread),
-                  text: draft,
-                },
+                { user: authorDisplay, country: countryDisplay, text: draft },
                 ...thread.answers,
               ],
             }
@@ -279,8 +278,8 @@ export function AskView({
     );
     setAnswerDrafts((current) => ({ ...current, [questionText]: "" }));
     recordHistory({
-      title: "Ask answer published",
-      detail: draft,
+      title: answerAnonymous ? "Anonymous verified answer published" : "Ask answer published",
+      detail: `${countryDisplay !== "Verified human" ? `[${countryDisplay}] ` : ""}${draft}`,
       kind: "comment",
     });
     earnPoints(15, "Your answer helped another verified human.");
@@ -309,19 +308,27 @@ export function AskView({
           aria-pressed={voiceMode}
           className={voiceMode ? "voice-orb active" : "voice-orb"}
           onClick={() => {
-            setVoiceMode((value) => !value);
+            setVoiceMode((v) => !v);
             act(
-              voiceMode ? "Voice mode paused" : "Voice mode ready",
+              voiceMode ? "Voice mode off" : "Voice mode queued",
               voiceMode
-                ? "Text question mode is active."
-                : "Microphone flow will record the question in World App.",
+                ? "Text question mode active."
+                : "Your question will publish with a voice flag. Native mic recording activates in World App.",
             );
           }}
           type="button"
+          title={voiceMode ? "Tap to disable voice mode" : "Tap to enable voice mode"}
         >
           <Mic size={24} />
         </button>
       </section>
+      {voiceMode && (
+        <div className="ask-voice-bar">
+          <span className="ask-voice-dot" aria-hidden="true" />
+          <span>Voice mode active — question publishes with voice flag. Mic recording uses World App permission.</span>
+          <button className="ask-voice-close" onClick={() => setVoiceMode(false)} type="button" aria-label="Dismiss voice mode">×</button>
+        </div>
+      )}
       <section className="ask-box">
         <div className="ask-service-switch" aria-label="Ask service path">
           <button
@@ -619,10 +626,22 @@ export function AskView({
                   <small>Verified responder - helpful signal visible</small>
                   <p>{answer.text}</p>
                   <div className="trust-action-row">
-                    <button onClick={() => act("Helpful signal", "This answer was marked helpful for verdict ranking.")} type="button">
-                      Helpful
+                    <button
+                      className={helpfulAnswers.has(`${thread.question}|${answer.user}|${answer.text}`) ? "active" : ""}
+                      onClick={() => {
+                        const key = `${thread.question}|${answer.user}|${answer.text}`;
+                        setHelpfulAnswers((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(key)) { next.delete(key); } else { next.add(key); }
+                          return next;
+                        });
+                        act("Helpful marked", "This answer contributes to the verdict ranking.");
+                      }}
+                      type="button"
+                    >
+                      {helpfulAnswers.has(`${thread.question}|${answer.user}|${answer.text}`) ? "✓ Helpful" : "Helpful"}
                     </button>
-                    <button onClick={() => act("Report queued", "Choose a report reason before moderator review.")} type="button">
+                    <button onClick={() => act("Report noted", "Reported for moderation review. Serious violations reach the trust team.")} type="button">
                       Report
                     </button>
                     {answer.user === (humanIdentity?.username ?? "@you") ? (
@@ -668,7 +687,11 @@ export function AskView({
               value={answerDrafts[thread.question] ?? ""}
             />
             <div className="thread-actions">
-              <button onClick={() => answerThread(thread.question)} type="button">
+              <button
+                disabled={!answerDrafts[thread.question]?.trim()}
+                onClick={() => answerThread(thread.question)}
+                type="button"
+              >
                 Answer
               </button>
               {thread.owner ? (
@@ -787,11 +810,40 @@ export function AskView({
           >
             Unlock voice answer
           </button>
-          <button onClick={() => act("Country answer", "Answer as your culture sees it.")} type="button">
-            Country and culture answer
+          <button
+            className={answerCountry ? "active" : ""}
+            onClick={() => setShowCountryInput((v) => !v)}
+            type="button"
+          >
+            {answerCountry ? `✓ ${answerCountry} perspective` : "Country and culture answer"}
           </button>
-          <button onClick={() => act("Anonymous answer", "Your identity stays private.")} type="button">
-            Anonymous verified answer
+          {showCountryInput && (
+            <div className="ask-country-answer-row">
+              <input
+                placeholder="Your country, e.g. Kenya"
+                value={answerCountry}
+                onChange={(e) => setAnswerCountry(e.target.value)}
+                aria-label="Country for cultural answer"
+              />
+              {answerCountry && (
+                <button onClick={() => { setAnswerCountry(""); }} type="button" aria-label="Clear country">✕</button>
+              )}
+            </div>
+          )}
+          <button
+            className={answerAnonymous ? "active" : ""}
+            onClick={() => {
+              setAnswerAnonymous((v) => !v);
+              act(
+                answerAnonymous ? "Identity visible" : "Anonymous mode on",
+                answerAnonymous
+                  ? "Your handle will show on your next answer."
+                  : "Your answers publish as @anon_verified. World ID still verifies you privately.",
+              );
+            }}
+            type="button"
+          >
+            {answerAnonymous ? "✓ Anonymous active" : "Anonymous verified answer"}
           </button>
         </div>
       </section>

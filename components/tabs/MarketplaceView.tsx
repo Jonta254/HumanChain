@@ -784,7 +784,7 @@ export function MarketplaceView({
       bidFloor: listingDraft.bidFloor.trim(), duration: listingDraft.duration,
       saleMode: listingDraft.saleMode, condition: listingDraft.condition,
       area: listingDraft.area, link: listingDraft.link.trim(), details: listingDraft.details.trim(),
-      photos: listingPhotos, ratings: 0, tips: 0, status: "payment-ready",
+      photos: listingPhotos, ratings: 0, tips: 0, status: "active",
       createdAt: new Intl.DateTimeFormat("en", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "short" }).format(new Date()),
       dataStorageStatus: "local-safe",
     };
@@ -1172,7 +1172,25 @@ export function MarketplaceView({
           <button
             className="hcm-publish-btn"
             disabled={listingPhotos.length < 2 || !listingDraft.title.trim() || !listingDraft.price.trim()}
-            onClick={() => { if (saveListing()) { openPayment({ title: "Publish Listing — 2 WLD", amount: "2 WLD", detail: "Your item goes live to verified buyers nearby.", success: "Listing published! Buyers can find and bid.", feature: "marketplace-quick-listing", points: 12, onConfirmed: () => { recordHistory({ title: "Listing published", detail: `${listingDraft.title} · 2 WLD fee confirmed.`, kind: "market" }); } }); } }}
+            onClick={() => {
+              // Validate before opening payment — do NOT save yet
+              if (!requireVerifiedPublicAction(humanIdentity, act, "publishing listings")) return;
+              const v = validateListingInput({ area: listingDraft.area, condition: listingDraft.condition, photos: listingPhotos, price: listingDraft.price, title: listingDraft.title });
+              if (!v.ok) { act("Listing needs details", v.issues[0] ?? "Add title, price, condition, area, and 2 photos."); return; }
+              // Payment first — save only after WLD confirmed
+              openPayment({
+                title: "Publish Listing — 2 WLD",
+                amount: "2 WLD",
+                detail: "Your item goes live to verified buyers nearby. WLD escrow protects every trade.",
+                success: "Listing published! Verified buyers can now find and bid.",
+                feature: "marketplace-quick-listing",
+                points: 12,
+                onConfirmed: () => {
+                  saveListing();
+                  recordHistory({ title: "Listing published", detail: `${listingDraft.title} · 2 WLD payment confirmed.`, kind: "market" });
+                },
+              });
+            }}
             type="button"
           >
             Publish Listing — 2 WLD

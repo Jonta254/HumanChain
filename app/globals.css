@@ -18069,3 +18069,97 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
   flex-direction: row;
 }
 
+
+
+/* ════════════════════════════════════════════════════════════════════
+   ASK VIEW — functional UI additions
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Voice mode status bar */
+.ask-voice-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 16px 10px;
+  padding: 10px 12px;
+  background: rgba(19, 122, 87, 0.08);
+  border: 1px solid rgba(19, 122, 87, 0.2);
+  border-radius: 14px;
+  font-size: 0.68rem;
+  color: var(--green);
+  font-weight: 700;
+}
+.ask-voice-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: voicePulse 1.4s ease-in-out infinite;
+}
+@keyframes voicePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+.ask-voice-close {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+/* Country culture answer input row */
+.ask-country-answer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.ask-country-answer-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+.ask-country-answer-row button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Answer button disabled state */
+.thread-actions button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Helpful button active state */
+.trust-action-row button.active {
+  color: var(--green);
+  font-weight: 900;
+}
+
+/* Marketplace listing status badge */
+.market-vault-row small:last-of-type {
+  text-transform: capitalize;
+}
+
+/* Active listing status color in vault */
+.market-vault-row small[data-status="active"] { color: var(--green); }
+.market-vault-row small[data-status="payment-ready"] { color: var(--gold); }
+.market-vault-row small[data-status="sold"] { color: var(--muted); }

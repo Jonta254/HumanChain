@@ -750,7 +750,7 @@ export function ChainsView({
   const activeComments =
     commentSort === "newest"
       ? [...(activeCommentPost?.comments ?? [])]
-      : [...(activeCommentPost?.comments ?? [])].sort((a, b) => b.length - a.length);
+      : [...(activeCommentPost?.comments ?? [])].reverse();
   const activeChainCommentEntry = activeChainCommentKey
     ? visibleLinks.find((link, index) => getChainCommentKey(link, index) === activeChainCommentKey)
     : null;
