@@ -3,8 +3,11 @@
 import { useState } from "react";
 import {
   BadgeCheck,
+  BookOpen,
   Briefcase,
+  Camera,
   ChevronDown,
+  Link2,
   MessageCircleQuestion,
   Mic,
   Sparkles,
@@ -12,6 +15,7 @@ import {
   Trophy,
   Users,
   X,
+  Zap,
 } from "lucide-react";
 import type { Tab } from "@/types/ui";
 
@@ -21,6 +25,8 @@ type CreateAction = {
   color: string;
   title: string;
   sub: string;
+  hp: string;
+  cost: "Free" | string;
   tab: Tab;
   detail: string;
 };
@@ -29,6 +35,7 @@ type Category = {
   id: string;
   label: string;
   description: string;
+  accent: string;
   actions: CreateAction[];
 };
 
@@ -36,30 +43,146 @@ const CATEGORIES: Category[] = [
   {
     id: "share",
     label: "Share",
-    description: "Post moments, proof of work, and voice answers",
+    description: "Publish content that builds your trust score",
+    accent: "#137a57",
     actions: [
-      { id: "moment",  icon: Sparkles,  color: "#137a57", title: "Post Moment",         sub: "Real photo or reflection", tab: "chains", detail: "Post a real photo or reflection. Verified humans only — every moment builds trust." },
-      { id: "proof",   icon: BadgeCheck, color: "#0f9d6c", title: "Proof of Work",       sub: "Show what you delivered",  tab: "chains", detail: "Post proof of completed work to grow your reputation. Real deliverables earn positive reputation signals." },
-      { id: "voice",   icon: Mic,        color: "#15938a", title: "Voice Answer",         sub: "Reply with your real voice", tab: "ask",  detail: "Record a voice answer where supported — a human voice carries trust that text cannot." },
+      {
+        id: "moment",
+        icon: Camera,
+        color: "#137a57",
+        title: "Post Moment",
+        sub: "Real photo or reflection — verified humans only",
+        hp: "+12 HP",
+        cost: "Free",
+        tab: "chains",
+        detail: "Post a real photo or reflection. Every verified moment adds a permanent link to your reputation.",
+      },
+      {
+        id: "proof",
+        icon: BadgeCheck,
+        color: "#0f9d6c",
+        title: "Proof of Work",
+        sub: "Show a real deliverable you completed today",
+        hp: "+18 HP",
+        cost: "Free",
+        tab: "chains",
+        detail: "Post proof of completed work. Real deliverables earn the strongest reputation signals on HumanChain.",
+      },
+      {
+        id: "story",
+        icon: BookOpen,
+        color: "#2f6fed",
+        title: "Write Story",
+        sub: "Publish a 200-character story or upload a file",
+        hp: "+14 HP",
+        cost: "Free",
+        tab: "stories",
+        detail: "Write exactly 200 characters or upload a PDF. Stories reach verified readers across 38 countries.",
+      },
+      {
+        id: "voice",
+        icon: Mic,
+        color: "#15938a",
+        title: "Voice Answer",
+        sub: "Record your voice — carries trust text cannot",
+        hp: "+10 HP",
+        cost: "Free",
+        tab: "ask",
+        detail: "Record a real voice answer. A human voice carries more trust than typed text — it is harder to fake.",
+      },
     ],
   },
   {
     id: "connect",
     label: "Connect",
-    description: "Ask questions and engage your community",
+    description: "Engage verified humans and grow your chain",
+    accent: "#2f6fed",
     actions: [
-      { id: "ask",       icon: MessageCircleQuestion, color: "#2f6fed", title: "Ask Question",     sub: "Get verified human answers", tab: "ask",    detail: "Ask one honest question. Verified humans answer — open a paid country route only when you need it." },
-      { id: "community", icon: Users,                 color: "#6657d9", title: "Community Update", sub: "Post to a community room",   tab: "chains", detail: "Share an update with a HumanChain community. Contributions add to your community standing." },
-      { id: "challenge", icon: Trophy,                color: "#d8a93c", title: "Start Challenge",  sub: "Rally your community",       tab: "chains", detail: "Start a community challenge. Completing verified challenges earns reputation and badges." },
+      {
+        id: "ask",
+        icon: MessageCircleQuestion,
+        color: "#2f6fed",
+        title: "Ask a Question",
+        sub: "Get answers from verified humans in 38 countries",
+        hp: "+8 HP",
+        cost: "Free",
+        tab: "ask",
+        detail: "Post one honest question. Verified humans from 38 countries answer — real answers from real people.",
+      },
+      {
+        id: "link",
+        icon: Link2,
+        color: "#6657d9",
+        title: "Add Chain Link",
+        sub: "Post one truth to a live community field",
+        hp: "+12 HP",
+        cost: "Free",
+        tab: "chains",
+        detail: "Add one honest link to a live HumanChain field. Your link joins the global chain permanently.",
+      },
+      {
+        id: "community",
+        icon: Users,
+        color: "#137a57",
+        title: "Community Update",
+        sub: "Share an update in your chain room",
+        hp: "+10 HP",
+        cost: "Free",
+        tab: "chains",
+        detail: "Post to your HumanChain community. Community contributions build your standing in that field.",
+      },
+      {
+        id: "challenge",
+        icon: Trophy,
+        color: "#d8a93c",
+        title: "Start Challenge",
+        sub: "Rally your community around a verified goal",
+        hp: "+22 HP",
+        cost: "Free",
+        tab: "chains",
+        detail: "Start a community challenge. Verified completions earn badges and the highest reputation signals.",
+      },
     ],
   },
   {
     id: "build",
     label: "Build",
-    description: "List opportunities and marketplace items",
+    description: "List work, services, and marketplace items",
+    accent: "#b88a1f",
     actions: [
-      { id: "opportunity", icon: Briefcase, color: "#b88a1f", title: "List Opportunity",    sub: "Hire a verified specialist", tab: "market", detail: "Post a job or opportunity. Verified specialists apply, and payment is held safely in escrow." },
-      { id: "listing",     icon: Store,     color: "#ef7d69", title: "Marketplace Listing", sub: "Sell goods or services",    tab: "market", detail: "Add a marketplace listing with real photos and a clear price. Trades settle in WLD with escrow protection." },
+      {
+        id: "job",
+        icon: Briefcase,
+        color: "#b88a1f",
+        title: "Post a Job",
+        sub: "Hire a verified specialist — escrow protected",
+        hp: "+15 HP",
+        cost: "2 WLD",
+        tab: "market",
+        detail: "Post a job opportunity. Verified specialists apply and payment is held safely in WLD escrow until delivery.",
+      },
+      {
+        id: "service",
+        icon: Sparkles,
+        color: "#6657d9",
+        title: "List Your Service",
+        sub: "Offer your skills to 214k verified humans",
+        hp: "+12 HP",
+        cost: "2 WLD",
+        tab: "market",
+        detail: "Offer your expertise globally. Set your rate, regions, and specialties. Payments settle in WLD.",
+      },
+      {
+        id: "listing",
+        icon: Store,
+        color: "#ef7d69",
+        title: "Sell in Marketplace",
+        sub: "List goods with real photos — 2 photos free",
+        hp: "+10 HP",
+        cost: "Free",
+        tab: "market",
+        detail: "Add a marketplace listing with real photos. WLD escrow protects every trade automatically.",
+      },
     ],
   },
 ];
@@ -80,24 +203,46 @@ export function CreateHub({
   }
 
   return (
-    <div className="create-hub-backdrop" role="dialog" aria-modal="true" aria-label="Create" onClick={onClose}>
+    <div
+      className="create-hub-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Create"
+      onClick={onClose}
+    >
       <div className="create-hub" onClick={(e) => e.stopPropagation()}>
         <div className="create-hub-handle" aria-hidden="true" />
+
         <div className="create-hub-head">
           <div>
             <strong>Create on HumanChain</strong>
-            <span>Every contribution builds your verified reputation.</span>
+            <span>Every action earns HP and builds your verified reputation.</span>
           </div>
-          <button className="create-hub-close" onClick={onClose} aria-label="Close" type="button">
+          <button
+            className="create-hub-close"
+            onClick={onClose}
+            aria-label="Close"
+            type="button"
+          >
             <X size={18} />
           </button>
+        </div>
+
+        {/* HP explainer strip */}
+        <div className="create-hub-hp-strip">
+          <Zap size={12} />
+          <span>HP (Human Points) power your tier, trust score, and community rank</span>
         </div>
 
         <div className="create-hub-cats">
           {CATEGORIES.map((cat) => {
             const isOpen = openCategory === cat.id;
             return (
-              <div key={cat.id} className={`create-hub-cat ${isOpen ? "open" : ""}`}>
+              <div
+                key={cat.id}
+                className={`create-hub-cat ${isOpen ? "open" : ""}`}
+                style={{ "--cat-accent": cat.accent } as React.CSSProperties}
+              >
                 <button
                   className="create-hub-cat-header"
                   onClick={() => toggleCategory(cat.id)}
@@ -108,7 +253,10 @@ export function CreateHub({
                     <strong>{cat.label}</strong>
                     <span>{cat.description}</span>
                   </div>
-                  <ChevronDown size={16} className="create-hub-cat-chevron" />
+                  <ChevronDown
+                    size={16}
+                    className="create-hub-cat-chevron"
+                  />
                 </button>
 
                 {isOpen && (
@@ -119,14 +267,32 @@ export function CreateHub({
                         <button
                           key={a.id}
                           className="create-hub-item"
-                          style={{ "--ca-color": a.color } as React.CSSProperties}
-                          onClick={() => { onClose(); setTab(a.tab); act(a.title, a.detail); }}
+                          style={
+                            { "--ca-color": a.color } as React.CSSProperties
+                          }
+                          onClick={() => {
+                            onClose();
+                            setTab(a.tab);
+                            act(a.title, a.detail);
+                          }}
                           type="button"
                         >
-                          <span className="create-hub-icon"><Icon size={18} /></span>
+                          <span className="create-hub-icon">
+                            <Icon size={18} />
+                          </span>
                           <span className="create-hub-text">
                             <strong>{a.title}</strong>
                             <small>{a.sub}</small>
+                          </span>
+                          <span className="create-hub-badges">
+                            <span className="create-hub-hp-badge">
+                              {a.hp}
+                            </span>
+                            <span
+                              className={`create-hub-cost-badge ${a.cost === "Free" ? "free" : "paid"}`}
+                            >
+                              {a.cost}
+                            </span>
                           </span>
                         </button>
                       );
