@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { appLanguages } from "@/lib/data/languages";
 import { firstRunNotifications } from "@/lib/data/notifications";
 import { initialHumanPosts } from "@/lib/data/posts";
@@ -28,6 +28,11 @@ import {
   worldProfileRefreshMs,
 } from "@/lib/humanchain/appHelpers";
 import { loadJsonFromStorage, loadLocalRecord, saveJsonToStorage, storageKeys } from "@/lib/humanchain/storage";
+import {
+  loadVerifiedHumanFromSession,
+  saveWorldHumanSession,
+  sessionToVerifiedHuman,
+} from "@/lib/humanchain/worldSession";
 import {
   getReferralLink,
   incrementReferralShareCount,
@@ -64,6 +69,7 @@ import {
 } from "@/lib/worldMiniApp";
 import type { AppLanguage } from "@/lib/data/languages";
 import type { HumanChainPaymentToken } from "@/lib/worldPayments";
+import type { WorldPaymentStatus } from "@/lib/world/types";
 import type { AskThread, ChainField, ChainPremiumState } from "@/types/chain";
 import type { DailyResponse, HumanPost, UserStory } from "@/types/content";
 import type { MarketBid, MarketHold, MarketLocationState, MarketplaceListing } from "@/types/market";
@@ -111,6 +117,7 @@ export function useHumanChainApp() {
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
   const [paymentToken] = useState<HumanChainPaymentToken>(defaultHumanChainPaymentToken);
   const [paymentBusy, setPaymentBusy] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<WorldPaymentStatus | null>(null);
   const [accountSyncReady, setAccountSyncReady] = useState(verifiedHuman?.mode !== "world");
   const [accountSyncStatus, setAccountSyncStatus] = useState<"idle" | "loading" | "ready" | "saving" | "offline">(
     verifiedHuman?.mode === "world" ? "loading" : "idle",
@@ -118,6 +125,7 @@ export function useHumanChainApp() {
   const [feedRefreshNonce, setFeedRefreshNonce] = useState(0);
   const [referredBy, setReferredBy] = useState<string | null>(loadReferredBy);
   const [referralShareCount, setReferralShareCount] = useState<number>(loadReferralShareCount);
+  const reentryHandledRef = useRef(false);
 
   // ── Persist profile image ──────────────────────────────────────────────────
   useEffect(() => {
@@ -131,13 +139,28 @@ export function useHumanChainApp() {
   // ── URL-based tab navigation ───────────────────────────────────────────────
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
+      if (storedAppMemory.verifiedHuman?.mode === "world" && storedAppMemory.verifiedHuman.wallet) {
+        setTab("home");
+        return;
+      }
+
       const requestedTab = getTabFromUrl();
       if (requestedTab === "home") return;
       if (requestedTab === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
       setTab(requestedTab);
     });
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [storedAppMemory.verifiedHuman]);
+
+  useEffect(() => {
+    if (reentryHandledRef.current || !verifiedHuman?.wallet || verifiedHuman.mode !== "world") return;
+    reentryHandledRef.current = true;
+    setTab("home");
+    setVerifiedHuman((cur) => {
+      if (!cur || cur.mode !== "world" || cur.wallet !== verifiedHuman.wallet) return cur;
+      return { ...cur, lastSeenAt: new Date().toISOString() };
+    });
+  }, [verifiedHuman?.mode, verifiedHuman?.wallet]);
 
   // ── Referral detection on load ────────────────────────────────────────────
   useEffect(() => {
@@ -187,14 +210,24 @@ export function useHumanChainApp() {
   useEffect(() => {
     getWorldPermissions()
       .then((result) => {
-        setWorldContext(getWorldMiniAppContext());
+        const nextContext = getWorldMiniAppContext();
+        setWorldContext(nextContext);
+        setVerifiedHuman((cur) => cur ?? loadVerifiedHumanFromSession(nextContext));
         const permissions = result.data?.permissions as { notifications?: boolean | { status?: string } } | undefined;
         const notifs = permissions?.notifications;
         const isGranted = notifs === true || (typeof notifs === "object" && notifs?.status === "success");
         if (isGranted) setNotificationReady(true);
       })
-      .catch(() => setWorldContext(getWorldMiniAppContext()))
-      .finally(() => setWorldContext(getWorldMiniAppContext()));
+      .catch(() => {
+        const nextContext = getWorldMiniAppContext();
+        setWorldContext(nextContext);
+        setVerifiedHuman((cur) => cur ?? loadVerifiedHumanFromSession(nextContext));
+      })
+      .finally(() => {
+        const nextContext = getWorldMiniAppContext();
+        setWorldContext(nextContext);
+        setVerifiedHuman((cur) => cur ?? loadVerifiedHumanFromSession(nextContext));
+      });
   }, []);
 
   // ── World profile sync ─────────────────────────────────────────────────────
@@ -249,6 +282,11 @@ export function useHumanChainApp() {
       window.clearTimeout(quickRetry); window.clearTimeout(hydratedRetry); window.clearInterval(interval);
     };
   }, [verifiedHuman?.mode, verifiedHuman?.wallet]);
+
+  useEffect(() => {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") return;
+    saveWorldHumanSession(verifiedHuman, worldContext);
+  }, [verifiedHuman, worldContext]);
 
   // ── Persist state to localStorage ─────────────────────────────────────────
   useEffect(() => { saveJsonToStorage(storageKeys.posts, humanPosts); }, [humanPosts]);
@@ -449,13 +487,13 @@ export function useHumanChainApp() {
       const t = window.setTimeout(async () => {
         const sent = await sendWorldUserNotification({
           title: "Keep your Human Streak",
-          detail: "Your chain is active today. Post a moment, check your passport, or browse the nearby market.",
+          detail: "Your chain is active today. Answer, add a link, read a story, or check your passport.",
           sector: "account",
           path: "/",
         });
         if (sent) {
           window.localStorage.setItem(eveningKey, Date.now().toString());
-          addNotification("Keep your Human Streak", "Check in, post a moment, or browse the market before midnight.", "account");
+          addNotification("Keep your Human Streak", "Check in, answer, add a chain link, or read a story before midnight.", "account");
         }
       }, 30_000);
       return () => window.clearTimeout(t);
@@ -520,8 +558,8 @@ export function useHumanChainApp() {
     window.localStorage.removeItem(storageKeys.marketHolds);
     window.localStorage.removeItem(storageKeys.notifications);
     window.localStorage.removeItem(storageKeys.marketRatings);
-    recordHistory({ title: "Marketplace data cleared", detail: "Stored listings, holds, photos, links, and marketplace drafts were removed locally.", kind: "market" });
-    act("Marketplace cleared", "Your local marketplace listings were removed from this device.");
+    recordHistory({ title: "Legacy data cleared", detail: "Stored legacy listings, holds, photos, links, and drafts were removed locally.", kind: "market" });
+    act("Legacy data cleared", "Old local market data was removed from this device.");
   }
 
   function clearPostData() {
@@ -544,7 +582,7 @@ export function useHumanChainApp() {
     setMarketLocation({ label: "Location not shared", source: "not-requested", status: "idle" });
     setNotificationReady(false); setNotificationWelcomeSent(false);
     setNotifications(loadStoredNotifications()); setPoints(420); setSavedItems(3); setStreak(4);
-    setToast({ title: "Local account deleted", detail: "Preview profile, stored marketplace data, posts, and history were removed from this device." });
+    setToast({ title: "Local account deleted", detail: "Preview profile, stored local data, posts, and history were removed from this device." });
   }
 
   function keepStreak(_detail = "Your Human Streak is alive for today.") {
@@ -575,6 +613,7 @@ export function useHumanChainApp() {
       return;
     }
     setPaymentPrompt(payment);
+    setPaymentStatus(null);
   }
 
   async function enableHumanChainNotifications(context = "login") {
@@ -585,12 +624,12 @@ export function useHumanChainApp() {
         return;
       }
       setNotificationReady(true); setNotificationPromptDismissed(true); setNotificationCenterOpen(true);
-      recordHistory({ title: "Notifications enabled", detail: "Daily questions, direct inbox, marketplace bids, story drops, payments, and account alerts can now notify this human.", kind: "profile" });
+      recordHistory({ title: "Notifications enabled", detail: "Daily questions, Ask replies, chain reactions, story drops, payments, and account alerts can now notify this human.", kind: "profile" });
       if (!notificationWelcomeSent) {
         const welcomeTitle = "Welcome to HumanChain";
-        const welcomeDetail = "Welcome to HumanChain. Ask real humans, post moments, trade safely, read stories, track your passport, and keep alerts on for replies, holds, payments, and safety.";
+        const welcomeDetail = "Welcome to HumanChain. Ask real humans, add chain links, read stories, track your passport, and keep alerts on for replies, tips, payments, and safety.";
         addNotification(welcomeTitle, welcomeDetail, "welcome");
-        addNotification("HumanChain guide unlocked", "Home guides your next action. Ask routes real replies. Moments holds photo posts and links. Market handles safer trade. Profile is always top-left.", "account");
+        addNotification("HumanChain guide unlocked", "Home guides your next action. Ask collects real replies. Daily Chain holds links and moments. Stories add depth. Passport keeps your human record.", "account");
         await sendWorldUserNotification({ title: welcomeTitle, detail: welcomeDetail, sector: "account", path: "/" });
         setNotificationWelcomeSent(true);
       }
@@ -614,9 +653,30 @@ export function useHumanChainApp() {
       const nextCtx = { ...freshCtx, ...resolved.context };
       const worldUsername = normalizeWorldUsername(resolved.username ?? freshCtx.username ?? worldContext.username);
       const worldPic = resolved.profilePictureUrl ?? freshCtx.profilePictureUrl;
-      setWorldContext({ ...freshCtx, ...nextCtx, profilePictureUrl: worldPic, username: worldUsername, walletAddress: address });
-      setVerifiedHuman({ deviceOS: nextCtx.deviceOS ?? freshCtx.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: nextCtx.launchLocation ?? freshCtx.launchLocation, profilePictureUrl: worldPic, username: worldUsername ?? "Resolving World username", wallet: address, mode: "world" });
+      const now = new Date().toISOString();
+      const nextWorldContext = { ...freshCtx, ...nextCtx, profilePictureUrl: worldPic, username: worldUsername, walletAddress: address };
+      const nextVerifiedHuman: VerifiedHuman = {
+        authenticatedAt: now,
+        deviceOS: nextCtx.deviceOS ?? freshCtx.deviceOS,
+        lastSeenAt: now,
+        launchLocation: nextCtx.launchLocation ?? freshCtx.launchLocation,
+        mode: "world",
+        profilePictureUrl: worldPic,
+        sessionVersion: 1,
+        username: worldUsername ?? "Resolving World username",
+        verificationSource: "wallet-auth",
+        wallet: address,
+        worldAppVersion: nextCtx.worldAppVersion ?? freshCtx.worldAppVersion,
+      };
+      const savedSession = saveWorldHumanSession(nextVerifiedHuman, nextWorldContext);
+      setWorldContext(nextWorldContext);
+      setVerifiedHuman(savedSession ? sessionToVerifiedHuman(savedSession) : nextVerifiedHuman);
       setTab("home"); setNotificationPromptDismissed(false);
+      recordHistory({
+        title: "World human session saved",
+        detail: "Wallet Auth was verified server-side and this device can reopen HumanChain without another login prompt.",
+        kind: "profile",
+      });
       // Award referral welcome bonus on first World login if referred
       const storedRef = loadReferredBy();
       if (storedRef && !loadReferralBonusAwarded()) {
@@ -628,7 +688,7 @@ export function useHumanChainApp() {
           "account",
         );
       }
-      setToast({ title: "Verified human entered", detail: `${worldUsername ?? "World username will appear after World profile sync"} is ready. You can now ask, post, trade, tip, and use paid actions.` });
+      setToast({ title: "Verified human entered", detail: `${worldUsername ?? "World username will appear after World profile sync"} is ready. You can now ask, answer, add links, tip, and use premium actions.` });
     } catch (error) {
       setToast({ title: "World login failed", detail: error instanceof Error ? error.message : "Try again inside World App." });
     } finally { setGateBusy(false); }
@@ -638,7 +698,7 @@ export function useHumanChainApp() {
     const username = verifiedHuman?.username ?? worldContext.username ?? "";
     const link = getReferralLink(username);
     const title = "Join HumanChain — real humans only";
-    const text = `I'm on HumanChain — the first trust-first human network inside World App. Ask real questions, post moments, trade nearby, and build your Human Passport. Join with my link and get +${REFERRAL_BONUS_FOR_REFERRED} HP bonus:`;
+    const text = `I'm on HumanChain — the first trust-first human network inside World App. Ask real questions, add daily links, read human stories, and build your Human Passport. Join with my link and get +${REFERRAL_BONUS_FOR_REFERRED} HP bonus:`;
     try {
       const { shareWithWorld } = await import("@/lib/worldMiniApp");
       await shareWithWorld({ title, text, url: link });
@@ -688,27 +748,35 @@ export function useHumanChainApp() {
       return;
     }
     setPaymentBusy(true);
+    setPaymentStatus("preparing");
+    let paymentReference: string | undefined;
+    let transactionId: string | undefined;
     let treasuryRecipient: string | undefined;
     try {
-      const result = await payWithWorld({ amount, description: paymentPrompt.detail, feature, token: paymentToken });
-      if ("pendingSetup" in result && result.pendingSetup) { setToast({ title: "World setup needed", detail: result.message }); setPaymentBusy(false); return; }
-      if ("pendingWorldApp" in result && result.pendingWorldApp) { setToast({ title: "Open in World App", detail: result.message }); setPaymentBusy(false); return; }
-      if ("ok" in result && !result.ok) { setToast({ title: "Payment not confirmed", detail: "error" in result && result.error ? result.error : "World payments are only counted after backend verification." }); setPaymentBusy(false); return; }
-      if ("error" in result && result.error) { setToast({ title: "Payment not prepared", detail: result.error }); setPaymentBusy(false); return; }
+      const result = await payWithWorld({ amount, description: paymentPrompt.detail, feature, onStatus: setPaymentStatus, token: paymentToken });
+      if ("pendingSetup" in result && result.pendingSetup) { setToast({ title: "World setup needed", detail: result.message }); setPaymentBusy(false); setPaymentStatus(null); return; }
+      if ("pendingWorldApp" in result && result.pendingWorldApp) { setToast({ title: "Open in World App", detail: result.message }); setPaymentBusy(false); setPaymentStatus(null); return; }
+      if ("ok" in result && !result.ok) { setToast({ title: "Payment still verifying", detail: "World accepted the payment request, but the backend has not seen a mined confirmation yet. Try again shortly if it does not unlock." }); setPaymentBusy(false); setPaymentStatus("pending"); return; }
+      if ("error" in result && result.error) { setToast({ title: "Payment not prepared", detail: result.error }); setPaymentBusy(false); setPaymentStatus(null); return; }
+      paymentReference = "reference" in result && typeof result.reference === "string" ? result.reference : undefined;
+      transactionId = "payment" in result && typeof result.payment?.data?.transactionId === "string"
+        ? result.payment.data.transactionId
+        : undefined;
       treasuryRecipient = "recipient" in result && typeof result.recipient === "string" ? result.recipient : undefined;
     } catch (error) {
       setToast({ title: "World payment failed", detail: error instanceof Error ? error.message : "Try again in World App." });
-      setPaymentBusy(false); return;
+      setPaymentBusy(false); setPaymentStatus(null); return;
     }
     try {
       const earnedPoints = paymentPrompt.points ?? 0;
       if (earnedPoints > 0) earnPoints(earnedPoints, `${paymentPrompt.title} payment reward`);
-      await paymentPrompt.onConfirmed?.(amount);
+      await paymentPrompt.onConfirmed?.(amount, { paymentReference, transactionId });
       const formattedAmount = formatPaymentAmount(amount, paymentToken);
       recordHistory({ title: getPaymentKind(feature) === "tip" ? "Tip payment confirmed" : "Payment confirmed", detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`, kind: getPaymentKind(feature) });
       void storeSafeData("payment", `${feature}-${Date.now()}`, { amount, feature, human: verifiedHuman?.username, payerWallet: verifiedHuman?.wallet, paymentTitle: paymentPrompt.title, ...paymentPrompt.context, treasuryRecipient, token: paymentToken, wallet: verifiedHuman?.wallet });
       setToast({ title: `${formattedAmount} confirmed`, detail: paymentPrompt.success });
       setPaymentPrompt(null);
+      setPaymentStatus(null);
     } finally { setPaymentBusy(false); }
   }
 
@@ -718,7 +786,7 @@ export function useHumanChainApp() {
     dailyAnsweredAt, dailyAnsweredDate, dailyResponses, feedRefreshNonce, gateBusy,
     historyRecords, hpLedger, humanPosts, lastCheckInAt, lastCheckInDate, links,
     marketLocation, marketplaceListings, notificationCenterOpen, notificationPromptDismissed,
-    notificationReady, notifications, paymentBusy, paymentPrompt, paymentToken,
+    notificationReady, notifications, paymentBusy, paymentPrompt, paymentStatus, paymentToken,
     points, profileImage, referralShareCount, referredBy, savedItems, streak,
     tab, toast, verifiedHuman, worldContext,
     // setters

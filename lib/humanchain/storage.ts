@@ -8,6 +8,8 @@ export const storageKeys = {
   chainComments: "humanchain_chain_comments",
   chainPremium: "humanchain_chain_premium",
   history: "humanchain_history",
+  humanProofEvents: "humanchain_world_human_proof_events",
+  humanSession: "humanchain_world_human_session",
   hpLedger: "humanchain_hp_ledger",
   links: "humanchain_links",
   marketComments: "humanchain_market_comments",

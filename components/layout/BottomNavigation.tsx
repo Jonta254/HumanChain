@@ -24,7 +24,7 @@ export function BottomNavigation({
   const items: Array<[Tab, string, React.ReactNode]> = [
     ["home", appLanguage.nav.home, <Home key="home" size={20} />],
     ["ask", appLanguage.nav.ask, <MessageCircleQuestion key="ask" size={20} />],
-    ["chains", "Moments", <Sparkles key="chains" size={20} />],
+    ["chains", "Chain", <Sparkles key="chains" size={20} />],
     ["market", appLanguage.nav.market, <Store key="market" size={20} />],
   ];
 

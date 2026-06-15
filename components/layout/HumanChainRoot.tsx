@@ -10,11 +10,11 @@ import { LoginGate } from "@/components/layout/LoginGate";
 import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { NotificationPermissionPrompt } from "@/components/layout/NotificationPermissionPrompt";
 import { PaymentSheet } from "@/components/layout/PaymentSheet";
-import { AskView } from "@/components/tabs/AskView";
 import { ChainsView } from "@/components/tabs/ChainsView";
 import { HomeView } from "@/components/tabs/HomeView";
-import { MarketplaceView } from "@/components/tabs/MarketplaceView";
 import { MeView } from "@/components/tabs/MeView";
+import { AskView } from "@/components/tabs/AskView";
+import { MarketplaceView } from "@/components/tabs/MarketplaceView";
 import { SettingsView } from "@/components/tabs/SettingsView";
 import { StoriesView } from "@/components/tabs/StoriesView";
 import type { HumanChainAppState } from "@/lib/humanchain/useHumanChainApp";
@@ -24,9 +24,9 @@ export function HumanChainRoot(props: HumanChainAppState) {
     accountSyncStatus, activeField, appLanguage, chainEntryNonce,
     dailyAnswered, dailyAnsweredAt, dailyResponses, earnPoints, feedRefreshNonce,
     gateBusy, historyRecords, hpLedger, humanPosts, lastCheckInAt, lastCheckInDate,
-    links, marketLocation, marketplaceListings, notificationCenterOpen,
+    links, marketplaceListings, notificationCenterOpen,
     notificationPromptDismissed, notificationReady, notifications,
-    paymentBusy, paymentPrompt, paymentToken, points, profileImage,
+    paymentBusy, paymentPrompt, paymentStatus, paymentToken, points, profileImage,
     referralShareCount, referredBy, savedItems, streak, tab, toast, verifiedHuman, worldContext,
     setActiveField, setAppLanguage, setChainEntryNonce, setDailyAnswered,
     setDailyAnsweredAt, setDailyAnsweredDate, setDailyResponses, setHumanPosts,
@@ -143,7 +143,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             humanPosts={humanPosts}
             links={links}
             marketplaceListings={marketplaceListings}
-            marketLocation={marketLocation}
             onCheckIn={() => {
               const now = new Date();
               const today = getLocalDateKey(now);
@@ -274,6 +273,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             onConfirm={confirmPayment}
             busy={paymentBusy}
             payment={paymentPrompt}
+            status={paymentStatus}
             selectedToken={paymentToken}
           />
         ) : null}
