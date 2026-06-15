@@ -23,6 +23,7 @@ export const storageKeys = {
   referralBy: "humanchain_referral_by",
   referralShareCount: "humanchain_referral_share_count",
   userStories: "humanchain_user_stories",
+  lastStreakDate: "humanchain_last_streak_date",
 } as const;
 
 export function loadJsonFromStorage<T>(key: string, fallback: T): T {
