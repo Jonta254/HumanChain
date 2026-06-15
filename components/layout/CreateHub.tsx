@@ -187,6 +187,9 @@ const CATEGORIES: Category[] = [
   },
 ];
 
+const TOTAL_HP = CATEGORIES.flatMap((c) => c.actions)
+  .reduce((sum, a) => sum + Number(a.hp.replace(/\D/g, "")), 0);
+
 export function CreateHub({
   act,
   onClose,
@@ -228,10 +231,27 @@ export function CreateHub({
           </button>
         </div>
 
-        {/* HP explainer strip */}
+        {/* HP total strip */}
         <div className="create-hub-hp-strip">
           <Zap size={12} />
-          <span>HP (Human Points) power your tier, trust score, and community rank</span>
+          <span>Up to <strong>+{TOTAL_HP} HP</strong> available · HP powers your tier, trust score, and rank</span>
+        </div>
+
+        {/* Category tab row */}
+        <div className="create-hub-cat-tabs">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              className={`create-hub-cat-tab${openCategory === cat.id ? " active" : ""}`}
+              style={{ "--cat-accent": cat.accent } as React.CSSProperties}
+              onClick={() => toggleCategory(cat.id)}
+              type="button"
+            >
+              <span className="create-hub-cat-dot" />
+              {cat.label}
+              <span className="create-hub-cat-count">{cat.actions.length}</span>
+            </button>
+          ))}
         </div>
 
         <div className="create-hub-cats">
@@ -243,33 +263,32 @@ export function CreateHub({
                 className={`create-hub-cat ${isOpen ? "open" : ""}`}
                 style={{ "--cat-accent": cat.accent } as React.CSSProperties}
               >
-                <button
-                  className="create-hub-cat-header"
-                  onClick={() => toggleCategory(cat.id)}
-                  type="button"
-                  aria-expanded={isOpen}
-                >
-                  <div className="create-hub-cat-label">
-                    <strong>{cat.label}</strong>
-                    <span>{cat.description}</span>
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className="create-hub-cat-chevron"
-                  />
-                </button>
+                {/* Collapsed header (visible only when not open) */}
+                {!isOpen && (
+                  <button
+                    className="create-hub-cat-header"
+                    onClick={() => toggleCategory(cat.id)}
+                    type="button"
+                    aria-expanded={false}
+                  >
+                    <div className="create-hub-cat-label">
+                      <strong>{cat.label}</strong>
+                      <span>{cat.description}</span>
+                    </div>
+                    <ChevronDown size={16} className="create-hub-cat-chevron" />
+                  </button>
+                )}
 
+                {/* 2-column action grid */}
                 {isOpen && (
-                  <div className="create-hub-cat-actions">
+                  <div className="create-hub-cat-actions create-hub-cat-grid">
                     {cat.actions.map((a) => {
                       const Icon = a.icon;
                       return (
                         <button
                           key={a.id}
-                          className="create-hub-item"
-                          style={
-                            { "--ca-color": a.color } as React.CSSProperties
-                          }
+                          className="create-hub-item create-hub-item--card"
+                          style={{ "--ca-color": a.color } as React.CSSProperties}
                           onClick={() => {
                             onClose();
                             setTab(a.tab);
@@ -278,19 +297,15 @@ export function CreateHub({
                           type="button"
                         >
                           <span className="create-hub-icon">
-                            <Icon size={18} />
+                            <Icon size={20} />
                           </span>
                           <span className="create-hub-text">
                             <strong>{a.title}</strong>
                             <small>{a.sub}</small>
                           </span>
                           <span className="create-hub-badges">
-                            <span className="create-hub-hp-badge">
-                              {a.hp}
-                            </span>
-                            <span
-                              className={`create-hub-cost-badge ${a.cost === "Free" ? "free" : "paid"}`}
-                            >
+                            <span className="create-hub-hp-badge">{a.hp}</span>
+                            <span className={`create-hub-cost-badge ${a.cost === "Free" ? "free" : "paid"}`}>
                               {a.cost}
                             </span>
                           </span>
