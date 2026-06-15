@@ -17026,3 +17026,323 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   background: var(--green);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   HUMANCHAIN v10 — UNIFIED APP EXPERIENCE
+   Every screen shares one visual language. No divided sections.
+   Strict World App mini-app compliance pass included.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. HOME: continuous content flow (no floating islands) ─── */
+
+/* Ticker blends into topbar area — part of the header, not a strip */
+.home-v9 .hc-ticker {
+  margin: -4px -16px 0;
+  padding: 5px 16px;
+  border-radius: 0;
+  background: rgba(19, 122, 87, 0.05);
+  border-bottom: 1px solid rgba(19, 122, 87, 0.12);
+  font-size: 0.71rem;
+}
+
+/* Hero: tighter top gap */
+.home-v9 .h9-hero {
+  margin-top: 10px;
+}
+
+/* Sections flow as a feed — dividers instead of isolated cards */
+.home-v9 .h9-section {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0 !important;
+}
+.home-v9 .h9-section:last-of-type {
+  border-bottom: none;
+}
+
+/* AI insight: part of page, no floating shadow */
+.home-v9 .hc-insight {
+  box-shadow: none !important;
+  border-color: rgba(19, 122, 87, 0.15) !important;
+  background: rgba(19, 122, 87, 0.04) !important;
+  border-radius: 16px !important;
+}
+.home-v9 .hc-insight:hover,
+.home-v9 .hc-insight:focus-within {
+  box-shadow: none !important;
+}
+
+/* Quick actions: lighter cards, no shadow */
+.home-v9 .hc-quick button {
+  box-shadow: none !important;
+  border-color: var(--line) !important;
+  background: var(--paper) !important;
+}
+.home-v9 .hc-quick button:active {
+  background: rgba(19, 122, 87, 0.05) !important;
+}
+
+/* Reputation card: no shadow, matches page */
+.home-v9 .hc-rep {
+  box-shadow: none !important;
+  border-color: var(--line) !important;
+  background: var(--paper) !important;
+}
+.home-v9 .hc-rep:active {
+  background: rgba(19, 122, 87, 0.03) !important;
+}
+
+/* Network stats: inline numbers, no card box */
+.home-v9 .hc-network-strip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.home-v9 .hc-network-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-right: 1px solid var(--line);
+}
+.home-v9 .hc-network-stat:last-child {
+  border-right: none;
+}
+.home-v9 .hc-network-stat strong {
+  font-size: 1.05rem;
+  font-weight: 950;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.home-v9 .hc-network-stat span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* Explore today: no shadow */
+.home-v9 .hc-explore-today {
+  box-shadow: none !important;
+}
+.home-v9 .hc-explore-today:active {
+  box-shadow: none !important;
+}
+
+/* Section heading: tighter, less visual noise */
+.home-v9 .h9-section-head {
+  margin-bottom: 8px;
+}
+.home-v9 .h9-section-head > strong {
+  font-size: 0.84rem;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.home-v9 .h9-section-head > strong::before {
+  display: none; /* remove left-bar accent — reduces visual noise */
+}
+
+/* ── 2. AI GUIDE SHEET: flex structure ensures header sticks & content scrolls ── */
+
+/* Remove any pre-set overflow on the sheet — we'll manage it via flex */
+.ai-guide-sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 88dvh !important;
+  overflow: hidden !important; /* clip on sheet, scroll on children */
+}
+/* The header already has position:sticky; this ensures content below scrolls */
+.ai-guide-topics,
+.ai-guide-content {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  flex: 1 1 auto;
+  /* Let it grow to fill the sheet and scroll */
+}
+.ai-guide-intro {
+  padding: 12px 20px 8px;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* ── 3. CREATE HUB: always scrollable ─────────────────────── */
+
+.create-hub {
+  max-height: 92dvh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  display: flex;
+  flex-direction: column;
+}
+/* Head stays above scroll */
+.create-hub-head {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  z-index: 2;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+  margin-bottom: 0;
+}
+.create-hub-cats {
+  flex: 1 1 auto;
+  padding-bottom: 20px;
+}
+
+/* ── 4. TOP-BAR: uniform across all screens ────────────────── */
+
+/* Make sure top-bar-v2 safe area is consistent */
+.top-bar-v2 {
+  padding-top: calc(14px + var(--world-safe-top, 0px));
+  padding-bottom: 14px;
+}
+
+/* ── 5. ME SCREEN: tighter internal sections ───────────────── */
+
+.me-screen .me-kpi-grid {
+  gap: 8px;
+}
+/* HP ledger rows: consistent height */
+.me-screen .hp-ledger-row {
+  min-height: 44px;
+}
+
+/* ── 6. CHAINS SCREEN: unified card borders ─────────────────── */
+
+/* Moment cards and link items share same border weight */
+.chains-screen .moment-card,
+.chains-screen .link-item {
+  box-shadow: none;
+  border: 1px solid var(--line);
+}
+
+/* ── 7. STORIES SCREEN: shelf continuity ───────────────────── */
+
+/* Shelf story cards: consistent shadow */
+.stories-screen .shelf-card {
+  box-shadow: 0 2px 8px rgba(20, 28, 24, 0.07);
+}
+
+/* ── 8. SETTINGS & MARKET SCREENS ──────────────────────────── */
+
+/* Market screen: section headings use same style */
+.market-screen .section-label,
+.settings-screen .section-label {
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ── 9. UNIVERSAL TYPOGRAPHY SCALE ─────────────────────────── */
+
+/* Consistent heading weights across every screen */
+.screen h2 {
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.screen h3 {
+  font-size: 0.95rem;
+  font-weight: 950;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+/* ── 10. WORLD APP COMPLIANCE ────────────────────────────────── */
+
+/* All interactive rows: 44px minimum touch target */
+.ai-guide-topic-btn {
+  min-height: 52px;
+}
+.create-hub-item {
+  min-height: 52px;
+}
+.settings-row,
+.market-item {
+  min-height: 52px;
+}
+
+/* Safe area: bottom nav padding */
+.bottom-nav--hc {
+  padding-bottom: max(10px, var(--world-safe-bottom, 0px));
+}
+
+/* Inputs: prevent zoom on iOS (min 16px font) */
+input,
+textarea,
+select {
+  font-size: max(1rem, 16px);
+}
+
+/* No external link bounce */
+a[href^="http"],
+a[href^="https"] {
+  pointer-events: none; /* MiniKit handles external routing */
+}
+
+/* ── 11. SCROLLABLE ROWS: hide scrollbars, enable touch scroll ── */
+
+.chain-tools,
+.shelf-cats,
+.profile-passport-map,
+.h9-opps-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.chain-tools::-webkit-scrollbar,
+.shelf-cats::-webkit-scrollbar,
+.profile-passport-map::-webkit-scrollbar,
+.h9-opps-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── 12. MODAL BACKDROP: consistent across all modals ──────── */
+
+.ai-guide-backdrop,
+.create-hub-backdrop {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── 13. SECTION DIVIDER TOKEN ─────────────────────────────── */
+
+/* Any screen can use .hc-divider for a full-bleed rule */
+.hc-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 0 -16px;
+}
+
+/* ── 14. BOTTOM NAV: crisp active state ─────────────────────── */
+
+.bottom-nav--hc button.active {
+  color: var(--green);
+  font-weight: 950;
+}
+.bottom-nav--hc button.active svg {
+  stroke-width: 2.4px;
+}
+.bn-create {
+  box-shadow: 0 4px 16px rgba(19, 122, 87, 0.35);
+}
+
