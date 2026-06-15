@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  CircleDollarSign,
   MapPin,
   MessageCircleQuestion,
   Mic,
@@ -32,28 +31,11 @@ import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HistoryRecord } from "@/types/reputation";
 import type { VerifiedHuman } from "@/types/user";
 
-const wldActions = [
-  ["tip", "Tip, Golden Link, or streak restore"],
-  ["pin", "Pin a link or unlock story pages"],
-  ["country", "Ask one country or save a capsule"],
-  ["private", "Ask privately as a verified human"],
-  ["voice", "Request voice answers"],
-  ["verdict", "Unlock Deep Human Verdict"],
-];
-
 const answerQueue = [
   "What helped you keep going when nobody saw you struggling?",
   "What belief from your culture made you stronger?",
   "What should a young person know before chasing money?",
   "What is one truth about love people learn too late?",
-];
-
-const worldVerdictParts = [
-  "What most humans said",
-  "Best answer",
-  "Country differences",
-  "Hard truth",
-  "Final verdict",
 ];
 
 const starterAskThreads: AskThread[] = [
@@ -313,8 +295,8 @@ export function AskView({
   }
 
   return (
-    <div className="screen">
-      <TopBar title="Ask The World" subtitle="Ask one honest question. Verified humans answer." />
+    <div className="screen ask-screen">
+      <TopBar title="Ask The World" subtitle="Verified human answers" />
       <section className="ask-hero">
         <div>
           <span className="section-kicker">Verified answers</span>
@@ -756,59 +738,6 @@ export function AskView({
               <span>Clear search or choose another topic to keep browsing.</span>
             </div>
           )}
-      </section>
-
-      <section className="panel payment-hub">
-        <div className="section-heading">
-          <span>HumanPass payments</span>
-          <CircleDollarSign size={18} />
-        </div>
-        <p>
-          Paid actions now open one clean World App sheet. The amount appears
-          only when a human chooses the premium action.
-        </p>
-        <div className="payment-pills">
-          {wldActions.map(([, detail]) => (
-            <span key={detail}>{detail}</span>
-          ))}
-        </div>
-      </section>
-
-      <section className="verdict-builder">
-        <span className="section-kicker">Premium World Verdict</span>
-        <h2>Turn answers into a real human report.</h2>
-        <div className="verdict-parts">
-        {worldVerdictParts.map((part) => (
-            <button
-              key={part}
-              onClick={() => act(part, "This section appears when enough verified answers arrive.")}
-              type="button"
-            >
-              {part}
-            </button>
-          ))}
-        </div>
-        <button
-          className="primary-command"
-          onClick={() =>
-            openPayment({
-              title: "Deep World Verdict",
-              amount: "6 WLD",
-              detail: "Unlock the full human report: most said, best answer, country differences, hard truth, and final verdict from all live answers.",
-              success: "Deep World Verdict unlocked. Your questions now show the full verdict breakdown.",
-              feature: "deep-world-verdict",
-              points: 12,
-              onConfirmed: () => {
-                act("Deep Verdict active", "Your questions now display full verdict reports when answers arrive.");
-                recordHistory({ title: "Deep World Verdict unlocked", detail: "Premium verdict reports enabled for all Ask questions.", kind: "post" });
-              },
-            })
-          }
-          type="button"
-        >
-          <CircleDollarSign size={18} />
-          Build Deep Verdict
-        </button>
       </section>
 
       <section className="panel">

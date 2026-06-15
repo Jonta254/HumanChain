@@ -421,12 +421,12 @@ export function HomeView({
         </button>
       </section>
 
-      {/* ── 7 · Live network activity ────────────────── */}
-      <section className="h9-section" aria-label="Network activity">
+      {/* ── 7 · Live network stats ───────────────────── */}
+      <section className="h9-section" aria-label="Network stats">
         <div className="hc-network-strip">
           <div className="hc-network-stat">
-            <strong>214k</strong>
-            <span>Verified Humans</span>
+            <strong>214k+</strong>
+            <span>Humans</span>
           </div>
           <div className="hc-network-stat">
             <strong>38</strong>
@@ -434,11 +434,11 @@ export function HomeView({
           </div>
           <div className="hc-network-stat">
             <strong>4.9k</strong>
-            <span>Active Today</span>
+            <span>Online Now</span>
           </div>
           <div className="hc-network-stat">
-            <strong>WLD</strong>
-            <span>Payments Live</span>
+            <strong>Live</strong>
+            <span>WLD Payments</span>
           </div>
         </div>
       </section>

@@ -15264,3 +15264,725 @@ html[data-world-mini-app="true"] .bottom-nav {
   text-align: center;
   line-height: 1.3;
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   FULL APP PERFECTION — premium upgrade for every view & component
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Premium inner-tab TopBar (top-bar-v2) ──────────────────────────
+   Sticky glass header used by Ask, Chains, Stories, Market, Me,
+   Settings. Provides brand cohesion across all tabs.              */
+.top-bar-v2 {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(14px + var(--world-safe-top, 0px)) 16px 12px;
+  background: rgba(247,251,249,0.97);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-bottom: 1px solid rgba(19,122,87,0.11);
+  box-shadow: 0 2px 12px rgba(20,55,42,0.04);
+  /* Negative margin pulls flush to scroll container edges */
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+html[data-world-mini-app="true"] .top-bar-v2 {
+  padding-top: 14px;
+}
+.top-bar-v2-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.top-bar-v2-kicker {
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--green);
+}
+.top-bar-v2-title {
+  margin: 0;
+  font-size: 1.38rem;
+  font-weight: 950;
+  color: var(--ink);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+.top-bar-v2-action {
+  flex: 0 0 auto;
+}
+
+/* ── Screen base: compensate for v2 topbar ──────────────────────────
+   The sticky header sits at top:0 inside the .screen scroll
+   container. Reduce the screen's own top padding so content
+   isn't pushed down twice.                                         */
+.ask-screen,
+.chains-screen,
+.stories-screen,
+.market-screen,
+.me-screen,
+.settings-screen-v2 {
+  padding-top: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% -5%, rgba(19,122,87,0.08), transparent 55%),
+    var(--paper);
+}
+
+/* ── Primary CTA button — brand gradient everywhere ─────────────────
+   Previously dark (var(--ink)). Now uses the emerald-blue gradient
+   for brand consistency across all tabs.                           */
+.primary-command {
+  background: var(--brand-grad) !important;
+  box-shadow: 0 8px 24px rgba(19,122,87,0.26);
+  transition: opacity 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+.primary-command:active:not(:disabled) {
+  transform: scale(0.97);
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(19,122,87,0.16);
+}
+
+/* ── Panel cards ─────────────────────────────────────────────────────
+   Shared across Ask, Chains, Market, Me, Settings.                */
+.panel {
+  border: 1px solid var(--card-line) !important;
+  border-radius: 20px !important;
+  background: var(--card) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+/* ── Section headings ────────────────────────────────────────────────
+   The label+icon combo used at the top of each content section.   */
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--line);
+}
+.section-heading span {
+  font-size: 0.9rem;
+  font-weight: 950;
+  color: var(--ink);
+}
+.section-heading svg {
+  color: var(--green);
+}
+
+/* ── Chip-row / filter pills ─────────────────────────────────────────
+   Topic selector, filter bar, mode selection.                      */
+.chip-row button,
+.chip-row button[aria-pressed="false"] {
+  border: 1px solid var(--line);
+  background: var(--paper-strong);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.76rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.chip-row button.active,
+.chip-row button[aria-pressed="true"] {
+  background: var(--brand-grad) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+/* ── Ask screen specific upgrades ───────────────────────────────────  */
+
+/* Hero section */
+.ask-screen .ask-hero {
+  border-radius: 22px;
+  margin-bottom: 0;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(10,40,32,0.22);
+}
+
+/* Ask board: section container */
+.ask-screen .ask-board {
+  display: grid;
+  gap: 12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Ask board section-heading */
+.ask-screen .ask-board > .section-heading {
+  margin-bottom: 0;
+}
+
+/* Thread cards: richer premium surface */
+.ask-thread {
+  border-radius: 22px !important;
+  border: 1px solid var(--card-line) !important;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(184,138,31,0.08), transparent 32%),
+    linear-gradient(158deg, #ffffff 0%, #f4f8f6 100%) !important;
+  box-shadow: var(--card-shadow-lg) !important;
+  transition: box-shadow 0.15s ease;
+}
+
+/* Thread meta: author + topic chip */
+.ask-thread-top span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: var(--green);
+  background: rgba(19,122,87,0.09);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+.ask-thread-top small {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.ask-thread h3 {
+  font-size: 1rem !important;
+  font-weight: 950 !important;
+  color: var(--ink) !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em;
+}
+
+/* Thread actions: Answer / Delete / Boost / Verdict */
+.thread-actions {
+  gap: 7px !important;
+}
+.thread-actions button {
+  min-height: 38px !important;
+  border-radius: 12px !important;
+  font-size: 0.75rem !important;
+  font-weight: 900 !important;
+  transition: opacity 0.12s ease, transform 0.1s ease !important;
+}
+.thread-actions button:first-child {
+  background: var(--brand-grad) !important;
+  color: #fff !important;
+  border: 0 !important;
+}
+.thread-actions button:not(:first-child) {
+  background: var(--paper-strong) !important;
+  border: 1px solid var(--card-line) !important;
+  color: var(--ink) !important;
+}
+.thread-actions button.danger {
+  background: rgba(239,125,105,0.1) !important;
+  border-color: rgba(239,125,105,0.28) !important;
+  color: var(--coral) !important;
+}
+.thread-actions button.active {
+  background: rgba(19,122,87,0.12) !important;
+  color: var(--green) !important;
+  border-color: rgba(19,122,87,0.22) !important;
+}
+.thread-actions button:active {
+  transform: scale(0.95) !important;
+  opacity: 0.88 !important;
+}
+
+/* Answer cards inside threads */
+.answer-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(19,122,87,0.1) !important;
+  background: rgba(247,251,249,0.8) !important;
+  padding: 12px !important;
+}
+.answer-card strong {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 0.76rem !important;
+  color: var(--green) !important;
+  margin-bottom: 4px !important;
+}
+.answer-card small {
+  font-size: 0.68rem !important;
+  color: var(--muted) !important;
+  margin-bottom: 8px !important;
+}
+.answer-card p {
+  font-size: 0.9rem !important;
+  line-height: 1.48 !important;
+  color: var(--ink) !important;
+}
+.answer-card.waiting {
+  border-style: dashed !important;
+  background: rgba(19,122,87,0.04) !important;
+}
+
+/* Answer input textarea inside threads */
+.answer-input {
+  border-radius: 16px !important;
+  border-color: rgba(19,122,87,0.18) !important;
+  background: var(--paper-strong) !important;
+  font-size: 0.9rem !important;
+}
+.answer-input:focus {
+  outline: 2px solid var(--green);
+  outline-offset: -1px;
+  border-color: transparent !important;
+}
+
+/* Answer reveal button */
+.answer-reveal-button {
+  background: rgba(19,122,87,0.08) !important;
+  color: var(--green) !important;
+  border: 1px solid rgba(19,122,87,0.16) !important;
+  border-radius: 12px !important;
+  font-weight: 900 !important;
+}
+
+/* Ask compose textarea */
+.ask-box textarea {
+  border-radius: 18px !important;
+  border-color: rgba(19,122,87,0.18) !important;
+  background: var(--paper-strong) !important;
+  font-size: 0.9rem !important;
+}
+.ask-box textarea:focus {
+  outline: 2px solid var(--green);
+  outline-offset: -1px;
+  border-color: transparent !important;
+}
+.ask-box label {
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  color: var(--ink) !important;
+}
+
+/* Boost button inside answer card */
+.answer-boost-btn {
+  background: rgba(47,111,237,0.1) !important;
+  color: var(--blue) !important;
+  border: 1px solid rgba(47,111,237,0.2) !important;
+  border-radius: 999px !important;
+  padding: 4px 10px !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+}
+
+/* ── Market view upgrades ────────────────────────────────────────────
+   MarketplaceView uses many item cards — ensure they're premium.  */
+.market-item,
+.market-panel,
+.market-hero {
+  border-radius: 22px;
+}
+
+/* ── Me / Passport view upgrades ─────────────────────────────────── */
+.passport-summary-card {
+  border-radius: 22px;
+  border: 1px solid var(--card-line);
+  background: var(--card);
+  box-shadow: var(--card-shadow-lg);
+}
+
+/* ── Trust-action row (helpful / report) ────────────────────────────  */
+.trust-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
+}
+.trust-action-row button {
+  min-height: 30px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 999px !important;
+  background: var(--paper-strong) !important;
+  color: var(--muted) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  padding: 4px 11px !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+}
+.trust-action-row button:active {
+  background: rgba(19,122,87,0.1) !important;
+  color: var(--green) !important;
+}
+
+/* ── Advanced ask toggle ─────────────────────────────────────────── */
+.ask-advanced-toggle {
+  background: rgba(19,122,87,0.06) !important;
+  color: var(--green) !important;
+  border: 1px solid rgba(19,122,87,0.14) !important;
+  border-radius: 12px !important;
+  font-weight: 900 !important;
+}
+
+/* ── Empty feed state ────────────────────────────────────────────── */
+.empty-feed-state {
+  padding: 32px 16px;
+  border-radius: 20px;
+  border: 1.5px dashed var(--line);
+  background: rgba(19,122,87,0.03);
+  text-align: center;
+  display: grid;
+  gap: 6px;
+}
+.empty-feed-state strong {
+  font-size: 0.92rem;
+  font-weight: 950;
+  color: var(--ink);
+}
+.empty-feed-state span {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── Verdict panel (per-thread verdict unlocked) ─────────────────── */
+.ask-verdict-panel {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(158deg, rgba(102,87,217,0.07), rgba(47,111,237,0.05));
+  border: 1px solid rgba(102,87,217,0.14);
+}
+.ask-verdict-row {
+  display: grid;
+  gap: 3px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(102,87,217,0.1);
+}
+.ask-verdict-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.ask-verdict-row strong {
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--violet);
+}
+.ask-verdict-row p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink);
+  line-height: 1.42;
+}
+
+/* ── Question row (answer-queue prompts) ─────────────────────────── */
+.question-row {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.question-row:first-of-type { border-top: 0; padding-top: 0; }
+.question-row p {
+  flex: 1;
+  font-size: 0.86rem;
+  color: var(--ink);
+  line-height: 1.42;
+  margin: 0 0 8px;
+}
+.question-row button {
+  min-height: 34px;
+  border: 1px solid rgba(19,122,87,0.2);
+  border-radius: 999px;
+  background: rgba(19,122,87,0.08);
+  color: var(--green);
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 6px 12px;
+  white-space: nowrap;
+  transition: background 0.12s, transform 0.1s;
+}
+.question-row button:active {
+  transform: scale(0.95);
+  background: rgba(19,122,87,0.16);
+}
+
+/* ── Compact actions grid ────────────────────────────────────────── */
+.compact-actions {
+  display: grid;
+  gap: 8px;
+}
+.compact-actions button {
+  min-height: 44px;
+  border: 1px solid var(--card-line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-align: left;
+  padding: 0 14px;
+  transition: background 0.12s, transform 0.1s;
+}
+.compact-actions button:active {
+  transform: scale(0.98);
+  background: rgba(19,122,87,0.08);
+}
+
+/* ── Ask modes selector (premium/paid options) ──────────────────── */
+.ask-modes button {
+  background: var(--card) !important;
+  border: 1px solid var(--card-line) !important;
+  color: var(--ink) !important;
+  transition: background 0.15s, border-color 0.15s !important;
+}
+.ask-modes button.active {
+  background: linear-gradient(158deg, #fff 0%, rgba(19,122,87,0.08) 100%) !important;
+  border-color: rgba(19,122,87,0.28) !important;
+}
+
+/* ── Home v9 quick actions: better labels ───────────────────────── */
+.home-v9 .hc-quick button span {
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+/* ── Floating profile button ────────────────────────────────────── */
+.floating-profile-button {
+  position: fixed;
+  bottom: calc(90px + var(--world-safe-bottom, 0px));
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.9);
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(20,55,42,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-grad);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 900;
+  z-index: 30;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.floating-profile-button:active {
+  transform: scale(0.9);
+  box-shadow: 0 3px 10px rgba(20,55,42,0.14);
+}
+.floating-profile-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.floating-profile-button span {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+/* ── Meter component (answer count bar) ─────────────────────────── */
+.meter-wrap {
+  display: grid;
+  gap: 4px;
+}
+.meter-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+.meter-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(19,122,87,0.1);
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand-grad);
+  transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* ── Toast: better presence ────────────────────────────────────────
+   The check-circle icon gets the brand green.                     */
+.toast svg:first-child {
+  color: var(--green);
+  flex-shrink: 0;
+}
+.toast strong {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 950;
+  color: var(--ink);
+}
+.toast span {
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+/* ── Notification center / permission prompt ────────────────────── */
+.notification-permission-prompt {
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -14px 40px rgba(20,55,42,0.14);
+}
+
+/* ── Payment sheet: premium ─────────────────────────────────────── */
+.payment-sheet {
+  border-radius: 26px 26px 0 0;
+}
+.payment-confirm-btn {
+  background: var(--brand-grad) !important;
+  box-shadow: 0 8px 24px rgba(19,122,87,0.3) !important;
+}
+
+/* ── Ask discovery bar search field ─────────────────────────────── */
+.search-field {
+  border-radius: 14px !important;
+  border: 1.5px solid rgba(19,122,87,0.18) !important;
+  background: var(--paper-strong) !important;
+}
+.search-field:focus-within {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px rgba(19,122,87,0.1) !important;
+}
+.search-field input {
+  font-size: 0.86rem !important;
+}
+
+/* ── Country lock badge ─────────────────────────────────────────── */
+.ask-country-lock {
+  border-radius: 12px !important;
+}
+
+/* ── Ask benefit row pills ──────────────────────────────────────── */
+.ask-benefit-row span {
+  background: rgba(19,122,87,0.07) !important;
+  border-color: rgba(19,122,87,0.14) !important;
+  color: var(--green) !important;
+}
+
+/* ── Field helper row ───────────────────────────────────────────── */
+.field-helper-row span {
+  border-color: rgba(19,122,87,0.1) !important;
+  color: var(--muted) !important;
+  background: transparent !important;
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+}
+
+/* ── Route control (Country route unlock) ───────────────────────── */
+.ask-route-panel {
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(184,138,31,0.2);
+  background: rgba(184,138,31,0.04);
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ask-route-control {
+  display: flex;
+  gap: 8px;
+}
+.ask-route-control input {
+  flex: 1;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  background: var(--paper-strong);
+  color: var(--ink);
+}
+.ask-route-control input:focus {
+  outline: 2px solid var(--green);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+.ask-route-control button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--brand-grad);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 0 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ask-route-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ask-route-status button {
+  border: 1px solid rgba(19,122,87,0.2);
+  border-radius: 999px;
+  padding: 5px 12px;
+  background: rgba(19,122,87,0.07);
+  color: var(--green);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+.ask-route-status button.active {
+  background: var(--green);
+  color: #fff;
+  border-color: transparent;
+}
+.ask-route-status span {
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.ask-route-current {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.ask-route-panel strong {
+  font-size: 0.84rem;
+  font-weight: 950;
+  color: var(--ink);
+}
+.ask-route-panel span {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.38;
+}
+
+/* ── Overall screen: better section spacing ─────────────────────── */
+.screen > * + * {
+  margin-top: 14px;
+}
+
+/* ── Notification permission prompt polish ─────────────────────── */
+.notification-permission-card {
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--card-shadow);
+}
+
+/* ── Gate entry: animated background ───────────────────────────── */
+@keyframes gateOrbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.gate-orbit span {
+  animation: gateOrbit 8s linear infinite;
+}
+.gate-orbit i {
+  animation: gateOrbit 12s linear infinite reverse;
+}
+.gate-orbit b {
+  animation: gateOrbit 18s linear infinite;
+}
+
+/* ── Ensure all interactive elements have press feedback ─────────── */
+.gate-secondary:active { opacity: 0.8; transform: scale(0.97); }
+.create-hub-cat-header:active { background: rgba(19,122,87,0.04); }
