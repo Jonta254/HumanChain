@@ -232,6 +232,7 @@ export function loadStoredAppMemory(): AppMemory {
     dailyAnswered: false,
     dailyAnsweredAt: null,
     dailyAnsweredDate: null,
+    joinedAt: null,
     lastCheckInAt: null,
     lastCheckInDate: null,
     marketLocation: { label: "Location not shared", source: "not-requested", status: "idle" },

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
 import { BottomNavigation as BottomNav } from "@/components/layout/BottomNavigation";
+import { CreateHub } from "@/components/layout/CreateHub";
 import { LoginGate } from "@/components/layout/LoginGate";
 import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { NotificationPermissionPrompt } from "@/components/layout/NotificationPermissionPrompt";
@@ -22,8 +23,8 @@ import type { HumanChainAppState } from "@/lib/humanchain/useHumanChainApp";
 export function HumanChainRoot(props: HumanChainAppState) {
   const {
     accountSyncStatus, activeField, appLanguage, chainEntryNonce,
-    dailyAnswered, dailyAnsweredAt, dailyResponses, earnPoints, feedRefreshNonce,
-    gateBusy, historyRecords, hpLedger, humanPosts, lastCheckInAt, lastCheckInDate,
+    dailyAnswered, earnPoints, feedRefreshNonce,
+    gateBusy, historyRecords, hpLedger, humanPosts, joinedAt, lastCheckInAt, lastCheckInDate,
     links, marketLocation, marketplaceListings, notificationCenterOpen,
     notificationPromptDismissed, notificationReady, notifications,
     paymentBusy, paymentPrompt, paymentToken, points, profileImage,
@@ -38,6 +39,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
     deleteLocalAccount, enableHumanChainNotifications, enterPreview, enterWithWorld,
     keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink,
   } = props;
+
+  const [createHubOpen, setCreateHubOpen] = useState(false);
 
   useEffect(() => {
     // Mark <html> so World App CSS rules activate without delaying first paint.
@@ -66,7 +69,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
   }, [toast, setToast]);
 
   // Scroll-lock: prevent background scroll while any modal/sheet is open
-  const anyModalOpen = Boolean(paymentPrompt || notificationCenterOpen);
+  const anyModalOpen = Boolean(paymentPrompt || notificationCenterOpen || createHubOpen);
   useEffect(() => {
     document.body.classList.toggle("modal-open", anyModalOpen);
     return () => document.body.classList.remove("modal-open");
@@ -201,10 +204,9 @@ export function HumanChainRoot(props: HumanChainAppState) {
             act={act}
             appLanguage={appLanguage}
             dailyAnswered={dailyAnswered}
-            dailyAnsweredAt={dailyAnsweredAt}
-            dailyResponses={dailyResponses}
             earnPoints={earnPoints}
             humanPosts={humanPosts}
+            joinedAt={joinedAt}
             marketplaceListings={marketplaceListings}
             notificationReady={notificationReady}
             notificationUnreadCount={unreadNotificationCount}
@@ -303,6 +305,17 @@ export function HumanChainRoot(props: HumanChainAppState) {
             active={tab}
             appLanguage={appLanguage}
             onChange={(nextTab) => {
+              if (nextTab === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
+              setTab(nextTab);
+            }}
+            onCreate={() => setCreateHubOpen(true)}
+          />
+        ) : null}
+        {createHubOpen ? (
+          <CreateHub
+            act={act}
+            onClose={() => setCreateHubOpen(false)}
+            setTab={(nextTab) => {
               if (nextTab === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
               setTab(nextTab);
             }}

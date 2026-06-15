@@ -24,6 +24,7 @@ export type AppMemory = {
   dailyAnswered: boolean;
   dailyAnsweredAt: string | null;
   dailyAnsweredDate: string | null;
+  joinedAt: string | null;
   lastCheckInAt: string | null;
   lastCheckInDate: string | null;
   marketLocation: MarketLocationState;

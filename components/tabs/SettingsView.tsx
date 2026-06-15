@@ -1,8 +1,9 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { Home, ShieldCheck } from "lucide-react";
+import { Home } from "lucide-react";
 import { AppSettingsBar } from "@/components/layout/AppSettingsBar";
+import { SafetyCenter } from "@/components/tabs/SafetyCenter";
 import { TopBar } from "@/components/layout/TopBar";
 import type { AppLanguage } from "@/lib/data/languages";
 import type { WorldMiniAppContext } from "@/lib/world/types";
@@ -57,33 +58,7 @@ export function SettingsView({
           Back to Home
         </button>
       </section>
-      <section className="settings-safety-center" aria-label="Safety center">
-        <div className="section-heading">
-          <span>Safety Center</span>
-          <ShieldCheck size={18} />
-        </div>
-        {[
-          "Community Rules",
-          "Governance",
-          "Reporting",
-          "Appeals",
-          "Safety Tips",
-          "Scam Prevention",
-        ].map((item) => (
-          <button
-            key={item}
-            onClick={() =>
-              act(
-                item,
-                `${item} guidance is available in HumanChain settings, with public rules kept outside the posting feed.`,
-              )
-            }
-            type="button"
-          >
-            {item}
-          </button>
-        ))}
-      </section>
+      <SafetyCenter act={act} />
     </div>
   );
 }

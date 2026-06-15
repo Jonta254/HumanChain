@@ -97,6 +97,7 @@ export function useHumanChainApp() {
   const [hpLedger, setHpLedger] = useState<HpLedgerRecord[]>(() =>
     loadJsonFromStorage<HpLedgerRecord[]>(storageKeys.hpLedger, []),
   );
+  const [joinedAt, setJoinedAt] = useState<string | null>(storedAppMemory.joinedAt ?? null);
   const [dailyAnswered, setDailyAnswered] = useState(storedAppMemory.dailyAnswered);
   const [dailyAnsweredAt, setDailyAnsweredAt] = useState<string | null>(storedAppMemory.dailyAnsweredAt);
   const [dailyAnsweredDate, setDailyAnsweredDate] = useState<string | null>(storedAppMemory.dailyAnsweredDate);
@@ -260,17 +261,17 @@ export function useHumanChainApp() {
   useEffect(() => {
     saveJsonToStorage(storageKeys.appMemory, {
       appLanguageCode: appLanguage.code, dailyAnswered, dailyAnsweredAt, dailyAnsweredDate,
-      lastCheckInAt, lastCheckInDate, marketLocation, notificationReady, notificationWelcomeSent,
+      joinedAt, lastCheckInAt, lastCheckInDate, marketLocation, notificationReady, notificationWelcomeSent,
       points, savedItems, streak, verifiedHuman,
     } satisfies AppMemory);
-  }, [appLanguage, dailyAnswered, dailyAnsweredAt, dailyAnsweredDate, lastCheckInAt, lastCheckInDate,
+  }, [appLanguage, dailyAnswered, dailyAnsweredAt, dailyAnsweredDate, joinedAt, lastCheckInAt, lastCheckInDate,
     marketLocation, notificationReady, notificationWelcomeSent, points, savedItems, streak, verifiedHuman]);
 
   // ── Snapshot helpers ───────────────────────────────────────────────────────
   function getCurrentAppMemory(): AppMemory {
     return {
       appLanguageCode: appLanguage.code, dailyAnswered, dailyAnsweredAt, dailyAnsweredDate,
-      lastCheckInAt, lastCheckInDate, marketLocation, notificationReady, notificationWelcomeSent,
+      joinedAt, lastCheckInAt, lastCheckInDate, marketLocation, notificationReady, notificationWelcomeSent,
       points, savedItems, streak, verifiedHuman,
     };
   }
@@ -616,6 +617,11 @@ export function useHumanChainApp() {
       const worldPic = resolved.profilePictureUrl ?? freshCtx.profilePictureUrl;
       setWorldContext({ ...freshCtx, ...nextCtx, profilePictureUrl: worldPic, username: worldUsername, walletAddress: address });
       setVerifiedHuman({ deviceOS: nextCtx.deviceOS ?? freshCtx.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: nextCtx.launchLocation ?? freshCtx.launchLocation, profilePictureUrl: worldPic, username: worldUsername ?? "Resolving World username", wallet: address, mode: "world" });
+      if (!joinedAt) {
+        const now = new Date().toISOString();
+        setJoinedAt(now);
+        saveJsonToStorage(storageKeys.joinDate, now);
+      }
       setTab("home"); setNotificationPromptDismissed(false);
       // Award referral welcome bonus on first World login if referred
       const storedRef = loadReferredBy();
@@ -716,7 +722,7 @@ export function useHumanChainApp() {
     // state
     accountSyncStatus, activeField, appLanguage, chainEntryNonce, dailyAnswered,
     dailyAnsweredAt, dailyAnsweredDate, dailyResponses, feedRefreshNonce, gateBusy,
-    historyRecords, hpLedger, humanPosts, lastCheckInAt, lastCheckInDate, links,
+    historyRecords, hpLedger, humanPosts, joinedAt, lastCheckInAt, lastCheckInDate, links,
     marketLocation, marketplaceListings, notificationCenterOpen, notificationPromptDismissed,
     notificationReady, notifications, paymentBusy, paymentPrompt, paymentToken,
     points, profileImage, referralShareCount, referredBy, savedItems, streak,

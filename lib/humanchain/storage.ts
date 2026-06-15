@@ -3,6 +3,7 @@
 export const storageKeys = {
   appMemory: "humanchain_app_memory",
   askCountryRoutes: "humanchain_ask_country_routes",
+  joinDate: "humanchain_join_date",
   askThreads: "humanchain_ask_threads",
   bids: "humanchain_market_bids",
   chainComments: "humanchain_chain_comments",
