@@ -110,6 +110,20 @@ export function requireVerifiedPublicAction(
   return false;
 }
 
+// Reputation score — single source of truth used by HomeView and MeView.
+// Formula: 1 point every 4 HP + 7 per streak day + 12 per post + 5 per saved item.
+// No artificial floor so Home and Passport show the same number.
+export function getChainScore({
+  points, streak, posts, savedItems,
+}: {
+  points: number;
+  streak: number;
+  posts: number;
+  savedItems: number;
+}) {
+  return Math.round(points / 4) + streak * 7 + posts * 12 + savedItems * 5;
+}
+
 // Text helpers
 
 export function getShortText(value: string, limit = 96) {
