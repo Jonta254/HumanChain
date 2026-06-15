@@ -11,6 +11,7 @@ import {
   Compass,
   Flame,
   Globe2,
+  Hexagon,
   Lightbulb,
   MessageCircleQuestion,
   Settings,
@@ -251,6 +252,9 @@ export function HomeView({
           <button className="h9-streak-chip" onClick={() => setTab("me")} type="button" aria-label={`${streak} day streak`}>
             <Flame size={13} />{streak}
           </button>
+          <button className="h9-hp-chip" onClick={() => setTab("me")} type="button" aria-label={`${points} HP`}>
+            <Hexagon size={11} />{points}
+          </button>
           <button
             className={`h9-icon-btn ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
             onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
@@ -301,7 +305,12 @@ export function HomeView({
             )}
           </div>
 
-          {/* Row 3: view passport */}
+          {/* Row 3: tier progress bar */}
+          <div className="hc-brief-progress" aria-label={`${tier.pct}% to ${tier.next ?? "Founder"}`}>
+            <i style={{ width: `${tier.pct}%` }} />
+          </div>
+
+          {/* Row 4: view passport */}
           <button className="hc-brief-view" onClick={() => setTab("me")} type="button">
             View Passport <ArrowRight size={12} />
           </button>
@@ -412,7 +421,29 @@ export function HomeView({
         </button>
       </section>
 
-      {/* ── 7 · Explore Today (one combined card) ────── */}
+      {/* ── 7 · Live network activity ────────────────── */}
+      <section className="h9-section" aria-label="Network activity">
+        <div className="hc-network-strip">
+          <div className="hc-network-stat">
+            <strong>214k</strong>
+            <span>Verified Humans</span>
+          </div>
+          <div className="hc-network-stat">
+            <strong>38</strong>
+            <span>Countries</span>
+          </div>
+          <div className="hc-network-stat">
+            <strong>4.9k</strong>
+            <span>Active Today</span>
+          </div>
+          <div className="hc-network-stat">
+            <strong>WLD</strong>
+            <span>Payments Live</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8 · Explore Today (one combined card) ────── */}
       <section className="h9-section" aria-label="Explore today">
         <button
           className="hc-explore-today"
