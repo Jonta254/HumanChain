@@ -39,6 +39,9 @@ export const importantToastTerms = [
   "required", "deleted", "cleared", "stored", "published", "uploaded",
   "sent", "verified", "connected", "world chat", "local account",
   "notifications active", "open in world app",
+  // Action feedback — without these, most user actions are completely silent
+  "already", "streak", "bonus", "restored", "answered", "copied",
+  "ready", "reset", "joined", "entered", "recorded",
 ];
 
 // ── Notification helpers ──────────────────────────────────────────────────────

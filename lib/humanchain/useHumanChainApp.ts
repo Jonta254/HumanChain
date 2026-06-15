@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { appLanguages } from "@/lib/data/languages";
 import { firstRunNotifications } from "@/lib/data/notifications";
 import { initialHumanPosts } from "@/lib/data/posts";
@@ -73,6 +73,12 @@ import type { AccountSyncSnapshot, AppMemory, PublicFeedPayload, VerifiedHuman }
 
 export function useHumanChainApp() {
   const [storedAppMemory] = useState(loadStoredAppMemory);
+  // Tracks the last calendar day keepStreak ran — prevents same-day double-counting
+  // across all actions (posting, answering, check-in, etc.). Initialized from
+  // localStorage so it survives app restarts within the same day.
+  const lastStreakDateRef = useRef<string | null>(
+    loadJsonFromStorage<string | null>(storageKeys.lastStreakDate, null),
+  );
   const [tab, setTab] = useState<Tab>("home");
   const [chainEntryNonce, setChainEntryNonce] = useState(0);
   const [toast, setToast] = useState<Toast | null>(null);
@@ -535,21 +541,29 @@ export function useHumanChainApp() {
     [storageKeys.posts, storageKeys.marketplace, storageKeys.history, storageKeys.bids,
       storageKeys.chainPremium, storageKeys.askThreads, storageKeys.askCountryRoutes,
       storageKeys.links, storageKeys.hpLedger, storageKeys.marketHolds, storageKeys.appMemory,
-      storageKeys.userStories, storageKeys.profileImage,
+      storageKeys.userStories, storageKeys.profileImage, storageKeys.lastStreakDate,
     ].forEach((key) => window.localStorage.removeItem(key));
     setHumanPosts(initialHumanPosts); setLinks(initialLinks); setMarketplaceListings([]);
     setHistoryRecords([{ id: Date.now(), title: "HumanChain opened", detail: "Your chain history starts here.", time: "Today", kind: "profile" }]);
     setHpLedger([]); setVerifiedHuman(null); setAppLanguage(appLanguages[0]);
     setDailyAnswered(false); setDailyAnsweredAt(null); setDailyAnsweredDate(null);
     setLastCheckInAt(null); setLastCheckInDate(null);
+    lastStreakDateRef.current = null;
     setMarketLocation({ label: "Location not shared", source: "not-requested", status: "idle" });
     setNotificationReady(false); setNotificationWelcomeSent(false);
-    setNotifications(loadStoredNotifications()); setPoints(420); setSavedItems(3); setStreak(4);
+    setNotifications(loadStoredNotifications()); setPoints(0); setSavedItems(0); setStreak(0);
     setToast({ title: "Local account deleted", detail: "Preview profile, stored marketplace data, posts, and history were removed from this device." });
   }
 
   function keepStreak(_detail = "Your Human Streak is alive for today.") {
-    void _detail; void humanHaptic("light");
+    void _detail;
+    void humanHaptic("light");
+    const today = getLocalDateKey();
+    // Idempotent within a calendar day — any action that calls keepStreak
+    // only increments the streak once, no matter how many times it's called.
+    if (lastStreakDateRef.current === today) return;
+    lastStreakDateRef.current = today;
+    saveJsonToStorage(storageKeys.lastStreakDate, today);
     setStreak((cur) => cur + 1);
   }
 
@@ -656,7 +670,6 @@ export function useHumanChainApp() {
     }
     const newCount = incrementReferralShareCount();
     setReferralShareCount(newCount);
-    earnPoints(0, `Referral link shared (share #${newCount})`);
     recordHistory({ title: "Referral link shared", detail: `Shared HumanChain invite link. Total shares: ${newCount}. Reward: +50 HP per verified human who joins.`, kind: "profile" });
   }
 

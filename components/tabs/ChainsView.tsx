@@ -15,6 +15,7 @@ import {
 import {
   formatCheckInTime,
   formatShortTime,
+  getLocalDateKey,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { TopBar } from "@/components/layout/TopBar";
@@ -1758,7 +1759,12 @@ export function ChainsView({
                 <p>{field.detail}</p>
                 <button
                   onClick={() => {
-                    earnPoints(6, `You entered ${field.name} and expanded your human map.`);
+                    // Award HP only once per field room per calendar day
+                    const visitKey = `hc_field_visit:${field.name}:${getLocalDateKey()}`;
+                    if (!window.localStorage.getItem(visitKey)) {
+                      window.localStorage.setItem(visitKey, "1");
+                      earnPoints(6, `You entered ${field.name} and expanded your human map.`);
+                    }
                     setActiveField(field);
                     act(`${field.name} opened`, "Read, copy, and carry useful field wisdom.");
                   }}
