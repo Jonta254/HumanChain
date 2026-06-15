@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -11,6 +11,7 @@ import {
   Compass,
   Flame,
   Globe2,
+  Hexagon,
   Lightbulb,
   MessageCircleQuestion,
   Settings,
@@ -178,6 +179,25 @@ export function HomeView({
   const [dailyDraft, setDailyDraft] = useState("");
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
   const [showDaily, setShowDaily] = useState(false);
+  const [tickerIdx, setTickerIdx] = useState(0);
+
+  const tickerMessages = [
+    "A human from South Africa answered today's question",
+    "4.9k humans online — the chain is live now",
+    "New verdict forming in Health & Healing",
+    "3 new opportunities posted in the last hour",
+    "A builder from Brazil posted a proof-of-work moment",
+    "7 humans reached Gold tier this week",
+    "214k verified humans active in 38 countries",
+    "AI Guide helped 128 humans today",
+  ];
+
+  useEffect(() => {
+    const id = setInterval(() => setTickerIdx((i) => i + 1), 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  const tickerMsg = tickerMessages[tickerIdx % tickerMessages.length];
 
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
@@ -251,6 +271,9 @@ export function HomeView({
           <button className="h9-streak-chip" onClick={() => setTab("me")} type="button" aria-label={`${streak} day streak`}>
             <Flame size={13} />{streak}
           </button>
+          <button className="h9-hp-chip" onClick={() => setTab("me")} type="button" aria-label={`${points} HP`}>
+            <Hexagon size={11} />{points}
+          </button>
           <button
             className={`h9-icon-btn ${notificationUnreadCount > 0 ? "has-dot" : ""}`}
             onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
@@ -264,6 +287,12 @@ export function HomeView({
           </button>
         </div>
       </header>
+
+      {/* ── 1.5 · Live activity ticker ───────────────── */}
+      <div className="hc-ticker" aria-live="polite" aria-label="Live activity">
+        <span className="hc-ticker-dot" aria-hidden="true" />
+        <span className="hc-ticker-text" key={tickerIdx}>{tickerMsg}</span>
+      </div>
 
       {/* ── 2 · Brief HumanChain Card ────────────────── */}
       <section className="h9-hero" aria-label="Your HumanChain card">
@@ -301,7 +330,12 @@ export function HomeView({
             )}
           </div>
 
-          {/* Row 3: view passport */}
+          {/* Row 3: tier progress bar */}
+          <div className="hc-brief-progress" aria-label={`${tier.pct}% to ${tier.next ?? "Founder"}`}>
+            <i style={{ width: `${tier.pct}%` }} />
+          </div>
+
+          {/* Row 4: view passport */}
           <button className="hc-brief-view" onClick={() => setTab("me")} type="button">
             View Passport <ArrowRight size={12} />
           </button>
@@ -412,7 +446,29 @@ export function HomeView({
         </button>
       </section>
 
-      {/* ── 7 · Explore Today (one combined card) ────── */}
+      {/* ── 7 · Live network stats ───────────────────── */}
+      <section className="h9-section" aria-label="Network stats">
+        <div className="hc-network-strip">
+          <div className="hc-network-stat">
+            <strong>214k+</strong>
+            <span>Humans</span>
+          </div>
+          <div className="hc-network-stat">
+            <strong>38</strong>
+            <span>Countries</span>
+          </div>
+          <div className="hc-network-stat">
+            <strong>4.9k</strong>
+            <span>Online Now</span>
+          </div>
+          <div className="hc-network-stat">
+            <strong>Live</strong>
+            <span>WLD Payments</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8 · Explore Today (one combined card) ────── */}
       <section className="h9-section" aria-label="Explore today">
         <button
           className="hc-explore-today"
