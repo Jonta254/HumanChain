@@ -12,8 +12,8 @@ type NavLanguage = {
 };
 
 // HumanChain primary nav: Home | Discover | (+ Create) | Reputation | Market.
-// Create is a raised center action, not a tab. Discover and Reputation map to
-// existing views (communities + passport) so World routing stays intact.
+// Create is a raised center FAB, not a tab. Discover → ChainsView (Moments/Links/Rooms).
+// Reputation → MeView (passport + profile). Market → MarketplaceView.
 export function BottomNavigation({
   active,
   appLanguage,
@@ -25,48 +25,55 @@ export function BottomNavigation({
   onChange: (tab: Tab) => void;
   onCreate: () => void;
 }) {
-  const items: Array<[Tab, string, React.ReactNode]> = [
-    ["home", appLanguage.nav.home, <Home key="home" size={20} />],
-    ["chains", "Discover", <Compass key="discover" size={20} />],
-    ["me", "Reputation", <Award key="reputation" size={20} />],
-    ["market", appLanguage.nav.market, <Store key="market" size={20} />],
+  const leftItems: Array<[Tab, string, React.ReactNode]> = [
+    ["home",   appLanguage.nav.home, <Home    key="home"     size={22} />],
+    ["chains", "Discover",           <Compass key="discover" size={22} />],
+  ];
+  const rightItems: Array<[Tab, string, React.ReactNode]> = [
+    ["me",     "Reputation",           <Award key="reputation" size={22} />],
+    ["market", appLanguage.nav.market, <Store key="market"     size={22} />],
   ];
 
   return (
     <nav className="bottom-nav bottom-nav--hc" aria-label="Primary navigation">
       <div className="bn-slot">
-        {renderItem(items[0])}
-        {renderItem(items[1])}
+        {leftItems.map(renderItem)}
       </div>
 
-      <button
-        className="bn-create"
-        onClick={() => { void humanHaptic("medium"); onCreate(); }}
-        aria-label="Create"
-        type="button"
-      >
-        <Plus size={24} />
-        <span>Create</span>
-      </button>
+      <div className="bn-create-wrap">
+        <button
+          className="bn-create"
+          onClick={() => { void humanHaptic("medium"); onCreate(); }}
+          aria-label="Open create menu"
+          type="button"
+        >
+          <span className="bn-create-icon" aria-hidden="true">
+            <Plus size={26} strokeWidth={2.6} />
+          </span>
+          <span className="bn-create-label">Create</span>
+        </button>
+      </div>
 
       <div className="bn-slot">
-        {renderItem(items[2])}
-        {renderItem(items[3])}
+        {rightItems.map(renderItem)}
       </div>
     </nav>
   );
 
   function renderItem([key, label, icon]: [Tab, string, React.ReactNode]) {
+    const isActive = active === key;
     return (
       <button
-        aria-current={active === key ? "page" : undefined}
-        className={active === key ? "active" : ""}
+        aria-current={isActive ? "page" : undefined}
+        className={`bn-tab${isActive ? " active" : ""}`}
+        data-tab={key}
         key={key}
         onClick={() => { void humanHaptic("light"); onChange(key); }}
         type="button"
       >
-        {icon}
-        <span>{label}</span>
+        {isActive && <span className="bn-pip" aria-hidden="true" />}
+        <span className="bn-icon" aria-hidden="true">{icon}</span>
+        <span className="bn-label">{label}</span>
       </button>
     );
   }
