@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -179,6 +179,25 @@ export function HomeView({
   const [dailyDraft, setDailyDraft] = useState("");
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
   const [showDaily, setShowDaily] = useState(false);
+  const [tickerIdx, setTickerIdx] = useState(0);
+
+  const tickerMessages = [
+    "A human from South Africa answered today's question",
+    "4.9k humans online — the chain is live now",
+    "New verdict forming in Health & Healing",
+    "3 new opportunities posted in the last hour",
+    "A builder from Brazil posted a proof-of-work moment",
+    "7 humans reached Gold tier this week",
+    "214k verified humans active in 38 countries",
+    "AI Guide helped 128 humans today",
+  ];
+
+  useEffect(() => {
+    const id = setInterval(() => setTickerIdx((i) => i + 1), 4000);
+    return () => clearInterval(id);
+  }, []);
+
+  const tickerMsg = tickerMessages[tickerIdx % tickerMessages.length];
 
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
@@ -268,6 +287,12 @@ export function HomeView({
           </button>
         </div>
       </header>
+
+      {/* ── 1.5 · Live activity ticker ───────────────── */}
+      <div className="hc-ticker" aria-live="polite" aria-label="Live activity">
+        <span className="hc-ticker-dot" aria-hidden="true" />
+        <span className="hc-ticker-text" key={tickerIdx}>{tickerMsg}</span>
+      </div>
 
       {/* ── 2 · Brief HumanChain Card ────────────────── */}
       <section className="h9-hero" aria-label="Your HumanChain card">

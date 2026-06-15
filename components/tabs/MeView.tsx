@@ -279,7 +279,7 @@ export function MeView({
   }
 
   return (
-    <div className="screen">
+    <div className="screen me-screen">
       <TopBar title="Human Passport" subtitle="World profile, HP ledger, and trust status" />
       <section className="treasure-profile">
         <div className="treasure-mark">

@@ -1266,7 +1266,7 @@ export function ChainsView({
   }
 
   return (
-    <div className="screen">
+    <div className="screen chains-screen">
       <TopBar title="Moments" subtitle="Photo-first proof-of-life posts from verified humans." />
       <section className="chain-tools">
         <button

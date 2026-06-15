@@ -1867,7 +1867,7 @@ export function StoriesView({
   }
 
   return (
-    <div className="screen">
+    <div className="screen stories-screen">
       <TopBar title="Human Story" subtitle="Monthly stories and published reflections from verified humans." />
       <section className="story-cover">
         <StoryCoverPhoto
