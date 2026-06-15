@@ -16,9 +16,9 @@ import {
   Share2,
   ShieldCheck,
   Star,
+  Mic,
   Store,
   Upload,
-  Wallet,
 } from "lucide-react";
 import {
   getNextMilestone,
@@ -34,6 +34,7 @@ import {
   requestWorldPermission,
 } from "@/lib/world";
 import {
+  getChainScore,
   getLocalDateKey,
   getTrustPassportMetrics,
   getWorldDisplayUsername,
@@ -217,18 +218,22 @@ export function MeView({
             ? "Local safe, cloud pending"
             : "Local safe";
   const ownedPosts = humanPosts.filter((post) => post.owner);
-  const chainScore = Math.round(points / 8 + streak * 9);
+  // Use the shared formula so Passport score matches the Home card score.
+  const chainScore = getChainScore({ points, streak, posts: ownedPosts.length, savedItems });
+  // Only count listings that completed a real sale (status "sold") as trades.
+  const completedTrades = marketplaceListings.filter((listing) => listing.status === "sold").length;
   const passportMetrics = getTrustPassportMetrics({
-    completedTrades: marketplaceListings.filter((listing) => listing.status === "payment-ready").length,
+    completedTrades,
     human: verifiedHuman,
     points,
     posts: ownedPosts.length,
     savedItems,
     streak,
   });
+  // Passport levels aligned with the same tier thresholds used on HomeView.
   const passportLevel =
-    chainScore >= 420 ? "Gold Human" : chainScore >= 240 ? "Silver Human" : "Bronze Human";
-  const nextPassportTarget = chainScore >= 420 ? 600 : chainScore >= 240 ? 420 : 240;
+    chainScore >= 420 ? "Gold Human" : chainScore >= 200 ? "Silver Human" : "Bronze Human";
+  const nextPassportTarget = chainScore >= 420 ? 720 : chainScore >= 200 ? 420 : 200;
   const passportProgress = Math.min(100, Math.round((chainScore / nextPassportTarget) * 100));
   const earnedBadges = [
     { active: isVerifiedWorldHuman(verifiedHuman), label: "Verified Human" },
@@ -597,7 +602,7 @@ export function MeView({
             }}
             type="button"
           >
-            <Wallet size={17} />
+            <Mic size={17} />
             Enable voice access
           </button>
         </div>

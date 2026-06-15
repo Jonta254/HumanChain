@@ -16,7 +16,7 @@ export type MarketplaceListing = {
   photos: Array<{ id: number; name: string; src: string }>;
   ratings: number;
   tips: number;
-  status: "draft" | "payment-ready";
+  status: "draft" | "payment-ready" | "sold" | "archived";
   createdAt: string;
 };
 

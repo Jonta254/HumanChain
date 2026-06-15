@@ -25,6 +25,7 @@ import { getWorldMiniAppContext } from "@/lib/worldMiniApp";
 import { type AppLanguage } from "@/lib/data/languages";
 import {
   formatShortTime,
+  getChainScore,
   getLocalDateKey,
   getPrimaryProfileImage,
   getTrustPassportMetrics,
@@ -205,11 +206,13 @@ export function HomeView({
   const userPostCount = humanPosts.filter((p) => p.owner).length;
   const profileInitial = worldHandle.replace(/^@/, "").trim().charAt(0).toUpperCase() || "H";
   const isVerified = isVerifiedWorldHuman(verifiedHuman);
-  const completedTrades = marketplaceListings.filter((l) => l.status === "payment-ready").length;
+  // Only count listings that reached "sold" status as completed trades.
+  // "payment-ready" is the default publish status and does not mean a sale was made.
+  const completedTrades = marketplaceListings.filter((l) => l.status === "sold").length;
   const passportMetrics = getTrustPassportMetrics({
     completedTrades, human: verifiedHuman, points, posts: userPostCount, savedItems, streak,
   });
-  const chainScore = Math.max(151, Math.round(points / 4) + streak * 7 + userPostCount * 12 + savedItems * 5);
+  const chainScore = getChainScore({ points, streak, posts: userPostCount, savedItems });
   const tier = getReputationTier(chainScore);
   const health = getReputationHealth(chainScore);
   const humanChainId = getHumanChainId(worldHandle);
