@@ -57,14 +57,18 @@ async function confirmWorldPayment(input: {
 
     lastConfirmation = confirmation;
 
-    // Hard server error (4xx wrapped as 502) — stop retrying immediately.
-    if (!confirmationResponse.ok) {
+    // Hard client/portal error (4xx or the 502 that wraps a Dev Portal 4xx) —
+    // retrying will not help; return immediately.
+    if (!confirmationResponse.ok && confirmationResponse.status < 500) {
       return {
         confirmation,
         error: confirmation.error ?? "World payment could not be confirmed.",
         ok: false,
       };
     }
+
+    // Transient server error (5xx) — fall through and retry.
+    if (!confirmationResponse.ok) continue;
 
     // Setup not complete — no point polling.
     if (confirmation.pendingSetup) {

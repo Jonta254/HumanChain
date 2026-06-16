@@ -284,7 +284,7 @@ export function useHumanChainApp() {
 
   function buildAccountSnapshot(): AccountSyncSnapshot {
     return {
-      appMemory: getCurrentAppMemory(), historyRecords, humanPosts, links,
+      appMemory: getCurrentAppMemory(), historyRecords, hpLedger, humanPosts, links,
       localRecords: {
         askCountryRoutes: loadLocalRecord<string[]>(storageKeys.askCountryRoutes, []),
         askThreads: loadLocalRecord<AskThread[]>(storageKeys.askThreads, starterAskThreads),
@@ -304,6 +304,7 @@ export function useHumanChainApp() {
     setLinks(snapshot.links ?? initialLinks);
     setMarketplaceListings(snapshot.marketplaceListings ?? []);
     setHistoryRecords(snapshot.historyRecords ?? []);
+    if (snapshot.hpLedger?.length) setHpLedger(snapshot.hpLedger.slice(0, 120));
     setNotifications(mergeFirstRunNotifications(snapshot.notifications ?? firstRunNotifications));
     const memory = snapshot.appMemory;
     if (memory) {
@@ -325,6 +326,7 @@ export function useHumanChainApp() {
     saveJsonToStorage(storageKeys.links, snapshot.links ?? initialLinks);
     saveJsonToStorage(storageKeys.marketplace, snapshot.marketplaceListings ?? []);
     saveJsonToStorage(storageKeys.history, snapshot.historyRecords ?? []);
+    if (snapshot.hpLedger?.length) saveJsonToStorage(storageKeys.hpLedger, snapshot.hpLedger.slice(0, 120));
     saveJsonToStorage(storageKeys.notifications, snapshot.notifications ?? []);
     saveJsonToStorage(storageKeys.askCountryRoutes, snapshot.localRecords?.askCountryRoutes ?? []);
     saveJsonToStorage(storageKeys.askThreads, snapshot.localRecords?.askThreads ?? starterAskThreads);
@@ -538,11 +540,7 @@ export function useHumanChainApp() {
   }
 
   function deleteLocalAccount() {
-    [storageKeys.posts, storageKeys.marketplace, storageKeys.history, storageKeys.bids,
-      storageKeys.chainPremium, storageKeys.askThreads, storageKeys.askCountryRoutes,
-      storageKeys.links, storageKeys.hpLedger, storageKeys.marketHolds, storageKeys.appMemory,
-      storageKeys.userStories, storageKeys.profileImage, storageKeys.lastStreakDate,
-    ].forEach((key) => window.localStorage.removeItem(key));
+    Object.values(storageKeys).forEach((key) => window.localStorage.removeItem(key));
     setHumanPosts(initialHumanPosts); setLinks(initialLinks); setMarketplaceListings([]);
     setHistoryRecords([{ id: Date.now(), title: "HumanChain opened", detail: "Your chain history starts here.", time: "Today", kind: "profile" }]);
     setHpLedger([]); setVerifiedHuman(null); setAppLanguage(appLanguages[0]);
@@ -712,7 +710,12 @@ export function useHumanChainApp() {
       const result = await payWithWorld({ amount, description: paymentPrompt.detail, feature, token: paymentToken });
       if ("pendingSetup" in result && result.pendingSetup) { setToast({ title: "World setup needed", detail: result.message }); setPaymentBusy(false); return; }
       if ("pendingWorldApp" in result && result.pendingWorldApp) { setToast({ title: "Open in World App", detail: result.message }); setPaymentBusy(false); return; }
-      if ("ok" in result && !result.ok) { setToast({ title: "Payment not confirmed", detail: "error" in result && result.error ? result.error : "World payments are only counted after backend verification." }); setPaymentBusy(false); return; }
+      if ("ok" in result && !result.ok) {
+        const detail = "error" in result && result.error ? result.error : "World payments are only counted after backend verification.";
+        const isStillPending = detail.toLowerCase().includes("still pending");
+        setToast({ title: isStillPending ? "Payment processing" : "Payment not confirmed", detail });
+        setPaymentBusy(false); return;
+      }
       if ("error" in result && result.error) { setToast({ title: "Payment not prepared", detail: result.error }); setPaymentBusy(false); return; }
       treasuryRecipient = "recipient" in result && typeof result.recipient === "string" ? result.recipient : undefined;
     } catch (error) {

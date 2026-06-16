@@ -1,5 +1,5 @@
 import type { AskThread, ChainLink, ChainPremiumState } from "./chain";
-import type { HistoryRecord } from "./reputation";
+import type { HistoryRecord, HpLedgerRecord } from "./reputation";
 import type { HumanPost, UserStory } from "./content";
 import type { MarketBid, MarketHold, MarketLocationState, MarketplaceListing } from "./market";
 import type { NotificationItem } from "./ui";
@@ -39,6 +39,7 @@ export type AppMemory = {
 export type AccountSyncSnapshot = {
   appMemory: AppMemory;
   historyRecords: HistoryRecord[];
+  hpLedger: HpLedgerRecord[];
   humanPosts: HumanPost[];
   links: ChainLink[];
   localRecords: {
