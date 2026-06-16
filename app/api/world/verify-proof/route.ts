@@ -7,6 +7,10 @@ import {
 } from "@/lib/serverApi";
 import { getWorldRpId } from "@/lib/worldConfig";
 
+// In-memory nullifier store — prevents World ID proof replay within a single instance.
+// Replace with a shared store (Redis, DB) when moving to persistent backend.
+const usedNullifiers = new Set<string>();
+
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "verify-proof", 20)) {
     return rateLimitResponse();
@@ -27,6 +31,28 @@ export async function POST(req: NextRequest) {
   if (!idkitResponse || !action || action.length > 80 || (signal && signal.length > 180)) {
     return noStoreJson(
       { error: "Missing World ID response or action." },
+      { status: 400 },
+    );
+  }
+
+  const nullifierHash =
+    idkitResponse &&
+    typeof idkitResponse === "object" &&
+    "nullifier_hash" in idkitResponse &&
+    typeof (idkitResponse as Record<string, unknown>).nullifier_hash === "string"
+      ? ((idkitResponse as Record<string, unknown>).nullifier_hash as string)
+      : null;
+
+  if (!nullifierHash) {
+    return noStoreJson(
+      { error: "Missing nullifier hash in World ID proof." },
+      { status: 400 },
+    );
+  }
+
+  if (usedNullifiers.has(nullifierHash)) {
+    return noStoreJson(
+      { ok: false, error: "World ID proof already used. Each proof can only be verified once." },
       { status: 400 },
     );
   }
@@ -61,6 +87,8 @@ export async function POST(req: NextRequest) {
   if (!response.ok) {
     return noStoreJson({ ok: false, payload }, { status: 400 });
   }
+
+  usedNullifiers.add(nullifierHash);
 
   return noStoreJson({ ok: true, payload });
 }
