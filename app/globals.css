@@ -16599,6 +16599,26 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 /* Tab bar — crisper active state */
 .hcm-tab.active { background: var(--paper-strong); color: var(--ink); box-shadow: 0 1px 8px rgba(0,0,0,0.12); }
 
+/* Topbar — fix text-wrap/overflow at narrow widths (Market | Services | Offer | Post Job) */
+.hcm-topbar { flex-wrap: wrap; row-gap: 8px; }
+.hcm-tab { white-space: nowrap; padding: 8px 12px; font-size: 0.76rem; gap: 4px; }
+.hcm-tab svg { flex-shrink: 0; }
+.hcm-sell-btn, .hcm-boost-btn { white-space: nowrap; padding: 8px 11px; font-size: 0.74rem; gap: 4px; }
+.hcm-sell-btn svg, .hcm-boost-btn svg { flex-shrink: 0; }
+.hcm-topbar-actions { flex-wrap: nowrap; }
+@media (max-width: 380px) {
+  .hcm-topbar { justify-content: flex-start; }
+  .hcm-topbar-actions { width: 100%; justify-content: flex-end; }
+}
+
+/* Services bottom CTA — remove mid-scroll sticky overlap, render as a normal block at true end of list */
+.hcm-svc-bottom {
+  position: static;
+  background: none;
+  padding-top: 6px;
+  margin: 16px 0 8px;
+}
+
 /* Tier band — premium token bg */
 .hcm-tier-band { background: var(--paper); }
 
