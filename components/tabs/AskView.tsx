@@ -15,6 +15,7 @@ import {
   validateAnswerInput,
   validateQuestionInput,
 } from "@/lib/humanchainPolicy";
+import { starterAskThreads } from "@/lib/data/chains";
 import {
   loadJsonFromStorage,
   saveJsonToStorage,
@@ -38,48 +39,6 @@ const answerQueue = [
   "What is one truth about love people learn too late?",
 ];
 
-const starterAskThreads: AskThread[] = [
-  {
-    question: "How do I start again after losing confidence?",
-    author: "@humanchain",
-    owner: false,
-    topic: "Life",
-    mode: "Text",
-    targetCountry: "World",
-    answers: [
-      {
-        user: "@mara_chain",
-        country: "Kenya",
-        text: "Start with one promise you can keep before sunset. Confidence returns through evidence.",
-      },
-      {
-        user: "@renato_human",
-        country: "Brazil",
-        text: "Tell one safe person the truth. Shame gets weaker when it stops being private.",
-      },
-    ],
-  },
-  {
-    question: "Should I chase money first or build skill first?",
-    author: "@humanchain",
-    owner: false,
-    topic: "Money",
-    mode: "Country",
-    targetCountry: "World",
-    answers: [
-      {
-        user: "@builder_ama",
-        country: "Ghana",
-        text: "Build the skill that can earn in many rooms. Money follows usefulness more often than noise.",
-      },
-      {
-        user: "@tomas_work",
-        country: "Portugal",
-        text: "Earn enough to breathe, then invest time in the skill that compounds.",
-      },
-    ],
-  },
-];
 
 function loadStoredAskThreads(): AskThread[] {
   if (typeof window === "undefined") {

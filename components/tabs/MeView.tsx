@@ -25,6 +25,7 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
+import { getChainLinkAuthor } from "@/lib/data/chains";
 import {
   getNextMilestone,
   getReachedMilestones,
@@ -34,6 +35,7 @@ import {
   REFERRAL_HP_PER_SHARE,
   referralMilestones,
 } from "@/lib/humanchain/referral";
+import { isWorldPermissionGranted } from "@/lib/humanchain/appHelpers";
 import {
   Permission,
   requestWorldPermission,
@@ -62,18 +64,6 @@ import type { ChainLink } from "@/types/chain";
 // Constants
 // ---------------------------------------------------------------------------
 
-const chainLinkHandleBySource: Record<string, string> = {
-  Brazil: "@joy_survives", Business: "@builder_ama", Canada: "@quiet_courage",
-  Care: "@care_voice", Culture: "@culture_keeper", Discipline: "@future_self",
-  Faith: "@faith_link", Family: "@family_room", Ghana: "@goodname_ghana",
-  Health: "@healing_chain", HumanChain: "@humanchain", Identity: "@seen_human",
-  India: "@discipline_daily", Japan: "@quiet_words", Kenya: "@mara_chain",
-  Love: "@love_practice", Mexico: "@workbench_mx", Money: "@money_room",
-  Philippines: "@care_bridge", Portugal: "@slow_light", Prayer: "@prayer_link",
-  Purpose: "@purpose_field", "South Africa": "@ubuntu_builder",
-  Wisdom: "@wisdom_vault", Work: "@craft_human", World: "@world_human",
-  Youth: "@youth_signal",
-};
 
 const pointRules = [
   ["Answer Daily Human", "+18 HP"],
@@ -96,18 +86,6 @@ const pointRules = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getChainLinkAuthor(link: ChainLink, fallback = "@verified_human") {
-  if (link.country.startsWith("@")) return link.country;
-  return chainLinkHandleBySource[link.country] ?? fallback;
-}
-
-function isWorldPermissionGranted(result: unknown) {
-  const r = result as { data?: { status?: string }; executedWith?: string } | undefined;
-  return (
-    r?.executedWith !== "fallback" &&
-    ["success", "already_granted"].includes(r?.data?.status ?? "")
-  );
-}
 
 // Group identical HP ledger entries (same amount + reason + date) into one row with a count.
 function groupLedger(records: HpLedgerRecord[]) {

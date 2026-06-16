@@ -18,6 +18,7 @@ import {
   getLocalDateKey,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
+import { getChainLinkAuthor } from "@/lib/data/chains";
 import { TopBar } from "@/components/layout/TopBar";
 import type { ChainLink, ChainPremiumState } from "@/types/chain";
 import type { HumanPost } from "@/types/content";
@@ -28,44 +29,6 @@ import type { HumanIdentity } from "@/types/user";
 // ---------------------------------------------------------------------------
 // Local helpers (only used by ChainsView)
 // ---------------------------------------------------------------------------
-
-const chainLinkHandleBySource: Record<string, string> = {
-  Brazil: "@joy_survives",
-  Business: "@builder_ama",
-  Canada: "@quiet_courage",
-  Care: "@care_voice",
-  Culture: "@culture_keeper",
-  Discipline: "@future_self",
-  Faith: "@faith_link",
-  Family: "@family_room",
-  Ghana: "@goodname_ghana",
-  Health: "@healing_chain",
-  HumanChain: "@humanchain",
-  Identity: "@seen_human",
-  India: "@discipline_daily",
-  Japan: "@quiet_words",
-  Kenya: "@mara_chain",
-  Love: "@love_practice",
-  Mexico: "@workbench_mx",
-  Money: "@money_room",
-  Philippines: "@care_bridge",
-  Portugal: "@slow_light",
-  Prayer: "@prayer_link",
-  Purpose: "@purpose_field",
-  "South Africa": "@ubuntu_builder",
-  Wisdom: "@wisdom_vault",
-  Work: "@craft_human",
-  World: "@world_human",
-  Youth: "@youth_signal",
-};
-
-function getChainLinkAuthor(link: ChainLink, fallback = "@verified_human") {
-  if (link.country.startsWith("@")) {
-    return link.country;
-  }
-
-  return chainLinkHandleBySource[link.country] ?? fallback;
-}
 
 function getChainLinkPulse(link: ChainLink, index: number) {
   const reactions = link.reactions ?? 6 + ((index + 2) * 3) % 21;
