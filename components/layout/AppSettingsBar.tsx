@@ -144,7 +144,8 @@ export function AppSettingsBar({
             </div>
           </div>
           <button
-            className="settings-notification"
+            className={`settings-notification${notificationReady ? " active" : ""}`}
+            disabled={notificationReady}
             onClick={onEnableNotifications}
             type="button"
           >

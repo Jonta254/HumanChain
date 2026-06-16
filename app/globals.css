@@ -405,15 +405,15 @@ html[data-world-mini-app="true"] .phone-frame {
   border-radius: 999px;
   padding: 7px 10px;
   color: var(--muted);
-  background: #fffcf6;
+  background: var(--paper);
   font-size: 0.76rem;
   font-weight: 850;
   white-space: normal;
 }
 
 .settings-language-row button.active,
-.settings-notification {
-  color: #fffdf8;
+.settings-notification.active {
+  color: var(--paper-strong);
   border-color: rgba(36, 107, 85, 0.32);
   background: var(--green);
 }
@@ -425,6 +425,7 @@ html[data-world-mini-app="true"] .phone-frame {
   gap: 7px;
   width: 100%;
 }
+.settings-notification:disabled { opacity: 0.85; cursor: default; }
 
 .settings-account-controls {
   gap: 10px;
