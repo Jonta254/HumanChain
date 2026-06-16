@@ -41,10 +41,12 @@ import {
 import {
   getChainScore,
   getLocalDateKey,
+  getReputationTier,
   getTrustPassportMetrics,
   getWorldDisplayUsername,
   isVerifiedWorldHuman,
   isWorldUsernamePlaceholder,
+  REP_TIERS,
 } from "@/lib/humanchain/utils";
 import { TopBar } from "@/components/layout/TopBar";
 import { Stat } from "@/components/ui/Stat";
@@ -72,15 +74,6 @@ const chainLinkHandleBySource: Record<string, string> = {
   Wisdom: "@wisdom_vault", Work: "@craft_human", World: "@world_human",
   Youth: "@youth_signal",
 };
-
-const TIER_ROAD = [
-  { label: "Newcomer", min: 0,    color: "#5d6b66", bg: "#f0f4f2" },
-  { label: "Bronze",   min: 200,  color: "#b88a1f", bg: "#fdf6e3" },
-  { label: "Silver",   min: 420,  color: "#7a8fa6", bg: "#eef3f7" },
-  { label: "Gold",     min: 720,  color: "#d4a820", bg: "#fdf3d4" },
-  { label: "Platinum", min: 1150, color: "#6657d9", bg: "#f0eeff" },
-  { label: "Founder",  min: 1800, color: "#137a57", bg: "#e6f5ee" },
-];
 
 const pointRules = [
   ["Answer Daily Human", "+18 HP"],
@@ -218,20 +211,17 @@ export function MeView({
     completedTrades, human: verifiedHuman, points, posts: ownedPosts.length, savedItems, streak,
   });
 
-  // Tier road
-  let tierIdx = TIER_ROAD.length - 1;
-  while (tierIdx > 0 && chainScore < TIER_ROAD[tierIdx].min) tierIdx--;
-  const currentTier = TIER_ROAD[tierIdx];
-  const nextTier = TIER_ROAD[tierIdx + 1] ?? null;
-  const tierPct = nextTier
-    ? Math.min(100, Math.round(((chainScore - currentTier.min) / (nextTier.min - currentTier.min)) * 100))
-    : 100;
+  // Tier road — shared with HomeView so the label/color/progress shown here
+  // always matches the home screen's reputation summary.
+  const { current: currentTier, next: nextTier, pct: tierPct, level: tierLevel } = getReputationTier(chainScore);
+  const tierIdx = REP_TIERS.findIndex((t) => t.label === currentTier.label);
 
-  // Passport level labels (passport card uses Bronze/Silver/Gold framing)
-  const passportLevel =
-    chainScore >= 420 ? "Gold Human" : chainScore >= 200 ? "Silver Human" : "Bronze Human";
-  const nextPassportTarget = chainScore >= 420 ? 720 : chainScore >= 200 ? 420 : 200;
-  const passportProgress = Math.min(100, Math.round((chainScore / nextPassportTarget) * 100));
+  // Passport level — derived from the same Tier Road used in the score strip,
+  // the Growth tab, and HomeView's reputation ladder, so the label, color, and
+  // progress shown here always match every other place tier is shown.
+  const passportLevel = `${currentTier.label} Human`;
+  const nextPassportTarget = nextTier?.min ?? currentTier.min;
+  const passportProgress = tierPct;
 
   const earnedBadges = [
     { active: isVerifiedWorldHuman(verifiedHuman), label: "Verified Human" },
@@ -349,7 +339,7 @@ export function MeView({
           <span><TrendingUp size={12} />{ownedPosts.length} posts</span>
         </div>
         <div className="rep-current-tier" style={{ color: currentTier.color, background: currentTier.bg }}>
-          {currentTier.label}
+          Lv.{tierLevel} · {currentTier.label}
         </div>
       </div>
 
@@ -378,7 +368,7 @@ export function MeView({
             <div>
               <span>Passport level</span>
               <strong>{passportLevel}</strong>
-              <p>{chainScore}/{nextPassportTarget} trust score toward the next level.</p>
+              <p>{nextTier ? `${chainScore}/${nextPassportTarget} trust score toward ${nextTier.label}.` : "Founder reached — the top of the chain."}</p>
             </div>
             <i aria-hidden="true"><b style={{ width: `${passportProgress}%` }} /></i>
             <div className="passport-badge-grid">
@@ -517,7 +507,7 @@ export function MeView({
               <Award size={18} />
             </div>
             <div className="rep-tier-road">
-              {TIER_ROAD.map((tier, i) => {
+              {REP_TIERS.map((tier, i) => {
                 const passed = chainScore >= tier.min;
                 const isCurrent = i === tierIdx;
                 return (
@@ -526,7 +516,7 @@ export function MeView({
                       {passed && !isCurrent && <span>✓</span>}
                       {isCurrent && <span>●</span>}
                     </div>
-                    {i < TIER_ROAD.length - 1 && (
+                    {i < REP_TIERS.length - 1 && (
                       <div className="rep-tier-line" style={passed && i < tierIdx ? { background: tier.color } : {}} />
                     )}
                     <span className="rep-tier-name" style={isCurrent ? { color: tier.color, fontWeight: 900 } : {}}>{tier.label}</span>

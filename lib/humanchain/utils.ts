@@ -124,6 +124,42 @@ export function getChainScore({
   return Math.round(points / 4) + streak * 7 + posts * 12 + savedItems * 5;
 }
 
+// Tier road — single source of truth for HomeView's reputation summary,
+// MeView's score strip/Passport/Growth tabs, and any other place a tier
+// label needs to be shown. Keeping this in one place prevents the label
+// shown in one screen from silently drifting out of sync with another.
+export const REP_TIERS = [
+  { label: "Newcomer", min: 0,    color: "#5d6b66", bg: "#f0f4f2" },
+  { label: "Bronze",   min: 200,  color: "#b88a1f", bg: "#fdf6e3" },
+  { label: "Silver",   min: 420,  color: "#7a8fa6", bg: "#eef3f7" },
+  { label: "Gold",     min: 720,  color: "#d4a820", bg: "#fdf3d4" },
+  { label: "Platinum", min: 1150, color: "#6657d9", bg: "#f0eeff" },
+  { label: "Founder",  min: 1800, color: "#137a57", bg: "#e6f5ee" },
+] as const;
+
+export function getReputationTier(score: number) {
+  let idx = REP_TIERS.length - 1;
+  while (idx > 0 && score < REP_TIERS[idx].min) idx--;
+  const current = REP_TIERS[idx];
+  const next = REP_TIERS[idx + 1] ?? null;
+  const pct = next
+    ? Math.min(100, Math.max(0, Math.round(((score - current.min) / (next.min - current.min)) * 100)))
+    : 100;
+  return {
+    current, next,
+    level: idx + 1,
+    pct,
+    toGo: next ? Math.max(0, next.min - score) : 0,
+  };
+}
+
+export function getReputationHealth(score: number) {
+  if (score >= 420) return { label: "Excellent", color: "#0f9d6c" };
+  if (score >= 280) return { label: "Strong",   color: "#137a57" };
+  if (score >= 180) return { label: "Healthy",  color: "#b88a1f" };
+  return { label: "Building", color: "#6b7a73" };
+}
+
 // Text helpers
 
 export function getShortText(value: string, limit = 96) {

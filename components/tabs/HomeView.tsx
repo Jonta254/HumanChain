@@ -28,6 +28,8 @@ import {
   getChainScore,
   getLocalDateKey,
   getPrimaryProfileImage,
+  getReputationHealth,
+  getReputationTier,
   getTrustPassportMetrics,
   getWorldDisplayUsername,
   isVerifiedWorldHuman,
@@ -41,34 +43,10 @@ import type { MarketplaceListing } from "@/types/market";
 import type { HistoryRecord } from "@/types/reputation";
 
 // ---------------------------------------------------------------------------
-// Reputation ladder — the spine of HumanChain.
+// Reputation ladder — getReputationTier/getReputationHealth are shared with
+// MeView via lib/humanchain/utils so the label/color/progress shown on the
+// home screen always matches the Reputation Hub.
 // ---------------------------------------------------------------------------
-
-const REP_TIERS = [
-  { label: "Newcomer", min: 0,    next: "Bronze",  nextAt: 200  },
-  { label: "Bronze",   min: 200,  next: "Silver",  nextAt: 420  },
-  { label: "Silver",   min: 420,  next: "Gold",    nextAt: 720  },
-  { label: "Gold",     min: 720,  next: "Platinum",nextAt: 1150 },
-  { label: "Platinum", min: 1150, next: "Founder", nextAt: 1800 },
-  { label: "Founder",  min: 1800, next: null,      nextAt: null },
-];
-
-function getReputationTier(score: number) {
-  let idx = REP_TIERS.length - 1;
-  while (idx > 0 && score < REP_TIERS[idx].min) idx--;
-  const t = REP_TIERS[idx];
-  if (!t.next || t.nextAt == null) return { label: t.label, next: null as string | null, toGo: 0, pct: 100, level: idx + 1 };
-  const span = t.nextAt - t.min;
-  const pct = Math.min(100, Math.max(5, Math.round(((score - t.min) / span) * 100)));
-  return { label: t.label, next: t.next, toGo: Math.max(0, t.nextAt - score), pct, level: idx + 1 };
-}
-
-function getReputationHealth(score: number) {
-  if (score >= 420) return { label: "Excellent", color: "#0f9d6c" };
-  if (score >= 280) return { label: "Strong",   color: "#137a57" };
-  if (score >= 180) return { label: "Healthy",  color: "#b88a1f" };
-  return { label: "Building", color: "#6b7a73" };
-}
 
 // Deterministic display ID derived from the handle — an identity label, not a
 // reputation value. Real IDs will come from the users table in Phase E.
@@ -227,7 +205,7 @@ export function HomeView({
     : !dailyAnswered
       ? `Answer today's reflection to earn +18 HP and protect your ${streak}-day streak.`
       : tier.next
-        ? `You're ${tier.toGo} points from ${tier.next}. Share a proof-of-work moment to climb faster.`
+        ? `You're ${tier.toGo} points from ${tier.next.label}. Share a proof-of-work moment to climb faster.`
         : "You're at the top of the chain. Mentor a newcomer to keep your reputation strong.";
 
   const improvementTip = !dailyAnswered
@@ -322,7 +300,7 @@ export function HomeView({
             <div className="hc-brief-score-row">
               <b className="hc-brief-score-num">{chainScore}</b>
               <div className="hc-brief-score-meta">
-                <span className="hc-brief-level">Lv.{tier.level} · {tier.label}</span>
+                <span className="hc-brief-level">Lv.{tier.level} · {tier.current.label}</span>
                 <span className="hc-brief-health"><i style={{ background: health.color }} />{health.label}</span>
               </div>
             </div>
@@ -334,7 +312,7 @@ export function HomeView({
           </div>
 
           {/* Row 3: tier progress bar */}
-          <div className="hc-brief-progress" aria-label={`${tier.pct}% to ${tier.next ?? "Founder"}`}>
+          <div className="hc-brief-progress" aria-label={`${tier.pct}% to ${tier.next?.label ?? "Founder"}`}>
             <i style={{ width: `${tier.pct}%` }} />
           </div>
 
@@ -410,7 +388,7 @@ export function HomeView({
             <span className="hc-rep-cat" style={{ color: health.color, background: `${health.color}1a` }}>{health.label}</span>
           </div>
           <div className="hc-rep-bar"><i style={{ width: `${tier.pct}%` }} /></div>
-          <span className="hc-rep-progress">{tier.next ? `${tier.toGo} pts to ${tier.next} · Level ${tier.level}` : "Founder — top of the chain"}</span>
+          <span className="hc-rep-progress">{tier.next ? `${tier.toGo} pts to ${tier.next.label} · Level ${tier.level}` : "Founder — top of the chain"}</span>
           <div className="hc-rep-signals">
             <span className="hc-rep-pos"><TrendingUp size={12} />{streak}-day streak</span>
             <span className="hc-rep-pos"><BadgeCheck size={12} />Trust {passportMetrics.helpfulScore}</span>
