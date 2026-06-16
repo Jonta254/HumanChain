@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
+  ArrowRight,
   BadgeCheck,
   BookOpen,
   Briefcase,
   Camera,
-  ChevronDown,
   Link2,
   MessageCircleQuestion,
   Mic,
+  Search,
   Sparkles,
   Store,
   Trophy,
   Users,
-  X,
   Zap,
 } from "lucide-react";
 import type { Tab } from "@/types/ui";
@@ -187,138 +187,153 @@ const CATEGORIES: Category[] = [
   },
 ];
 
-const TOTAL_HP = CATEGORIES.flatMap((c) => c.actions)
-  .reduce((sum, a) => sum + Number(a.hp.replace(/\D/g, "")), 0);
+const ALL_ACTIONS = CATEGORIES.flatMap((c) => c.actions.map((a) => ({ ...a, categoryId: c.id, categoryColor: c.accent })));
+const TOTAL_HP = ALL_ACTIONS.reduce((sum, a) => sum + Number(a.hp.replace(/\D/g, "")), 0);
+const FEATURED = ALL_ACTIONS.reduce((top, a) => (Number(a.hp.replace(/\D/g, "")) > Number(top.hp.replace(/\D/g, "")) ? a : top), ALL_ACTIONS[0]);
 
-export function CreateHub({
+export function CreateView({
   act,
-  onClose,
   setTab,
 }: {
   act: (title: string, detail: string) => void;
-  onClose: () => void;
   setTab: (tab: Tab) => void;
 }) {
-  const [openCategory, setOpenCategory] = useState<string>("share");
+  const [activeCategory, setActiveCategory] = useState<string>("share");
+  const [query, setQuery] = useState("");
 
-  function toggleCategory(id: string) {
-    setOpenCategory((cur) => (cur === id ? "" : id));
+  const searching = query.trim().length > 0;
+
+  const filteredActions = useMemo(() => {
+    if (!searching) return null;
+    const q = query.trim().toLowerCase();
+    return ALL_ACTIONS.filter((a) => `${a.title} ${a.sub}`.toLowerCase().includes(q));
+  }, [query, searching]);
+
+  const currentCategory = CATEGORIES.find((c) => c.id === activeCategory) ?? CATEGORIES[0];
+
+  function launch(a: CreateAction) {
+    setTab(a.tab);
+    act(a.title, a.detail);
   }
 
   return (
-    <div
-      className="create-hub-backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Create"
-      onClick={onClose}
-    >
-      <div className="create-hub" onClick={(e) => e.stopPropagation()}>
-        <div className="create-hub-handle" aria-hidden="true" />
-
-        <div className="create-hub-head">
-          <div>
-            <strong>Create on HumanChain</strong>
-            <span>Every action earns HP and builds your verified reputation.</span>
-          </div>
-          <button
-            className="create-hub-close"
-            onClick={onClose}
-            aria-label="Close"
-            type="button"
-          >
-            <X size={18} />
-          </button>
+    <div className="screen create-page">
+      {/* Header */}
+      <div className="create-page-head">
+        <div>
+          <strong>Create</strong>
+          <span>Every action earns HP and builds your verified reputation.</span>
         </div>
-
-        {/* HP total strip */}
-        <div className="create-hub-hp-strip">
-          <Zap size={12} />
-          <span>Up to <strong>+{TOTAL_HP} HP</strong> available · HP powers your tier, trust score, and rank</span>
-        </div>
-
-        {/* Category tab row */}
-        <div className="create-hub-cat-tabs">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              className={`create-hub-cat-tab${openCategory === cat.id ? " active" : ""}`}
-              style={{ "--cat-accent": cat.accent } as React.CSSProperties}
-              onClick={() => toggleCategory(cat.id)}
-              type="button"
-            >
-              <span className="create-hub-cat-dot" />
-              {cat.label}
-              <span className="create-hub-cat-count">{cat.actions.length}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="create-hub-cats">
-          {CATEGORIES.map((cat) => {
-            const isOpen = openCategory === cat.id;
-            return (
-              <div
-                key={cat.id}
-                className={`create-hub-cat ${isOpen ? "open" : ""}`}
-                style={{ "--cat-accent": cat.accent } as React.CSSProperties}
-              >
-                {/* Collapsed header (visible only when not open) */}
-                {!isOpen && (
-                  <button
-                    className="create-hub-cat-header"
-                    onClick={() => toggleCategory(cat.id)}
-                    type="button"
-                    aria-expanded={false}
-                  >
-                    <div className="create-hub-cat-label">
-                      <strong>{cat.label}</strong>
-                      <span>{cat.description}</span>
-                    </div>
-                    <ChevronDown size={16} className="create-hub-cat-chevron" />
-                  </button>
-                )}
-
-                {/* 2-column action grid */}
-                {isOpen && (
-                  <div className="create-hub-cat-actions create-hub-cat-grid">
-                    {cat.actions.map((a) => {
-                      const Icon = a.icon;
-                      return (
-                        <button
-                          key={a.id}
-                          className="create-hub-item create-hub-item--card"
-                          style={{ "--ca-color": a.color } as React.CSSProperties}
-                          onClick={() => {
-                            onClose();
-                            setTab(a.tab);
-                            act(a.title, a.detail);
-                          }}
-                          type="button"
-                        >
-                          <span className="create-hub-icon">
-                            <Icon size={20} />
-                          </span>
-                          <span className="create-hub-text">
-                            <strong>{a.title}</strong>
-                            <small>{a.sub}</small>
-                          </span>
-                          <span className="create-hub-badges">
-                            <span className="create-hub-hp-badge">{a.hp}</span>
-                            <span className={`create-hub-cost-badge ${a.cost === "Free" ? "free" : "paid"}`}>
-                              {a.cost}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div className="create-page-hp-pill">
+          <Zap size={13} />
+          <span>+{TOTAL_HP} HP available</span>
         </div>
       </div>
+
+      {/* Search */}
+      <div className="create-page-search">
+        <Search size={15} />
+        <input
+          aria-label="Search create actions"
+          placeholder="Search moments, jobs, questions…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && <button onClick={() => setQuery("")} type="button" aria-label="Clear">×</button>}
+      </div>
+
+      {!searching && (
+        <>
+          {/* Featured hero */}
+          <button
+            className="create-hero"
+            style={{ "--hero-color": FEATURED.color } as React.CSSProperties}
+            onClick={() => launch(FEATURED)}
+            type="button"
+          >
+            <span className="create-hero-tag"><Sparkles size={11} />Top pick today</span>
+            <strong>{FEATURED.title}</strong>
+            <p>{FEATURED.sub}</p>
+            <div className="create-hero-footer">
+              <span className="create-hero-hp">{FEATURED.hp}</span>
+              <span className="create-hero-go">Start <ArrowRight size={13} /></span>
+            </div>
+          </button>
+
+          {/* Category tabs */}
+          <div className="create-page-cat-tabs">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                className={`create-page-cat-tab${activeCategory === cat.id ? " active" : ""}`}
+                style={{ "--cat-accent": cat.accent } as React.CSSProperties}
+                onClick={() => setActiveCategory(cat.id)}
+                type="button"
+              >
+                <span className="create-hub-cat-dot" />
+                {cat.label}
+                <span className="create-hub-cat-count">{cat.actions.length}</span>
+              </button>
+            ))}
+          </div>
+
+          <p className="create-page-cat-desc">{currentCategory.description}</p>
+
+          {/* Action grid for selected category */}
+          <div className="create-hub-cat-grid create-page-grid">
+            {currentCategory.actions.map((a) => (
+              <ActionCard key={a.id} a={a} onClick={() => launch(a)} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {searching && (
+        <div className="create-page-results">
+          <div className="create-page-results-head">
+            <span>{filteredActions?.length ?? 0} result{filteredActions?.length === 1 ? "" : "s"}</span>
+          </div>
+          {filteredActions && filteredActions.length > 0 ? (
+            <div className="create-hub-cat-grid create-page-grid">
+              {filteredActions.map((a) => (
+                <ActionCard key={a.id} a={a} onClick={() => launch(a)} />
+              ))}
+            </div>
+          ) : (
+            <div className="create-page-empty">
+              <Search size={26} />
+              <strong>No actions found</strong>
+              <p>Try a different keyword.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
+  );
+}
+
+function ActionCard({ a, onClick }: { a: CreateAction; onClick: () => void }) {
+  const Icon = a.icon;
+  return (
+    <button
+      className="create-hub-item create-hub-item--card"
+      style={{ "--ca-color": a.color } as React.CSSProperties}
+      onClick={onClick}
+      type="button"
+    >
+      <span className="create-hub-icon">
+        <Icon size={20} />
+      </span>
+      <span className="create-hub-text">
+        <strong>{a.title}</strong>
+        <small>{a.sub}</small>
+      </span>
+      <span className="create-hub-badges">
+        <span className="create-hub-hp-badge">{a.hp}</span>
+        <span className={`create-hub-cost-badge ${a.cost === "Free" ? "free" : "paid"}`}>
+          {a.cost}
+        </span>
+      </span>
+    </button>
   );
 }

@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
 import { BottomNavigation as BottomNav } from "@/components/layout/BottomNavigation";
-import { CreateHub } from "@/components/layout/CreateHub";
 import { LoginGate } from "@/components/layout/LoginGate";
 import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { NotificationPermissionPrompt } from "@/components/layout/NotificationPermissionPrompt";
 import { PaymentSheet } from "@/components/layout/PaymentSheet";
 import { AskView } from "@/components/tabs/AskView";
 import { ChainsView } from "@/components/tabs/ChainsView";
+import { CreateView } from "@/components/tabs/CreateView";
 import { HomeView } from "@/components/tabs/HomeView";
 import { MarketplaceView } from "@/components/tabs/MarketplaceView";
 import { MeView } from "@/components/tabs/MeView";
@@ -39,8 +39,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
     deleteLocalAccount, enableHumanChainNotifications, enterPreview, enterWithWorld,
     keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink,
   } = props;
-
-  const [createHubOpen, setCreateHubOpen] = useState(false);
 
   useEffect(() => {
     // Mark <html> so World App CSS rules activate without delaying first paint.
@@ -69,7 +67,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
   }, [toast, setToast]);
 
   // Scroll-lock: prevent background scroll while any modal/sheet is open
-  const anyModalOpen = Boolean(paymentPrompt || notificationCenterOpen || createHubOpen);
+  const anyModalOpen = Boolean(paymentPrompt || notificationCenterOpen);
   useEffect(() => {
     document.body.classList.toggle("modal-open", anyModalOpen);
     return () => document.body.classList.remove("modal-open");
@@ -82,6 +80,13 @@ export function HumanChainRoot(props: HumanChainAppState) {
 
   const activeView = (() => {
     switch (tab) {
+      case "create":
+        return (
+          <CreateView
+            act={act}
+            setTab={setTab}
+          />
+        );
       case "ask":
         return (
           <AskView
@@ -249,7 +254,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             worldContext={worldContext}
           />
         )}
-        {verifiedHuman && tab !== "home" && tab !== "me" ? (
+        {verifiedHuman && tab !== "home" && tab !== "me" && tab !== "create" ? (
           <button
             aria-label="Open Human Passport"
             className="floating-profile-button"
@@ -308,17 +313,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
               if (nextTab === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
               setTab(nextTab);
             }}
-            onCreate={() => setCreateHubOpen(true)}
-          />
-        ) : null}
-        {createHubOpen ? (
-          <CreateHub
-            act={act}
-            onClose={() => setCreateHubOpen(false)}
-            setTab={(nextTab) => {
-              if (nextTab === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
-              setTab(nextTab);
-            }}
+            onCreate={() => setTab("create")}
           />
         ) : null}
       </section>

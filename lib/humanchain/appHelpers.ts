@@ -20,7 +20,7 @@ import type { AppMemory } from "@/types/user";
 
 // ── Tab navigation ────────────────────────────────────────────────────────────
 
-const appTabs = new Set<Tab>(["home", "ask", "market", "chains", "stories", "me", "settings"]);
+const appTabs = new Set<Tab>(["home", "ask", "market", "chains", "stories", "me", "settings", "create"]);
 
 export function isAppTab(value: string | null): value is Tab {
   return Boolean(value && appTabs.has(value as Tab));

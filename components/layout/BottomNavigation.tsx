@@ -42,9 +42,10 @@ export function BottomNavigation({
 
       <div className="bn-create-wrap">
         <button
-          className="bn-create"
+          className={`bn-create${active === "create" ? " active" : ""}`}
+          aria-current={active === "create" ? "page" : undefined}
           onClick={() => { void humanHaptic("medium"); onCreate(); }}
-          aria-label="Open create menu"
+          aria-label="Open Create page"
           type="button"
         >
           <span className="bn-create-icon" aria-hidden="true">

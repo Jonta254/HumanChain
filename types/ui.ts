@@ -1,4 +1,4 @@
-export type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me" | "settings";
+export type Tab = "home" | "ask" | "market" | "chains" | "stories" | "me" | "settings" | "create";
 
 export type Toast = {
   title: string;
