@@ -260,10 +260,10 @@ const BUSINESS_ADS = [
 ];
 
 const MARKET_PLANS = [
-  ["Quick listing",  "2 WLD",   "Publish one item with 2 included photos."],
-  ["Extra photos",   "1.5 WLD", "Add up to 3 more photos to one listing."],
-  ["Local boost",    "2 WLD",   "Push a listing higher in nearby discovery."],
-  ["Business ad",    "4 WLD",   "Market a shop, service, event, or link."],
+  ["Quick listing",    "2 WLD",   "Publish one item with 2 included photos."],
+  ["Extra photo pack", "1.5 WLD", "Add up to 3 more photos to one listing."],
+  ["Local boost",      "2 WLD",   "Push a listing higher in nearby discovery."],
+  ["Business ad",      "4 WLD",   "Market a shop, service, event, or link."],
 ] as const;
 
 const MARKET_CHECKLIST = [
