@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
@@ -45,6 +45,28 @@ export function HumanChainRoot(props: HumanChainAppState) {
     if (typeof window === "undefined") return true;
     return Boolean(localStorage.getItem("hc_onboarded"));
   });
+
+  // Track previous tab so the back button always returns to the right place
+  const prevTabRef = useRef<typeof tab>("home");
+  const [prevTab, setPrevTab] = useState<typeof tab>("home");
+  useEffect(() => {
+    if (tab !== prevTabRef.current) {
+      setPrevTab(prevTabRef.current);
+      prevTabRef.current = tab;
+    }
+  }, [tab]);
+
+  function goBack() {
+    const dest = prevTab === tab ? "home" : prevTab;
+    if (dest === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
+    setTab(dest);
+  }
+
+  const TAB_LABELS: Record<typeof tab, string> = {
+    home: "Home", ask: "Ask", chains: "Chains", stories: "Stories",
+    market: "Market", me: "Passport", create: "Create", settings: "Settings",
+  };
+  const backLabel = TAB_LABELS[prevTab === tab ? "home" : prevTab] ?? "Home";
 
   function completeOnboarding() {
     if (typeof window !== "undefined") localStorage.setItem("hc_onboarded", "1");
@@ -269,6 +291,19 @@ export function HumanChainRoot(props: HumanChainAppState) {
             worldContext={worldContext}
           />
         )}
+        {/* Floating back button — replaces Android hardware back key */}
+        {verifiedHuman && tab !== "home" ? (
+          <button
+            aria-label={`Back to ${backLabel}`}
+            className="hc-back-btn"
+            onClick={goBack}
+            type="button"
+          >
+            <ArrowLeft size={15} />
+            <span>{backLabel}</span>
+          </button>
+        ) : null}
+
         {verifiedHuman && tab !== "home" && tab !== "me" && tab !== "create" ? (
           <button
             aria-label="Open Human Passport"

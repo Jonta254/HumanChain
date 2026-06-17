@@ -19283,6 +19283,62 @@ html[data-world-mini-app="true"] .bottom-nav {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   BACK BUTTON  (.hc-back-btn)
+   Floating pill shown on every non-home tab — replaces hardware back key.
+   Positioned top-left, above all tab content but below modals.
+   ════════════════════════════════════════════════════════════════════ */
+
+.hc-back-btn {
+  position: fixed;
+  top: calc(10px + var(--world-safe-top, 0px));
+  left: max(12px, var(--world-safe-left, 12px));
+  z-index: 45;                           /* above content, below modals/nav */
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: rgba(244, 248, 246, 0.92);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  border: 1px solid var(--card-edge);
+  box-shadow:
+    0 4px 14px rgba(15, 45, 35, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+  /* Ensure 44px tap target even though pill is shorter */
+  min-height: 36px;
+  cursor: pointer;
+}
+
+.hc-back-btn svg {
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+/* Push TopBar text right so the back pill doesn't overlap the title */
+.top-bar-v2 {
+  padding-left: 104px !important; /* back-btn width (~88px) + 16px gap */
+}
+
+.hc-back-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 6px rgba(15, 45, 35, 0.08);
+  opacity: 0.88;
+}
+
+/* In World App the header has safe-area padding — nudge the button down
+   slightly so it clears the World chrome */
+html[data-world-mini-app="true"] .hc-back-btn {
+  top: calc(14px + var(--world-safe-top, 0px));
+}
+
+/* ════════════════════════════════════════════════════════════════════
    DIGITAL PASSPORT CARD  (.hc-passport-card)
    Premium digital ID card — dark emerald with holographic sheen
    ════════════════════════════════════════════════════════════════════ */

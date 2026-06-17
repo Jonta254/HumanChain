@@ -96,8 +96,9 @@ returns void language sql as $$
   update hc_ask_threads set answer_count = answer_count + 1 where id = thread_id;
 $$;
 
--- Leaderboard helper view
-create or replace view hc_leaderboard as
+-- Leaderboard helper view (SECURITY INVOKER respects RLS of the querying user)
+create or replace view hc_leaderboard
+  with (security_invoker = true) as
   select wallet, username, points, streak, tier,
          rank() over (order by points desc) as rank
   from hc_users
