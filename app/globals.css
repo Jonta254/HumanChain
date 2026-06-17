@@ -19080,3 +19080,211 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   WORLD APP RESPONSIVE — shape-lock for every screen size
+   Follows World App Mini App design guidelines:
+   - 375px–430px phones are primary target
+   - Safe areas always respected via env() + CSS vars
+   - Floating pill nav never overlaps scrollable content
+   - Touch targets ≥ 44px on all interactive elements
+   - No horizontal scroll, no broken layout at 320px or 900px+
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Global overflow guard ────────────────────────────────────────── */
+.screen > *,
+.screen section,
+.screen article,
+.screen aside {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ── Purge remaining warm-white / cream surfaces ─────────────────── */
+.field-strip button,
+.settings-safety-center button,
+.profile-passport-map button {
+  background: var(--paper);
+}
+
+.bottom-nav {
+  background: rgba(244, 248, 246, 0.96);
+}
+
+.app-settings-bar {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(36, 107, 85, 0.08), transparent 8rem),
+    var(--paper);
+}
+
+/* ── Core layout: phone-frame is always contained ────────────────── */
+.phone-frame {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Screen — never escape the frame horizontally ────────────────── */
+.screen {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── All cards / content blocks — safe horizontal containment ─────── */
+.hero,
+.streak-card,
+.ask-hero,
+.chain-map,
+.story-cover,
+.profile-card,
+.hcm-card,
+.hcm-listing-card,
+.story-card,
+.chain-link-card,
+.ask-thread-card,
+.notification-item {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── Text truncation safety ──────────────────────────────────────── */
+.hcm-card-title,
+.hcm-listing-title,
+.ask-thread-card h3,
+.story-card h3,
+.chain-link-card p,
+.notification-item .notif-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ── Touch targets: enforce 44px minimum on all interactive items ─── */
+.bottom-nav button,
+.top-bar button,
+.floating-profile-button,
+.gate-primary,
+.gate-preview,
+.hcm-book-btn,
+.ask-submit-btn,
+.chain-submit-btn {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ── World App: screen height tracks dynamic viewport ─────────────── */
+html[data-world-mini-app="true"] .screen {
+  /* Use dvh so the height recalculates if keyboard appears */
+  height: 100dvh;
+  height: var(--app-height);
+  min-height: unset;
+  max-height: var(--app-height);
+}
+
+/* ── World App: floating nav — correct pill shape at all widths ───── */
+html[data-world-mini-app="true"] .bottom-nav {
+  left: max(var(--world-safe-left), 12px);
+  right: max(var(--world-safe-right), 12px);
+  bottom: max(var(--world-safe-bottom), 12px);
+  width: auto;
+  max-width: none;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 28px rgba(20, 55, 42, 0.13);
+  backdrop-filter: blur(20px);
+  transform: none;
+}
+
+/* ── Small phones: 320px–374px ──────────────────────────────────────
+   SE 1st gen, budget Androids. Keep layout intact, reduce font/spacing. */
+@media (max-width: 374px) {
+  :root { font-size: 14.5px; }
+
+  .screen {
+    padding:
+      calc(10px + var(--world-safe-top))
+      max(10px, calc(12px + var(--world-safe-right)))
+      calc(96px + var(--world-safe-bottom))
+      max(10px, calc(12px + var(--world-safe-left)));
+  }
+
+  .hero { padding: 14px 14px 12px; }
+
+  .bottom-nav button { font-size: 0.6rem; min-height: 48px; }
+
+  .ask-hero h2,
+  .chain-map h2 { font-size: 1.1rem; }
+
+  .human-home-identity h1 { font-size: 1.7rem; }
+
+  .v7-digital-card b { font-size: 24px; }
+}
+
+/* ── Very short screens: under 640px height (landscape phones) ───────
+   Reduce vertical padding, keep content accessible. */
+@media (max-height: 640px) {
+  .screen {
+    padding-top: calc(8px + var(--world-safe-top));
+    padding-bottom: calc(80px + var(--world-safe-bottom));
+  }
+
+  .hero { padding: 12px 14px 10px; }
+  .hero h1, .top-bar h1 { margin-top: 10px; font-size: 1.6rem; }
+
+  .bottom-nav button { min-height: 44px; }
+
+  html[data-world-mini-app="true"] .bottom-nav {
+    bottom: max(var(--world-safe-bottom), 6px);
+  }
+}
+
+/* ── Medium phones: 375px–430px — primary World App target ──────────
+   No changes needed here — base styles already target this range.
+   This block is a marker for future targeted tweaks. */
+
+/* ── Large phones / Android flagships: 431px–500px ─────────────────
+   phone-frame caps at 430px, so extra width shows on .app-shell bg. */
+@media (min-width: 431px) {
+  .app-shell {
+    background: var(--premium-bg);
+  }
+}
+
+/* ── Tablet / desktop — browser testing mode ────────────────────────
+   Phone frame floats centered, gets rounded corners + subtle shadow.
+   World App will never show this breakpoint in production. */
+@media (min-width: 720px) and (not (display-mode: standalone)) {
+  .app-shell {
+    align-items: flex-start;
+    padding: 32px 0;
+    min-height: 100vh;
+  }
+
+  .phone-frame {
+    border-radius: 44px;
+    overflow: hidden;
+    min-height: 780px;
+    max-height: 900px;
+    box-shadow:
+      0 32px 80px rgba(20, 55, 42, 0.18),
+      0 0 0 1px rgba(19, 122, 87, 0.12);
+  }
+
+  .bottom-nav {
+    border-radius: 0 0 44px 44px;
+    bottom: 0;
+  }
+}
+
+/* ── Accessibility: reduced motion ──────────────────────────────────
+   Per World App a11y guidance: no essential animations.              */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
