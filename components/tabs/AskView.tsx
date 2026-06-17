@@ -417,7 +417,7 @@ export function AskView({
           <div className="ask-modes">
             {[
               ["Text", "Public question", "Free"],
-              ["Voice", "Hear my tone", "2 WLD"],
+              ["Voice", "Coming soon", "Free"],
               ["Private", "Hide identity", "4 WLD"],
               ["Deep Verdict", "Human report", "6 WLD"],
             ].map(([mode, label, amount]) => (
@@ -432,22 +432,23 @@ export function AskView({
                     return;
                   }
 
+                  if (mode === "Voice") {
+                    act("Voice questions coming soon", "Record and post voice questions in an upcoming HumanChain update — no payment needed today.");
+                    return;
+                  }
+
                   openPayment({
                     title: `${mode} question`,
                     amount,
                     detail:
-                      mode === "Voice"
-                        ? "Ask with voice so verified humans hear your tone before answering."
-                        : mode === "Private"
-                          ? "Hide your public identity while verified humans answer."
-                          : "Turn answers into most-said, best answer, country differences, hard truth, and final verdict.",
+                      mode === "Private"
+                        ? "Hide your public identity while verified humans answer."
+                        : "Turn answers into most-said, best answer, country differences, hard truth, and final verdict.",
                     success: `${mode} mode is now active. Your next question will use this flow.`,
                     feature:
-                      mode === "Voice"
-                        ? "voice-question"
-                        : mode === "Private"
-                          ? "private-question"
-                          : "deep-verdict-question",
+                      mode === "Private"
+                        ? "private-question"
+                        : "deep-verdict-question",
                     points: mode === "Deep Verdict" ? 12 : 6,
                     onConfirmed: () => {
                       setSelectedMode(mode);
@@ -794,23 +795,11 @@ export function AskView({
         </div>
         <div className="compact-actions">
           <button
-            onClick={() => {
-              openPayment({
-                title: "Voice answer",
-                amount: "2 WLD",
-                detail: "Record up to 60 seconds and send an answer with human tone. Verified humans hear your voice before reading.",
-                success: "Voice answer mode is active. Use the microphone button to record your next answer.",
-                feature: "voice-answer",
-                points: 15,
-                onConfirmed: () => {
-                  act("Voice answer coming soon", "Voice recording will be enabled in an upcoming HumanChain update. Your WLD will be refunded.");
-                  recordHistory({ title: "Voice answer unlock attempted", detail: "Voice answer mode is coming soon — payment noted.", kind: "post" });
-                },
-              });
-            }}
+            onClick={() => act("Voice answers coming soon", "Record and send voice answers in an upcoming HumanChain update — no payment needed today.")}
             type="button"
+            title="Coming soon"
           >
-            Unlock voice answer
+            Voice answer
           </button>
           <button
             className={countryAnswerUnlocked ? "active" : ""}
