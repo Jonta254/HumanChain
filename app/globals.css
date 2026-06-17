@@ -19288,3 +19288,204 @@ html[data-world-mini-app="true"] .bottom-nav {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   HOME OVERHAUL — full, premium, sharp
+   Fixes thin/unarranged layout, section spacing, hero card weight,
+   quick-action prominence, and the Create FAB.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Sections: consistent 14px gap between blocks ───────────────── */
+.home-v9 { gap: 0; }
+.home-v9 .h9-hero     { padding: 14px 16px 0; }
+.home-v9 .h9-section  { padding: 14px 16px 0; }
+.home-v9 .h9-section:last-of-type { padding-bottom: 12px; }
+
+/* ── Hero card: bigger, richer, more padding ─────────────────────── */
+.home-v9 .hc-brief {
+  margin-top: 0;
+  padding: 18px 18px 16px;
+  gap: 14px;
+  border-radius: 22px;
+  box-shadow:
+    0 16px 40px rgba(11, 90, 64, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+.home-v9 .hc-brief-score-num {
+  font-size: 2.2rem !important;
+  letter-spacing: -0.03em;
+}
+
+.home-v9 .hc-brief-level { font-size: 0.72rem !important; }
+.home-v9 .hc-brief-av    { width: 42px; height: 42px; font-size: 1rem; }
+
+.home-v9 .hc-brief-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+.home-v9 .hc-brief-progress i {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, #ffe9a8, #ffd166);
+  min-width: 8px;
+}
+
+.home-v9 .hc-brief-view {
+  padding: 10px 14px;
+  min-height: 40px;
+  font-size: 0.78rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  justify-content: space-between;
+  backdrop-filter: blur(8px);
+}
+.home-v9 .hc-brief-view:active { opacity: 0.82; }
+
+/* ── Ticker: full-width branded strip ───────────────────────────── */
+.home-v9 .hc-ticker {
+  padding: 8px 16px;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: linear-gradient(90deg, rgba(19,122,87,0.07), rgba(47,111,237,0.04));
+  border-bottom: 1px solid var(--card-line);
+}
+
+/* ── Social proof: more prominent ──────────────────────────────── */
+.hc-social-proof {
+  padding: 7px 16px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--paper);
+  border-bottom: 1px solid var(--card-line);
+}
+.hc-sp-dot.green { background: #22c97a; box-shadow: 0 0 0 3px rgba(34,201,122,0.15); }
+
+/* ── Quick actions: taller, bigger icons, bolder ────────────────── */
+.home-v9 .hc-quick {
+  gap: 10px;
+}
+.home-v9 .hc-quick button {
+  min-height: 84px;
+  padding: 14px 6px 12px;
+  border-radius: 18px;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 900;
+  background: var(--card);
+  border: 1px solid var(--card-line);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.9) inset;
+}
+.home-v9 .hc-quick button:active {
+  transform: scale(0.91);
+  box-shadow: none;
+}
+
+.home-v9 .hc-quick-icon {
+  width: 44px; height: 44px; border-radius: 14px;
+}
+
+/* ── AI insight: a bit more breathing room ──────────────────────── */
+.home-v9 .hc-insight {
+  padding: 16px;
+  gap: 13px;
+  border-radius: 20px;
+}
+.home-v9 .hc-insight-icon {
+  width: 38px; height: 38px; border-radius: 13px;
+  flex-shrink: 0;
+}
+
+/* ── Reputation card: more internal padding ─────────────────────── */
+.home-v9 .hc-rep {
+  padding: 16px 18px;
+  border-radius: 20px;
+  gap: 10px;
+}
+.home-v9 .hc-rep-bar {
+  height: 9px;
+}
+
+/* ── Opportunity scroll: tighter card width on small screens ─────── */
+.home-v9 .h9-opp-scroll .h9-opp {
+  min-width: 260px;
+}
+
+/* ── Section headings: stronger contrast ────────────────────────── */
+.home-v9 .h9-section-head { margin-bottom: 12px; }
+.home-v9 .h9-section-head > div > strong {
+  font-size: 0.92rem;
+  font-weight: 950;
+  color: var(--ink);
+}
+
+/* ── Network stats: more visual weight ─────────────────────────── */
+.home-v9 .hc-network-strip {
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--card-line);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 14px 0;
+}
+.home-v9 .hc-network-stat { padding: 4px 16px; }
+
+/* ── Leaderboard: clean premium rows ────────────────────────────── */
+.home-v9 .hc-leaderboard {
+  border-radius: 18px;
+  border: 1px solid var(--card-line);
+  background: var(--card);
+  overflow: hidden;
+}
+.home-v9 .hc-lb-row { padding: 12px 16px; font-size: 0.8rem; }
+
+/* ── Explore card: more presence ────────────────────────────────── */
+.home-v9 .hc-explore-today {
+  padding: 18px 18px;
+  border-radius: 22px;
+  gap: 8px;
+}
+.home-v9 .hc-explore-title { font-size: 1.05rem; }
+
+/* ── Create FAB — emerald, prominent, labelled ───────────────────── */
+.h9-fab {
+  background: var(--brand-grad) !important;
+  box-shadow: 0 10px 32px rgba(19,122,87,0.46) !important;
+  width: 60px !important; height: 60px !important;
+  flex-direction: column;
+  gap: 2px;
+  bottom: calc(88px + var(--world-safe-bottom, 0px)) !important;
+}
+.h9-fab-label {
+  font-size: 0.5rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #fff;
+}
+@keyframes h9FabPulse {
+  0%, 100% { box-shadow: 0 10px 32px rgba(19,122,87,0.46); }
+  50%       { box-shadow: 0 14px 44px rgba(19,122,87,0.7), 0 0 0 6px rgba(19,122,87,0.08); }
+}
+.h9-fab { animation: h9FabPulse 2.8s ease-in-out infinite; }
+
+/* ── Streak nudge: tighter, rounded ────────────────────────────── */
+.hc-streak-nudge { border-radius: 18px; }
+.hc-streak-act {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 14px; border-radius: 999px;
+  background: rgba(216,125,58,0.14); color: #d87d3a;
+  font-size: 0.74rem; font-weight: 900;
+  border: 1px solid rgba(216,125,58,0.28);
+  white-space: nowrap;
+}
+
+/* ── Bottom gap so last section clears the floating nav ─────────── */
+.home-v9 { padding-bottom: calc(100px + var(--world-safe-bottom, 0px)); }
