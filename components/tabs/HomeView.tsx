@@ -22,6 +22,7 @@ import {
   Zap,
 } from "lucide-react";
 import { getWorldMiniAppContext } from "@/lib/worldMiniApp";
+import { getDailyQuestion } from "@/lib/data/dailyQuestions";
 import { type AppLanguage } from "@/lib/data/languages";
 import {
   formatShortTime,
@@ -92,7 +93,7 @@ const chainFields = [
 ];
 type ChainField = (typeof chainFields)[number];
 
-const dailyHumanQuestion = "What truth did life teach you this week?";
+const dailyHumanQuestion = getDailyQuestion();
 
 function getGreeting() {
   const h = new Date().getHours();

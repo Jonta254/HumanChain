@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HeartHandshake, PlusCircle, ShieldCheck, Star, Upload, Users } from "lucide-react";
+import { getDailyQuestion } from "@/lib/data/dailyQuestions";
 import {
   humanChainErrorStates,
   validateAnswerInput,
@@ -1796,6 +1797,11 @@ export function ChainsView({
           <div className="chain-section-note live-note">
             <span>Live chain quotes</span>
             <p>Live handles, fresh reactions, and human links from Today&apos;s main chain. Add your link above and it appears here first.</p>
+          </div>
+          <div className="chain-daily-highlight">
+            <span className="cdh-label">Today&apos;s Human Question</span>
+            <p className="cdh-question">{getDailyQuestion()}</p>
+            <small className="cdh-note">Answer below — your link appears in the live chain.</small>
           </div>
           {visibleLinks.map((link, index) => {
             const author = getChainLinkAuthor(link, humanIdentity?.username ?? "@verified_human");

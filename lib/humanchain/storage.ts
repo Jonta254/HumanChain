@@ -25,6 +25,11 @@ export const storageKeys = {
   userStories: "humanchain_user_stories",
   lastStreakDate: "humanchain_last_streak_date",
   jobApplications: "hc_job_applications",
+  answerReactions: "humanchain_answer_reactions",
+  savedThreadIds: "humanchain_saved_threads",
+  savedStoryIds: "humanchain_saved_story_ids",
+  streakFreezeUsed: "humanchain_streak_freeze_used",
+  milestonesSeen: "humanchain_milestones_seen",
 } as const;
 
 export function loadJsonFromStorage<T>(key: string, fallback: T): T {

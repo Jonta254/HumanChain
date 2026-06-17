@@ -102,8 +102,26 @@ export function AskView({
   const [askFeedFilter, setAskFeedFilter] = useState("All");
   const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
   const [showAskAdvanced, setShowAskAdvanced] = useState(false);
+  // answer reactions: answerKey → Set of emoji the current user reacted with
+  const [answerReactions, setAnswerReactions] = useState<Record<string, Record<string, number>>>(() =>
+    loadJsonFromStorage(storageKeys.answerReactions, {}),
+  );
+  const [myReactions, setMyReactions] = useState<Record<string, string[]>>({});
+  // thread bookmarks
+  const [savedThreadIds, setSavedThreadIds] = useState<Set<string>>(() =>
+    new Set(loadJsonFromStorage<string[]>(storageKeys.savedThreadIds, [])),
+  );
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+
+  const ANSWER_REACTION_EMOJIS = [
+    { emoji: "💡", label: "Real" },
+    { emoji: "🔥", label: "Hard truth" },
+    { emoji: "❤️", label: "Helped me" },
+    { emoji: "🌍", label: "Universal" },
+  ];
 
   const visibleThreads = threads.filter((thread) => {
+    if (showSavedOnly && !savedThreadIds.has(thread.question)) return false;
     const targetCountry = getAskThreadTargetCountry(thread);
     const query = askSearch.trim().toLowerCase();
     const matchesQuery = !query || `${thread.question} ${thread.topic} ${thread.author} ${targetCountry}`.toLowerCase().includes(query);
@@ -121,9 +139,9 @@ export function AskView({
     24 + (isVerifiedWorldHuman(humanIdentity) ? 26 : 0) + threads.filter((thread) => thread.owner).length * 4,
   );
 
-  useEffect(() => {
-    saveJsonToStorage(storageKeys.askThreads, threads);
-  }, [threads]);
+  useEffect(() => { saveJsonToStorage(storageKeys.askThreads, threads); }, [threads]);
+  useEffect(() => { saveJsonToStorage(storageKeys.answerReactions, answerReactions); }, [answerReactions]);
+  useEffect(() => { saveJsonToStorage(storageKeys.savedThreadIds, [...savedThreadIds]); }, [savedThreadIds]);
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.askCountryRoutes, paidCountryRoutes);
@@ -523,12 +541,20 @@ export function AskView({
                 aria-pressed={askFeedFilter === filter}
                 className={askFeedFilter === filter ? "active" : ""}
                 key={filter}
-                onClick={() => setAskFeedFilter(filter)}
+                onClick={() => { setAskFeedFilter(filter); setShowSavedOnly(false); }}
                 type="button"
               >
                 {filter}
               </button>
             ))}
+            <button
+              aria-pressed={showSavedOnly}
+              className={showSavedOnly ? "active" : ""}
+              onClick={() => setShowSavedOnly((v) => !v)}
+              type="button"
+            >
+              ★ Saved{savedThreadIds.size > 0 ? ` (${savedThreadIds.size})` : ""}
+            </button>
           </div>
         </div>
         {visibleThreads.length ? visibleThreads.map((thread, index) => {
@@ -548,6 +574,18 @@ export function AskView({
               <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                 <small>{targetCountry === "World" ? thread.mode : `${targetCountry} route`}{boostedQuestions.has(thread.question) ? " · 🔥" : ""}{verdictUnlocked ? " · ✓ Verdict" : ""}</small>
                 {alreadyAnswered && <span className="ask-answered-badge">✓ Answered</span>}
+                <button
+                  className={`ask-bookmark-btn${savedThreadIds.has(thread.question) ? " active" : ""}`}
+                  onClick={() => setSavedThreadIds((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(thread.question)) { next.delete(thread.question); } else { next.add(thread.question); }
+                    return next;
+                  })}
+                  title={savedThreadIds.has(thread.question) ? "Remove bookmark" : "Bookmark question"}
+                  type="button"
+                >
+                  {savedThreadIds.has(thread.question) ? "★" : "☆"}
+                </button>
               </div>
             </div>
             <h3>{thread.question}</h3>
@@ -588,6 +626,31 @@ export function AskView({
                   <strong>{answer.user} - {answer.country}</strong>
                   <small>Verified responder - helpful signal visible</small>
                   <p>{answer.text}</p>
+                  <div className="answer-reactions">
+                    {ANSWER_REACTION_EMOJIS.map(({ emoji, label }) => {
+                      const ak = `${thread.question}|${answer.user}|${answer.text}`;
+                      const count = answerReactions[ak]?.[emoji] ?? 0;
+                      const reacted = myReactions[ak]?.includes(emoji) ?? false;
+                      return (
+                        <button
+                          key={emoji}
+                          className={`answer-reaction-btn${reacted ? " reacted" : ""}`}
+                          onClick={() => {
+                            if (reacted) return;
+                            setMyReactions((prev) => ({ ...prev, [ak]: [...(prev[ak] ?? []), emoji] }));
+                            setAnswerReactions((prev) => ({
+                              ...prev,
+                              [ak]: { ...(prev[ak] ?? {}), [emoji]: (prev[ak]?.[emoji] ?? 0) + 1 },
+                            }));
+                          }}
+                          title={label}
+                          type="button"
+                        >
+                          {emoji}{count > 0 && <span>{count}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <div className="trust-action-row">
                     {(() => {
                       const ak = `${thread.question}|${answer.user}|${answer.text}`;

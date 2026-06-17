@@ -588,12 +588,34 @@ export function useHumanChainApp() {
     setStreak((cur) => cur + 1);
   }
 
+  const SCORE_MILESTONES = [
+    { score: 200,  label: "Bronze",   emoji: "🥉", detail: "You reached Bronze tier. Your Human Passport is growing." },
+    { score: 420,  label: "Silver",   emoji: "🥈", detail: "Silver tier unlocked. You are building a verified identity." },
+    { score: 720,  label: "Gold",     emoji: "🥇", detail: "Gold tier reached. You are among HumanChain's most active humans." },
+    { score: 1150, label: "Platinum", emoji: "💎", detail: "Platinum tier. Your chain is a reference for the whole network." },
+    { score: 1800, label: "Founder",  emoji: "🌿", detail: "Founder status. You helped shape what HumanChain stands for." },
+  ];
+
   function earnPoints(amount: number, reason: string) {
     void humanHaptic("light");
     setPoints((cur) => {
       const balanceAfter = cur + amount;
       const now = new Date();
       setHpLedger((ledger) => [{ amount, balanceAfter, date: getLocalDateKey(now), id: Date.now(), reason, time: formatCheckInTime(now), wallet: verifiedHuman?.wallet }, ...ledger].slice(0, 120));
+      // Milestone check — fire once per tier crossing
+      const seenRaw = typeof window !== "undefined" ? localStorage.getItem(storageKeys.milestonesSeen) : null;
+      const seen: number[] = seenRaw ? (JSON.parse(seenRaw) as number[]) : [];
+      for (const m of SCORE_MILESTONES) {
+        if (cur < m.score && balanceAfter >= m.score && !seen.includes(m.score)) {
+          seen.push(m.score);
+          if (typeof window !== "undefined") localStorage.setItem(storageKeys.milestonesSeen, JSON.stringify(seen));
+          const title = `${m.emoji} ${m.label} tier reached!`;
+          setToast({ title, detail: m.detail });
+          setNotifications((ns) => [{ id: Date.now(), title, detail: m.detail, sector: "account" as const, time: formatShortTime(), read: false }, ...ns].slice(0, 60));
+          void sendWorldUserNotification({ title, detail: m.detail, sector: "account", path: "/?tab=me" });
+          break;
+        }
+      }
       return balanceAfter;
     });
   }

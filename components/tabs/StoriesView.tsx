@@ -1527,6 +1527,10 @@ export function StoriesView({
   const [bookmarkedStories, setBookmarkedStories] = useState<Set<string>>(new Set());
   const [tippedStories, setTippedStories] = useState<Set<string>>(new Set());
   const [storyRatings, setStoryRatings] = useState<Record<number, number>>({});
+  const [savedStoryIds, setSavedStoryIds] = useState<Set<string>>(() =>
+    new Set(loadJsonFromStorage<string[]>(storageKeys.savedStoryIds, [])),
+  );
+  const [storiesTab, setStoriesTab] = useState<"browse" | "library">("browse");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [fileDraft, setFileDraft] = useState<{
     dataUrl?: string;
@@ -1577,9 +1581,15 @@ export function StoriesView({
   }, [feedRefreshNonce]);
 
   function saveStory() {
+    const key = activePublishedStory ?? (isReading ? "monthly" : null);
+    if (key && !savedStoryIds.has(key)) {
+      setSavedStoryIds((prev) => { const next = new Set(prev); next.add(key); return next; });
+      saveJsonToStorage(storageKeys.savedStoryIds, [key, ...loadJsonFromStorage<string[]>(storageKeys.savedStoryIds, [])]);
+    }
     setSavedItems((value) => value + 1);
     earnPoints(8, "Saved stories improve your Human Points record.");
     keepStreak("The monthly Human Story was saved to your library.");
+    addNotification("Story saved to library", "Find it any time under Stories → Library.", "stories");
   }
 
   function saveStoryReceipt(story: UserStory) {
@@ -1927,9 +1937,64 @@ export function StoriesView({
     );
   }
 
+  // Library tab — saved published stories
+  if (storiesTab === "library") {
+    const savedKeys = [...savedStoryIds];
+    return (
+      <div className="screen stories-screen">
+        <TopBar title="My Library" subtitle="Stories you saved for later reading." />
+        <nav className="stories-tab-nav">
+          <button onClick={() => setStoriesTab("browse")} type="button">Browse</button>
+          <button className="active" onClick={() => setStoriesTab("library")} type="button">Library {savedKeys.length > 0 ? `(${savedKeys.length})` : ""}</button>
+        </nav>
+        {savedKeys.length === 0 ? (
+          <div className="stories-library-empty">
+            <span>📚</span>
+            <strong>No saved stories yet</strong>
+            <p>While reading a story, tap <strong>Save</strong> to add it here.</p>
+          </div>
+        ) : (
+          <section className="stories-library-list">
+            {savedKeys.map((key) => {
+              const entry = publishedStoryCollection[key as keyof typeof publishedStoryCollection];
+              if (!entry) return null;
+              return (
+                <article className="stories-library-card" key={key}>
+                  <div className="slc-info">
+                    <strong>{entry.shelfTitle ?? key}</strong>
+                    <p>{entry.pages?.[0]?.text?.slice(0, 80) ?? "Human story"}…</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setActivePublishedStory(key as keyof typeof publishedStoryCollection);
+                      setPage(0);
+                      setIsReading(true);
+                      setStoriesTab("browse");
+                    }}
+                    type="button"
+                  >Read</button>
+                  <button
+                    className="slc-remove"
+                    onClick={() => setSavedStoryIds((prev) => { const next = new Set(prev); next.delete(key); saveJsonToStorage(storageKeys.savedStoryIds, [...next]); return next; })}
+                    title="Remove from library"
+                    type="button"
+                  >✕</button>
+                </article>
+              );
+            })}
+          </section>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="screen stories-screen">
       <TopBar title="Human Story" subtitle="Monthly stories and published reflections from verified humans." />
+      <nav className="stories-tab-nav">
+        <button className="active" onClick={() => setStoriesTab("browse")} type="button">Browse</button>
+        <button onClick={() => setStoriesTab("library")} type="button">Library {savedStoryIds.size > 0 ? `(${savedStoryIds.size})` : ""}</button>
+      </nav>
       <section className="story-cover">
         <StoryCoverPhoto
           alt="Colored cinematic cover for The Door That Waited showing a blue door and cracked cup"

@@ -493,6 +493,20 @@ export function MeView({
         <p>
           Wallet addresses stay out of primary public UI. HumanChain shows World usernames, coarse area, helpfulness, trade completion, and moderation state instead.
         </p>
+        <button
+          className="share-passport-btn"
+          onClick={async () => {
+            try {
+              const { shareWithWorld } = await import("@/lib/world/social");
+              const username = verifiedHuman?.username ?? "a verified human";
+              const text = `${username} — ${tier} · ${chainScore} HP · ${passportMetrics.completedTrades} trades · ${streak} day streak on HumanChain.`;
+              await shareWithWorld({ title: "My Human Passport", text, url: process.env.NEXT_PUBLIC_APP_URL ?? "https://humanchain.app" });
+            } catch { /* share dismissed */ }
+          }}
+          type="button"
+        >
+          <Share2 size={14} /> Share Passport
+        </button>
       </section>
       <section className="panel human-history-panel">
         <div className="section-heading">

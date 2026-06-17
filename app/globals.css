@@ -18721,3 +18721,43 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 .usr-star.lit{color:#f59e0b;}
 .usr-star:hover{color:#fbbf24;}
 .usr-thanks{font-size:.72rem;color:var(--green);font-weight:600;}
+
+/* ── Stories tab nav (Browse / Library) ─────────────────────────── */
+.stories-tab-nav{display:flex;gap:0;border-bottom:1px solid var(--line);margin:0 0 4px;}
+.stories-tab-nav button{flex:1;padding:10px 0;background:none;border:none;font-size:.85rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.stories-tab-nav button.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600;}
+
+/* ── Stories Library ────────────────────────────────────────────── */
+.stories-library-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:60px 20px;text-align:center;color:var(--muted);}
+.stories-library-empty span{font-size:2.5rem;}
+.stories-library-empty strong{color:var(--ink);}
+.stories-library-list{display:flex;flex-direction:column;gap:10px;padding:12px 16px;}
+.stories-library-card{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+.slc-info{flex:1;min-width:0;}
+.slc-info strong{display:block;font-size:.9rem;color:var(--ink);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slc-info p{font-size:.76rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stories-library-card>button{flex-shrink:0;background:var(--ink);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:.78rem;cursor:pointer;}
+.slc-remove{background:none !important;color:var(--muted) !important;padding:4px 8px !important;font-size:.9rem !important;}
+
+/* ── Answer reactions ───────────────────────────────────────────── */
+.answer-reactions{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0 4px;}
+.answer-reaction-btn{display:flex;align-items:center;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:.75rem;cursor:pointer;color:var(--ink);transition:background .12s,border-color .12s;}
+.answer-reaction-btn.reacted{background:var(--paper-strong);border-color:var(--ink);}
+.answer-reaction-btn span{font-size:1rem;}
+
+/* ── Ask bookmark button ────────────────────────────────────────── */
+.ask-bookmark-btn{background:none;border:none;cursor:pointer;padding:4px 6px;color:var(--muted);font-size:.85rem;line-height:1;transition:color .12s;}
+.ask-bookmark-btn.saved{color:#f59e0b;}
+
+/* ── Chain daily highlight ──────────────────────────────────────── */
+.chain-daily-highlight{background:linear-gradient(135deg,var(--paper),var(--paper-strong));border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 16px 16px;position:relative;}
+.cdh-label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.cdh-question{font-size:1rem;font-weight:600;color:var(--ink);margin:0 0 8px;line-height:1.4;}
+.cdh-note{font-size:.72rem;color:var(--muted);}
+
+/* ── Marketplace interested badge ───────────────────────────────── */
+.hcm-interested-badge{background:var(--green);color:#fff;border-radius:12px;padding:2px 8px;font-size:.7rem;font-weight:600;}
+
+/* ── Profile share passport button ─────────────────────────────── */
+.share-passport-btn{display:flex;align-items:center;gap:7px;margin-top:14px;padding:9px 16px;background:var(--ink);color:#fff;border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;width:100%;justify-content:center;transition:opacity .12s;}
+.share-passport-btn:active{opacity:.8;}

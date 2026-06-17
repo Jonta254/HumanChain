@@ -1734,6 +1734,11 @@ export function MarketplaceView({
                         <span>{social.rating} votes</span>
                         <span>{social.tips} tips</span>
                         <span>{comments.length} comments</span>
+                        {marketHolds.filter((h) => h.itemKey === itemKey(item)).length > 0 && (
+                          <span className="hcm-interested-badge">
+                            {marketHolds.filter((h) => h.itemKey === itemKey(item)).length} interested
+                          </span>
+                        )}
                       </div>
                       <p className="hcm-item-quality">{getShortText(item.quality, 90)}</p>
                       {item.bidding && (
