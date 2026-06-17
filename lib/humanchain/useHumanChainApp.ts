@@ -156,6 +156,24 @@ export function useHumanChainApp() {
     }
   }, []);
 
+  // ── Streak warning notification ───────────────────────────────────────────
+  useEffect(() => {
+    if (streak <= 0 || dailyAnswered) return;
+    if (new Date().getHours() < 17) return;
+    const warnKey = `hc_streak_warn_${getLocalDateKey()}`;
+    if (typeof window === "undefined" || localStorage.getItem(warnKey)) return;
+    localStorage.setItem(warnKey, "1");
+    const time = formatShortTime();
+    setNotifications((cur) => [{
+      id: Date.now(),
+      title: `${streak}-day streak at risk`,
+      detail: "Answer today's HumanChain question before midnight to protect your chain.",
+      sector: "daily" as const,
+      time,
+      read: false,
+    }, ...cur].slice(0, 60));
+  }, [streak, dailyAnswered]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Scroll to top on tab/auth change ──────────────────────────────────────
   useEffect(() => { scrollMiniAppToTop(); }, [tab, verifiedHuman]);
 

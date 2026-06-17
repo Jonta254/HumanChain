@@ -443,6 +443,7 @@ function getInitialBids() {
 
 export function MarketplaceView({
   act,
+  addNotification,
   earnPoints,
   humanIdentity,
   marketLocation,
@@ -454,6 +455,7 @@ export function MarketplaceView({
   worldContext,
 }: {
   act: (title: string, detail: string) => void;
+  addNotification: (title: string, detail: string, sector?: "welcome" | "inbox" | "marketplace" | "daily" | "stories" | "payments" | "account") => void;
   earnPoints: EarnPoints;
   humanIdentity: HumanIdentity | null;
   marketLocation: MarketLocationState;
@@ -1481,6 +1483,11 @@ export function MarketplaceView({
                   earnPoints(5, `Applied to ${activeSvc.title}.`);
                   recordHistory({ title: isJob ? "Job application sent" : "Provider contacted", detail: `${activeSvc.title} · ${budget}`, kind: "market" });
                   act("Application sent!", `World Chat opened with ${poster}.`);
+                  const existing = loadJsonFromStorage<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(storageKeys.jobApplications, []);
+                  if (!existing.find((a) => a.id === svcId)) {
+                    saveJsonToStorage(storageKeys.jobApplications, [{ id: svcId, title: activeSvc.title, budget, poster, appliedAt: new Date().toISOString() }, ...existing]);
+                  }
+                  addNotification("Application sent!", `You applied to "${activeSvc.title}". The poster has been notified via World Chat.`, "marketplace");
                 }).catch(() => act("Chat unavailable", "Try from World App."));
               }}
               type="button"
@@ -1551,6 +1558,13 @@ export function MarketplaceView({
             <button className="hcm-sell-btn" onClick={() => setSvcMode("post-job")} type="button"><PlusCircle size={14} />Post Job</button>
           </div>
         )}
+      </div>
+
+      {/* Social proof strip */}
+      <div className="hcm-social-proof">
+        <span className="hcm-sp-dot" /><span>{(() => { const base = 34 + (new Date().getHours() % 12) * 3; return base; })()}&nbsp;verified humans browsing nearby</span>
+        <span className="hcm-sp-sep">·</span>
+        <span className="hcm-sp-live"><span className="hcm-sp-dot green" />Live escrow active</span>
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════

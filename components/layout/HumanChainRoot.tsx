@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
 import { BottomNavigation as BottomNav } from "@/components/layout/BottomNavigation";
 import { LoginGate } from "@/components/layout/LoginGate";
+import { OnboardingModal } from "@/components/layout/OnboardingModal";
 import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { NotificationPermissionPrompt } from "@/components/layout/NotificationPermissionPrompt";
 import { PaymentSheet } from "@/components/layout/PaymentSheet";
@@ -35,10 +36,21 @@ export function HumanChainRoot(props: HumanChainAppState) {
     setLinks, setNotificationCenterOpen,
     setNotificationPromptDismissed, setNotifications, setPaymentPrompt,
     setProfileImage, setSavedItems, setTab, setToast,
-    act, clearMarketplaceData, clearPostData, confirmPayment, copyReferralLink,
+    act, addNotification, clearMarketplaceData, clearPostData, confirmPayment, copyReferralLink,
     deleteLocalAccount, enableHumanChainNotifications, enterPreview, enterWithWorld,
     keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink,
   } = props;
+
+  const [onboardingDone, setOnboardingDone] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return Boolean(localStorage.getItem("hc_onboarded"));
+  });
+
+  function completeOnboarding() {
+    if (typeof window !== "undefined") localStorage.setItem("hc_onboarded", "1");
+    setOnboardingDone(true);
+    earnPoints(25, "Welcome bonus — you started your HumanChain journey!");
+  }
 
   useEffect(() => {
     // Mark <html> so World App CSS rules activate without delaying first paint.
@@ -133,6 +145,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
         return (
           <MarketplaceView
             act={act}
+            addNotification={addNotification}
             earnPoints={earnPoints}
             humanIdentity={verifiedHuman}
             marketLocation={marketLocation}
@@ -237,6 +250,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
 
   return (
     <main className="app-shell">
+      {!onboardingDone && <OnboardingModal onComplete={completeOnboarding} />}
       <section className="phone-frame">
         {verifiedHuman ? (
           <div key={tab} className="screen-transition-wrapper">

@@ -67,6 +67,14 @@ function getStrongestBadge(args: { isVerified: boolean; streak: number; posts: n
   return null;
 }
 
+const LEADERBOARD_SEED = [
+  { rank: 1, handle: "@mara_chain",       score: 847, tierLabel: "Gold",   country: "🇰🇪" },
+  { rank: 2, handle: "@ubuntu_builder",   score: 721, tierLabel: "Gold",   country: "🇿🇦" },
+  { rank: 3, handle: "@discipline_daily", score: 634, tierLabel: "Gold",   country: "🇮🇳" },
+  { rank: 4, handle: "@care_bridge",      score: 512, tierLabel: "Silver", country: "🇵🇭" },
+  { rank: 5, handle: "@builder_ama",      score: 448, tierLabel: "Silver", country: "🇧🇷" },
+];
+
 const openOpportunities = [
   { id: "opp-1", title: "Swahili–Portuguese Medical Translation", budget: "WLD 85",  niche: "Healthcare",    region: "Kenya → Brazil",  deadline: "5 days",  proposals: 3, urgent: true,  color: "#2f6fed", skills: ["Medical terms", "Swahili"] },
   { id: "opp-2", title: "South African Mining Regulation Consultant", budget: "WLD 220", niche: "Legal",       region: "South Africa",    deadline: "12 days", proposals: 7, urgent: false, color: "#137a57", skills: ["SA mining law", "MPRDA"] },
@@ -159,6 +167,7 @@ export function HomeView({
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
   const [showDaily, setShowDaily] = useState(false);
   const [tickerIdx, setTickerIdx] = useState(0);
+  const [activityCount, setActivityCount] = useState(() => 72 + (new Date().getMinutes() % 28));
 
   const tickerMessages = [
     "A human from South Africa answered today's question",
@@ -194,7 +203,8 @@ export function HomeView({
     };
     const id = setInterval(() => setTickerIdx((i) => i + 1), 4000);
     countdownRef.current = setInterval(tick, 60000);
-    return () => { clearInterval(id); if (countdownRef.current) clearInterval(countdownRef.current); };
+    const activityId = setInterval(() => setActivityCount((c) => c + (Math.random() < 0.35 ? 1 : 0)), 9000);
+    return () => { clearInterval(id); clearInterval(activityId); if (countdownRef.current) clearInterval(countdownRef.current); };
   }, []);
 
   const tickerMsg = tickerMessages[tickerIdx % tickerMessages.length];
@@ -299,6 +309,13 @@ export function HomeView({
       <div className="hc-ticker" aria-live="polite" aria-label="Live activity">
         <span className="hc-ticker-dot" aria-hidden="true" />
         <span className="hc-ticker-text" key={tickerIdx}>{tickerMsg}</span>
+      </div>
+
+      {/* ── 1.6 · Live social proof ──────────────────── */}
+      <div className="hc-social-proof">
+        <span className="hc-sp-item"><span className="hc-sp-dot green" />{activityCount} answered this hour</span>
+        <span className="hc-sp-sep">·</span>
+        <span className="hc-sp-item">4.9k online now</span>
       </div>
 
       {/* ── 2 · Brief HumanChain Card ────────────────── */}
@@ -482,6 +499,32 @@ export function HomeView({
           <div className="hc-network-stat">
             <strong>Live</strong>
             <span>WLD Payments</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7.3 · Leaderboard ────────────────────────── */}
+      <section className="h9-section" aria-label="Weekly leaderboard">
+        <div className="h9-section-head">
+          <strong>Top Chains This Week</strong>
+          <button onClick={() => setTab("me")} type="button" className="h9-see-all">Your rank →</button>
+        </div>
+        <div className="hc-leaderboard">
+          {LEADERBOARD_SEED.map((entry) => (
+            <div key={entry.rank} className="hc-lb-row">
+              <span className={`hc-lb-rank${entry.rank <= 3 ? " top3" : ""}`}>#{entry.rank}</span>
+              <span className="hc-lb-flag">{entry.country}</span>
+              <span className="hc-lb-handle">{entry.handle}</span>
+              <span className="hc-lb-tier">{entry.tierLabel}</span>
+              <span className="hc-lb-score">{entry.score}</span>
+            </div>
+          ))}
+          <div className="hc-lb-row hc-lb-you">
+            <span className="hc-lb-rank">#{chainScore > 448 ? "≤5" : "—"}</span>
+            <span className="hc-lb-flag">🌍</span>
+            <span className="hc-lb-handle">{worldHandle} · You</span>
+            <span className="hc-lb-tier">{tier.current.label.split(" ")[0]}</span>
+            <span className="hc-lb-score">{chainScore}</span>
           </div>
         </div>
       </section>

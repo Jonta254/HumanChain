@@ -18641,3 +18641,53 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 .hc-empty-state svg{opacity:.3;}
 .hc-empty-state strong{font-size:.86rem;color:var(--ink);}
 .hc-empty-state p{font-size:.75rem;margin:0;}
+/* ── FEATURES: onboarding, leaderboard, social proof, applications ── */
+
+/* Onboarding modal */
+.ob-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,18,12,.72);display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0);}
+.ob-card{background:var(--paper);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:28px 24px 32px;position:relative;box-shadow:0 -8px 40px rgba(0,0,0,.18);}
+.ob-skip{position:absolute;top:14px;right:16px;background:var(--paper-strong);border:none;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;color:var(--muted);cursor:pointer;}
+.ob-icon-wrap{width:64px;height:64px;border-radius:18px;display:grid;place-items:center;margin:0 auto 16px;}
+.ob-steps{display:flex;gap:6px;justify-content:center;margin-bottom:16px;}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .2s;}
+.ob-dot.active{width:22px;border-radius:4px;background:var(--green);}
+.ob-dot.done{background:rgba(19,122,87,.35);}
+.ob-title{font-size:1.15rem;font-weight:800;text-align:center;margin:0 0 10px;color:var(--ink);}
+.ob-body{font-size:.84rem;color:var(--muted);text-align:center;line-height:1.6;margin:0 0 22px;}
+.ob-cta{width:100%;padding:14px 20px;border-radius:14px;border:none;background:var(--ob-color,var(--green));color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ob-cta:active{opacity:.88;}
+
+/* Social proof strip — HomeView */
+.hc-social-proof{display:flex;align-items:center;gap:8px;padding:5px 16px;font-size:.72rem;color:var(--muted);background:rgba(19,122,87,.04);border-bottom:1px solid var(--line);}
+.hc-sp-item{display:flex;align-items:center;gap:5px;}
+.hc-sp-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.hc-sp-dot.green{background:#2bc77e;box-shadow:0 0 4px rgba(43,199,126,.5);}
+.hc-sp-sep{color:var(--line);font-size:.65rem;}
+
+/* Social proof strip — MarketplaceView */
+.hcm-social-proof{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:.72rem;color:var(--muted);background:rgba(19,122,87,.04);border-bottom:1px solid var(--line);}
+.hcm-sp-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.hcm-sp-dot.green{background:#2bc77e;box-shadow:0 0 4px rgba(43,199,126,.5);}
+.hcm-sp-sep{color:var(--line);font-size:.65rem;}
+.hcm-sp-live{display:flex;align-items:center;gap:5px;}
+
+/* Leaderboard */
+.hc-leaderboard{border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.hc-lb-row{display:grid;grid-template-columns:28px 22px 1fr auto auto;align-items:center;gap:0 8px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:.78rem;}
+.hc-lb-row:last-child{border-bottom:0;}
+.hc-lb-rank{font-size:.72rem;font-weight:800;color:var(--muted);text-align:center;}
+.hc-lb-rank.top3{color:var(--gold,#b88a1f);}
+.hc-lb-flag{font-size:.82rem;text-align:center;}
+.hc-lb-handle{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hc-lb-tier{font-size:.66rem;color:var(--muted);padding:1px 6px;background:var(--paper-strong);border-radius:999px;white-space:nowrap;}
+.hc-lb-score{font-size:.8rem;font-weight:800;color:var(--green);text-align:right;}
+.hc-lb-you{background:rgba(19,122,87,.05);}
+.hc-lb-you .hc-lb-handle{color:var(--green);}
+.h9-see-all{font-size:.72rem;color:var(--green);background:none;border:none;cursor:pointer;padding:2px 4px;font-weight:600;}
+
+/* Application inbox */
+.me-applications{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.me-app-card{background:var(--paper-strong);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+.me-app-title{font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.me-app-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);}
+.me-app-status{margin-left:auto;padding:2px 8px;background:rgba(19,122,87,.1);border:1px solid rgba(19,122,87,.2);border-radius:999px;color:var(--green);font-size:.66rem;font-weight:700;}

@@ -5,6 +5,7 @@ import type { Dispatch, SetStateAction } from "react";
 import {
   BadgeCheck,
   BookOpen,
+  Briefcase,
   CalendarCheck,
   ChevronRight,
   Compass,
@@ -196,6 +197,9 @@ export function MeView({
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
   const [showAllLedger, setShowAllLedger] = useState(false);
+  const [jobApplications] = useState<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(() => {
+    try { return JSON.parse(typeof window !== "undefined" ? (localStorage.getItem("hc_job_applications") ?? "[]") : "[]"); } catch { return []; }
+  });
 
   // Restore profile image from localStorage on first mount
   useEffect(() => {
@@ -556,6 +560,30 @@ export function MeView({
           <p>Your marketplace listings will appear here once you post an item.</p>
         )}
       </section>
+      {jobApplications.length > 0 && (
+        <section className="panel human-history-panel">
+          <div className="section-heading">
+            <span>My Applications</span>
+            <Briefcase size={18} />
+          </div>
+          <div className="me-applications">
+            {jobApplications.map((app) => (
+              <div key={app.id} className="me-app-card">
+                <div className="me-app-title">{app.title}</div>
+                <div className="me-app-meta">
+                  <span>{app.budget}</span>
+                  <span>via {app.poster}</span>
+                  <span className="me-app-status">Applied</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button className="hp-ledger-toggle" onClick={() => setTab("market")} type="button">
+            Browse more opportunities →
+          </button>
+        </section>
+      )}
+
       <section className="badge-cloud">
         {profileBadges.map((badge) => (
           <span key={badge}>{badge}</span>

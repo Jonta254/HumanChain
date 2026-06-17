@@ -24,6 +24,7 @@ export const storageKeys = {
   referralShareCount: "humanchain_referral_share_count",
   userStories: "humanchain_user_stories",
   lastStreakDate: "humanchain_last_streak_date",
+  jobApplications: "hc_job_applications",
 } as const;
 
 export function loadJsonFromStorage<T>(key: string, fallback: T): T {
