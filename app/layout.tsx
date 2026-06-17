@@ -4,10 +4,8 @@ import { Providers } from "./providers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://humanchain.app";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(appUrl),
+  metadataBase: new URL("https://humanchain.app"),
   applicationName: "HumanChain",
   title: "HumanChain",
   description:
