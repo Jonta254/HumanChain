@@ -9992,11 +9992,12 @@ textarea:focus {
 .ai-guide-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 22;
+  z-index: 56;   /* above bottom-nav (z-index:50) so sheet is fully tappable */
   display: flex;
   align-items: flex-end;
   background: rgba(20, 28, 24, 0.52);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .ai-guide-sheet {
@@ -17289,17 +17290,21 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 .ai-guide-sheet {
   display: flex !important;
   flex-direction: column !important;
-  max-height: 88dvh !important;
-  overflow: hidden !important; /* clip on sheet, scroll on children */
+  /* Use a fixed height so flex children can actually scroll in World App WebView */
+  max-height: min(88dvh, calc(var(--app-height, 100dvh) * 0.88)) !important;
+  overflow: hidden !important;
+  /* Ensure sheet clears the floating nav */
+  margin-bottom: max(10px, var(--world-safe-bottom, 0px));
 }
 /* The header already has position:sticky; this ensures content below scrolls */
 .ai-guide-topics,
 .ai-guide-content {
-  overflow-y: auto !important;
+  overflow-y: scroll !important;  /* scroll (not auto) forces scrollability in WKWebView */
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior: contain !important;
-  flex: 1 1 auto;
-  /* Let it grow to fill the sheet and scroll */
+  flex: 1 1 0 !important;         /* 0 base-size so it fills remaining space */
+  min-height: 0 !important;       /* flex collapse fix */
+  padding-bottom: 24px;
 }
 .ai-guide-intro {
   padding: 12px 20px 8px;
@@ -19276,6 +19281,198 @@ html[data-world-mini-app="true"] .bottom-nav {
     bottom: 0;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   DIGITAL PASSPORT CARD  (.hc-passport-card)
+   Premium digital ID card — dark emerald with holographic sheen
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Card container ──────────────────────────────────────────────── */
+.hc-passport-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  margin: 14px 16px 0;
+  border-radius: 22px;
+  padding: 18px 18px 0;
+  background:
+    radial-gradient(ellipse 140% 80% at 110% -10%, rgba(255,255,255,0.15), transparent 55%),
+    linear-gradient(150deg, #072d1e 0%, #0b5a40 40%, #0f6e4e 65%, #0c4a4a 100%);
+  color: #e8f5ef;
+  box-shadow:
+    0 20px 50px rgba(7, 45, 30, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.3) inset;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Holographic iridescent layer ──────────────────────────────────── */
+.hcp-holo {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 20%,
+    rgba(100, 255, 180, 0.06) 35%,
+    rgba(80, 180, 255, 0.07) 50%,
+    rgba(200, 100, 255, 0.05) 65%,
+    transparent 78%
+  );
+  border-radius: inherit;
+}
+
+/* ── Micro-grid watermark ───────────────────────────────────────────── */
+.hcp-grid {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 18px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 18px);
+}
+
+/* All direct children sit above decorative layers */
+.hc-passport-card > * { position: relative; z-index: 2; }
+
+/* ── Issuer row ────────────────────────────────────────────────────── */
+.hcp-issuer {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.hcp-issuer-text {
+  font-size: 0.58rem; font-weight: 900; letter-spacing: 0.18em;
+  text-transform: uppercase; color: rgba(255,255,255,0.55);
+}
+.hcp-doc-type {
+  font-size: 0.56rem; font-weight: 900; letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px; padding: 2px 7px; color: rgba(255,255,255,0.8);
+}
+
+/* ── Body: photo + identity + score badge ───────────────────────────── */
+.hcp-body { display: flex; align-items: flex-start; gap: 13px; }
+
+/* Photo */
+.hcp-photo-wrap { position: relative; flex: 0 0 auto; cursor: pointer; }
+.hcp-photo {
+  width: 70px; height: 86px; border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.3);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; font-weight: 900; color: rgba(255,255,255,0.6);
+}
+.hcp-photo img { width: 100%; height: 100%; object-fit: cover; }
+.hcp-photo-pip {
+  position: absolute; bottom: -3px; right: -3px;
+  width: 18px; height: 18px; border-radius: 999px;
+  background: linear-gradient(135deg, #ffe08a, #d8a93c);
+  color: #3a2a06; border: 2px solid #0b5a40;
+  display: flex; align-items: center; justify-content: center;
+}
+.hcp-photo-input { display: none; }
+
+/* Identity text */
+.hcp-identity { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.hcp-name {
+  font-size: 1.05rem; font-weight: 950; color: #fff;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.hcp-id-row { display: flex; align-items: center; gap: 7px; }
+.hcp-id { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.06em; color: rgba(255,255,255,0.7); font-family: monospace; }
+.hcp-status {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 0.58rem; font-weight: 900; padding: 2px 7px;
+  border-radius: 999px;
+}
+.hcp-status.verified { background: linear-gradient(135deg, #ffe9a8, #d8a93c); color: #3a2a06; }
+.hcp-status.preview  { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
+
+.hcp-tier-row { display: flex; align-items: center; gap: 7px; }
+.hcp-tier { font-size: 0.72rem; font-weight: 800; color: rgba(255,255,255,0.92); }
+.hcp-level {
+  font-size: 0.62rem; font-weight: 700;
+  background: rgba(255,255,255,0.13); border-radius: 999px;
+  padding: 1px 7px; color: rgba(255,255,255,0.7);
+}
+.hcp-sync { font-size: 0.6rem; color: rgba(255,255,255,0.45); font-weight: 600; margin-top: 2px; }
+
+/* Score badge (top-right corner) */
+.hcp-score-badge {
+  flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 12px; padding: 8px 11px;
+  backdrop-filter: blur(8px);
+}
+.hcp-score-num { font-size: 1.5rem; font-weight: 950; color: #fff; line-height: 1; letter-spacing: -0.02em; }
+.hcp-score-label { font-size: 0.55rem; font-weight: 900; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.65); }
+
+/* ── Metrics strip ───────────────────────────────────────────────────── */
+.hcp-metrics {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 0;
+}
+.hcp-metric {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.hcp-metric:last-child { border-right: none; }
+.hcp-metric strong { font-size: 1.05rem; font-weight: 950; color: #fff; letter-spacing: -0.01em; line-height: 1; }
+.hcp-metric span { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.55); }
+
+/* ── Footer: progress + check-in ──────────────────────────────────── */
+.hcp-footer {
+  display: flex; align-items: center; gap: 12px;
+  padding-bottom: 0;
+}
+.hcp-progress-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.hcp-progress-bar {
+  height: 5px; border-radius: 999px;
+  background: rgba(255,255,255,0.15); overflow: hidden;
+}
+.hcp-progress-fill {
+  height: 100%; border-radius: 999px; min-width: 6px;
+  background: linear-gradient(90deg, #a8e6c8, #ffe08a);
+}
+.hcp-progress-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.6); }
+.hcp-checkin {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.7rem; font-weight: 900;
+  padding: 8px 13px; border-radius: 999px;
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: 1px solid rgba(255,255,255,0.25); white-space: nowrap;
+}
+.hcp-checkin:disabled { opacity: 0.55; }
+.hcp-checkin:not(:disabled):active { background: rgba(255,255,255,0.25); }
+
+/* ── MRZ band (decorative, bottom of card) ──────────────────────── */
+.hcp-mrz {
+  background: rgba(0,0,0,0.28);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 8px 14px;
+  display: flex; flex-direction: column; gap: 2px;
+  font-size: 0.52rem; font-family: "Courier New", monospace;
+  font-weight: 700; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.35);
+  border-radius: 0 0 22px 22px;
+  margin: 0 -18px;   /* bleed to card edges */
+}
+
+/* ── Responsive: on very narrow screens, shrink photo ──────────────── */
+@media (max-width: 360px) {
+  .hcp-photo { width: 58px; height: 72px; }
+  .hcp-name  { font-size: 0.92rem; }
+  .hcp-score-num { font-size: 1.25rem; }
+}
+
+/* ── Existing treasure-profile: hide it (replaced by card above) ─── */
+.me-screen .treasure-profile { display: none; }
+
+/* ════════════════════════════════════════════════════════════════════ */
 
 /* ── Accessibility: reduced motion ──────────────────────────────────
    Per World App a11y guidance: no essential animations.              */

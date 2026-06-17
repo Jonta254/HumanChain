@@ -301,68 +301,123 @@ export function MeView({
     });
   }
 
+  // Deterministic HC-ID from username (same logic as HomeView)
+  function getHumanChainId(handle: string) {
+    const seed = (handle || "human").replace(/[^a-z0-9]/gi, "").toUpperCase() || "HUMAN";
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    const code = h.toString(36).toUpperCase().padStart(6, "0").slice(0, 6);
+    return `HC-${code.slice(0, 3)}-${code.slice(3, 6)}`;
+  }
+  const humanChainId = getHumanChainId(displayUsername);
+  const isVerified = isVerifiedWorldHuman(verifiedHuman);
+
   return (
     <div className="screen me-screen">
-      <TopBar title="Human Passport" subtitle="World profile, HP ledger, and trust status" />
-      <section className="treasure-profile">
-        <div className="treasure-mark">
-          <div className="avatar">
-            {profileImage ? (
-              <img alt="Uploaded profile" src={profileImage} />
-            ) : worldProfileImage ? (
-              <img alt={`${displayUsername} World profile`} src={worldProfileImage} />
-            ) : (
-              <span>{profileInitial}</span>
-            )}
+      <TopBar title="Human Passport" subtitle="Your verified digital identity" />
+
+      {/* ── Digital Passport Card ──────────────────────── */}
+      <section className="hc-passport-card" aria-label="Digital Human Card">
+        {/* Holographic shimmer layers */}
+        <span className="hcp-holo" aria-hidden="true" />
+        <span className="hcp-grid" aria-hidden="true" />
+
+        {/* Top row: issuer brand */}
+        <div className="hcp-issuer">
+          <span className="hcp-issuer-text">HUMANCHAIN · WORLD</span>
+          <span className="hcp-doc-type">DIGITAL ID</span>
+        </div>
+
+        {/* Middle: photo + identity */}
+        <div className="hcp-body">
+          <label className="hcp-photo-wrap" title="Upload profile image">
+            <div className="hcp-photo">
+              {profileImage ? (
+                <img alt="" src={profileImage} />
+              ) : worldProfileImage ? (
+                <img alt="" src={worldProfileImage} />
+              ) : (
+                <span>{profileInitial}</span>
+              )}
+              {isVerified && <span className="hcp-photo-pip"><BadgeCheck size={10} /></span>}
+            </div>
+            <input
+              accept="image/*"
+              className="hcp-photo-input"
+              type="file"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const imageData = String(reader.result);
+                  setProfileImage(imageData);
+                  try { localStorage.setItem("hc_profile_image", imageData); } catch {}
+                  recordHistory({ title: "Profile image updated", detail: "HumanChain profile image updated.", kind: "profile" });
+                };
+                reader.readAsDataURL(file);
+                earnPoints(5, "Profile image added to your human identity.");
+              }}
+            />
+          </label>
+
+          <div className="hcp-identity">
+            <div className="hcp-name">{displayUsername}</div>
+            <div className="hcp-id-row">
+              <span className="hcp-id">{humanChainId}</span>
+              <span className={`hcp-status ${isVerified ? "verified" : "preview"}`}>
+                <BadgeCheck size={9} />{isVerified ? "Verified" : "Preview"}
+              </span>
+            </div>
+            <div className="hcp-tier-row">
+              <span className="hcp-tier">{tier.current.label}</span>
+              <span className="hcp-level">Lv.{tier.level}</span>
+            </div>
+            <div className="hcp-sync">{syncLabel}</div>
           </div>
-          <BadgeCheck size={22} />
+
+          {/* Score badge */}
+          <div className="hcp-score-badge">
+            <span className="hcp-score-num">{chainScore}</span>
+            <span className="hcp-score-label">HP Score</span>
+          </div>
         </div>
-        <div>
-          <span className="section-kicker">Verified Human Passport</span>
-          <h2>{displayUsername}</h2>
-          <p>{identityLabel}. {syncLabel}. Trust score, HP records, market activity, and mini-app notification status stay together here.</p>
+
+        {/* Metrics strip */}
+        <div className="hcp-metrics">
+          <div className="hcp-metric"><strong>{points}</strong><span>HP</span></div>
+          <div className="hcp-metric"><strong>{streak}d</strong><span>Streak</span></div>
+          <div className="hcp-metric"><strong>{passportMetrics.completedTrades}</strong><span>Trades</span></div>
+          <div className="hcp-metric"><strong>{ownedPosts?.length ?? 0}</strong><span>Posts</span></div>
         </div>
-        <button
-          disabled={checkedInToday}
-          onClick={onCheckIn}
-          type="button"
-        >
-          <CalendarCheck size={17} />
-          {checkedInToday ? "Checked in" : "Check in"}
-        </button>
-        <p className="check-in-stamp">
-          {lastCheckInAt ? `Last check-in: ${lastCheckInAt}` : "Calendar and time check-in ready."}
-        </p>
-        <label className="profile-upload">
-          <Upload size={16} />
-          Upload profile image
-          <input
-            accept="image/*"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
 
-              if (!file) {
-                return;
-              }
+        {/* Bottom: progress bar + check-in */}
+        <div className="hcp-footer">
+          <div className="hcp-progress-wrap">
+            <div className="hcp-progress-bar" role="progressbar" aria-valuenow={tier.pct} aria-valuemin={0} aria-valuemax={100}>
+              <div className="hcp-progress-fill" style={{ width: `${tier.pct}%` }} />
+            </div>
+            <span className="hcp-progress-label">
+              {tier.next ? `${tier.toGo} pts → ${tier.next.label}` : "Founder — top of the chain"}
+            </span>
+          </div>
+          <button
+            className="hcp-checkin"
+            disabled={checkedInToday}
+            onClick={onCheckIn}
+            type="button"
+            aria-label="Daily check-in"
+          >
+            <CalendarCheck size={14} />
+            {checkedInToday ? "✓ Checked in" : "Check in"}
+          </button>
+        </div>
 
-              const reader = new FileReader();
-
-              reader.onload = () => {
-                const imageData = String(reader.result);
-                setProfileImage(imageData);
-                try { localStorage.setItem("hc_profile_image", imageData); } catch {}
-                recordHistory({
-                  title: "Profile image updated",
-                  detail: "Your HumanChain profile now has a personal image.",
-                  kind: "profile",
-                });
-              };
-              reader.readAsDataURL(file);
-              earnPoints(5, "Profile image added to your human identity.");
-            }}
-            type="file"
-          />
-        </label>
+        {/* Machine-readable strip (purely decorative) */}
+        <div className="hcp-mrz" aria-hidden="true">
+          <span>{`HCID<<${displayUsername.replace(/[^A-Z0-9]/gi, "").toUpperCase().padEnd(24, "<").slice(0, 24)}`}</span>
+          <span>{`${humanChainId.replace(/-/g, "")}<<<${chainScore.toString().padStart(6, "0")}`}</span>
+        </div>
       </section>
       <section className="profile-passport-map" aria-label="Digital passport sections">
         {[
