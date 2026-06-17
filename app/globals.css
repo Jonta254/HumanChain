@@ -17557,3 +17557,73 @@ html[data-world-mini-app="true"] .bottom-nav.bottom-nav--hc {
 html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
   background: rgba(244, 248, 246, 0.97);
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   HARD UPDATE — Moments, Market Sold, Stories reader
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Moment card avatar */
+.post-author-row { display:flex; align-items:center; gap:9px; }
+.post-avatar {
+  width:34px; height:34px; flex-shrink:0;
+  border-radius:50%;
+  background: var(--brand-grad);
+  color:#fff; font-size:0.82rem; font-weight:900;
+  display:grid; place-items:center;
+}
+.post-head-right { display:flex; align-items:center; gap:7px; flex-shrink:0; }
+.post-love-btn { font-weight:800 !important; }
+.post-love-btn.active { color:#d63a4a !important; border-color:rgba(214,58,74,0.3) !important; background:rgba(214,58,74,0.07) !important; }
+.post-hot-tag { background:rgba(239,125,105,0.12); color:#c45427; border-radius:999px; padding:2px 8px; font-size:0.63rem; font-weight:900; }
+.comment-preview-row { display:flex; align-items:baseline; gap:8px; padding:4px 0; border-top:1px solid var(--line); font-size:0.74rem; }
+.comment-av { width:20px; height:20px; border-radius:50%; background:rgba(19,122,87,0.14); color:var(--green); font-size:0.62rem; font-weight:900; display:grid; place-items:center; flex-shrink:0; }
+.comment-view-all { font-size:0.72rem; font-weight:800; color:var(--green); padding:0; background:none; border:none; margin-top:4px; }
+
+/* Market sold state */
+.hcm-badge-sold { display:inline-flex; background:rgba(214,58,74,0.85); color:#fff; font-size:0.62rem; font-weight:900; border-radius:999px; padding:3px 9px; backdrop-filter:blur(4px); letter-spacing:0.06em; }
+.hcm-stored-row.sold { opacity:0.65; }
+.hcm-stored-thumb { position:relative; flex-shrink:0; width:52px; height:52px; border-radius:10px; overflow:hidden; background:var(--paper); border:1px solid var(--line); display:grid; place-items:center; }
+.hcm-stored-thumb img { width:100%; height:100%; object-fit:cover; }
+.hcm-thumb-sold { position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,0.52); color:#fff; font-size:0.58rem; font-weight:900; letter-spacing:0.05em; }
+.hcm-stored-info { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+.hcm-stored-info strong { font-size:0.8rem; font-weight:800; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hcm-stored-info span { font-size:0.71rem; color:var(--muted); }
+.hcm-stored-info small { font-size:0.64rem; color:var(--muted); opacity:0.7; }
+.hcm-sold-tag { font-size:0.63rem; font-weight:900; color:#d63a4a; background:rgba(214,58,74,0.1); border-radius:999px; padding:3px 9px; white-space:nowrap; }
+.hcm-listings-count { margin-left:auto; font-size:0.7rem; color:var(--muted); font-weight:700; }
+.hcm-owner-controls { border:1.5px solid rgba(19,122,87,0.2); border-radius:14px; padding:12px 14px; background:rgba(19,122,87,0.04); display:flex; flex-direction:column; gap:10px; }
+.hcm-owner-label { display:flex; align-items:center; gap:5px; font-size:0.72rem; font-weight:900; color:var(--green); }
+.hcm-owner-acts { display:flex; gap:8px; }
+.hcm-mark-sold { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; border:0; border-radius:12px; background:var(--green); color:#fff; font-size:0.8rem; font-weight:800; min-height:42px; cursor:pointer; }
+.hcm-archive-btn { border:1.5px solid var(--line); border-radius:12px; background:transparent; color:var(--muted); font-size:0.78rem; font-weight:700; min-height:42px; padding:0 16px; cursor:pointer; }
+.hcm-sold-notice { display:flex; align-items:center; gap:8px; font-size:0.75rem; color:#d63a4a; font-weight:700; flex-wrap:wrap; }
+.hcm-sold-notice span { flex:1; }
+.hcm-sold-notice button { border:1px solid rgba(214,58,74,0.3); border-radius:999px; background:transparent; color:#d63a4a; font-size:0.7rem; font-weight:800; padding:4px 12px; min-height:30px; }
+.hcm-delete-confirm { border:1.5px solid rgba(214,58,74,0.25); border-radius:14px; padding:12px 14px; background:rgba(214,58,74,0.05); display:flex; flex-direction:column; gap:10px; }
+.hcm-delete-confirm p { margin:0; font-size:0.78rem; font-weight:700; color:var(--ink); }
+.hcm-delete-confirm > div { display:flex; gap:8px; }
+.hcm-act-danger { flex:1; border:0; border-radius:12px; background:#d63a4a; color:#fff; font-size:0.8rem; font-weight:800; min-height:42px; }
+
+/* Stories user list */
+.user-story-info { flex:1; display:flex; flex-direction:column; gap:3px; min-width:0; }
+.user-story-badges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:3px; }
+.story-kind-tag { font-size:0.62rem; font-weight:900; text-transform:uppercase; letter-spacing:0.06em; border-radius:999px; padding:2px 8px; background:rgba(19,122,87,0.1); color:var(--green); }
+.story-safe-tag { font-size:0.62rem; font-weight:800; border-radius:999px; padding:2px 8px; }
+.story-safe-tag.cloud { background:rgba(47,111,237,0.1); color:#2f6fed; }
+.story-safe-tag.local { background:rgba(154,119,30,0.1); color:#7a5c0a; }
+.story-delete-confirm { display:flex; align-items:center; gap:6px; font-size:0.72rem; font-weight:700; color:var(--ink); }
+.story-delete-confirm button { border-radius:999px; padding:4px 10px; min-height:28px; font-size:0.7rem; font-weight:800; }
+.story-row-actions { grid-column:1 / -1; display:flex; gap:7px; flex-wrap:wrap; }
+.story-row-actions button { min-height:38px; flex:1; }
+
+/* Story reader */
+.reader-back-btn { font-size:0.78rem; font-weight:800; white-space:nowrap; }
+.reader-top-center { flex:1; display:flex; flex-direction:column; align-items:center; gap:1px; text-align:center; min-width:0; overflow:hidden; }
+.reader-title-short { font-size:0.72rem; font-weight:900; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+.reader-page-counter { font-size:0.65rem; color:var(--muted); font-weight:700; }
+.reader-tip-btn { white-space:nowrap; }
+.reader-tip-btn.tipped { color:var(--green) !important; }
+.reader-kicker { font-size:0.68rem; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); }
+.reader-end-card { margin-top:24px; padding:16px; border:1.5px solid rgba(19,122,87,0.2); border-radius:16px; background:rgba(19,122,87,0.04); display:flex; flex-direction:column; gap:6px; }
+.reader-end-card > span { font-size:0.78rem; font-weight:900; color:var(--green); }
+.reader-end-card > p { margin:0; font-size:0.78rem; color:var(--muted); line-height:1.5; }

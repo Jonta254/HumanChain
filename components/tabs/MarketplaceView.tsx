@@ -464,6 +464,7 @@ export function MarketplaceView({
   const [boostedListings, setBoostedListings] = useState(false);
   const [adPosted, setAdPosted] = useState(false);
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [listingDraft, setListingDraft] = useState({
     area: "", bidFloor: "", condition: "", details: "",
     duration: "3 days", link: "", price: "", saleMode: "direct" as MarketplaceListing["saleMode"],
@@ -893,6 +894,9 @@ export function MarketplaceView({
     const images = getImages(activeItem);
     const isSeed = !("id" in activeItem && typeof (activeItem as MarketplaceListing).id === "number");
     const seedItem = isSeed ? (activeItem as SeedItem) : null;
+    const userListing = !isSeed ? (activeItem as MarketplaceListing) : null;
+    const isOwner = Boolean(userListing?.seller === (humanIdentity?.username ?? "@you") || userListing?.seller === humanIdentity?.wallet);
+    const isSold = userListing?.status === "sold";
     const k      = itemKey(activeItem);
     const itemComments = marketComments[k] ?? [];
     const hold   = marketHolds.find((h) => h.itemKey === k);
@@ -926,6 +930,7 @@ export function MarketplaceView({
           <div className="hcm-gallery-badges">
             <span className="hcm-badge-cond">{info.condition}</span>
             {seedItem?.isFeatured && <span className="hcm-badge-feat"><Flame size={10} />Featured</span>}
+            {isSold && <span className="hcm-badge-sold">SOLD</span>}
           </div>
         </div>
 
@@ -1056,16 +1061,66 @@ export function MarketplaceView({
             </div>
           </section>
 
-          {/* Actions */}
+          {/* Owner controls */}
+          {isOwner && (
+            <div className="hcm-owner-controls">
+              <div className="hcm-owner-label"><BadgeCheck size={13} />Your listing</div>
+              {isSold ? (
+                <div className="hcm-sold-notice">
+                  <CheckCircle2 size={14} />
+                  <span>Marked as sold — no longer visible to buyers.</span>
+                  <button onClick={() => {
+                    setMarketplaceListings((c) => c.map((l) => l.id === userListing!.id ? { ...l, status: "payment-ready" as const } : l));
+                    act("Listing restored", "Your item is visible to buyers again.");
+                  }} type="button">Relist</button>
+                </div>
+              ) : (
+                <div className="hcm-owner-acts">
+                  <button className="hcm-mark-sold" onClick={() => {
+                    setMarketplaceListings((c) => c.map((l) => l.id === userListing!.id ? { ...l, status: "sold" as const } : l));
+                    earnPoints(10, "Item marked as sold — great transaction!");
+                    recordHistory({ title: "Item sold", detail: `${userListing!.title} marked sold.`, kind: "market" });
+                    act("Marked as sold", "Buyers will see this item is no longer available.");
+                  }} type="button">
+                    <CheckCircle2 size={14} /> Mark as Sold
+                  </button>
+                  <button className="hcm-archive-btn" onClick={() => {
+                    setShowDeleteConfirm(userListing!.id);
+                  }} type="button">
+                    Archive
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Delete confirmation */}
+          {showDeleteConfirm === userListing?.id && (
+            <div className="hcm-delete-confirm">
+              <p>Remove this listing permanently?</p>
+              <div>
+                <button className="hcm-act-danger" onClick={() => {
+                  setMarketplaceListings((c) => c.filter((l) => l.id !== userListing!.id));
+                  setShowDeleteConfirm(null);
+                  setActiveItem(null);
+                  act("Listing removed", "Your item was removed from the market.");
+                }} type="button">Remove</button>
+                <button onClick={() => setShowDeleteConfirm(null)} type="button">Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {/* Actions — hidden if sold */}
+          {!isSold && (
           <div className="hcm-detail-actions">
             <button
               className="hcm-act-primary"
               aria-busy={busyAction === `hold:${k}`}
-              disabled={Boolean(busyAction)}
+              disabled={Boolean(busyAction) || isOwner}
               onClick={() => void holdItem(activeItem)}
               type="button"
             >
-              {busyAction === `hold:${k}` ? "Holding…" : "Book / Hold Item"}
+              {isOwner ? "Your listing" : busyAction === `hold:${k}` ? "Holding…" : "Book / Hold Item"}
             </button>
             <button
               className="hcm-act-chat"
@@ -1075,7 +1130,7 @@ export function MarketplaceView({
               type="button"
             >
               <MessageCircle size={15} />
-              {busyAction === `chat:${k}` ? "Opening…" : "Message Seller"}
+              {busyAction === `chat:${k}` ? "Opening…" : isOwner ? "Share via Chat" : "Message Seller"}
             </button>
             <div className="hcm-act-row">
               <button onClick={() => rateItem(activeItem)} type="button"><Star size={14} />Rate</button>
@@ -1083,6 +1138,7 @@ export function MarketplaceView({
               <button onClick={() => void shareItem(activeItem)} type="button"><Send size={14} />Share</button>
             </div>
           </div>
+          )}
 
           {/* Detail dl */}
           <dl className="hcm-detail-dl">
@@ -1460,21 +1516,35 @@ export function MarketplaceView({
           {/* Your listings */}
           {marketplaceListings.length > 0 && (
             <section className="hcm-section">
-              <div className="hcm-section-head"><Library size={14} /><strong>Your Listings</strong></div>
+              <div className="hcm-section-head">
+                <Library size={14} /><strong>Your Listings</strong>
+                <span className="hcm-listings-count">{marketplaceListings.filter((l) => l.status !== "archived").length} active</span>
+              </div>
               <div className="hcm-stored-list">
-                {marketplaceListings.slice(0, 3).map((listing) => (
-                  <div key={listing.id} className="hcm-stored-row">
+                {marketplaceListings.filter((l) => l.status !== "archived").map((listing) => (
+                  <div key={listing.id} className={`hcm-stored-row${listing.status === "sold" ? " sold" : ""}`}>
                     <button className="hcm-stored-thumb" onClick={() => setActiveItem(listing)} type="button">
                       {listing.photos[0] ? <img src={listing.photos[0].src} alt={listing.photos[0].name} /> : <Tag size={18} />}
+                      {listing.status === "sold" && <span className="hcm-thumb-sold">SOLD</span>}
                     </button>
-                    <div>
+                    <div className="hcm-stored-info">
                       <strong>{listing.title}</strong>
                       <span>{listing.price} · {listing.condition} · {listing.area}</span>
-                      <small>{listing.saleMode === "bidding" ? `Bidding, floor ${listing.bidFloor}` : "Chat-first"} · {listing.ratings ?? 0} votes · {listing.tips ?? 0} tips · {listing.dataStorageStatus === "cloud-safe" ? "☁ safe" : "local"}</small>
+                      <small>{listing.saleMode === "bidding" ? `Bidding, floor ${listing.bidFloor}` : "Direct"} · {listing.ratings ?? 0} ratings · {listing.tips ?? 0} tips</small>
                     </div>
                     <div className="hcm-stored-acts">
-                      <button onClick={() => rateItem(listing)} type="button"><Star size={12} /></button>
-                      <button onClick={() => tipItem(listing)} type="button"><Zap size={12} /></button>
+                      {listing.status === "sold" ? (
+                        <span className="hcm-sold-tag">Sold</span>
+                      ) : (
+                        <>
+                          <button onClick={() => {
+                            setMarketplaceListings((c) => c.map((l) => l.id === listing.id ? { ...l, status: "sold" as const } : l));
+                            earnPoints(10, "Item marked as sold — great transaction!");
+                            act("Marked sold", `${listing.title} is now marked as sold.`);
+                          }} title="Mark as sold" type="button"><CheckCircle2 size={13} /></button>
+                          <button onClick={() => setActiveItem(listing)} title="View detail" type="button"><Tag size={13} /></button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}

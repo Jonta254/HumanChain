@@ -1524,6 +1524,7 @@ export function StoriesView({
   const [unlockedReflections, setUnlockedReflections] = useState<Set<string>>(new Set());
   const [bookmarkedStories, setBookmarkedStories] = useState<Set<string>>(new Set());
   const [tippedStories, setTippedStories] = useState<Set<string>>(new Set());
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [fileDraft, setFileDraft] = useState<{
     dataUrl?: string;
     fileName?: string;
@@ -1769,10 +1770,14 @@ export function StoriesView({
   }
 
   if (isReading || activePublishedStory) {
+    const readPercent = Math.round(((page + 1) / activePages.length) * 100);
+    const isLastPage = page === activePages.length - 1;
+
     return (
       <div className="screen story-reader-screen">
         <section className="reader-top">
           <button
+            className="reader-back-btn"
             onClick={() => {
               setIsReading(false);
               setActivePublishedStory(null);
@@ -1780,12 +1785,14 @@ export function StoriesView({
             }}
             type="button"
           >
-            Cover
+            ← Back
           </button>
-          <span>
-            Page {current.page} / {activePages.length}
-          </span>
+          <div className="reader-top-center">
+            <span className="reader-title-short">{activeTitle}</span>
+            <span className="reader-page-counter">{page + 1} / {activePages.length}</span>
+          </div>
           <button
+            className={`reader-tip-btn${tippedStories.has(`pub:${activePublishedStory}`) ? " tipped" : ""}`}
             onClick={() =>
               openPayment({
                 title: "Tip storyteller",
@@ -1807,21 +1814,20 @@ export function StoriesView({
             }
             type="button"
           >
-            Tip
+            {tippedStories.has(`pub:${activePublishedStory}`) ? "⚡ Tipped" : "⚡ Tip"}
           </button>
           <div
             className="reader-progress"
-            style={{ "--progress": `${((page + 1) / activePages.length) * 100}%` } as React.CSSProperties}
+            style={{ "--progress": `${readPercent}%` } as React.CSSProperties}
           />
         </section>
         <article className="story-page">
           {page === 0 ? (
             <header className="reader-masthead">
-              <span>{publishedStory ? "Published story" : "Monthly human story"}</span>
+              <span className="reader-kicker">{publishedStory ? "Published story" : "Monthly human story"}</span>
               <h1>{activeTitle}</h1>
               <small>
-                Published by {activePublisher}
-                {publishedStory ? ` - ${activeAuthor}` : ""}
+                {activePublisher}{publishedStory ? ` · ${activeAuthor}` : ""}
               </small>
             </header>
           ) : null}
@@ -1834,6 +1840,12 @@ export function StoriesView({
           ) : null}
           {page > 0 ? <span className="reader-chapter">{activeTitle}</span> : null}
           <p>{current.text}</p>
+          {isLastPage && (
+            <div className="reader-end-card">
+              <span>✓ Story complete — {readPercent}% read</span>
+              <p>You finished "{activeTitle}". Leave a tip for the author or bookmark it to your reading list.</p>
+            </div>
+          )}
         </article>
         <section className="reader-actions">
           <button
@@ -1841,19 +1853,19 @@ export function StoriesView({
             onClick={() => setPage((value) => Math.max(0, value - 1))}
             type="button"
           >
-            Previous
+            ← Prev
           </button>
           <button onClick={saveStory} type="button">
             Save
           </button>
           <button
-            disabled={page === activePages.length - 1}
+            disabled={isLastPage}
             onClick={() =>
               setPage((value) => Math.min(activePages.length - 1, value + 1))
             }
             type="button"
           >
-            Next
+            Next →
           </button>
         </section>
         <section className="reader-bookmark-row">
@@ -2010,20 +2022,41 @@ export function StoriesView({
                   <Library size={19} />
                 </div>
               )}
-              <div>
-                <span>{story.kind === "file" ? "Paid file story" : "Free 200-character story"}</span>
+              <div className="user-story-info">
+                <div className="user-story-badges">
+                  <span className="story-kind-tag">{story.kind === "file" ? "File Story" : "200-char"}</span>
+                  <span className={`story-safe-tag ${story.storageStatus === "cloud-safe" ? "cloud" : "local"}`}>
+                    {story.storageStatus === "cloud-safe" ? "☁ Cloud safe" : "📱 Local safe"}
+                  </span>
+                </div>
                 <h3>{story.title}</h3>
-                <small>{story.author} - {story.createdAt} - {story.storageStatus === "cloud-safe" ? "safe receipt" : "local safe"}</small>
+                <small>{story.author} · {story.createdAt}</small>
                 <p>{story.kind === "file" ? story.fileName ?? "Uploaded story file" : story.text}</p>
               </div>
               <div className="story-row-actions">
                 <button onClick={() => setActiveUserStory(story)} type="button">
                   Read
                 </button>
+                <button onClick={() => {
+                  if (navigator.share) {
+                    void navigator.share({ title: story.title, text: `"${story.title}" by ${story.author} on HumanChain` })
+                      .catch(() => {});
+                  } else {
+                    act("Story link copied", "Share your story from World App.");
+                  }
+                }} type="button">Share</button>
                 {story.owner ? (
-                  <button className="danger" onClick={() => deleteUserStory(story.id)} type="button">
-                    Delete
-                  </button>
+                  deleteConfirmId === story.id ? (
+                    <div className="story-delete-confirm">
+                      <span>Remove?</span>
+                      <button className="danger" onClick={() => { deleteUserStory(story.id); setDeleteConfirmId(null); }} type="button">Yes</button>
+                      <button onClick={() => setDeleteConfirmId(null)} type="button">No</button>
+                    </div>
+                  ) : (
+                    <button className="danger" onClick={() => setDeleteConfirmId(story.id)} type="button">
+                      Delete
+                    </button>
+                  )
                 ) : null}
               </div>
             </article>
