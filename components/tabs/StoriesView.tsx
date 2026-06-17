@@ -1524,6 +1524,7 @@ export function StoriesView({
   const [unlockedReflections, setUnlockedReflections] = useState<Set<string>>(new Set());
   const [bookmarkedStories, setBookmarkedStories] = useState<Set<string>>(new Set());
   const [tippedStories, setTippedStories] = useState<Set<string>>(new Set());
+  const [storyRatings, setStoryRatings] = useState<Record<number, number>>({});
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [fileDraft, setFileDraft] = useState<{
     dataUrl?: string;
@@ -1764,6 +1765,27 @@ export function StoriesView({
           ) : (
             <p>{activeUserStory.text}</p>
           )}
+          <div className="user-story-rating">
+            <span className="usr-label">Rate this story</span>
+            <div className="usr-stars">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  className={`usr-star${(storyRatings[activeUserStory.id] ?? 0) >= star ? " lit" : ""}`}
+                  key={star}
+                  onClick={() => {
+                    const storyId = activeUserStory.id;
+                    setStoryRatings((prev) => ({ ...prev, [storyId]: star }));
+                    earnPoints(2, `Rated "${activeUserStory.title}"`);
+                  }}
+                  title={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                  type="button"
+                >★</button>
+              ))}
+            </div>
+            {(storyRatings[activeUserStory.id] ?? 0) > 0 && (
+              <span className="usr-thanks">Thanks for rating!</span>
+            )}
+          </div>
         </article>
       </div>
     );
@@ -2036,6 +2058,21 @@ export function StoriesView({
               <div className="story-row-actions">
                 <button onClick={() => setActiveUserStory(story)} type="button">
                   Read
+                </button>
+                <button
+                  className={`story-bookmark-btn${bookmarkedStories.has(String(story.id)) ? " active" : ""}`}
+                  onClick={() => {
+                    const key = String(story.id);
+                    setBookmarkedStories((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(key)) { next.delete(key); } else { next.add(key); }
+                      return next;
+                    });
+                  }}
+                  title={bookmarkedStories.has(String(story.id)) ? "Remove bookmark" : "Bookmark"}
+                  type="button"
+                >
+                  {bookmarkedStories.has(String(story.id)) ? "★" : "☆"}
                 </button>
                 <button onClick={() => {
                   if (navigator.share) {

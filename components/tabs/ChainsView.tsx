@@ -19,6 +19,7 @@ import {
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { getChainLinkAuthor } from "@/lib/data/chains";
+import { humanHaptic } from "@/lib/world/haptics";
 import { TopBar } from "@/components/layout/TopBar";
 import type { ChainLink, ChainPremiumState } from "@/types/chain";
 import type { HumanPost } from "@/types/content";
@@ -765,6 +766,7 @@ export function ChainsView({
     });
     earnPoints(12, "Your chain link added value to today's field.");
     keepStreak("Your link joined today's global chain.");
+    void humanHaptic("light");
   }
 
   async function publishMediaPost() {
@@ -885,6 +887,7 @@ export function ChainsView({
     });
     earnPoints(postMediaType === "video" ? 22 : 16, `Your human ${postMediaType} post joined the visual chain.`);
     keepStreak(`You posted a human ${postMediaType} into today's chain.`);
+    void humanHaptic("medium");
   }
 
   function deleteLink(link: ChainLink) {

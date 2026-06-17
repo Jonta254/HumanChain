@@ -18691,3 +18691,33 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 .me-app-title{font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:6px;}
 .me-app-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);}
 .me-app-status{margin-left:auto;padding:2px 8px;background:rgba(19,122,87,.1);border:1px solid rgba(19,122,87,.2);border-radius:999px;color:var(--green);font-size:.66rem;font-weight:700;}
+
+/* ── PHASE 3: Ask answer modes, story bookmark/rating ── */
+
+/* Ask — answered badge */
+.ask-answered-badge{font-size:.66rem;padding:2px 8px;background:rgba(19,122,87,.1);border:1px solid rgba(19,122,87,.25);border-radius:999px;color:var(--green);font-weight:700;flex-shrink:0;}
+
+/* Ask — answer mode badges */
+.ask-answer-mode-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+.ask-mode-badge{font-size:.68rem;padding:3px 9px;border-radius:999px;font-weight:700;}
+.ask-mode-badge.anon{background:rgba(90,90,110,.08);color:var(--muted);border:1px solid var(--line);}
+.ask-mode-badge.country{background:rgba(19,122,87,.08);color:var(--green);border:1px solid rgba(19,122,87,.25);}
+
+/* Ask — people also asked row */
+.ask-paa-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 14px;background:var(--paper-strong);border-radius:10px;margin-bottom:6px;cursor:pointer;}
+.ask-paa-q{font-size:.8rem;font-weight:600;color:var(--ink);flex:1;}
+.ask-paa-arrow{color:var(--muted);font-size:.9rem;flex-shrink:0;}
+
+/* Story bookmark button */
+.story-bookmark-btn{font-size:1rem;background:none;border:1px solid var(--line);border-radius:8px;padding:4px 8px;cursor:pointer;color:var(--muted);line-height:1;transition:all .15s;}
+.story-bookmark-btn.active{color:#f59e0b;border-color:#f59e0b;background:rgba(245,158,11,.06);}
+.story-bookmark-btn:active{opacity:.75;}
+
+/* User story rating */
+.user-story-rating{display:flex;align-items:center;gap:10px;padding:14px 0 6px;flex-wrap:wrap;}
+.usr-label{font-size:.75rem;color:var(--muted);}
+.usr-stars{display:flex;gap:4px;}
+.usr-star{background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--line);padding:0;line-height:1;transition:color .12s;}
+.usr-star.lit{color:#f59e0b;}
+.usr-star:hover{color:#fbbf24;}
+.usr-thanks{font-size:.72rem;color:var(--green);font-weight:600;}

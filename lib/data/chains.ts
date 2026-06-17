@@ -9,10 +9,10 @@ export const chainLinkHandleBySource: Record<string, string> = {
   Health: "@healing_chain", HumanChain: "@humanchain", Identity: "@seen_human",
   India: "@discipline_daily", Japan: "@quiet_words", Kenya: "@mara_chain",
   Love: "@love_practice", Mexico: "@workbench_mx", Money: "@money_room",
-  Philippines: "@care_bridge", Portugal: "@slow_light", Prayer: "@prayer_link",
-  Purpose: "@purpose_field", "South Africa": "@ubuntu_builder",
-  Wisdom: "@wisdom_vault", Work: "@craft_human", World: "@world_human",
-  Youth: "@youth_signal",
+  Nigeria: "@goodname_nigeria", Philippines: "@care_bridge", Portugal: "@slow_light",
+  Prayer: "@prayer_link", Purpose: "@purpose_field", "South Africa": "@ubuntu_builder",
+  Uganda: "@healing_ug", Wisdom: "@wisdom_vault", Work: "@craft_human",
+  World: "@world_human", Youth: "@youth_signal",
 };
 
 export function getChainLinkAuthor(link: ChainLink, fallback = "@verified_human"): string {
@@ -21,46 +21,21 @@ export function getChainLinkAuthor(link: ChainLink, fallback = "@verified_human"
 }
 
 export const initialLinks: ChainLink[] = [
-  {
-    country: "Kenya",
-    text: "Start before life feels perfect.",
-  },
-  {
-    country: "Brazil",
-    text: "Joy is also a form of survival.",
-  },
-  {
-    country: "India",
-    text: "Discipline is love for your future self.",
-  },
-  {
-    country: "Japan",
-    text: "Silence can be care when words are tired.",
-  },
-  {
-    country: "Ghana",
-    text: "A good name is built in the small moments nobody records.",
-  },
-  {
-    country: "Philippines",
-    text: "Begin with what your hands can do today.",
-  },
-  {
-    country: "Portugal",
-    text: "Peace is sometimes a bill paid early and a call returned honestly.",
-  },
-  {
-    country: "South Africa",
-    text: "The truth gets lighter when it is carried by more than one person.",
-  },
-  {
-    country: "Mexico",
-    text: "Family is not perfect people. It is people learning to return.",
-  },
-  {
-    country: "Canada",
-    text: "When the day is heavy, do the next kind thing.",
-  },
+  { country: "Kenya",        text: "Start before life feels perfect." },
+  { country: "Brazil",       text: "Joy is also a form of survival." },
+  { country: "India",        text: "Discipline is love for your future self." },
+  { country: "Japan",        text: "Silence can be care when words are tired." },
+  { country: "Ghana",        text: "A good name is built in the small moments nobody records." },
+  { country: "Philippines",  text: "Begin with what your hands can do today." },
+  { country: "Portugal",     text: "Peace is sometimes a bill paid early and a call returned honestly." },
+  { country: "South Africa", text: "The truth gets lighter when it is carried by more than one person." },
+  { country: "Mexico",       text: "Family is not perfect people. It is people learning to return." },
+  { country: "Canada",       text: "When the day is heavy, do the next kind thing." },
+  { country: "Nigeria",      text: "Your name is your credit. Guard it with your life." },
+  { country: "Uganda",       text: "The person who shows up quietly for others is remembered loudly." },
+  { country: "India",        text: "Discipline is the only bridge between who you are and who you want to be." },
+  { country: "Brazil",       text: "Work worth doing rarely announces itself. Start anyway." },
+  { country: "Canada",       text: "Loneliness and solitude are not the same. One drains, one restores." },
 ];
 
 export const starterAskThreads: AskThread[] = [
@@ -72,16 +47,8 @@ export const starterAskThreads: AskThread[] = [
     mode: "Text",
     targetCountry: "World",
     answers: [
-      {
-        user: "@mara_chain",
-        country: "Kenya",
-        text: "Start with one promise you can keep before sunset. Confidence returns through evidence.",
-      },
-      {
-        user: "@renato_human",
-        country: "Brazil",
-        text: "Tell one safe person the truth. Shame gets weaker when it stops being private.",
-      },
+      { user: "@mara_chain",    country: "Kenya",  text: "Start with one promise you can keep before sunset. Confidence returns through evidence." },
+      { user: "@renato_human",  country: "Brazil", text: "Tell one safe person the truth. Shame gets weaker when it stops being private." },
     ],
   },
   {
@@ -92,16 +59,80 @@ export const starterAskThreads: AskThread[] = [
     mode: "Country",
     targetCountry: "World",
     answers: [
-      {
-        user: "@builder_ama",
-        country: "Ghana",
-        text: "Build the skill that can earn in many rooms. Money follows usefulness more often than noise.",
-      },
-      {
-        user: "@tomas_work",
-        country: "Portugal",
-        text: "Earn enough to breathe, then invest time in the skill that compounds.",
-      },
+      { user: "@builder_ama",  country: "Ghana",    text: "Build the skill that can earn in many rooms. Money follows usefulness more often than noise." },
+      { user: "@tomas_work",   country: "Portugal", text: "Earn enough to breathe, then invest time in the skill that compounds." },
+    ],
+  },
+  {
+    question: "What habit changed your financial life the most?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Money",
+    mode: "Text",
+    targetCountry: "World",
+    answers: [
+      { user: "@discipline_daily", country: "India",  text: "Writing every expense down — not budgeting, just awareness. The waste became visible immediately." },
+      { user: "@quiet_courage",    country: "Canada", text: "Treating savings like a bill paid first, before any spending. Automatic transfer on payday." },
+    ],
+  },
+  {
+    question: "How do you forgive someone who never apologized?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Family",
+    mode: "Text",
+    targetCountry: "World",
+    answers: [
+      { user: "@care_bridge", country: "Philippines", text: "Forgiveness is releasing yourself. They don't have to know. You're doing it to carry less weight." },
+      { user: "@faith_link",  country: "Nigeria",     text: "I chose to see the wound they were carrying that made them hurt me. It didn't excuse — it explained." },
+    ],
+  },
+  {
+    question: "What should every entrepreneur know before quitting their job?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Business",
+    mode: "Text",
+    targetCountry: "World",
+    answers: [
+      { user: "@builder_ama",   country: "Ghana",  text: "Run the business in evenings for 90 days. Revenue proves the idea before the risk." },
+      { user: "@workbench_mx",  country: "Mexico", text: "Know your first paying customer before you quit. Not a friend — a stranger who found value and paid." },
+    ],
+  },
+  {
+    question: "What truth about love took you the longest to understand?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Love",
+    mode: "Text",
+    targetCountry: "World",
+    answers: [
+      { user: "@joy_survives", country: "Brazil",   text: "Love is a verb, not a feeling. It fades when you stop choosing it." },
+      { user: "@slow_light",   country: "Portugal", text: "You cannot give love you don't believe you deserve. Receiving matters as much as giving." },
+    ],
+  },
+  {
+    question: "What do you wish you knew at 20 that you know now?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Life",
+    mode: "Text",
+    targetCountry: "World",
+    answers: [
+      { user: "@ubuntu_builder",  country: "South Africa", text: "That discomfort is not a sign you're failing — it's a sign you're growing. I avoided too much." },
+      { user: "@culture_keeper",  country: "Ghana",        text: "To invest in two deep friendships instead of maintaining twenty shallow ones." },
+    ],
+  },
+  {
+    question: "How do you stay motivated when your progress is invisible?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Life",
+    mode: "Text",
+    targetCountry: "World",
+    answers: [
+      { user: "@future_self",   country: "India", text: "I track inputs, not outcomes. Did I show up today? That's the only metric I control." },
+      { user: "@youth_signal",  country: "Kenya", text: "I write the version of me I'm becoming. Reading it during hard weeks reminds me why I started." },
     ],
   },
 ];

@@ -24,6 +24,7 @@ import {
   isVerifiedWorldHuman,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
+import { starterAskThreads } from "@/lib/data/chains";
 import { Meter } from "@/components/ui/Meter";
 import { TopBar } from "@/components/layout/TopBar";
 import type { AskThread } from "@/types/chain";
@@ -36,49 +37,12 @@ const answerQueue = [
   "What belief from your culture made you stronger?",
   "What should a young person know before chasing money?",
   "What is one truth about love people learn too late?",
-];
-
-const starterAskThreads: AskThread[] = [
-  {
-    question: "How do I start again after losing confidence?",
-    author: "@humanchain",
-    owner: false,
-    topic: "Life",
-    mode: "Text",
-    targetCountry: "World",
-    answers: [
-      {
-        user: "@mara_chain",
-        country: "Kenya",
-        text: "Start with one promise you can keep before sunset. Confidence returns through evidence.",
-      },
-      {
-        user: "@renato_human",
-        country: "Brazil",
-        text: "Tell one safe person the truth. Shame gets weaker when it stops being private.",
-      },
-    ],
-  },
-  {
-    question: "Should I chase money first or build skill first?",
-    author: "@humanchain",
-    owner: false,
-    topic: "Money",
-    mode: "Country",
-    targetCountry: "World",
-    answers: [
-      {
-        user: "@builder_ama",
-        country: "Ghana",
-        text: "Build the skill that can earn in many rooms. Money follows usefulness more often than noise.",
-      },
-      {
-        user: "@tomas_work",
-        country: "Portugal",
-        text: "Earn enough to breathe, then invest time in the skill that compounds.",
-      },
-    ],
-  },
+  "How do you deal with people who don't believe in you?",
+  "What does real success look like away from social media?",
+  "What did failure teach you that success never could?",
+  "How do you repair a relationship that broke because of money?",
+  "What is the most important thing you learned from a parent?",
+  "What would you tell someone who feels invisible?",
 ];
 
 function loadStoredAskThreads(): AskThread[] {
@@ -263,6 +227,12 @@ export function AskView({
       return;
     }
 
+    const isAnon = anonymousAnswerUnlocked;
+    const answerUser = isAnon ? "@anonymous" : (humanIdentity?.username ?? "@you");
+    const answerCountry = countryAnswerUnlocked && selectedCountryRoute !== "World"
+      ? selectedCountryRoute
+      : "Verified human";
+
     setThreads((current) =>
       current.map((thread) =>
         thread.question === questionText
@@ -270,11 +240,10 @@ export function AskView({
               ...thread,
               answers: [
                 {
-                  user: humanIdentity?.username ?? "@you",
-                  country:
-                    getAskThreadTargetCountry(thread) === "World"
-                      ? "Verified human"
-                      : getAskThreadTargetCountry(thread),
+                  user: answerUser,
+                  country: getAskThreadTargetCountry(thread) !== "World"
+                    ? getAskThreadTargetCountry(thread)
+                    : answerCountry,
                   text: draft,
                 },
                 ...thread.answers,
@@ -285,7 +254,7 @@ export function AskView({
     );
     setAnswerDrafts((current) => ({ ...current, [questionText]: "" }));
     recordHistory({
-      title: "Ask answer published",
+      title: isAnon ? "Anonymous answer published" : "Ask answer published",
       detail: draft,
       kind: "comment",
     });
@@ -576,15 +545,16 @@ export function AskView({
               : thread.answers.filter((answer) => answer.country === targetCountry);
 
           const verdictUnlocked = unlockedVerdicts.has(thread.question);
+          const alreadyAnswered = thread.answers.some((a) => a.user === (humanIdentity?.username ?? "@you") || a.user === "@anonymous");
 
           return (
           <article className="ask-thread" key={`${thread.question}-${index}`}>
             <div className="ask-thread-top">
-              <span>{thread.topic} - {thread.author}</span>
-              <small>Trust {askerTrustScore} - {targetCountry === "World" ? thread.mode : targetCountry} route
-                {boostedQuestions.has(thread.question) ? " · 🔥 Boosted" : ""}
-                {verdictUnlocked ? " · ✓ Verdict live" : ""}
-              </small>
+              <span>{thread.topic} · {thread.author}</span>
+              <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                <small>{targetCountry === "World" ? thread.mode : `${targetCountry} route`}{boostedQuestions.has(thread.question) ? " · 🔥" : ""}{verdictUnlocked ? " · ✓ Verdict" : ""}</small>
+                {alreadyAnswered && <span className="ask-answered-badge">✓ Answered</span>}
+              </div>
             </div>
             <h3>{thread.question}</h3>
             {verdictUnlocked && visibleAnswers.length > 0 ? (
@@ -724,6 +694,12 @@ export function AskView({
               placeholder="Add your real human answer..."
               value={answerDrafts[thread.question] ?? ""}
             />
+            {(anonymousAnswerUnlocked || (countryAnswerUnlocked && selectedCountryRoute !== "World")) && (
+              <div className="ask-answer-mode-badges">
+                {anonymousAnswerUnlocked && <span className="ask-mode-badge anon">🔒 Anonymous mode</span>}
+                {countryAnswerUnlocked && selectedCountryRoute !== "World" && <span className="ask-mode-badge country">📍 {selectedCountryRoute} mode</span>}
+              </div>
+            )}
             <div className="thread-actions">
               <button onClick={() => answerThread(thread.question)} type="button">
                 Answer
@@ -788,8 +764,8 @@ export function AskView({
               </button>
             </div>
             </article>
-            );
-          }) : (
+          );
+        }) : (
             <div className="empty-feed-state">
               <strong>No matching questions</strong>
               <span>Clear search or choose another topic to keep browsing.</span>
@@ -799,11 +775,11 @@ export function AskView({
 
       <section className="panel">
         <div className="section-heading">
-          <span>Questions needing humans</span>
+          <span>People also asked</span>
           <PenLine size={18} />
         </div>
-        {answerQueue.map((prompt) => (
-          <article className="question-row" key={prompt}>
+        {answerQueue.slice(0, 5).map((prompt) => (
+          <article className="question-row ask-paa-row" key={prompt}>
             <p>{prompt}</p>
             <button
               onClick={() => {
