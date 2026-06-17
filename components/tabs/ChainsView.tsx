@@ -759,6 +759,14 @@ export function ChainsView({
       },
       ...current,
     ]);
+    // Persist moment to Supabase for real feed
+    if (humanIdentity?.wallet) {
+      void fetch("/api/db/moments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, author_wallet: humanIdentity.wallet, author_username: humanIdentity.username ?? "Human" }),
+      }).catch(() => {/* non-critical */});
+    }
     setLinkText("");
     recordHistory({
       title: "Live chain link added",

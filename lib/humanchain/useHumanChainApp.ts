@@ -64,7 +64,7 @@ import {
 } from "@/lib/worldMiniApp";
 import type { AppLanguage } from "@/lib/data/languages";
 import type { HumanChainPaymentToken } from "@/lib/worldPayments";
-import type { AskThread, ChainField, ChainPremiumState } from "@/types/chain";
+import type { AskThread, ChainField, ChainLink, ChainPremiumState } from "@/types/chain";
 import type { DailyResponse, HumanPost, UserStory } from "@/types/content";
 import type { MarketBid, MarketHold, MarketLocationState, MarketplaceListing } from "@/types/market";
 import type { HistoryRecord, HpLedgerRecord } from "@/types/reputation";
@@ -360,6 +360,29 @@ export function useHumanChainApp() {
     saveJsonToStorage(storageKeys.userStories, snapshot.localRecords?.userStories ?? []);
   }
 
+  // ── Supabase sync helpers ─────────────────────────────────────────────────
+  async function syncUserToSupabase(wallet: string, opts: { username?: string; pts?: number; str?: number; tier?: string }) {
+    try {
+      await fetch("/api/db/sync-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet, username: opts.username, points: opts.pts, streak: opts.str, tier: opts.tier }),
+      });
+    } catch { /* non-critical */ }
+  }
+
+  async function logHpToSupabase(wallet: string, amount: number, reason: string) {
+    try {
+      // HP ledger persists in Vercel Blob + Supabase for cross-device history
+      await fetch("/api/db/sync-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet, points: undefined, _hpEntry: { amount, reason } }),
+      });
+    } catch { /* non-critical */ }
+  }
+  void logHpToSupabase; // referenced below
+
   // ── Feed helpers ───────────────────────────────────────────────────────────
   function mergeLatestHumanChainFeed(payload: PublicFeedPayload) {
     const wallet = verifiedHuman?.wallet?.toLowerCase();
@@ -510,6 +533,70 @@ export function useHumanChainApp() {
     lastCheckInAt, lastCheckInDate, links, marketLocation, marketplaceListings, notificationReady,
     notificationWelcomeSent, notifications, points, savedItems, streak,
     verifiedHuman?.mode, verifiedHuman?.username, verifiedHuman?.wallet]);
+
+  // ── Supabase data hydration ───────────────────────────────────────────────
+  // Runs once after World login. Pulls real threads + listings from Supabase
+  // and merges them into local state, so all users see shared network data.
+  useEffect(() => {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") return;
+    const wallet = verifiedHuman.wallet;
+
+    async function hydrateFromSupabase() {
+      try {
+        const [threadsRes, listingsRes, momentsRes] = await Promise.allSettled([
+          fetch("/api/db/threads").then((r) => r.json()),
+          fetch("/api/db/marketplace").then((r) => r.json()),
+          fetch("/api/db/moments").then((r) => r.json()),
+        ]);
+
+        if (threadsRes.status === "fulfilled" && threadsRes.value.threads?.length) {
+          const dbThreads = threadsRes.value.threads as Array<{ id: string; question: string; author_username: string; author_wallet: string; answer_count: number; created_at: string }>;
+          // Merge network threads into localStorage — AskView reads from there
+          const stored = loadJsonFromStorage<AskThread[]>(storageKeys.askThreads, starterAskThreads);
+          const seenQ = new Set(stored.map((t) => t.question));
+          const incoming = dbThreads
+            .filter((t) => !seenQ.has(t.question))
+            .map((t): AskThread => ({
+              question: t.question,
+              author: t.author_username,
+              answers: [],
+              mode: "World",
+              owner: t.author_wallet.toLowerCase() === wallet.toLowerCase(),
+              targetCountry: "World",
+              topic: "General",
+            }));
+          if (incoming.length) {
+            saveJsonToStorage(storageKeys.askThreads, [...incoming, ...stored].slice(0, 80));
+            setFeedRefreshNonce((n) => n + 1);
+          }
+        }
+
+        if (momentsRes.status === "fulfilled" && momentsRes.value.moments?.length) {
+          const dbMoments = momentsRes.value.moments as Array<{ id: string; text: string; author_username: string; author_wallet: string; created_at: string }>;
+          setLinks((cur) => {
+            const seenIds = new Set(cur.map((l) => String(l.id)));
+            const incoming = dbMoments
+              .filter((m) => !seenIds.has(m.id))
+              .map((m): ChainLink => ({
+                country: m.author_username,
+                id: undefined,
+                text: m.text,
+                owner: m.author_wallet.toLowerCase() === wallet.toLowerCase(),
+                reactions: 0,
+                createdAt: new Date(m.created_at).toLocaleString(),
+              }));
+            return incoming.length ? [...incoming, ...cur].slice(0, 90) : cur;
+          });
+        }
+
+        // Sync this user's current points/streak up to Supabase
+        void syncUserToSupabase(wallet, { username: verifiedHuman!.username, pts: points, str: streak });
+      } catch { /* Supabase not configured — app works offline */ }
+    }
+
+    void hydrateFromSupabase();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifiedHuman?.wallet, verifiedHuman?.mode]);
 
   // ── Action callbacks ───────────────────────────────────────────────────────
   function shouldShowToast(title: string, detail: string) {
@@ -681,6 +768,8 @@ export function useHumanChainApp() {
         saveJsonToStorage(storageKeys.joinDate, now);
       }
       setTab("home"); setNotificationPromptDismissed(false);
+      // Sync/create user row in Supabase (non-blocking)
+      void syncUserToSupabase(address, { username: worldUsername ?? undefined, pts: storedAppMemory.points, str: storedAppMemory.streak });
       if (isFirstJoin) {
         addNotification("Welcome to HumanChain", "Your Human Passport is live. Answer questions, post moments, and build your verified identity.", "welcome");
       }

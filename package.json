@@ -12,6 +12,7 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm build:webpack"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.3.3",
     "@vercel/speed-insights": "^2.0.0",

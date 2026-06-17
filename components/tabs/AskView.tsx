@@ -208,8 +208,10 @@ export function AskView({
       return;
     }
 
+    const threadId = `local-${Date.now()}`;
     setThreads((current) => [
       {
+        id: threadId,
         question: cleanQuestion,
         author: humanIdentity?.username ?? "@you",
         owner: true,
@@ -220,6 +222,14 @@ export function AskView({
       },
       ...current,
     ]);
+    // Persist to Supabase (non-blocking — local state is source of truth)
+    if (humanIdentity?.wallet && humanIdentity.mode === "world") {
+      void fetch("/api/db/threads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: cleanQuestion, author_wallet: humanIdentity.wallet, author_username: humanIdentity.username ?? "Human" }),
+      }).catch(() => {/* non-critical */});
+    }
     setQuestion("");
     recordHistory({
       title: targetCountry === "World" ? "World question published" : `${targetCountry} question published`,

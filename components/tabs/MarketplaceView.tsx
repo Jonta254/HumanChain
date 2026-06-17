@@ -851,6 +851,23 @@ export function MarketplaceView({
       dataStorageStatus: "local-safe",
     };
     setMarketplaceListings((c) => [listing, ...c]);
+    // Persist to Supabase for cross-device discovery
+    if (humanIdentity?.wallet) {
+      void fetch("/api/db/marketplace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: listing.title,
+          price: Number.parseFloat(listing.price) || 0,
+          condition: listing.condition,
+          category: listing.area || "General",
+          description: listing.details || undefined,
+          seller_wallet: humanIdentity.wallet,
+          seller_username: handle,
+          location: listing.area || undefined,
+        }),
+      }).catch(() => {/* non-critical */});
+    }
     void storeData("marketplace-listing", listing.id, listing).then((r) => {
       if (!r.ok) return;
       setMarketplaceListings((c) => c.map((l) => l.id === listing.id ? { ...l, dataReceiptUrl: r.url, dataStorageStatus: "cloud-safe" } : l));
