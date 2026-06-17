@@ -284,6 +284,10 @@ const NICHES = [
   { id: "translation",   label: "Translation",   icon: Languages, color: "#246b55" },
   { id: "manufacturing", label: "Manufacturing", icon: Wrench,    color: "#ef7d69" },
   { id: "consulting",    label: "Consulting",    icon: Briefcase, color: "#b98218" },
+  { id: "tech",          label: "Tech & Dev",    icon: Sparkles,  color: "#6657d9" },
+  { id: "design",        label: "Design",        icon: Sparkles,  color: "#d87d3a" },
+  { id: "healthcare",    label: "Healthcare",    icon: ShieldCheck, color: "#0f9d6c" },
+  { id: "finance",       label: "Finance",       icon: CircleDollarSign, color: "#b98218" },
 ];
 
 const SEED_JOBS = [
@@ -327,13 +331,49 @@ const SEED_JOBS = [
     proposals: 5, urgent: false, poster: "@medtech_ph",
     skills: ["FDA PH", "Healthcare", "Market entry"], color: "#6657d9",
   },
+  {
+    id: "j6", type: "job" as const, niche: "tech",
+    title: "Next.js + Supabase Dashboard — WLD Payment Integration",
+    detail: "Build a dashboard that connects to Supabase and integrates WLD payments. Fullstack preferred.",
+    budget: "WLD 420", region: "Remote / Worldwide", deadline: "18 days",
+    proposals: 9, urgent: false, poster: "@buildwith_world",
+    skills: ["Next.js", "Supabase", "WLD API", "TypeScript"], color: "#6657d9",
+  },
+  {
+    id: "j7", type: "job" as const, niche: "design",
+    title: "Brand Identity for Verified African Startup",
+    detail: "Logo, color palette, and brand guidelines for a Web3 fintech brand. Afro-modern aesthetic.",
+    budget: "WLD 130", region: "West Africa / Remote", deadline: "10 days",
+    proposals: 4, urgent: false, poster: "@nairobi_startup",
+    skills: ["Branding", "Figma", "African design", "Logo"], color: "#d87d3a",
+  },
+  {
+    id: "j8", type: "job" as const, niche: "healthcare",
+    title: "Community Health Educator — Rural Uganda",
+    detail: "Create a 3-session curriculum on maternal health for rural women. Luganda required.",
+    budget: "WLD 95", region: "Uganda", deadline: "7 days",
+    proposals: 2, urgent: true, poster: "@health_uganda",
+    skills: ["Luganda", "Public health", "Curriculum design"], color: "#0f9d6c",
+  },
+  {
+    id: "j9", type: "job" as const, niche: "finance",
+    title: "WLD Treasury Audit — Small Cooperative",
+    detail: "Review a 6-month treasury ledger for a 40-member cooperative. On-chain records available.",
+    budget: "WLD 150", region: "East Africa", deadline: "9 days",
+    proposals: 3, urgent: false, poster: "@sacco_chain",
+    skills: ["On-chain audit", "WLD", "Cooperative finance"], color: "#b98218",
+  },
 ];
 
 const SEED_PROVIDERS = [
-  { id: "p1", name: "Kwame Asante", initial: "K", specialty: "Medical & Legal Translation", niche: "translation",   region: "Ghana",          rating: 5.0, jobs: 132, color: "#246b55" },
-  { id: "p2", name: "Amara Diallo", initial: "A", specialty: "West African Commercial Law", niche: "legal",         region: "Senegal",        rating: 4.9, jobs: 84,  color: "#2f6fed" },
-  { id: "p3", name: "Lena Morales", initial: "L", specialty: "CNC & Custom Fabrication",    niche: "manufacturing", region: "Guadalajara MX", rating: 4.8, jobs: 61,  color: "#ef7d69" },
-  { id: "p4", name: "Priya Nair",   initial: "P", specialty: "South Asian Healthcare",      niche: "consulting",    region: "Bangalore, IN",  rating: 4.7, jobs: 49,  color: "#b98218" },
+  { id: "p1", name: "Kwame Asante",  initial: "K", specialty: "Medical & Legal Translation",  niche: "translation",   region: "Ghana",           rating: 5.0, jobs: 132, color: "#246b55" },
+  { id: "p2", name: "Amara Diallo",  initial: "A", specialty: "West African Commercial Law",  niche: "legal",         region: "Senegal",         rating: 4.9, jobs: 84,  color: "#2f6fed" },
+  { id: "p3", name: "Lena Morales",  initial: "L", specialty: "CNC & Custom Fabrication",     niche: "manufacturing", region: "Guadalajara, MX", rating: 4.8, jobs: 61,  color: "#ef7d69" },
+  { id: "p4", name: "Priya Nair",    initial: "P", specialty: "South Asian Healthcare",       niche: "consulting",    region: "Bangalore, IN",   rating: 4.7, jobs: 49,  color: "#b98218" },
+  { id: "p5", name: "David Mwangi",  initial: "D", specialty: "Next.js · Supabase · WLD API", niche: "tech",          region: "Nairobi, KE",     rating: 5.0, jobs: 38,  color: "#6657d9" },
+  { id: "p6", name: "Yemi Adeyemi",  initial: "Y", specialty: "Afro-modern Brand Identity",  niche: "design",        region: "Lagos, NG",       rating: 4.9, jobs: 56,  color: "#d87d3a" },
+  { id: "p7", name: "Grace Otieno",  initial: "G", specialty: "Community & Public Health",    niche: "healthcare",    region: "Kisumu, KE",      rating: 4.8, jobs: 27,  color: "#0f9d6c" },
+  { id: "p8", name: "Ahmed Balogun", initial: "A", specialty: "Cooperative & DeFi Finance",   niche: "finance",       region: "Abuja, NG",       rating: 4.9, jobs: 43,  color: "#b98218" },
 ];
 
 const BUDGET_PRESETS   = ["WLD 25", "WLD 50", "WLD 100", "WLD 200", "WLD 500"];
@@ -488,6 +528,8 @@ export function MarketplaceView({
   const [serviceForm, setServiceFormState] = useState({
     title: "", detail: "", niche: "translation", rate: "", region: "", languages: "",
   });
+  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
+  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
   // ── Persist ───────────────────────────────────────────────────────────────
   useEffect(() => { saveJsonToStorage(storageKeys.bids, marketBids); }, [marketBids]);
@@ -1341,45 +1383,102 @@ export function MarketplaceView({
     const color = activeSvc.color;
     const poster = isJob ? (activeSvc as AnyJob).poster : (activeSvc as LocalService).provider;
     const budget = isJob ? (activeSvc as AnyJob).budget : (activeSvc as LocalService).rate;
+    const svcId = activeSvc.id;
+    const hasApplied = appliedJobs.has(svcId);
+    const hasSaved = savedJobs.has(svcId);
+    const posterInitial = poster.replace(/^@/, "").charAt(0).toUpperCase();
+
     return (
       <div className="screen hcm-svc-detail">
         <div className="hcm-svc-hero" style={{ background: `linear-gradient(135deg, ${color}22, ${color}08)`, borderBottom: `3px solid ${color}44` }}>
           <button className="hcm-back-text" onClick={() => setActiveSvc(null)} type="button"><ArrowLeft size={15} /> Services</button>
-          <span className="hcm-svc-niche" style={{ color, background: `${color}18` }}>{activeSvc.niche}</span>
+          <div className="hcm-svc-tag-row">
+            <span className="hcm-svc-niche" style={{ color, background: `${color}18` }}>{activeSvc.niche}</span>
+            {isJob && (activeSvc as AnyJob).urgent && <span className="hcm-svc-urgent">Urgent</span>}
+          </div>
           <h1>{activeSvc.title}</h1>
           <div className="hcm-svc-meta">
             <span><Globe2 size={12} />{activeSvc.region}</span>
             {isJob && <span><Clock size={12} />{(activeSvc as AnyJob).deadline} left</span>}
-            {isJob && <span><Users size={12} />{(activeSvc as AnyJob).proposals} proposals</span>}
+            {isJob && <span><Users size={12} />{(activeSvc as AnyJob).proposals + (hasApplied ? 1 : 0)} proposals</span>}
           </div>
         </div>
         <div className="hcm-svc-body">
           <div className="hcm-svc-budget-row">
             <div><span>{isJob ? "Budget" : "Starting rate"}</span><strong>{budget}</strong></div>
-            <span className="hcm-escrow-badge"><ShieldCheck size={12} />Escrow</span>
+            <span className="hcm-escrow-badge"><ShieldCheck size={12} />WLD Escrow</span>
           </div>
+
           <section className="hcm-detail-section"><strong>Description</strong><p>{activeSvc.detail}</p></section>
+
           {isJob && (activeSvc as AnyJob).skills.length > 0 && (
             <section className="hcm-detail-section">
               <strong>Skills needed</strong>
               <div className="hcm-skill-chips">{(activeSvc as AnyJob).skills.map((s) => <span key={s}>{s}</span>)}</div>
             </section>
           )}
+
+          {/* Milestone payment explainer */}
+          <div className="hcm-milestone-row">
+            <div className="hcm-milestone-step"><span>1</span><p>Apply via World Chat</p></div>
+            <div className="hcm-milestone-arrow">→</div>
+            <div className="hcm-milestone-step"><span>2</span><p>Agree on milestones</p></div>
+            <div className="hcm-milestone-arrow">→</div>
+            <div className="hcm-milestone-step"><span>3</span><p>WLD escrow releases on completion</p></div>
+          </div>
+
           <div className="hcm-detail-trust">
             <span><BadgeCheck size={12} />World ID verified</span>
             <span><ShieldCheck size={12} />WLD escrow on hire</span>
             <span><Zap size={12} />Milestone payments</span>
           </div>
+
           <div className="hcm-seller-card">
-            <div className="hcm-seller-av" style={{ background: `${color}44` }}>{poster.replace(/^@/, "").charAt(0).toUpperCase()}</div>
-            <div><strong>{poster}</strong><span>World ID Verified</span></div>
+            <div className="hcm-seller-av" style={{ background: `${color}44` }}>{posterInitial}</div>
+            <div>
+              <strong>{poster}</strong>
+              <span>World ID Verified · {activeSvc.region}</span>
+            </div>
             <BadgeCheck size={16} color="#2f6fed" />
           </div>
+
+          {/* Applied state */}
+          {hasApplied && (
+            <div className="hcm-applied-banner">
+              <CheckCircle2 size={14} /><span>You applied — your World Chat message was sent to {poster}.</span>
+            </div>
+          )}
+
           <div className="hcm-detail-actions">
-            <button className="hcm-act-primary" onClick={() => { if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying" : "contacting providers")) return; void chatWithWorld({ message: `Hi ${poster}, I'm interested in "${activeSvc.title}" on HumanChain.`, to: [poster.replace(/^@/, "")] }).then(() => act("World Chat opened", `Chat with ${poster} ready.`)).catch(() => act("Chat unavailable", "Try from World App.")); }} type="button">
-              <MessageCircle size={15} />{isJob ? "Apply via World Chat" : "Contact Provider"}
+            <button
+              className="hcm-act-primary"
+              disabled={hasApplied}
+              onClick={() => {
+                if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying to jobs" : "contacting providers")) return;
+                void chatWithWorld({
+                  message: `Hi ${poster}, I'm interested in "${activeSvc.title}" on HumanChain. Budget: ${budget}. Let's connect.`,
+                  to: [poster.replace(/^@/, "")],
+                }).then(() => {
+                  setAppliedJobs((prev) => new Set([...prev, svcId]));
+                  earnPoints(5, `Applied to ${activeSvc.title}.`);
+                  recordHistory({ title: isJob ? "Job application sent" : "Provider contacted", detail: `${activeSvc.title} · ${budget}`, kind: "market" });
+                  act("Application sent!", `World Chat opened with ${poster}.`);
+                }).catch(() => act("Chat unavailable", "Try from World App."));
+              }}
+              type="button"
+            >
+              <MessageCircle size={15} />{hasApplied ? "Applied ✓" : isJob ? "Apply via World Chat" : "Contact Provider"}
             </button>
-            <button className="hcm-act-chat" onClick={() => setActiveSvc(null)} type="button">Back to Services</button>
+            <button
+              className="hcm-act-chat"
+              onClick={() => {
+                setSavedJobs((prev) => { const s = new Set([...prev]); if (s.has(svcId)) s.delete(svcId); else s.add(svcId); return s; });
+                if (!hasSaved) earnPoints(2, "Job saved to your list.");
+              }}
+              type="button"
+            >
+              {hasSaved ? "★ Saved" : "☆ Save"}
+            </button>
           </div>
         </div>
       </div>
@@ -1734,24 +1833,38 @@ export function MarketplaceView({
             </section>
           )}
 
-          {/* Top providers */}
-          {activeNiche === "all" && !svcSearch && (
+          {/* Saved jobs */}
+          {savedJobs.size > 0 && (
             <section className="hcm-section">
-              <div className="hcm-section-head"><Star size={14} /><strong>Top Specialists</strong></div>
-              <div className="hcm-providers-row">
-                {SEED_PROVIDERS.map((p) => (
-                  <div key={p.id} className="hcm-provider-chip">
-                    <div className="hcm-pav" style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}44)` }}>
-                      {p.initial}
-                      <span className="hcm-pip"><BadgeCheck size={8} /></span>
-                    </div>
-                    <span>{p.name.split(" ")[0]}</span>
-                    <span className="hcm-prating"><Star size={9} fill="currentColor" />{p.rating}</span>
-                  </div>
+              <div className="hcm-section-head"><Star size={14} /><strong>Saved Jobs</strong><span className="hcm-count">{savedJobs.size}</span></div>
+              <div className="hcm-saved-scroll">
+                {[...SEED_JOBS, ...localJobs].filter((j) => savedJobs.has(j.id)).map((j) => (
+                  <button key={j.id} className="hcm-saved-chip" onClick={() => setActiveSvc(j)} type="button">
+                    <span style={{ background: `${j.color}18`, color: j.color }}>{j.niche}</span>
+                    <strong>{j.title.slice(0, 32)}{j.title.length > 32 ? "…" : ""}</strong>
+                    <span>{j.budget}</span>
+                  </button>
                 ))}
               </div>
             </section>
           )}
+
+          {/* Top providers */}
+          <section className="hcm-section">
+            <div className="hcm-section-head"><Star size={14} /><strong>Top Specialists</strong></div>
+            <div className="hcm-providers-row">
+              {(activeNiche === "all" ? SEED_PROVIDERS : SEED_PROVIDERS.filter((p) => p.niche === activeNiche)).map((p) => (
+                <button key={p.id} className="hcm-provider-chip" onClick={() => act(p.name, `${p.specialty} · ${p.region} · ${p.rating}★ · ${p.jobs} jobs completed on HumanChain.`)} type="button">
+                  <div className="hcm-pav" style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}44)` }}>
+                    {p.initial}
+                    <span className="hcm-pip"><BadgeCheck size={8} /></span>
+                  </div>
+                  <span>{p.name.split(" ")[0]}</span>
+                  <span className="hcm-prating"><Star size={9} fill="currentColor" />{p.rating}</span>
+                </button>
+              ))}
+            </div>
+          </section>
 
           {/* Jobs */}
           {svcJobs.length > 0 && (
@@ -1759,23 +1872,25 @@ export function MarketplaceView({
               <div className="hcm-section-head"><strong>Open Jobs</strong><span className="hcm-count">{svcJobs.length}</span></div>
               <div className="hcm-svc-list">
                 {svcJobs.map((job) => (
-                  <button key={job.id} className="hcm-svc-card" style={{ "--cc": job.color } as React.CSSProperties} onClick={() => setActiveSvc(job)} type="button">
+                  <button key={job.id} className={`hcm-svc-card${appliedJobs.has(job.id) ? " applied" : ""}`} style={{ "--cc": job.color } as React.CSSProperties} onClick={() => setActiveSvc(job)} type="button">
                     <span className="hcm-svc-bar" />
                     <div className="hcm-svc-top">
                       <span style={{ color: job.color, background: `${job.color}18` }}>{job.niche}</span>
                       {job.urgent && <span className="hcm-urgent-tag">Urgent</span>}
+                      {appliedJobs.has(job.id) && <span className="hcm-applied-tag"><CheckCircle2 size={10} />Applied</span>}
                       <span><Clock size={10} />{job.deadline}</span>
                     </div>
                     <strong>{job.title}</strong>
                     <div className="hcm-svc-meta">
                       <span><Globe2 size={11} />{job.region}</span>
-                      <span><Users size={11} />{job.proposals} proposals</span>
+                      <span><Users size={11} />{job.proposals + (appliedJobs.has(job.id) ? 1 : 0)} proposals</span>
                     </div>
                     {"skills" in job && job.skills.length > 0 && (
                       <div className="hcm-skill-chips">{job.skills.slice(0, 3).map((s) => <i key={s}>{s}</i>)}</div>
                     )}
                     <div className="hcm-svc-footer">
-                      <strong>{job.budget}</strong><span>Apply <ArrowRight size={11} /></span>
+                      <strong>{job.budget}</strong>
+                      <span>{appliedJobs.has(job.id) ? "View ✓" : "Apply"} <ArrowRight size={11} /></span>
                     </div>
                   </button>
                 ))}
