@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   BookOpen,
   CalendarCheck,
+  ChevronRight,
   Compass,
   Copy,
   Gift,
@@ -506,41 +507,29 @@ export function MeView({
                 : "Not active yet. Open Market and tap GPS or use area."}
             </small>
           </div>
-          <button onClick={() => act("Nearby market", marketLocation.label)} type="button">
-            View
+          <button onClick={() => setTab("market")} type="button">
+            Open Market
           </button>
         </article>
         {marketplaceListings.length ? (
-          marketplaceListings.slice(0, 5).map((listing) => (
+          marketplaceListings.filter((l) => l.status !== "archived").slice(0, 5).map((listing) => (
             <article className="market-vault-row" key={listing.id}>
               <div>
                 <strong>{listing.title}</strong>
-                <span>
-                  {listing.price} - {listing.condition} - {listing.photos.length} photos
-                </span>
-                <small>{listing.area} - {listing.status}</small>
+                <span>{listing.price} · {listing.condition} · {listing.photos.length} photo{listing.photos.length !== 1 ? "s" : ""}</span>
                 <small>
-                  {listing.saleMode === "bidding"
-                    ? `Bid window ${listing.duration}, floor ${listing.bidFloor || "not set"}`
-                    : "Direct inbox/chat sale"}
+                  {listing.area} ·
+                  <span className={`vault-status-badge ${listing.status}`}> {listing.status === "sold" ? "✓ Sold" : listing.status === "payment-ready" ? "Listed" : listing.status}</span>
                 </small>
-                <small>{listing.dataStorageStatus === "cloud-safe" ? "Safe data receipt attached" : "Saved locally until backend receipt is available"}</small>
+                <small>{listing.saleMode === "bidding" ? `Bidding · floor ${listing.bidFloor || "not set"}` : "Direct sale"} · {listing.dataStorageStatus === "cloud-safe" ? "☁ safe receipt" : "local safe"}</small>
               </div>
-              <button
-                onClick={() =>
-                  act(
-                    "Marketplace listing opened",
-                    `${listing.title} is stored in your HumanChain marketplace history.`,
-                  )
-                }
-                type="button"
-              >
+              <button onClick={() => setTab("market")} type="button">
                 View
               </button>
             </article>
           ))
         ) : (
-          <p>Your stored marketplace listings, business ads, and paid boosts will appear here.</p>
+          <p>Your marketplace listings will appear here once you post an item.</p>
         )}
       </section>
       <section className="badge-cloud">
@@ -553,18 +542,19 @@ export function MeView({
           <span>Human vault</span>
           <BookOpen size={18} />
         </div>
-        {["Saved Verdicts", "Monthly Stories", "Voice Notes", "Best Advice"].map(
-          (item) => (
-            <button
-              className="library-row"
-              key={item}
-              onClick={() => act(item, "Opened from your Human Vault.")}
-              type="button"
-            >
-              {item}
-            </button>
-          ),
-        )}
+        {([
+          { label: "Saved Verdicts", tab: "ask" as const, detail: "Your saved answers and verdicts from the Ask community." },
+          { label: "Monthly Stories", tab: "stories" as const, detail: "Read this month's verified Human Stories collection." },
+          { label: "Voice Notes", tab: "ask" as const, detail: "Voice answers and audio notes live in Ask." },
+          { label: "Best Advice", tab: "chains" as const, detail: "Top chain links and community advice in Chains." },
+        ]).map((item) => (
+          <button className="library-row" key={item.label}
+            onClick={() => { setTab(item.tab); act(item.label, item.detail); }}
+            type="button">
+            <span>{item.label}</span>
+            <ChevronRight size={14} />
+          </button>
+        ))}
       </section>
       <section className="panel">
         <div className="section-heading">

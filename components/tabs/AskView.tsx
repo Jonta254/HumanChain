@@ -129,6 +129,11 @@ export function AskView({
   const [boostedQuestions, setBoostedQuestions] = useState<Set<string>>(new Set());
   const [boostedAnswers, setBoostedAnswers] = useState<Set<string>>(new Set());
   const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(new Set());
+  const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
+  const [reportingAnswer, setReportingAnswer] = useState<string | null>(null);
+  const [reportedAnswers, setReportedAnswers] = useState<Set<string>>(new Set());
+  const [countryAnswerUnlocked, setCountryAnswerUnlocked] = useState(false);
+  const [anonymousAnswerUnlocked, setAnonymousAnswerUnlocked] = useState(false);
   const [askSearch, setAskSearch] = useState("");
   const [askFeedFilter, setAskFeedFilter] = useState("All");
   const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
@@ -620,12 +625,45 @@ export function AskView({
                   <small>Verified responder - helpful signal visible</small>
                   <p>{answer.text}</p>
                   <div className="trust-action-row">
-                    <button onClick={() => act("Helpful signal", "This answer was marked helpful for verdict ranking.")} type="button">
-                      Helpful
-                    </button>
-                    <button onClick={() => act("Report queued", "Choose a report reason before moderator review.")} type="button">
-                      Report
-                    </button>
+                    {(() => {
+                      const ak = `${thread.question}|${answer.user}|${answer.text}`;
+                      const isHelpful = helpfulAnswers.has(ak);
+                      const isReporting = reportingAnswer === ak;
+                      const isReported = reportedAnswers.has(ak);
+                      return (
+                        <>
+                          <button
+                            className={isHelpful ? "active" : ""}
+                            disabled={isHelpful}
+                            onClick={() => {
+                              if (isHelpful) return;
+                              setHelpfulAnswers((p) => new Set([...p, ak]));
+                              earnPoints(2, "Helpful signal strengthens the human verdict.");
+                              act("Marked helpful", "Your signal improves verdict quality for this question.");
+                            }}
+                            type="button"
+                          >
+                            {isHelpful ? "✓ Helpful" : "Helpful"}
+                          </button>
+                          {isReported ? (
+                            <span className="answer-reported-tag">Reported</span>
+                          ) : isReporting ? (
+                            <div className="answer-report-picker">
+                              {["Spam", "Fake", "Harmful", "Off-topic"].map((reason) => (
+                                <button key={reason} onClick={() => {
+                                  setReportedAnswers((p) => new Set([...p, ak]));
+                                  setReportingAnswer(null);
+                                  act("Report submitted", `"${reason}" report queued for moderation.`);
+                                }} type="button">{reason}</button>
+                              ))}
+                              <button onClick={() => setReportingAnswer(null)} type="button">Cancel</button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setReportingAnswer(ak)} type="button">Report</button>
+                          )}
+                        </>
+                      );
+                    })()}
                     {answer.user === (humanIdentity?.username ?? "@you") ? (
                       (() => {
                         const answerKey = `${thread.question}|${answer.user}|${answer.text}`;
@@ -806,11 +844,53 @@ export function AskView({
           >
             Unlock voice answer
           </button>
-          <button onClick={() => act("Country answer", "Answer as your culture sees it.")} type="button">
-            Country and culture answer
+          <button
+            className={countryAnswerUnlocked ? "active" : ""}
+            onClick={() => {
+              if (countryAnswerUnlocked) {
+                act("Country answer active", "Your next answer will carry your country and culture signal.");
+                return;
+              }
+              openPayment({
+                title: "Country & Culture Answer",
+                amount: "1 WLD",
+                detail: "Answer as your country sees it. Your answer is labelled with your verified region — adds weight to country-routed questions.",
+                success: "Country answer mode active. Your next answer carries your region signal.",
+                feature: "country-answer-mode",
+                points: 8,
+                onConfirmed: async () => {
+                  setCountryAnswerUnlocked(true);
+                  recordHistory({ title: "Country answer unlocked", detail: "1 WLD. Country-labelled answers now active.", kind: "post" });
+                },
+              });
+            }}
+            type="button"
+          >
+            {countryAnswerUnlocked ? "✓ Country answer active" : "Country and culture answer · 1 WLD"}
           </button>
-          <button onClick={() => act("Anonymous answer", "Your identity stays private.")} type="button">
-            Anonymous verified answer
+          <button
+            className={anonymousAnswerUnlocked ? "active" : ""}
+            onClick={() => {
+              if (anonymousAnswerUnlocked) {
+                act("Anonymous mode active", "Your identity stays private on your next answer.");
+                return;
+              }
+              openPayment({
+                title: "Anonymous Verified Answer",
+                amount: "1.5 WLD",
+                detail: "Answer without revealing your username. World ID still verifies you're human — only your name stays private.",
+                success: "Anonymous mode active. Your next answer will be published without your username.",
+                feature: "anonymous-answer",
+                points: 6,
+                onConfirmed: async () => {
+                  setAnonymousAnswerUnlocked(true);
+                  recordHistory({ title: "Anonymous answer unlocked", detail: "1.5 WLD. Anonymous verified answers now active.", kind: "post" });
+                },
+              });
+            }}
+            type="button"
+          >
+            {anonymousAnswerUnlocked ? "✓ Anonymous mode active" : "Anonymous verified answer · 1.5 WLD"}
           </button>
         </div>
       </section>
