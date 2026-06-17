@@ -127,6 +127,7 @@ export function AskView({
   const [threads, setThreads] = useState(loadStoredAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
   const [boostedQuestions, setBoostedQuestions] = useState<Set<string>>(new Set());
+  const [boostedAnswers, setBoostedAnswers] = useState<Set<string>>(new Set());
   const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(new Set());
   const [askSearch, setAskSearch] = useState("");
   const [askFeedFilter, setAskFeedFilter] = useState("All");
@@ -626,20 +627,38 @@ export function AskView({
                       Report
                     </button>
                     {answer.user === (humanIdentity?.username ?? "@you") ? (
-                      <button
-                        className="answer-boost-btn"
-                        onClick={() => openPayment({
-                          title: "Boost this answer to top",
-                          amount: "0.5",
-                          detail: "Your answer moves to the top of this thread for 24 hours. Verified humans see it first.",
-                          success: "Answer boosted to top of thread for 24 hours.",
-                          feature: "quick-answer-boost",
-                          points: 8,
-                        })}
-                        type="button"
-                      >
-                        ↑ Boost · 0.5 WLD
-                      </button>
+                      (() => {
+                        const answerKey = `${thread.question}|${answer.user}|${answer.text}`;
+                        const alreadyBoosted = boostedAnswers.has(answerKey);
+                        return (
+                          <button
+                            className={`answer-boost-btn${alreadyBoosted ? " active" : ""}`}
+                            disabled={alreadyBoosted}
+                            onClick={() => {
+                              if (alreadyBoosted) return;
+                              openPayment({
+                                title: "Boost this answer to top",
+                                amount: "0.5",
+                                detail: "Your answer moves to the top of this thread for 24 hours.",
+                                success: "Answer boosted — it now appears first in this thread.",
+                                feature: "quick-answer-boost",
+                                points: 8,
+                                onConfirmed: async () => {
+                                  setBoostedAnswers((prev) => new Set([...prev, answerKey]));
+                                  setThreads((current) => current.map((t) =>
+                                    t.question === thread.question
+                                      ? { ...t, answers: [answer, ...t.answers.filter((a) => a !== answer)] }
+                                      : t,
+                                  ));
+                                },
+                              });
+                            }}
+                            type="button"
+                          >
+                            {alreadyBoosted ? "↑ Boosted" : "↑ Boost · 0.5 WLD"}
+                          </button>
+                        );
+                      })()
                     ) : null}
                   </div>
                 </div>

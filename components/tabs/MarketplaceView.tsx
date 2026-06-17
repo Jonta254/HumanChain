@@ -461,6 +461,8 @@ export function MarketplaceView({
   // Listing wizard
   const [listingPhotos, setListingPhotos] = useState<Array<{ id: number; name: string; src: string }>>([]);
   const [photoPackUnlocked, setPhotoPackUnlocked] = useState(false);
+  const [boostedListings, setBoostedListings] = useState(false);
+  const [adPosted, setAdPosted] = useState(false);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [listingDraft, setListingDraft] = useState({
     area: "", bidFloor: "", condition: "", details: "",
@@ -565,9 +567,24 @@ export function MarketplaceView({
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const label = `GPS: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`;
-        setMarketLocation({ accuracy: pos.coords.accuracy, label, lat: pos.coords.latitude, lng: pos.coords.longitude, source: "browser-gps", status: "ready" });
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        let label = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+        try {
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+            { headers: { "Accept-Language": "en" }, signal: AbortSignal.timeout(5000) },
+          );
+          if (r.ok) {
+            const geo = await r.json() as { address?: { city?: string; town?: string; village?: string; county?: string; state?: string; country?: string } };
+            const a = geo.address ?? {};
+            const place = a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? "";
+            const country = a.country ?? "";
+            if (place || country) label = [place, country].filter(Boolean).join(", ");
+          }
+        } catch { /* keep coordinate fallback */ }
+        setMarketLocation({ accuracy: pos.coords.accuracy, label, lat, lng, source: "browser-gps", status: "ready" });
         setListingDraft((c) => ({ ...c, area: label }));
         earnPoints(5, "Nearby market connected with GPS consent.");
       },
@@ -575,7 +592,7 @@ export function MarketplaceView({
         setMarketLocation({ label: "Location not allowed", source: "unavailable", status: "denied" });
         act("Location not connected", "Enter your area manually below.");
       },
-      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 10_000 },
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 15_000 },
     );
   }
 
@@ -1348,8 +1365,8 @@ export function MarketplaceView({
         </div>
         {topTab === "market" ? (
           <div className="hcm-topbar-actions">
-            <button className="hcm-boost-btn" onClick={() => { if (!marketplaceListings.length) { setShowSell(true); return; } openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: () => recordHistory({ title: "Listing boosted", detail: "2 WLD boost confirmed.", kind: "market" }) }); }} type="button">
-              <Flame size={13} />Boost
+            <button className={`hcm-boost-btn${boostedListings ? " active" : ""}`} disabled={boostedListings} onClick={() => { if (!marketplaceListings.length) { setShowSell(true); return; } if (boostedListings) return; openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: async () => { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); recordHistory({ title: "Listing boosted", detail: "2 WLD boost confirmed.", kind: "market" }); } }); }} type="button">
+              <Flame size={13} />{boostedListings ? "✓ Boosted" : "Boost"}
             </button>
             <button className="hcm-sell-btn" onClick={() => setShowSell(true)} type="button">
               <PlusCircle size={14} />Sell
@@ -1432,11 +1449,11 @@ export function MarketplaceView({
             <button onClick={() => setShowSell(true)} type="button">
               <PlusCircle size={17} /><span>Sell Item</span><strong>Start</strong>
             </button>
-            <button onClick={() => openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: () => recordHistory({ title: "Boosted", detail: "2 WLD boost.", kind: "market" }) })} type="button">
+            <button disabled={boostedListings} onClick={() => { if (boostedListings) return; openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: async () => { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); recordHistory({ title: "Boosted", detail: "2 WLD boost.", kind: "market" }); } }); }} type="button">
               <Flame size={17} /><span>Boost</span><strong>2 WLD</strong>
             </button>
-            <button onClick={() => openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Market a verified shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: () => recordHistory({ title: "Business ad live", detail: "4 WLD ad confirmed.", kind: "market" }) })} type="button">
-              <HandCoins size={17} /><span>Ad</span><strong>4 WLD</strong>
+            <button disabled={adPosted} onClick={() => { if (adPosted) return; openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Market a verified shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: async () => { setAdPosted(true); recordHistory({ title: "Business ad live", detail: "4 WLD ad confirmed.", kind: "market" }); } }); }} type="button">
+              <HandCoins size={17} /><span>{adPosted ? "✓ Ad live" : "Ad"}</span><strong>4 WLD</strong>
             </button>
           </div>
 
@@ -1563,8 +1580,8 @@ export function MarketplaceView({
                 </article>
               ))}
             </div>
-            <button className="hcm-ad-post-btn" onClick={() => openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Promote your shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: () => recordHistory({ title: "Business ad live", detail: "4 WLD.", kind: "market" }) })} type="button">
-              <Send size={14} /> Post Your Business Ad — 4 WLD
+            <button className={`hcm-ad-post-btn${adPosted ? " active" : ""}`} disabled={adPosted} onClick={() => { if (adPosted) return; openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Promote your shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: async () => { setAdPosted(true); recordHistory({ title: "Business ad live", detail: "4 WLD.", kind: "market" }); } }); }} type="button">
+              <Send size={14} /> {adPosted ? "✓ Business Ad Live" : "Post Your Business Ad — 4 WLD"}
             </button>
           </section>
 
@@ -1572,12 +1589,34 @@ export function MarketplaceView({
           <section className="hcm-section">
             <div className="hcm-section-head"><CircleDollarSign size={14} /><strong>Publishing Fees</strong></div>
             <div className="hcm-plans">
-              {MARKET_PLANS.map((plan) => (
-                <button key={plan[0]} className="hcm-plan-row" onClick={() => openPayment({ title: `${plan[0]} — ${plan[1]}`, amount: plan[1], detail: plan[2], success: `${plan[0]} unlocked!`, feature: normalizePaymentFeature(`marketplace-${plan[0]}`), points: 10, onConfirmed: () => recordHistory({ title: `${plan[0]} payment`, detail: `${plan[1]} confirmed.`, kind: "market" }) })} type="button">
-                  <div><strong>{plan[0]}</strong><span>{plan[2]}</span></div>
-                  <b>{plan[1]}</b>
-                </button>
-              ))}
+              {MARKET_PLANS.map((plan) => {
+                const planKey = plan[0];
+                const alreadyActive =
+                  (planKey === "Quick listing" && showSell) ||
+                  (planKey === "Extra photos" && photoPackUnlocked) ||
+                  (planKey === "Local boost" && boostedListings) ||
+                  (planKey === "Business ad" && adPosted);
+                return (
+                  <button key={planKey} className={`hcm-plan-row${alreadyActive ? " active" : ""}`} disabled={alreadyActive} onClick={() => {
+                    if (alreadyActive) return;
+                    openPayment({
+                      title: `${planKey} — ${plan[1]}`, amount: plan[1], detail: plan[2],
+                      success: `${planKey} unlocked!`,
+                      feature: normalizePaymentFeature(`marketplace-${planKey}`), points: 10,
+                      onConfirmed: async () => {
+                        if (planKey === "Quick listing") setShowSell(true);
+                        else if (planKey === "Extra photos") setPhotoPackUnlocked(true);
+                        else if (planKey === "Local boost") { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); }
+                        else if (planKey === "Business ad") setAdPosted(true);
+                        recordHistory({ title: `${planKey} payment`, detail: `${plan[1]} confirmed.`, kind: "market" });
+                      },
+                    });
+                  }} type="button">
+                    <div><strong>{planKey}</strong><span>{plan[2]}</span></div>
+                    <b>{alreadyActive ? "✓ Active" : plan[1]}</b>
+                  </button>
+                );
+              })}
             </div>
           </section>
         </>

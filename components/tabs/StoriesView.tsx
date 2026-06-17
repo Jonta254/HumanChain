@@ -1522,6 +1522,8 @@ export function StoriesView({
   );
   const [unlockedBonusStories, setUnlockedBonusStories] = useState<Set<string>>(new Set());
   const [unlockedReflections, setUnlockedReflections] = useState<Set<string>>(new Set());
+  const [bookmarkedStories, setBookmarkedStories] = useState<Set<string>>(new Set());
+  const [tippedStories, setTippedStories] = useState<Set<string>>(new Set());
   const [fileDraft, setFileDraft] = useState<{
     dataUrl?: string;
     fileName?: string;
@@ -1725,6 +1727,10 @@ export function StoriesView({
                 success: "Story tip is prepared for World App.",
                 feature: "tip-storyteller",
                 points: 4,
+                onConfirmed: async () => {
+                  const storyKey = `user:${activeUserStory.title}`;
+                  setTippedStories((prev) => new Set([...prev, storyKey]));
+                },
               })
             }
             type="button"
@@ -1793,6 +1799,10 @@ export function StoriesView({
                 success: "Story tip is prepared for World App.",
                 feature: "tip-storyteller",
                 points: 4,
+                onConfirmed: async () => {
+                  const storyKey = `pub:${activePublishedStory}`;
+                  setTippedStories((prev) => new Set([...prev, storyKey]));
+                },
               })
             }
             type="button"
@@ -1847,20 +1857,34 @@ export function StoriesView({
           </button>
         </section>
         <section className="reader-bookmark-row">
-          <button
-            className="story-bookmark-btn"
-            onClick={() => openPayment({
-              title: "Bookmark this story",
-              amount: "0.5",
-              detail: "Save this story permanently to your HumanChain reading list. Access it from your profile any time.",
-              success: "Story bookmarked to your permanent reading list.",
-              feature: "story-bookmark",
-              points: 5,
-            })}
-            type="button"
-          >
-            ✦ Bookmark · 0.5 WLD
-          </button>
+          {(() => {
+            const bmKey = `bm:${activePublishedStory}`;
+            const alreadyBookmarked = bookmarkedStories.has(bmKey);
+            return (
+              <button
+                className={`story-bookmark-btn${alreadyBookmarked ? " active" : ""}`}
+                disabled={alreadyBookmarked}
+                onClick={() => {
+                  if (alreadyBookmarked) return;
+                  openPayment({
+                    title: "Bookmark this story",
+                    amount: "0.5",
+                    detail: "Save this story permanently to your HumanChain reading list.",
+                    success: "Story bookmarked to your permanent reading list.",
+                    feature: "story-bookmark",
+                    points: 5,
+                    onConfirmed: async () => {
+                      setBookmarkedStories((prev) => new Set([...prev, bmKey]));
+                      setSavedItems((c) => c + 1);
+                    },
+                  });
+                }}
+                type="button"
+              >
+                {alreadyBookmarked ? "✦ Saved" : "✦ Bookmark · 0.5 WLD"}
+              </button>
+            );
+          })()}
         </section>
       </div>
     );
@@ -2263,6 +2287,10 @@ export function StoriesView({
                 success: "Storyteller tip is prepared for World App.",
                 feature: "tip-storyteller",
                 points: 4,
+                onConfirmed: async () => {
+                  const storyKey = `act:${activePublishedStory}`;
+                  setTippedStories((prev) => new Set([...prev, storyKey]));
+                },
               })
             }
             type="button"

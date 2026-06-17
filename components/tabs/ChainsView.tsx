@@ -1860,6 +1860,15 @@ export function ChainsView({
                         success: "Tip is ready for World App payment.",
                         feature: "tip-chain-link",
                         points: 4,
+                        onConfirmed: async () => {
+                          setLinks((current) =>
+                            current.map((l) =>
+                              (link.id ? l.id === link.id : l.text === link.text)
+                                ? { ...l, tips: (l.tips ?? 0) + 1 }
+                                : l,
+                            ),
+                          );
+                        },
                       })
                     }
                     type="button"
