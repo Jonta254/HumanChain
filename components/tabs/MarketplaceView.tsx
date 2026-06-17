@@ -1780,7 +1780,7 @@ export function MarketplaceView({
                 const planKey = plan[0];
                 const alreadyActive =
                   (planKey === "Quick listing" && showSell) ||
-                  (planKey === "Extra photos" && photoPackUnlocked) ||
+                  (planKey === "Extra photo pack" && photoPackUnlocked) ||
                   (planKey === "Local boost" && boostedListings) ||
                   (planKey === "Business ad" && adPosted);
                 return (
@@ -1792,7 +1792,7 @@ export function MarketplaceView({
                       feature: normalizePaymentFeature(`marketplace-${planKey}`), points: 10,
                       onConfirmed: async () => {
                         if (planKey === "Quick listing") setShowSell(true);
-                        else if (planKey === "Extra photos") setPhotoPackUnlocked(true);
+                        else if (planKey === "Extra photo pack") setPhotoPackUnlocked(true);
                         else if (planKey === "Local boost") { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); }
                         else if (planKey === "Business ad") setAdPosted(true);
                         recordHistory({ title: `${planKey} payment`, detail: `${plan[1]} confirmed.`, kind: "market" });

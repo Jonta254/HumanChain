@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import {
   BadgeCheck,
@@ -37,6 +37,7 @@ import {
 import {
   getChainScore,
   getLocalDateKey,
+  getReputationTier,
   getTrustPassportMetrics,
   getWorldDisplayUsername,
   isVerifiedWorldHuman,
@@ -194,6 +195,18 @@ export function MeView({
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
+  const [showAllLedger, setShowAllLedger] = useState(false);
+
+  // Restore profile image from localStorage on first mount
+  useEffect(() => {
+    if (!profileImage) {
+      try {
+        const saved = localStorage.getItem("hc_profile_image");
+        if (saved) setProfileImage(saved);
+      } catch {}
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const displayUsername = getWorldDisplayUsername(worldContext, verifiedHuman);
   const profileInitial =
     displayUsername.replace(/^@/, "").trim().charAt(0).toUpperCase() || "H";
@@ -219,8 +232,8 @@ export function MeView({
             ? "Local safe, cloud pending"
             : "Local safe";
   const ownedPosts = humanPosts.filter((post) => post.owner);
-  // Use the shared formula so Passport score matches the Home card score.
   const chainScore = getChainScore({ points, streak, posts: ownedPosts.length, savedItems });
+  const tier = getReputationTier(chainScore);
   // Only count listings that completed a real sale (status "sold") as trades.
   const completedTrades = marketplaceListings.filter((listing) => listing.status === "sold").length;
   const passportMetrics = getTrustPassportMetrics({
@@ -331,7 +344,9 @@ export function MeView({
               const reader = new FileReader();
 
               reader.onload = () => {
-                setProfileImage(String(reader.result));
+                const imageData = String(reader.result);
+                setProfileImage(imageData);
+                try { localStorage.setItem("hc_profile_image", imageData); } catch {}
                 recordHistory({
                   title: "Profile image updated",
                   detail: "Your HumanChain profile now has a personal image.",
@@ -414,19 +429,28 @@ export function MeView({
           <Star size={18} />
         </div>
         {hpLedger.length ? (
-          <div className="hp-ledger-list">
-            {hpLedger.slice(0, 6).map((record) => (
-              <article className="hp-ledger-row" key={record.id}>
-                <strong>+{record.amount} HP</strong>
-                <span>{record.reason}</span>
-                <small>
-                  {record.date} - {record.time}
-                </small>
-              </article>
-            ))}
-          </div>
+          <>
+            <div className="hp-ledger-list">
+              {hpLedger.slice(0, showAllLedger ? hpLedger.length : 6).map((record) => (
+                <article className="hp-ledger-row" key={record.id}>
+                  <strong>+{record.amount} HP</strong>
+                  <span>{record.reason}</span>
+                  <small>{record.date} · {record.time}</small>
+                </article>
+              ))}
+            </div>
+            {hpLedger.length > 6 && (
+              <button className="hp-ledger-toggle" onClick={() => setShowAllLedger((v) => !v)} type="button">
+                {showAllLedger ? "Show less" : `Show all ${hpLedger.length} records`}
+              </button>
+            )}
+          </>
         ) : (
-          <p>Check in, answer, post, trade, or confirm a WLD action to create your first HP record.</p>
+          <div className="ledger-empty-state">
+            <Star size={22} />
+            <strong>No HP records yet</strong>
+            <p>Check in, answer the daily question, post a moment, or complete a trade to earn your first HP.</p>
+          </div>
         )}
       </section>
       <ReferralCard
@@ -543,15 +567,38 @@ export function MeView({
           <BookOpen size={18} />
         </div>
         {([
-          { label: "Saved Verdicts", tab: "ask" as const, detail: "Your saved answers and verdicts from the Ask community." },
-          { label: "Monthly Stories", tab: "stories" as const, detail: "Read this month's verified Human Stories collection." },
-          { label: "Voice Notes", tab: "ask" as const, detail: "Voice answers and audio notes live in Ask." },
-          { label: "Best Advice", tab: "chains" as const, detail: "Top chain links and community advice in Chains." },
+          {
+            label: "Saved Verdicts",
+            tab: "ask" as const,
+            detail: "Your saved answers and verdicts from the Ask community.",
+            count: historyRecords.filter((r) => r.title.toLowerCase().includes("answer") || r.title.toLowerCase().includes("question") || r.title.toLowerCase().includes("verdict")).length,
+          },
+          {
+            label: "Monthly Stories",
+            tab: "stories" as const,
+            detail: "Read this month's verified Human Stories collection.",
+            count: 1,
+          },
+          {
+            label: "Chain Links",
+            tab: "chains" as const,
+            detail: "Top chain links and community wisdom in Chains.",
+            count: links.length,
+          },
+          {
+            label: "Moments Posted",
+            tab: "chains" as const,
+            detail: "Your photo moments and proof-of-work posts.",
+            count: ownedPosts.length,
+          },
         ]).map((item) => (
           <button className="library-row" key={item.label}
             onClick={() => { setTab(item.tab); act(item.label, item.detail); }}
             type="button">
-            <span>{item.label}</span>
+            <span className="library-row-label">
+              <span>{item.label}</span>
+              {item.count > 0 && <span className="library-row-count">{item.count}</span>}
+            </span>
             <ChevronRight size={14} />
           </button>
         ))}
@@ -624,16 +671,23 @@ export function MeView({
             ) : null}
             {quickToolPanel === "mirror" ? (
               <>
-                <strong>Deep Human Mirror ready</strong>
-                <p>
-                  Your private mirror now reads profile activity, check-ins, saved posts, and chain
-                  signals. It stays in your Human Vault after payment confirmation.
-                </p>
-                <div className="mirror-signal-row">
-                  <span>{chainScore} score</span>
-                  <span>{streak} day streak</span>
-                  <span>{ownedPosts.length} posts</span>
+                <strong>Deep Human Mirror</strong>
+                <p className="mirror-intro">Your private reflection based on your HumanChain activity and signals:</p>
+                <div className="mirror-insights">
+                  {[
+                    { label: "Chain strength", value: chainScore >= 200 ? "Growing — keep posting" : "Building — start with a check-in" },
+                    { label: "Consistency", value: streak >= 7 ? `Strong — ${streak}-day streak active` : streak >= 3 ? `Emerging — ${streak} days in a row` : "Needs nurturing — answer daily" },
+                    { label: "Community reach", value: `${links.length + ownedPosts.length} touchpoints across fields` },
+                    { label: "Trust trajectory", value: passportMetrics.helpfulScore },
+                    { label: "Next milestone", value: tier.next ? `${tier.toGo} pts to ${tier.next.label}` : "Founder — top of the chain" },
+                  ].map((insight) => (
+                    <div className="mirror-insight-row" key={insight.label}>
+                      <span>{insight.label}</span>
+                      <strong>{insight.value}</strong>
+                    </div>
+                  ))}
                 </div>
+                <p className="mirror-note">This reflection is private and stored in your Human Vault.</p>
               </>
             ) : null}
             {quickToolPanel === "voice" ? (

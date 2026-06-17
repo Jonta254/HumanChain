@@ -86,9 +86,9 @@ const CATEGORIES: Category[] = [
         title: "Voice Answer",
         sub: "Record your voice — carries trust text cannot",
         hp: "+10 HP",
-        cost: "Free",
+        cost: "2 WLD",
         tab: "ask",
-        detail: "Record a real voice answer. A human voice carries more trust than typed text — it is harder to fake.",
+        detail: "Unlock voice answers in Ask for 2 WLD. A human voice carries more trust than typed text — harder to fake.",
       },
     ],
   },
@@ -187,9 +187,11 @@ const CATEGORIES: Category[] = [
   },
 ];
 
-const ALL_ACTIONS = CATEGORIES.flatMap((c) => c.actions.map((a) => ({ ...a, categoryId: c.id, categoryColor: c.accent })));
+const ALL_ACTIONS = CATEGORIES.flatMap((c) => c.actions.map((a) => ({ ...a, categoryId: c.id, categoryLabel: c.label, categoryColor: c.accent })));
 const TOTAL_HP = ALL_ACTIONS.reduce((sum, a) => sum + Number(a.hp.replace(/\D/g, "")), 0);
-const FEATURED = ALL_ACTIONS.reduce((top, a) => (Number(a.hp.replace(/\D/g, "")) > Number(top.hp.replace(/\D/g, "")) ? a : top), ALL_ACTIONS[0]);
+// Rotate featured action daily (7 days × 11 actions)
+const FEATURED_IDS = ["proof", "challenge", "job", "story", "ask", "service", "moment"];
+const FEATURED = ALL_ACTIONS.find((a) => a.id === FEATURED_IDS[new Date().getDay() % FEATURED_IDS.length]) ?? ALL_ACTIONS[0];
 
 export function CreateView({
   act,
@@ -282,7 +284,7 @@ export function CreateView({
           {/* Action grid for selected category */}
           <div className="create-hub-cat-grid create-page-grid">
             {currentCategory.actions.map((a) => (
-              <ActionCard key={a.id} a={a} onClick={() => launch(a)} />
+              <ActionCard key={a.id} a={a as EnrichedAction} onClick={() => launch(a)} />
             ))}
           </div>
         </>
@@ -296,14 +298,14 @@ export function CreateView({
           {filteredActions && filteredActions.length > 0 ? (
             <div className="create-hub-cat-grid create-page-grid">
               {filteredActions.map((a) => (
-                <ActionCard key={a.id} a={a} onClick={() => launch(a)} />
+                <ActionCard key={a.id} a={a as EnrichedAction} onClick={() => launch(a)} showCategory />
               ))}
             </div>
           ) : (
             <div className="create-page-empty">
               <Search size={26} />
-              <strong>No actions found</strong>
-              <p>Try a different keyword.</p>
+              <strong>No actions match</strong>
+              <p>Try "moment", "job", "story", or "ask".</p>
             </div>
           )}
         </div>
@@ -312,7 +314,9 @@ export function CreateView({
   );
 }
 
-function ActionCard({ a, onClick }: { a: CreateAction; onClick: () => void }) {
+type EnrichedAction = CreateAction & { categoryId: string; categoryLabel?: string; categoryColor?: string };
+
+function ActionCard({ a, onClick, showCategory }: { a: EnrichedAction; onClick: () => void; showCategory?: boolean }) {
   const Icon = a.icon;
   return (
     <button
@@ -327,6 +331,9 @@ function ActionCard({ a, onClick }: { a: CreateAction; onClick: () => void }) {
       <span className="create-hub-text">
         <strong>{a.title}</strong>
         <small>{a.sub}</small>
+        {showCategory && a.categoryLabel && (
+          <span className="create-hub-cat-label" style={{ color: a.categoryColor }}>{a.categoryLabel}</span>
+        )}
       </span>
       <span className="create-hub-badges">
         <span className="create-hub-hp-badge">{a.hp}</span>

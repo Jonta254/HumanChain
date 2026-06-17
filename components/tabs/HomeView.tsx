@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
@@ -169,14 +169,41 @@ export function HomeView({
     "7 humans reached Gold tier this week",
     "214k verified humans active in 38 countries",
     "AI Guide helped 128 humans today",
+    "A verified trade completed in Nairobi 2 minutes ago",
+    "New story submitted from the Philippines",
+    "Lagos-routed question received 12 answers today",
+    "Faith & Prayer gained 47 new chain links",
+    "A healthcare worker from Uganda just got hired",
+    "WLD escrow protected a Swahili translation job",
   ];
 
+  const [dailyCountdown, setDailyCountdown] = useState(() => {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    return Math.floor((midnight.getTime() - now.getTime()) / 1000);
+  });
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      setDailyCountdown(Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000)));
+    };
     const id = setInterval(() => setTickerIdx((i) => i + 1), 4000);
-    return () => clearInterval(id);
+    countdownRef.current = setInterval(tick, 60000);
+    return () => { clearInterval(id); if (countdownRef.current) clearInterval(countdownRef.current); };
   }, []);
 
   const tickerMsg = tickerMessages[tickerIdx % tickerMessages.length];
+
+  function formatCountdown(secs: number) {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
 
   const homeCopy = appLanguage.home;
   const worldHandle = getWorldDisplayUsername(worldContext, verifiedHuman);
@@ -196,7 +223,6 @@ export function HomeView({
   const humanChainId = getHumanChainId(worldHandle);
   const strongestBadge = getStrongestBadge({ isVerified, streak, posts: userPostCount, trades: completedTrades });
   const communitySpotlight = chainFields[(new Date().getDate() - 1) % chainFields.length];
-  const todaysOpportunity = openOpportunities[0];
   const greeting = getGreeting();
   const joinLabel = formatJoinDate(joinedAt);
 
@@ -330,6 +356,12 @@ export function HomeView({
           <div className="hc-insight-body">
             <span className="hc-insight-kicker">AI Guide · your next best move</span>
             <p>{aiInsight}</p>
+            {dailyAnswered && (
+              <div className="hc-daily-done">
+                <span className="hc-daily-done-check">✓</span>
+                <span>Answered today · Next question in <strong>{formatCountdown(dailyCountdown)}</strong></span>
+              </div>
+            )}
             {isVerified && !dailyAnswered && (
               showDaily ? (
                 <div className="hc-insight-daily">
@@ -397,34 +429,39 @@ export function HomeView({
         </button>
       </section>
 
-      {/* ── 6 · Today's opportunity (one) ────────────── */}
-      <section className="h9-section" aria-label="Today's opportunity">
+      {/* ── 6 · Open Opportunities (horizontal scroll) ── */}
+      <section className="h9-section" aria-label="Open opportunities">
         <div className="h9-section-head">
-          <strong>Today&rsquo;s Opportunity</strong>
+          <strong>Open Opportunities</strong>
           <span className="h9-live-pill"><span className="h9-pulse" />Live</span>
         </div>
-        <button
-          className="h9-opp hc-opp-single"
-          style={{ "--opp-color": todaysOpportunity.color } as React.CSSProperties}
-          onClick={() => { act(todaysOpportunity.title, `${todaysOpportunity.niche} in ${todaysOpportunity.region}. Budget: ${todaysOpportunity.budget}.`); setTab("market"); }}
-          type="button"
-        >
-          <div className="h9-opp-top">
-            <span className="h9-opp-tag" style={{ color: todaysOpportunity.color, background: `${todaysOpportunity.color}18` }}>{todaysOpportunity.niche}</span>
-            {todaysOpportunity.urgent && <span className="h9-opp-urgent">Urgent</span>}
-            <span className="h9-opp-deadline"><Clock size={11} />{todaysOpportunity.deadline}</span>
-          </div>
-          <strong className="h9-opp-title">{todaysOpportunity.title}</strong>
-          <div className="h9-opp-meta">
-            <span><Globe2 size={12} />{todaysOpportunity.region}</span>
-            <span><Users size={12} />{todaysOpportunity.proposals} applied</span>
-          </div>
-          <div className="h9-opp-footer">
-            <strong>{todaysOpportunity.budget}</strong>
-            <span className="h9-opp-apply">Apply <ArrowRight size={12} /></span>
-          </div>
-          <span className="h9-opp-bar" style={{ background: todaysOpportunity.color }} />
-        </button>
+        <div className="h9-opp-scroll">
+          {openOpportunities.map((opp) => (
+            <button
+              key={opp.id}
+              className="h9-opp"
+              style={{ "--opp-color": opp.color } as React.CSSProperties}
+              onClick={() => { act(opp.title, `${opp.niche} in ${opp.region}. Budget: ${opp.budget}.`); setTab("market"); }}
+              type="button"
+            >
+              <div className="h9-opp-top">
+                <span className="h9-opp-tag" style={{ color: opp.color, background: `${opp.color}18` }}>{opp.niche}</span>
+                {opp.urgent && <span className="h9-opp-urgent">Urgent</span>}
+                <span className="h9-opp-deadline"><Clock size={11} />{opp.deadline}</span>
+              </div>
+              <strong className="h9-opp-title">{opp.title}</strong>
+              <div className="h9-opp-meta">
+                <span><Globe2 size={12} />{opp.region}</span>
+                <span><Users size={12} />{opp.proposals} applied</span>
+              </div>
+              <div className="h9-opp-footer">
+                <strong>{opp.budget}</strong>
+                <span className="h9-opp-apply">Apply <ArrowRight size={12} /></span>
+              </div>
+              <span className="h9-opp-bar" style={{ background: opp.color }} />
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* ── 7 · Live network stats ───────────────────── */}
