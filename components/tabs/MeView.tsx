@@ -373,7 +373,7 @@ export function MeView({
             </div>
             {groupedLedger.length ? (
               <div className="hp-ledger-list">
-                {groupedLedger.slice(0, 8).map((record) => (
+                {groupedLedger.slice(0, 12).map((record) => (
                   <article className="hp-ledger-row" key={record.id}>
                     <strong>+{record.count > 1 ? record.count * record.amount : record.amount} HP</strong>
                     <span>{record.count > 1 ? `${record.count}× ` : ""}{record.reason}</span>
@@ -382,7 +382,7 @@ export function MeView({
                 ))}
               </div>
             ) : (
-              <p>Check in, answer, post, trade, or confirm a WLD action to create your first HP record.</p>
+              <p>Check in, answer questions, post moments, or confirm WLD payments to build your HP record.</p>
             )}
           </section>
 
@@ -565,7 +565,7 @@ export function MeView({
             </div>
             {groupedLedger.length ? (
               <div className="hp-ledger-list">
-                {groupedLedger.slice(0, 20).map((record) => (
+                {groupedLedger.slice(0, 30).map((record) => (
                   <article className="hp-ledger-row" key={record.id}>
                     <strong>+{record.count > 1 ? record.count * record.amount : record.amount} HP</strong>
                     <span>{record.count > 1 ? `${record.count}× ` : ""}{record.reason}</span>
@@ -612,9 +612,20 @@ export function MeView({
               <span>Human vault</span>
               <BookOpen size={18} />
             </div>
-            {["Saved Verdicts", "Monthly Stories", "Voice Notes", "Best Advice"].map((item) => (
-              <button className="library-row" key={item} onClick={() => act(item, "Opened from your Human Vault.")} type="button">
-                {item}
+            {([
+              { label: "Saved Verdicts", tab: "ask" as const, detail: "Your saved answers and verdicts from the Ask community." },
+              { label: "Monthly Stories", tab: "stories" as const, detail: "Read this month's verified Human Stories collection." },
+              { label: "Voice Notes", tab: "ask" as const, detail: "Voice answers and audio notes live in Ask." },
+              { label: "Best Advice", tab: "chains" as const, detail: "Top chain links and community advice in Chains." },
+            ]).map((item) => (
+              <button
+                className="library-row"
+                key={item.label}
+                onClick={() => { setTab(item.tab); act(item.label, item.detail); }}
+                type="button"
+              >
+                <span>{item.label}</span>
+                <ChevronRight size={14} />
               </button>
             ))}
           </section>

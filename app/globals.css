@@ -2117,12 +2117,10 @@ html[data-world-mini-app="true"] .floating-profile-button {
   align-items: center;
   gap: 12px;
   padding: 14px;
-  border: 1px solid rgba(36, 107, 85, 0.14);
+  border: 1px solid rgba(19, 122, 87, 0.2);
   border-radius: 18px;
-  background:
-    linear-gradient(135deg, #fffdf8, #eef8f3),
-    radial-gradient(circle at 100% 0%, rgba(47, 111, 237, 0.08), transparent 8rem);
-  box-shadow: 0 10px 24px rgba(62, 48, 31, 0.06);
+  background: linear-gradient(135deg, rgba(19,122,87,0.06), var(--paper-strong));
+  box-shadow: 0 4px 16px rgba(19,122,87,0.08);
 }
 
 .moment-create-prompt div,
@@ -2158,12 +2156,13 @@ html[data-world-mini-app="true"] .floating-profile-button {
   gap: 7px;
   border: 0;
   border-radius: 999px;
-  padding: 8px 12px;
-  color: #fffdf8;
-  background: var(--green);
+  padding: 8px 14px;
+  color: #fff;
+  background: var(--brand-grad);
   font-size: 0.78rem;
   font-weight: 950;
   white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(19,122,87,0.22);
 }
 
 .composer-title-row {
@@ -5598,7 +5597,13 @@ button.danger {
   border-radius: 14px;
   padding: 10px 12px;
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
 }
+.library-row > span:first-child { flex: 1; }
+.library-row svg { flex-shrink: 0; color: var(--muted); }
 
 .quick-tool-result {
   display: grid;
@@ -17968,13 +17973,15 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 /* Score breakdown bars */
 .rep-score-breakdown { margin: 0 16px 12px; }
 .rep-score-formula {
-  font-size: 0.65rem;
-  color: var(--muted);
-  margin: 0 0 12px;
-  padding: 8px 10px;
-  background: var(--line);
+  font-size: 0.68rem;
+  color: var(--green);
+  margin: 0 0 14px;
+  padding: 9px 12px;
+  background: rgba(19,122,87,0.08);
+  border: 1px solid rgba(19,122,87,0.18);
   border-radius: 10px;
-  font-weight: 700;
+  font-weight: 800;
+  line-height: 1.4;
 }
 .rep-bar-row {
   margin-bottom: 10px;
