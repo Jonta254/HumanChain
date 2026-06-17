@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ShieldCheck, X, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle, ShieldCheck, X, Zap } from "lucide-react";
 import {
   humanChainPaymentTokens,
   isValidHumanChainPaymentAmount,
@@ -26,6 +26,13 @@ export function PaymentSheet({
   const [customAmount, setCustomAmount] = useState(() =>
     parsePaymentAmount(payment.amount).toString(),
   );
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!busy) { setElapsed(0); return; }
+    const id = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [busy]);
 
   const amount = payment.allowCustomAmount
     ? Number.parseFloat(customAmount)
@@ -98,10 +105,39 @@ export function PaymentSheet({
         {/* Confirming state */}
         {busy && (
           <div className="ps-confirming" role="status" aria-live="polite">
-            <span className="ps-dot" />
-            <span className="ps-dot" />
-            <span className="ps-dot" />
-            <span>Confirming on World Chain…</span>
+            <div className="ps-confirm-ring" aria-hidden="true">
+              <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="22" cy="22" r="18" stroke="rgba(19,122,87,0.12)" strokeWidth="3.5" />
+                <circle cx="22" cy="22" r="18" stroke="var(--green)" strokeWidth="3.5"
+                  strokeLinecap="round" strokeDasharray="113" strokeDashoffset="28"
+                  className="ps-ring-arc" />
+              </svg>
+              <ShieldCheck size={16} className="ps-ring-icon" />
+            </div>
+            <div className="ps-confirm-body">
+              <strong className="ps-confirm-title">Verifying on World Chain</strong>
+              <p className="ps-confirm-note">This can take 10–30 seconds. Please stay on this screen.</p>
+              <div className="ps-confirm-steps">
+                <span className="ps-cstep done"><CheckCircle size={11} />Payment sent</span>
+                <span className="ps-cstep-arrow">›</span>
+                <span className={`ps-cstep ${elapsed >= 3 ? "active" : "pending"}`}>
+                  <span className="ps-cstep-dot" />Verifying
+                </span>
+                <span className="ps-cstep-arrow">›</span>
+                <span className="ps-cstep pending"><span className="ps-cstep-dot" />Unlocking</span>
+              </div>
+              {elapsed >= 8 && (
+                <p className="ps-confirm-patience">
+                  Still confirming… blockchain verification takes a moment. Do not close this screen.
+                </p>
+              )}
+              {elapsed >= 20 && (
+                <p className="ps-confirm-patience ps-confirm-patience-slow">
+                  Taking longer than usual — network may be busy. Your payment is safe. Hang tight.
+                </p>
+              )}
+              <span className="ps-confirm-elapsed">{elapsed}s elapsed</span>
+            </div>
           </div>
         )}
 

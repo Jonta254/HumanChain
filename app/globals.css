@@ -18996,3 +18996,87 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 
 /* ── Bottom breathing room ──────────────────────────────────────────────── */
 .home-v9 { padding-bottom: calc(100px + var(--world-safe-bottom,0px)) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAYMENT SHEET — confirmation patience UI
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ps-confirming {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, rgba(19,122,87,0.07), rgba(47,111,237,0.04)) !important;
+  border: 1.5px solid rgba(19,122,87,0.18) !important;
+}
+
+/* Animated ring */
+.ps-confirm-ring {
+  flex-shrink: 0;
+  position: relative;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ps-confirm-ring svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  animation: ps-ring-spin 1.8s linear infinite;
+}
+@keyframes ps-ring-spin { to { transform: rotate(360deg); } }
+.ps-ring-arc { transition: stroke-dashoffset 0.5s ease; }
+.ps-ring-icon { color: var(--green); position: relative; z-index: 1; }
+
+/* Text body */
+.ps-confirm-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.ps-confirm-title { font-size: 0.88rem; font-weight: 900; color: var(--ink); }
+.ps-confirm-note { margin: 0; font-size: 0.74rem; color: var(--muted); line-height: 1.4; }
+
+/* Step chips */
+.ps-confirm-steps {
+  display: flex; align-items: center; gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.ps-cstep {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.64rem; font-weight: 800;
+  border-radius: 999px; padding: 3px 8px;
+}
+.ps-cstep.done   { background: rgba(19,122,87,0.12); color: var(--green); }
+.ps-cstep.active { background: rgba(47,111,237,0.12); color: #2f6fed; }
+.ps-cstep.pending{ background: var(--paper-strong); color: var(--muted); }
+.ps-cstep-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+}
+.ps-cstep.active .ps-cstep-dot { animation: ps-cstep-pulse 1s ease infinite; }
+@keyframes ps-cstep-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.ps-cstep-arrow { font-size: 0.7rem; color: var(--line); font-weight: 700; }
+
+/* Patience messages */
+.ps-confirm-patience {
+  margin: 0; font-size: 0.72rem; color: var(--muted);
+  line-height: 1.4; font-style: italic;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(19,122,87,0.05);
+  border-left: 2px solid rgba(19,122,87,0.3);
+}
+.ps-confirm-patience-slow {
+  color: #d87d3a;
+  background: rgba(216,125,58,0.06);
+  border-left-color: rgba(216,125,58,0.35);
+}
+
+/* Elapsed counter */
+.ps-confirm-elapsed {
+  font-size: 0.62rem; font-weight: 700;
+  color: var(--muted); letter-spacing: 0.03em;
+  opacity: 0.7;
+}
+
+/* Pay button in busy state */
+.ps-pay:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
