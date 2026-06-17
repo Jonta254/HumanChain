@@ -767,7 +767,7 @@ export function MarketplaceView({
         await fetch("/api/world/send-notification", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ walletAddresses: [info.sellerWallet], title: "Market item interest", message: `${handle} wants to hold ${info.title}.`, path: "/?tab=market", sector: "marketplace" }),
+          body: JSON.stringify({ walletAddresses: [info.sellerWallet], title: "Market item interest", message: `${handle} wants to hold ${info.title}.`, path: "/?tab=market", sector: "marketplace", localisations: [{ language: "en", title: "Market item interest", message: `${handle} wants to hold ${info.title}.` }] }),
         }).catch(() => null);
       }
       await chatWithWorld({ message: `Hi ${info.seller}, I want to hold ${info.title} on HumanChain. From: ${marketLocation.label}. Still available?`, to: [info.seller.replace(/^@/, "")] });

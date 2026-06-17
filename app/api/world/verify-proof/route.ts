@@ -7,9 +7,12 @@ import {
 } from "@/lib/serverApi";
 import { getWorldRpId } from "@/lib/worldConfig";
 
-// In-memory nullifier store — prevents World ID proof replay within a single instance.
-// Replace with a shared store (Redis, DB) when moving to persistent backend.
-const usedNullifiers = new Set<string>();
+// Nullifier store persisted on globalThis so it survives Next.js hot-reloads
+// within a single instance. The World API also enforces uniqueness globally,
+// so this is an optimistic local guard. Replace with Redis/DB for multi-instance.
+const g = globalThis as typeof globalThis & { _hcNullifiers?: Set<string> };
+if (!g._hcNullifiers) g._hcNullifiers = new Set<string>();
+const usedNullifiers = g._hcNullifiers;
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "verify-proof", 20)) {

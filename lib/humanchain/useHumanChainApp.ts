@@ -164,14 +164,19 @@ export function useHumanChainApp() {
     if (typeof window === "undefined" || localStorage.getItem(warnKey)) return;
     localStorage.setItem(warnKey, "1");
     const time = formatShortTime();
+    const warnTitle = `${streak}-day streak at risk`;
+    const warnDetail = "Answer today's HumanChain question before midnight to protect your chain.";
     setNotifications((cur) => [{
       id: Date.now(),
-      title: `${streak}-day streak at risk`,
-      detail: "Answer today's HumanChain question before midnight to protect your chain.",
+      title: warnTitle,
+      detail: warnDetail,
       sector: "daily" as const,
       time,
       read: false,
     }, ...cur].slice(0, 60));
+    if (verifiedHuman?.wallet && verifiedHuman.mode === "world" && notificationReady) {
+      void sendWorldUserNotification({ title: warnTitle, detail: warnDetail, sector: "daily", path: "/?tab=ask" });
+    }
   }, [streak, dailyAnswered]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Scroll to top on tab/auth change ──────────────────────────────────────
@@ -647,12 +652,16 @@ export function useHumanChainApp() {
       const worldPic = resolved.profilePictureUrl ?? freshCtx.profilePictureUrl;
       setWorldContext({ ...freshCtx, ...nextCtx, profilePictureUrl: worldPic, username: worldUsername, walletAddress: address });
       setVerifiedHuman({ deviceOS: nextCtx.deviceOS ?? freshCtx.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: nextCtx.launchLocation ?? freshCtx.launchLocation, profilePictureUrl: worldPic, username: worldUsername ?? "Resolving World username", wallet: address, mode: "world" });
-      if (!joinedAt) {
+      const isFirstJoin = !joinedAt;
+      if (isFirstJoin) {
         const now = new Date().toISOString();
         setJoinedAt(now);
         saveJsonToStorage(storageKeys.joinDate, now);
       }
       setTab("home"); setNotificationPromptDismissed(false);
+      if (isFirstJoin) {
+        addNotification("Welcome to HumanChain", "Your Human Passport is live. Answer questions, post moments, and build your verified identity.", "welcome");
+      }
       // Award referral welcome bonus on first World login if referred
       const storedRef = loadReferredBy();
       if (storedRef && !loadReferralBonusAwarded()) {
@@ -745,8 +754,13 @@ export function useHumanChainApp() {
       if (earnedPoints > 0) earnPoints(earnedPoints, `${paymentPrompt.title} payment reward`);
       await paymentPrompt.onConfirmed?.(amount);
       const formattedAmount = formatPaymentAmount(amount, paymentToken);
-      recordHistory({ title: getPaymentKind(feature) === "tip" ? "Tip payment confirmed" : "Payment confirmed", detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`, kind: getPaymentKind(feature) });
+      const isKindTip = getPaymentKind(feature) === "tip";
+      recordHistory({ title: isKindTip ? "Tip payment confirmed" : "Payment confirmed", detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`, kind: getPaymentKind(feature) });
       void storeSafeData("payment", `${feature}-${Date.now()}`, { amount, feature, human: verifiedHuman?.username, payerWallet: verifiedHuman?.wallet, paymentTitle: paymentPrompt.title, ...paymentPrompt.context, treasuryRecipient, token: paymentToken, wallet: verifiedHuman?.wallet });
+      const notifTitle = isKindTip ? `Tip of ${formattedAmount} sent` : `${formattedAmount} confirmed`;
+      const notifDetail = `${paymentPrompt.title} — verified on World App and recorded in your HumanChain history.`;
+      addNotification(notifTitle, notifDetail, "payments");
+      void sendWorldUserNotification({ title: notifTitle, detail: notifDetail, sector: "payments", path: "/?tab=me" });
       setToast({ title: `${formattedAmount} confirmed`, detail: paymentPrompt.success });
       setPaymentPrompt(null);
     } finally { setPaymentBusy(false); }

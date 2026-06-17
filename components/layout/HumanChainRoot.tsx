@@ -132,6 +132,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
         return (
           <StoriesView
             act={act}
+            addNotification={addNotification}
             earnPoints={earnPoints}
             feedRefreshNonce={feedRefreshNonce}
             humanIdentity={verifiedHuman}

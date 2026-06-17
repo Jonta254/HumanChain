@@ -1685,7 +1685,7 @@ export function ChainsView({
                       <article key={`${activeCommentPost.id}-${comment}-${index}`}>
                         <strong>{comment.includes(":") ? comment.split(":")[0] : "@verified_human"}</strong>
                         <p>{comment.includes(":") ? comment.split(":").slice(1).join(":").trim() : comment}</p>
-                        <button onClick={() => act("Translate ready", "One-tap translation can be connected for this comment.")} type="button">
+                        <button onClick={() => { const text = comment.includes(":") ? comment.split(":").slice(1).join(":").trim() : comment; window.open(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}`, "_blank"); }} type="button">
                           Translate
                         </button>
                       </article>
@@ -1932,7 +1932,7 @@ export function ChainsView({
                       <article key={`${activeChainCommentKey}-${comment}-${index}`}>
                         <strong>{comment.includes(":") ? comment.split(":")[0] : "@verified_human"}</strong>
                         <p>{comment.includes(":") ? comment.split(":").slice(1).join(":").trim() : comment}</p>
-                        <button onClick={() => act("Translate ready", "One-tap translation can be connected for this chain comment.")} type="button">
+                        <button onClick={() => { const text = comment.includes(":") ? comment.split(":").slice(1).join(":").trim() : comment; window.open(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}`, "_blank"); }} type="button">
                           Translate
                         </button>
                       </article>

@@ -1493,6 +1493,7 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 
 export function StoriesView({
   act,
+  addNotification,
   earnPoints,
   feedRefreshNonce,
   humanIdentity,
@@ -1502,6 +1503,7 @@ export function StoriesView({
   setSavedItems,
 }: {
   act: (title: string, detail: string) => void;
+  addNotification: (title: string, detail: string, sector?: "welcome" | "inbox" | "marketplace" | "daily" | "stories" | "payments" | "account") => void;
   earnPoints: EarnPoints;
   feedRefreshNonce: number;
   humanIdentity: HumanIdentity | null;
@@ -1610,6 +1612,7 @@ export function StoriesView({
     });
     earnPoints(story.kind === "file" ? 24 : 14, "Your story was stored in HumanChain.");
     keepStreak("Your story joined HumanChain.");
+    addNotification("Story published", `"${story.title}" is stored and ready for readers in HumanChain.`, "stories");
     act("Story published", `${story.title} is stored and ready for readers.`);
   }
 

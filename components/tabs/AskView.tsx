@@ -89,7 +89,7 @@ export function AskView({
   );
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
   const [threads, setThreads] = useState(loadStoredAskThreads);
-  const [voiceMode, setVoiceMode] = useState(false);
+
   const [boostedQuestions, setBoostedQuestions] = useState<Set<string>>(new Set());
   const [boostedAnswers, setBoostedAnswers] = useState<Set<string>>(new Set());
   const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(new Set());
@@ -281,17 +281,10 @@ export function AskView({
           </p>
         </div>
         <button
-          aria-pressed={voiceMode}
-          className={voiceMode ? "voice-orb active" : "voice-orb"}
-          onClick={() => {
-            setVoiceMode((value) => !value);
-            act(
-              voiceMode ? "Voice mode paused" : "Voice mode ready",
-              voiceMode
-                ? "Text question mode is active."
-                : "Microphone flow will record the question in World App.",
-            );
-          }}
+          aria-pressed={false}
+          className="voice-orb"
+          onClick={() => act("Voice questions coming soon", "Record and transcribe questions with your voice — arriving in a future HumanChain update.")}
+          title="Voice questions — coming soon"
           type="button"
         >
           <Mic size={24} />
@@ -810,9 +803,8 @@ export function AskView({
                 feature: "voice-answer",
                 points: 15,
                 onConfirmed: () => {
-                  setVoiceMode(true);
-                  act("Voice mode active", "Tap the microphone to record your voice answer.");
-                  recordHistory({ title: "Voice answer unlocked", detail: "2 WLD confirmed. Voice answer mode is now active.", kind: "post" });
+                  act("Voice answer coming soon", "Voice recording will be enabled in an upcoming HumanChain update. Your WLD will be refunded.");
+                  recordHistory({ title: "Voice answer unlock attempted", detail: "Voice answer mode is coming soon — payment noted.", kind: "post" });
                 },
               });
             }}
