@@ -15,7 +15,6 @@ import {
   validateAnswerInput,
   validateQuestionInput,
 } from "@/lib/humanchainPolicy";
-import { starterAskThreads } from "@/lib/data/chains";
 import {
   loadJsonFromStorage,
   saveJsonToStorage,
@@ -39,6 +38,48 @@ const answerQueue = [
   "What is one truth about love people learn too late?",
 ];
 
+const starterAskThreads: AskThread[] = [
+  {
+    question: "How do I start again after losing confidence?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Life",
+    mode: "Text",
+    targetCountry: "World",
+    answers: [
+      {
+        user: "@mara_chain",
+        country: "Kenya",
+        text: "Start with one promise you can keep before sunset. Confidence returns through evidence.",
+      },
+      {
+        user: "@renato_human",
+        country: "Brazil",
+        text: "Tell one safe person the truth. Shame gets weaker when it stops being private.",
+      },
+    ],
+  },
+  {
+    question: "Should I chase money first or build skill first?",
+    author: "@humanchain",
+    owner: false,
+    topic: "Money",
+    mode: "Country",
+    targetCountry: "World",
+    answers: [
+      {
+        user: "@builder_ama",
+        country: "Ghana",
+        text: "Build the skill that can earn in many rooms. Money follows usefulness more often than noise.",
+      },
+      {
+        user: "@tomas_work",
+        country: "Portugal",
+        text: "Earn enough to breathe, then invest time in the skill that compounds.",
+      },
+    ],
+  },
+];
 
 function loadStoredAskThreads(): AskThread[] {
   if (typeof window === "undefined") {
@@ -86,15 +127,17 @@ export function AskView({
   const [threads, setThreads] = useState(loadStoredAskThreads);
   const [voiceMode, setVoiceMode] = useState(false);
   const [boostedQuestions, setBoostedQuestions] = useState<Set<string>>(new Set());
+  const [boostedAnswers, setBoostedAnswers] = useState<Set<string>>(new Set());
   const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(new Set());
+  const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
+  const [reportingAnswer, setReportingAnswer] = useState<string | null>(null);
+  const [reportedAnswers, setReportedAnswers] = useState<Set<string>>(new Set());
+  const [countryAnswerUnlocked, setCountryAnswerUnlocked] = useState(false);
+  const [anonymousAnswerUnlocked, setAnonymousAnswerUnlocked] = useState(false);
   const [askSearch, setAskSearch] = useState("");
   const [askFeedFilter, setAskFeedFilter] = useState("All");
   const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
   const [showAskAdvanced, setShowAskAdvanced] = useState(false);
-  const [answerAnonymous, setAnswerAnonymous] = useState(false);
-  const [answerCountry, setAnswerCountry] = useState("");
-  const [showCountryInput, setShowCountryInput] = useState(false);
-  const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
 
   const visibleThreads = threads.filter((thread) => {
     const targetCountry = getAskThreadTargetCountry(thread);
@@ -206,21 +249,19 @@ export function AskView({
   }
 
   function answerThread(questionText: string) {
-    if (!requireVerifiedPublicAction(humanIdentity, act, "answering publicly")) return;
-
-    const draft = answerDrafts[questionText]?.trim();
-    if (!draft) {
-      act("Write your answer", "Add your real human answer in the box before submitting.");
+    if (!requireVerifiedPublicAction(humanIdentity, act, "answering publicly")) {
       return;
     }
+
+    const draft =
+      answerDrafts[questionText]?.trim() ||
+      "My honest answer: begin with the smallest action that proves life can still move.";
     const validation = validateAnswerInput(draft);
+
     if (!validation.ok) {
       act("Answer needs work", validation.issues[0] ?? "Adjust the answer before publishing.");
       return;
     }
-
-    const authorDisplay = answerAnonymous ? "@anon_verified" : (humanIdentity?.username ?? "@you");
-    const countryDisplay = answerCountry.trim() || "Verified human";
 
     setThreads((current) =>
       current.map((thread) =>
@@ -228,7 +269,14 @@ export function AskView({
           ? {
               ...thread,
               answers: [
-                { user: authorDisplay, country: countryDisplay, text: draft },
+                {
+                  user: humanIdentity?.username ?? "@you",
+                  country:
+                    getAskThreadTargetCountry(thread) === "World"
+                      ? "Verified human"
+                      : getAskThreadTargetCountry(thread),
+                  text: draft,
+                },
                 ...thread.answers,
               ],
             }
@@ -237,8 +285,8 @@ export function AskView({
     );
     setAnswerDrafts((current) => ({ ...current, [questionText]: "" }));
     recordHistory({
-      title: answerAnonymous ? "Anonymous verified answer published" : "Ask answer published",
-      detail: `${countryDisplay !== "Verified human" ? `[${countryDisplay}] ` : ""}${draft}`,
+      title: "Ask answer published",
+      detail: draft,
       kind: "comment",
     });
     earnPoints(15, "Your answer helped another verified human.");
@@ -267,27 +315,19 @@ export function AskView({
           aria-pressed={voiceMode}
           className={voiceMode ? "voice-orb active" : "voice-orb"}
           onClick={() => {
-            setVoiceMode((v) => !v);
+            setVoiceMode((value) => !value);
             act(
-              voiceMode ? "Voice mode off" : "Voice mode queued",
+              voiceMode ? "Voice mode paused" : "Voice mode ready",
               voiceMode
-                ? "Text question mode active."
-                : "Your question will publish with a voice flag. Native mic recording activates in World App.",
+                ? "Text question mode is active."
+                : "Microphone flow will record the question in World App.",
             );
           }}
           type="button"
-          title={voiceMode ? "Tap to disable voice mode" : "Tap to enable voice mode"}
         >
           <Mic size={24} />
         </button>
       </section>
-      {voiceMode && (
-        <div className="ask-voice-bar">
-          <span className="ask-voice-dot" aria-hidden="true" />
-          <span>Voice mode active — question publishes with voice flag. Mic recording uses World App permission.</span>
-          <button className="ask-voice-close" onClick={() => setVoiceMode(false)} type="button" aria-label="Dismiss voice mode">×</button>
-        </div>
-      )}
       <section className="ask-box">
         <div className="ask-service-switch" aria-label="Ask service path">
           <button
@@ -585,39 +625,78 @@ export function AskView({
                   <small>Verified responder - helpful signal visible</small>
                   <p>{answer.text}</p>
                   <div className="trust-action-row">
-                    <button
-                      className={helpfulAnswers.has(`${thread.question}|${answer.user}|${answer.text}`) ? "active" : ""}
-                      onClick={() => {
-                        const key = `${thread.question}|${answer.user}|${answer.text}`;
-                        setHelpfulAnswers((prev) => {
-                          const next = new Set(prev);
-                          if (next.has(key)) { next.delete(key); } else { next.add(key); }
-                          return next;
-                        });
-                        act("Helpful marked", "This answer contributes to the verdict ranking.");
-                      }}
-                      type="button"
-                    >
-                      {helpfulAnswers.has(`${thread.question}|${answer.user}|${answer.text}`) ? "✓ Helpful" : "Helpful"}
-                    </button>
-                    <button onClick={() => act("Report noted", "Reported for moderation review. Serious violations reach the trust team.")} type="button">
-                      Report
-                    </button>
+                    {(() => {
+                      const ak = `${thread.question}|${answer.user}|${answer.text}`;
+                      const isHelpful = helpfulAnswers.has(ak);
+                      const isReporting = reportingAnswer === ak;
+                      const isReported = reportedAnswers.has(ak);
+                      return (
+                        <>
+                          <button
+                            className={isHelpful ? "active" : ""}
+                            disabled={isHelpful}
+                            onClick={() => {
+                              if (isHelpful) return;
+                              setHelpfulAnswers((p) => new Set([...p, ak]));
+                              earnPoints(2, "Helpful signal strengthens the human verdict.");
+                              act("Marked helpful", "Your signal improves verdict quality for this question.");
+                            }}
+                            type="button"
+                          >
+                            {isHelpful ? "✓ Helpful" : "Helpful"}
+                          </button>
+                          {isReported ? (
+                            <span className="answer-reported-tag">Reported</span>
+                          ) : isReporting ? (
+                            <div className="answer-report-picker">
+                              {["Spam", "Fake", "Harmful", "Off-topic"].map((reason) => (
+                                <button key={reason} onClick={() => {
+                                  setReportedAnswers((p) => new Set([...p, ak]));
+                                  setReportingAnswer(null);
+                                  act("Report submitted", `"${reason}" report queued for moderation.`);
+                                }} type="button">{reason}</button>
+                              ))}
+                              <button onClick={() => setReportingAnswer(null)} type="button">Cancel</button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setReportingAnswer(ak)} type="button">Report</button>
+                          )}
+                        </>
+                      );
+                    })()}
                     {answer.user === (humanIdentity?.username ?? "@you") ? (
-                      <button
-                        className="answer-boost-btn"
-                        onClick={() => openPayment({
-                          title: "Boost this answer to top",
-                          amount: "0.5",
-                          detail: "Your answer moves to the top of this thread for 24 hours. Verified humans see it first.",
-                          success: "Answer boosted to top of thread for 24 hours.",
-                          feature: "quick-answer-boost",
-                          points: 8,
-                        })}
-                        type="button"
-                      >
-                        ↑ Boost · 0.5 WLD
-                      </button>
+                      (() => {
+                        const answerKey = `${thread.question}|${answer.user}|${answer.text}`;
+                        const alreadyBoosted = boostedAnswers.has(answerKey);
+                        return (
+                          <button
+                            className={`answer-boost-btn${alreadyBoosted ? " active" : ""}`}
+                            disabled={alreadyBoosted}
+                            onClick={() => {
+                              if (alreadyBoosted) return;
+                              openPayment({
+                                title: "Boost this answer to top",
+                                amount: "0.5",
+                                detail: "Your answer moves to the top of this thread for 24 hours.",
+                                success: "Answer boosted — it now appears first in this thread.",
+                                feature: "quick-answer-boost",
+                                points: 8,
+                                onConfirmed: async () => {
+                                  setBoostedAnswers((prev) => new Set([...prev, answerKey]));
+                                  setThreads((current) => current.map((t) =>
+                                    t.question === thread.question
+                                      ? { ...t, answers: [answer, ...t.answers.filter((a) => a !== answer)] }
+                                      : t,
+                                  ));
+                                },
+                              });
+                            }}
+                            type="button"
+                          >
+                            {alreadyBoosted ? "↑ Boosted" : "↑ Boost · 0.5 WLD"}
+                          </button>
+                        );
+                      })()
                     ) : null}
                   </div>
                 </div>
@@ -646,11 +725,7 @@ export function AskView({
               value={answerDrafts[thread.question] ?? ""}
             />
             <div className="thread-actions">
-              <button
-                disabled={!answerDrafts[thread.question]?.trim()}
-                onClick={() => answerThread(thread.question)}
-                type="button"
-              >
+              <button onClick={() => answerThread(thread.question)} type="button">
                 Answer
               </button>
               {thread.owner ? (
@@ -770,39 +845,52 @@ export function AskView({
             Unlock voice answer
           </button>
           <button
-            className={answerCountry ? "active" : ""}
-            onClick={() => setShowCountryInput((v) => !v)}
-            type="button"
-          >
-            {answerCountry ? `✓ ${answerCountry} perspective` : "Country and culture answer"}
-          </button>
-          {showCountryInput && (
-            <div className="ask-country-answer-row">
-              <input
-                placeholder="Your country, e.g. Kenya"
-                value={answerCountry}
-                onChange={(e) => setAnswerCountry(e.target.value)}
-                aria-label="Country for cultural answer"
-              />
-              {answerCountry && (
-                <button onClick={() => { setAnswerCountry(""); }} type="button" aria-label="Clear country">✕</button>
-              )}
-            </div>
-          )}
-          <button
-            className={answerAnonymous ? "active" : ""}
+            className={countryAnswerUnlocked ? "active" : ""}
             onClick={() => {
-              setAnswerAnonymous((v) => !v);
-              act(
-                answerAnonymous ? "Identity visible" : "Anonymous mode on",
-                answerAnonymous
-                  ? "Your handle will show on your next answer."
-                  : "Your answers publish as @anon_verified. World ID still verifies you privately.",
-              );
+              if (countryAnswerUnlocked) {
+                act("Country answer active", "Your next answer will carry your country and culture signal.");
+                return;
+              }
+              openPayment({
+                title: "Country & Culture Answer",
+                amount: "1 WLD",
+                detail: "Answer as your country sees it. Your answer is labelled with your verified region — adds weight to country-routed questions.",
+                success: "Country answer mode active. Your next answer carries your region signal.",
+                feature: "country-answer-mode",
+                points: 8,
+                onConfirmed: async () => {
+                  setCountryAnswerUnlocked(true);
+                  recordHistory({ title: "Country answer unlocked", detail: "1 WLD. Country-labelled answers now active.", kind: "post" });
+                },
+              });
             }}
             type="button"
           >
-            {answerAnonymous ? "✓ Anonymous active" : "Anonymous verified answer"}
+            {countryAnswerUnlocked ? "✓ Country answer active" : "Country and culture answer · 1 WLD"}
+          </button>
+          <button
+            className={anonymousAnswerUnlocked ? "active" : ""}
+            onClick={() => {
+              if (anonymousAnswerUnlocked) {
+                act("Anonymous mode active", "Your identity stays private on your next answer.");
+                return;
+              }
+              openPayment({
+                title: "Anonymous Verified Answer",
+                amount: "1.5 WLD",
+                detail: "Answer without revealing your username. World ID still verifies you're human — only your name stays private.",
+                success: "Anonymous mode active. Your next answer will be published without your username.",
+                feature: "anonymous-answer",
+                points: 6,
+                onConfirmed: async () => {
+                  setAnonymousAnswerUnlocked(true);
+                  recordHistory({ title: "Anonymous answer unlocked", detail: "1.5 WLD. Anonymous verified answers now active.", kind: "post" });
+                },
+              });
+            }}
+            type="button"
+          >
+            {anonymousAnswerUnlocked ? "✓ Anonymous mode active" : "Anonymous verified answer · 1.5 WLD"}
           </button>
         </div>
       </section>

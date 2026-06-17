@@ -2,6 +2,8 @@ export const humanChainPaymentFeatures = {
   "bonus-story-pages": 2,
   "boost-question": 2,
   "country-answer": 2,
+  "country-answer-mode": 1,
+  "anonymous-answer": 1.5,
   "deep-story-reflection": 6,
   "deep-verdict-question": 6,
   "deep-world-verdict": 6,

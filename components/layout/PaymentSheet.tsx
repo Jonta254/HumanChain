@@ -63,6 +63,7 @@ export function PaymentSheet({
 
         {/* Title */}
         <p className="ps-title">{payment.title}</p>
+        {payment.detail ? <p className="ps-detail">{payment.detail}</p> : null}
 
         {/* Custom amount input */}
         {payment.allowCustomAmount && (

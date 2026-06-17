@@ -449,6 +449,39 @@ export function HomeView({
         </div>
       </section>
 
+      {/* ── 7.5 · Daily streak nudge ─────────────────── */}
+      {!dailyAnswered && streak > 0 && (
+        <section className="h9-section" aria-label="Streak nudge">
+          <div className="hc-streak-nudge">
+            <Flame size={18} style={{ flexShrink: 0, color: "#d87d3a" }} />
+            <div className="hc-streak-nudge-body">
+              <strong>{streak}-day streak at risk</strong>
+              <p>Answer today&apos;s question to protect your chain and earn +18 HP.</p>
+            </div>
+            <button onClick={() => setShowDaily(true)} type="button" className="hc-streak-act">
+              Answer <Zap size={12} />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ── 7.6 · Profile completion ──────────────────── */}
+      {!isVerified && (
+        <section className="h9-section" aria-label="Profile completion">
+          <div className="hc-profile-complete">
+            <div className="hc-pc-steps">
+              <div className={`hc-pc-step done`}><span>✓</span><p>Joined</p></div>
+              <div className={`hc-pc-step ${isVerified ? "done" : "next"}`}><span>2</span><p>World ID</p></div>
+              <div className="hc-pc-step"><span>3</span><p>Post moment</p></div>
+              <div className="hc-pc-step"><span>4</span><p>First trade</p></div>
+            </div>
+            <button className="hc-pc-cta" onClick={() => act("Verify with World ID", "Open World App and tap Verify. Your human proof stays private — only the zero-knowledge proof is shared.")} type="button">
+              <BadgeCheck size={14} /> Verify with World ID — unlock full HumanChain
+            </button>
+          </div>
+        </section>
+      )}
+
       {/* ── 8 · Explore Today (one combined card) ────── */}
       <section className="h9-section" aria-label="Explore today">
         <button

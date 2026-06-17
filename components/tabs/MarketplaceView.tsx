@@ -284,6 +284,10 @@ const NICHES = [
   { id: "translation",   label: "Translation",   icon: Languages, color: "#246b55" },
   { id: "manufacturing", label: "Manufacturing", icon: Wrench,    color: "#ef7d69" },
   { id: "consulting",    label: "Consulting",    icon: Briefcase, color: "#b98218" },
+  { id: "tech",          label: "Tech & Dev",    icon: Sparkles,  color: "#6657d9" },
+  { id: "design",        label: "Design",        icon: Sparkles,  color: "#d87d3a" },
+  { id: "healthcare",    label: "Healthcare",    icon: ShieldCheck, color: "#0f9d6c" },
+  { id: "finance",       label: "Finance",       icon: CircleDollarSign, color: "#b98218" },
 ];
 
 const SEED_JOBS = [
@@ -327,13 +331,49 @@ const SEED_JOBS = [
     proposals: 5, urgent: false, poster: "@medtech_ph",
     skills: ["FDA PH", "Healthcare", "Market entry"], color: "#6657d9",
   },
+  {
+    id: "j6", type: "job" as const, niche: "tech",
+    title: "Next.js + Supabase Dashboard — WLD Payment Integration",
+    detail: "Build a dashboard that connects to Supabase and integrates WLD payments. Fullstack preferred.",
+    budget: "WLD 420", region: "Remote / Worldwide", deadline: "18 days",
+    proposals: 9, urgent: false, poster: "@buildwith_world",
+    skills: ["Next.js", "Supabase", "WLD API", "TypeScript"], color: "#6657d9",
+  },
+  {
+    id: "j7", type: "job" as const, niche: "design",
+    title: "Brand Identity for Verified African Startup",
+    detail: "Logo, color palette, and brand guidelines for a Web3 fintech brand. Afro-modern aesthetic.",
+    budget: "WLD 130", region: "West Africa / Remote", deadline: "10 days",
+    proposals: 4, urgent: false, poster: "@nairobi_startup",
+    skills: ["Branding", "Figma", "African design", "Logo"], color: "#d87d3a",
+  },
+  {
+    id: "j8", type: "job" as const, niche: "healthcare",
+    title: "Community Health Educator — Rural Uganda",
+    detail: "Create a 3-session curriculum on maternal health for rural women. Luganda required.",
+    budget: "WLD 95", region: "Uganda", deadline: "7 days",
+    proposals: 2, urgent: true, poster: "@health_uganda",
+    skills: ["Luganda", "Public health", "Curriculum design"], color: "#0f9d6c",
+  },
+  {
+    id: "j9", type: "job" as const, niche: "finance",
+    title: "WLD Treasury Audit — Small Cooperative",
+    detail: "Review a 6-month treasury ledger for a 40-member cooperative. On-chain records available.",
+    budget: "WLD 150", region: "East Africa", deadline: "9 days",
+    proposals: 3, urgent: false, poster: "@sacco_chain",
+    skills: ["On-chain audit", "WLD", "Cooperative finance"], color: "#b98218",
+  },
 ];
 
 const SEED_PROVIDERS = [
-  { id: "p1", name: "Kwame Asante", initial: "K", specialty: "Medical & Legal Translation", niche: "translation",   region: "Ghana",          rating: 5.0, jobs: 132, color: "#246b55" },
-  { id: "p2", name: "Amara Diallo", initial: "A", specialty: "West African Commercial Law", niche: "legal",         region: "Senegal",        rating: 4.9, jobs: 84,  color: "#2f6fed" },
-  { id: "p3", name: "Lena Morales", initial: "L", specialty: "CNC & Custom Fabrication",    niche: "manufacturing", region: "Guadalajara MX", rating: 4.8, jobs: 61,  color: "#ef7d69" },
-  { id: "p4", name: "Priya Nair",   initial: "P", specialty: "South Asian Healthcare",      niche: "consulting",    region: "Bangalore, IN",  rating: 4.7, jobs: 49,  color: "#b98218" },
+  { id: "p1", name: "Kwame Asante",  initial: "K", specialty: "Medical & Legal Translation",  niche: "translation",   region: "Ghana",           rating: 5.0, jobs: 132, color: "#246b55" },
+  { id: "p2", name: "Amara Diallo",  initial: "A", specialty: "West African Commercial Law",  niche: "legal",         region: "Senegal",         rating: 4.9, jobs: 84,  color: "#2f6fed" },
+  { id: "p3", name: "Lena Morales",  initial: "L", specialty: "CNC & Custom Fabrication",     niche: "manufacturing", region: "Guadalajara, MX", rating: 4.8, jobs: 61,  color: "#ef7d69" },
+  { id: "p4", name: "Priya Nair",    initial: "P", specialty: "South Asian Healthcare",       niche: "consulting",    region: "Bangalore, IN",   rating: 4.7, jobs: 49,  color: "#b98218" },
+  { id: "p5", name: "David Mwangi",  initial: "D", specialty: "Next.js · Supabase · WLD API", niche: "tech",          region: "Nairobi, KE",     rating: 5.0, jobs: 38,  color: "#6657d9" },
+  { id: "p6", name: "Yemi Adeyemi",  initial: "Y", specialty: "Afro-modern Brand Identity",  niche: "design",        region: "Lagos, NG",       rating: 4.9, jobs: 56,  color: "#d87d3a" },
+  { id: "p7", name: "Grace Otieno",  initial: "G", specialty: "Community & Public Health",    niche: "healthcare",    region: "Kisumu, KE",      rating: 4.8, jobs: 27,  color: "#0f9d6c" },
+  { id: "p8", name: "Ahmed Balogun", initial: "A", specialty: "Cooperative & DeFi Finance",   niche: "finance",       region: "Abuja, NG",       rating: 4.9, jobs: 43,  color: "#b98218" },
 ];
 
 const BUDGET_PRESETS   = ["WLD 25", "WLD 50", "WLD 100", "WLD 200", "WLD 500"];
@@ -461,7 +501,10 @@ export function MarketplaceView({
   // Listing wizard
   const [listingPhotos, setListingPhotos] = useState<Array<{ id: number; name: string; src: string }>>([]);
   const [photoPackUnlocked, setPhotoPackUnlocked] = useState(false);
+  const [boostedListings, setBoostedListings] = useState(false);
+  const [adPosted, setAdPosted] = useState(false);
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [listingDraft, setListingDraft] = useState({
     area: "", bidFloor: "", condition: "", details: "",
     duration: "3 days", link: "", price: "", saleMode: "direct" as MarketplaceListing["saleMode"],
@@ -485,6 +528,8 @@ export function MarketplaceView({
   const [serviceForm, setServiceFormState] = useState({
     title: "", detail: "", niche: "translation", rate: "", region: "", languages: "",
   });
+  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
+  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
   // ── Persist ───────────────────────────────────────────────────────────────
   useEffect(() => { saveJsonToStorage(storageKeys.bids, marketBids); }, [marketBids]);
@@ -891,6 +936,9 @@ export function MarketplaceView({
     const images = getImages(activeItem);
     const isSeed = !("id" in activeItem && typeof (activeItem as MarketplaceListing).id === "number");
     const seedItem = isSeed ? (activeItem as SeedItem) : null;
+    const userListing = !isSeed ? (activeItem as MarketplaceListing) : null;
+    const isOwner = Boolean(userListing?.seller === (humanIdentity?.username ?? "@you") || userListing?.seller === humanIdentity?.wallet);
+    const isSold = userListing?.status === "sold";
     const k      = itemKey(activeItem);
     const itemComments = marketComments[k] ?? [];
     const hold   = marketHolds.find((h) => h.itemKey === k);
@@ -924,6 +972,7 @@ export function MarketplaceView({
           <div className="hcm-gallery-badges">
             <span className="hcm-badge-cond">{info.condition}</span>
             {seedItem?.isFeatured && <span className="hcm-badge-feat"><Flame size={10} />Featured</span>}
+            {isSold && <span className="hcm-badge-sold">SOLD</span>}
           </div>
         </div>
 
@@ -1054,16 +1103,66 @@ export function MarketplaceView({
             </div>
           </section>
 
-          {/* Actions */}
+          {/* Owner controls */}
+          {isOwner && (
+            <div className="hcm-owner-controls">
+              <div className="hcm-owner-label"><BadgeCheck size={13} />Your listing</div>
+              {isSold ? (
+                <div className="hcm-sold-notice">
+                  <CheckCircle2 size={14} />
+                  <span>Marked as sold — no longer visible to buyers.</span>
+                  <button onClick={() => {
+                    setMarketplaceListings((c) => c.map((l) => l.id === userListing!.id ? { ...l, status: "payment-ready" as const } : l));
+                    act("Listing restored", "Your item is visible to buyers again.");
+                  }} type="button">Relist</button>
+                </div>
+              ) : (
+                <div className="hcm-owner-acts">
+                  <button className="hcm-mark-sold" onClick={() => {
+                    setMarketplaceListings((c) => c.map((l) => l.id === userListing!.id ? { ...l, status: "sold" as const } : l));
+                    earnPoints(10, "Item marked as sold — great transaction!");
+                    recordHistory({ title: "Item sold", detail: `${userListing!.title} marked sold.`, kind: "market" });
+                    act("Marked as sold", "Buyers will see this item is no longer available.");
+                  }} type="button">
+                    <CheckCircle2 size={14} /> Mark as Sold
+                  </button>
+                  <button className="hcm-archive-btn" onClick={() => {
+                    setShowDeleteConfirm(userListing!.id);
+                  }} type="button">
+                    Archive
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Delete confirmation */}
+          {showDeleteConfirm === userListing?.id && (
+            <div className="hcm-delete-confirm">
+              <p>Remove this listing permanently?</p>
+              <div>
+                <button className="hcm-act-danger" onClick={() => {
+                  setMarketplaceListings((c) => c.filter((l) => l.id !== userListing!.id));
+                  setShowDeleteConfirm(null);
+                  setActiveItem(null);
+                  act("Listing removed", "Your item was removed from the market.");
+                }} type="button">Remove</button>
+                <button onClick={() => setShowDeleteConfirm(null)} type="button">Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {/* Actions — hidden if sold */}
+          {!isSold && (
           <div className="hcm-detail-actions">
             <button
               className="hcm-act-primary"
               aria-busy={busyAction === `hold:${k}`}
-              disabled={Boolean(busyAction)}
+              disabled={Boolean(busyAction) || isOwner}
               onClick={() => void holdItem(activeItem)}
               type="button"
             >
-              {busyAction === `hold:${k}` ? "Holding…" : "Book / Hold Item"}
+              {isOwner ? "Your listing" : busyAction === `hold:${k}` ? "Holding…" : "Book / Hold Item"}
             </button>
             <button
               className="hcm-act-chat"
@@ -1073,7 +1172,7 @@ export function MarketplaceView({
               type="button"
             >
               <MessageCircle size={15} />
-              {busyAction === `chat:${k}` ? "Opening…" : "Message Seller"}
+              {busyAction === `chat:${k}` ? "Opening…" : isOwner ? "Share via Chat" : "Message Seller"}
             </button>
             <div className="hcm-act-row">
               <button onClick={() => rateItem(activeItem)} type="button"><Star size={14} />Rate</button>
@@ -1081,6 +1180,7 @@ export function MarketplaceView({
               <button onClick={() => void shareItem(activeItem)} type="button"><Send size={14} />Share</button>
             </div>
           </div>
+          )}
 
           {/* Detail dl */}
           <dl className="hcm-detail-dl">
@@ -1301,45 +1401,102 @@ export function MarketplaceView({
     const color = activeSvc.color;
     const poster = isJob ? (activeSvc as AnyJob).poster : (activeSvc as LocalService).provider;
     const budget = isJob ? (activeSvc as AnyJob).budget : (activeSvc as LocalService).rate;
+    const svcId = activeSvc.id;
+    const hasApplied = appliedJobs.has(svcId);
+    const hasSaved = savedJobs.has(svcId);
+    const posterInitial = poster.replace(/^@/, "").charAt(0).toUpperCase();
+
     return (
       <div className="screen hcm-svc-detail">
         <div className="hcm-svc-hero" style={{ background: `linear-gradient(135deg, ${color}22, ${color}08)`, borderBottom: `3px solid ${color}44` }}>
           <button className="hcm-back-text" onClick={() => setActiveSvc(null)} type="button"><ArrowLeft size={15} /> Services</button>
-          <span className="hcm-svc-niche" style={{ color, background: `${color}18` }}>{activeSvc.niche}</span>
+          <div className="hcm-svc-tag-row">
+            <span className="hcm-svc-niche" style={{ color, background: `${color}18` }}>{activeSvc.niche}</span>
+            {isJob && (activeSvc as AnyJob).urgent && <span className="hcm-svc-urgent">Urgent</span>}
+          </div>
           <h1>{activeSvc.title}</h1>
           <div className="hcm-svc-meta">
             <span><Globe2 size={12} />{activeSvc.region}</span>
             {isJob && <span><Clock size={12} />{(activeSvc as AnyJob).deadline} left</span>}
-            {isJob && <span><Users size={12} />{(activeSvc as AnyJob).proposals} proposals</span>}
+            {isJob && <span><Users size={12} />{(activeSvc as AnyJob).proposals + (hasApplied ? 1 : 0)} proposals</span>}
           </div>
         </div>
         <div className="hcm-svc-body">
           <div className="hcm-svc-budget-row">
             <div><span>{isJob ? "Budget" : "Starting rate"}</span><strong>{budget}</strong></div>
-            <span className="hcm-escrow-badge"><ShieldCheck size={12} />Escrow</span>
+            <span className="hcm-escrow-badge"><ShieldCheck size={12} />WLD Escrow</span>
           </div>
+
           <section className="hcm-detail-section"><strong>Description</strong><p>{activeSvc.detail}</p></section>
+
           {isJob && (activeSvc as AnyJob).skills.length > 0 && (
             <section className="hcm-detail-section">
               <strong>Skills needed</strong>
               <div className="hcm-skill-chips">{(activeSvc as AnyJob).skills.map((s) => <span key={s}>{s}</span>)}</div>
             </section>
           )}
+
+          {/* Milestone payment explainer */}
+          <div className="hcm-milestone-row">
+            <div className="hcm-milestone-step"><span>1</span><p>Apply via World Chat</p></div>
+            <div className="hcm-milestone-arrow">→</div>
+            <div className="hcm-milestone-step"><span>2</span><p>Agree on milestones</p></div>
+            <div className="hcm-milestone-arrow">→</div>
+            <div className="hcm-milestone-step"><span>3</span><p>WLD escrow releases on completion</p></div>
+          </div>
+
           <div className="hcm-detail-trust">
             <span><BadgeCheck size={12} />World ID verified</span>
             <span><ShieldCheck size={12} />WLD escrow on hire</span>
             <span><Zap size={12} />Milestone payments</span>
           </div>
+
           <div className="hcm-seller-card">
-            <div className="hcm-seller-av" style={{ background: `${color}44` }}>{poster.replace(/^@/, "").charAt(0).toUpperCase()}</div>
-            <div><strong>{poster}</strong><span>World ID Verified</span></div>
+            <div className="hcm-seller-av" style={{ background: `${color}44` }}>{posterInitial}</div>
+            <div>
+              <strong>{poster}</strong>
+              <span>World ID Verified · {activeSvc.region}</span>
+            </div>
             <BadgeCheck size={16} color="#2f6fed" />
           </div>
+
+          {/* Applied state */}
+          {hasApplied && (
+            <div className="hcm-applied-banner">
+              <CheckCircle2 size={14} /><span>You applied — your World Chat message was sent to {poster}.</span>
+            </div>
+          )}
+
           <div className="hcm-detail-actions">
-            <button className="hcm-act-primary" onClick={() => { if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying" : "contacting providers")) return; void chatWithWorld({ message: `Hi ${poster}, I'm interested in "${activeSvc.title}" on HumanChain.`, to: [poster.replace(/^@/, "")] }).then(() => act("World Chat opened", `Chat with ${poster} ready.`)).catch(() => act("Chat unavailable", "Try from World App.")); }} type="button">
-              <MessageCircle size={15} />{isJob ? "Apply via World Chat" : "Contact Provider"}
+            <button
+              className="hcm-act-primary"
+              disabled={hasApplied}
+              onClick={() => {
+                if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying to jobs" : "contacting providers")) return;
+                void chatWithWorld({
+                  message: `Hi ${poster}, I'm interested in "${activeSvc.title}" on HumanChain. Budget: ${budget}. Let's connect.`,
+                  to: [poster.replace(/^@/, "")],
+                }).then(() => {
+                  setAppliedJobs((prev) => new Set([...prev, svcId]));
+                  earnPoints(5, `Applied to ${activeSvc.title}.`);
+                  recordHistory({ title: isJob ? "Job application sent" : "Provider contacted", detail: `${activeSvc.title} · ${budget}`, kind: "market" });
+                  act("Application sent!", `World Chat opened with ${poster}.`);
+                }).catch(() => act("Chat unavailable", "Try from World App."));
+              }}
+              type="button"
+            >
+              <MessageCircle size={15} />{hasApplied ? "Applied ✓" : isJob ? "Apply via World Chat" : "Contact Provider"}
             </button>
-            <button className="hcm-act-chat" onClick={() => setActiveSvc(null)} type="button">Back to Services</button>
+            <button
+              className="hcm-act-chat"
+              onClick={() => {
+                setSavedJobs((prev) => { const s = new Set([...prev]); if (s.has(svcId)) s.delete(svcId); else s.add(svcId); return s; });
+                if (!hasSaved) earnPoints(2, "Job saved to your list.");
+              }}
+              type="button"
+            >
+              {hasSaved ? "★ Saved" : "☆ Save"}
+            </button>
           </div>
         </div>
       </div>
@@ -1381,8 +1538,8 @@ export function MarketplaceView({
         </div>
         {topTab === "market" ? (
           <div className="hcm-topbar-actions">
-            <button className="hcm-boost-btn" onClick={() => { if (!marketplaceListings.length) { setShowSell(true); return; } openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: () => recordHistory({ title: "Listing boosted", detail: "2 WLD boost confirmed.", kind: "market" }) }); }} type="button">
-              <Flame size={13} />Boost
+            <button className={`hcm-boost-btn${boostedListings ? " active" : ""}`} disabled={boostedListings} onClick={() => { if (!marketplaceListings.length) { setShowSell(true); return; } if (boostedListings) return; openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: async () => { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); recordHistory({ title: "Listing boosted", detail: "2 WLD boost confirmed.", kind: "market" }); } }); }} type="button">
+              <Flame size={13} />{boostedListings ? "✓ Boosted" : "Boost"}
             </button>
             <button className="hcm-sell-btn" onClick={() => setShowSell(true)} type="button">
               <PlusCircle size={14} />Sell
@@ -1465,32 +1622,46 @@ export function MarketplaceView({
             <button onClick={() => setShowSell(true)} type="button">
               <PlusCircle size={17} /><span>Sell Item</span><strong>Start</strong>
             </button>
-            <button onClick={() => openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: () => recordHistory({ title: "Boosted", detail: "2 WLD boost.", kind: "market" }) })} type="button">
+            <button disabled={boostedListings} onClick={() => { if (boostedListings) return; openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: async () => { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); recordHistory({ title: "Boosted", detail: "2 WLD boost.", kind: "market" }); } }); }} type="button">
               <Flame size={17} /><span>Boost</span><strong>2 WLD</strong>
             </button>
-            <button onClick={() => openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Market a verified shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: () => recordHistory({ title: "Business ad live", detail: "4 WLD ad confirmed.", kind: "market" }) })} type="button">
-              <HandCoins size={17} /><span>Ad</span><strong>4 WLD</strong>
+            <button disabled={adPosted} onClick={() => { if (adPosted) return; openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Market a verified shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: async () => { setAdPosted(true); recordHistory({ title: "Business ad live", detail: "4 WLD ad confirmed.", kind: "market" }); } }); }} type="button">
+              <HandCoins size={17} /><span>{adPosted ? "✓ Ad live" : "Ad"}</span><strong>4 WLD</strong>
             </button>
           </div>
 
           {/* Your listings */}
           {marketplaceListings.length > 0 && (
             <section className="hcm-section">
-              <div className="hcm-section-head"><Library size={14} /><strong>Your Listings</strong></div>
+              <div className="hcm-section-head">
+                <Library size={14} /><strong>Your Listings</strong>
+                <span className="hcm-listings-count">{marketplaceListings.filter((l) => l.status !== "archived").length} active</span>
+              </div>
               <div className="hcm-stored-list">
-                {marketplaceListings.slice(0, 3).map((listing) => (
-                  <div key={listing.id} className="hcm-stored-row">
+                {marketplaceListings.filter((l) => l.status !== "archived").map((listing) => (
+                  <div key={listing.id} className={`hcm-stored-row${listing.status === "sold" ? " sold" : ""}`}>
                     <button className="hcm-stored-thumb" onClick={() => setActiveItem(listing)} type="button">
                       {listing.photos[0] ? <img src={listing.photos[0].src} alt={listing.photos[0].name} /> : <Tag size={18} />}
+                      {listing.status === "sold" && <span className="hcm-thumb-sold">SOLD</span>}
                     </button>
-                    <div>
+                    <div className="hcm-stored-info">
                       <strong>{listing.title}</strong>
                       <span>{listing.price} · {listing.condition} · {listing.area}</span>
-                      <small>{listing.saleMode === "bidding" ? `Bidding, floor ${listing.bidFloor}` : "Chat-first"} · {listing.ratings ?? 0} votes · {listing.tips ?? 0} tips · {listing.dataStorageStatus === "cloud-safe" ? "☁ safe" : "local"}</small>
+                      <small>{listing.saleMode === "bidding" ? `Bidding, floor ${listing.bidFloor}` : "Direct"} · {listing.ratings ?? 0} ratings · {listing.tips ?? 0} tips</small>
                     </div>
                     <div className="hcm-stored-acts">
-                      <button onClick={() => rateItem(listing)} type="button"><Star size={12} /></button>
-                      <button onClick={() => tipItem(listing)} type="button"><Zap size={12} /></button>
+                      {listing.status === "sold" ? (
+                        <span className="hcm-sold-tag">Sold</span>
+                      ) : (
+                        <>
+                          <button onClick={() => {
+                            setMarketplaceListings((c) => c.map((l) => l.id === listing.id ? { ...l, status: "sold" as const } : l));
+                            earnPoints(10, "Item marked as sold — great transaction!");
+                            act("Marked sold", `${listing.title} is now marked as sold.`);
+                          }} title="Mark as sold" type="button"><CheckCircle2 size={13} /></button>
+                          <button onClick={() => setActiveItem(listing)} title="View detail" type="button"><Tag size={13} /></button>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1596,8 +1767,8 @@ export function MarketplaceView({
                 </article>
               ))}
             </div>
-            <button className="hcm-ad-post-btn" onClick={() => openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Promote your shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: () => recordHistory({ title: "Business ad live", detail: "4 WLD.", kind: "market" }) })} type="button">
-              <Send size={14} /> Post Your Business Ad — 4 WLD
+            <button className={`hcm-ad-post-btn${adPosted ? " active" : ""}`} disabled={adPosted} onClick={() => { if (adPosted) return; openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Promote your shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: async () => { setAdPosted(true); recordHistory({ title: "Business ad live", detail: "4 WLD.", kind: "market" }); } }); }} type="button">
+              <Send size={14} /> {adPosted ? "✓ Business Ad Live" : "Post Your Business Ad — 4 WLD"}
             </button>
           </section>
 
@@ -1605,12 +1776,34 @@ export function MarketplaceView({
           <section className="hcm-section">
             <div className="hcm-section-head"><CircleDollarSign size={14} /><strong>Publishing Fees</strong></div>
             <div className="hcm-plans">
-              {MARKET_PLANS.map((plan) => (
-                <button key={plan[0]} className="hcm-plan-row" onClick={() => openPayment({ title: `${plan[0]} — ${plan[1]}`, amount: plan[1], detail: plan[2], success: `${plan[0]} unlocked!`, feature: normalizePaymentFeature(`marketplace-${plan[0]}`), points: 10, onConfirmed: () => recordHistory({ title: `${plan[0]} payment`, detail: `${plan[1]} confirmed.`, kind: "market" }) })} type="button">
-                  <div><strong>{plan[0]}</strong><span>{plan[2]}</span></div>
-                  <b>{plan[1]}</b>
-                </button>
-              ))}
+              {MARKET_PLANS.map((plan) => {
+                const planKey = plan[0];
+                const alreadyActive =
+                  (planKey === "Quick listing" && showSell) ||
+                  (planKey === "Extra photos" && photoPackUnlocked) ||
+                  (planKey === "Local boost" && boostedListings) ||
+                  (planKey === "Business ad" && adPosted);
+                return (
+                  <button key={planKey} className={`hcm-plan-row${alreadyActive ? " active" : ""}`} disabled={alreadyActive} onClick={() => {
+                    if (alreadyActive) return;
+                    openPayment({
+                      title: `${planKey} — ${plan[1]}`, amount: plan[1], detail: plan[2],
+                      success: `${planKey} unlocked!`,
+                      feature: normalizePaymentFeature(`marketplace-${planKey}`), points: 10,
+                      onConfirmed: async () => {
+                        if (planKey === "Quick listing") setShowSell(true);
+                        else if (planKey === "Extra photos") setPhotoPackUnlocked(true);
+                        else if (planKey === "Local boost") { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); }
+                        else if (planKey === "Business ad") setAdPosted(true);
+                        recordHistory({ title: `${planKey} payment`, detail: `${plan[1]} confirmed.`, kind: "market" });
+                      },
+                    });
+                  }} type="button">
+                    <div><strong>{planKey}</strong><span>{plan[2]}</span></div>
+                    <b>{alreadyActive ? "✓ Active" : plan[1]}</b>
+                  </button>
+                );
+              })}
             </div>
           </section>
         </>
@@ -1658,24 +1851,38 @@ export function MarketplaceView({
             </section>
           )}
 
-          {/* Top providers */}
-          {activeNiche === "all" && !svcSearch && (
+          {/* Saved jobs */}
+          {savedJobs.size > 0 && (
             <section className="hcm-section">
-              <div className="hcm-section-head"><Star size={14} /><strong>Top Specialists</strong></div>
-              <div className="hcm-providers-row">
-                {SEED_PROVIDERS.map((p) => (
-                  <div key={p.id} className="hcm-provider-chip">
-                    <div className="hcm-pav" style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}44)` }}>
-                      {p.initial}
-                      <span className="hcm-pip"><BadgeCheck size={8} /></span>
-                    </div>
-                    <span>{p.name.split(" ")[0]}</span>
-                    <span className="hcm-prating"><Star size={9} fill="currentColor" />{p.rating}</span>
-                  </div>
+              <div className="hcm-section-head"><Star size={14} /><strong>Saved Jobs</strong><span className="hcm-count">{savedJobs.size}</span></div>
+              <div className="hcm-saved-scroll">
+                {[...SEED_JOBS, ...localJobs].filter((j) => savedJobs.has(j.id)).map((j) => (
+                  <button key={j.id} className="hcm-saved-chip" onClick={() => setActiveSvc(j)} type="button">
+                    <span style={{ background: `${j.color}18`, color: j.color }}>{j.niche}</span>
+                    <strong>{j.title.slice(0, 32)}{j.title.length > 32 ? "…" : ""}</strong>
+                    <span>{j.budget}</span>
+                  </button>
                 ))}
               </div>
             </section>
           )}
+
+          {/* Top providers */}
+          <section className="hcm-section">
+            <div className="hcm-section-head"><Star size={14} /><strong>Top Specialists</strong></div>
+            <div className="hcm-providers-row">
+              {(activeNiche === "all" ? SEED_PROVIDERS : SEED_PROVIDERS.filter((p) => p.niche === activeNiche)).map((p) => (
+                <button key={p.id} className="hcm-provider-chip" onClick={() => act(p.name, `${p.specialty} · ${p.region} · ${p.rating}★ · ${p.jobs} jobs completed on HumanChain.`)} type="button">
+                  <div className="hcm-pav" style={{ background: `linear-gradient(135deg,${p.color}cc,${p.color}44)` }}>
+                    {p.initial}
+                    <span className="hcm-pip"><BadgeCheck size={8} /></span>
+                  </div>
+                  <span>{p.name.split(" ")[0]}</span>
+                  <span className="hcm-prating"><Star size={9} fill="currentColor" />{p.rating}</span>
+                </button>
+              ))}
+            </div>
+          </section>
 
           {/* Jobs */}
           {svcJobs.length > 0 && (
@@ -1683,23 +1890,25 @@ export function MarketplaceView({
               <div className="hcm-section-head"><strong>Open Jobs</strong><span className="hcm-count">{svcJobs.length}</span></div>
               <div className="hcm-svc-list">
                 {svcJobs.map((job) => (
-                  <button key={job.id} className="hcm-svc-card" style={{ "--cc": job.color } as React.CSSProperties} onClick={() => setActiveSvc(job)} type="button">
+                  <button key={job.id} className={`hcm-svc-card${appliedJobs.has(job.id) ? " applied" : ""}`} style={{ "--cc": job.color } as React.CSSProperties} onClick={() => setActiveSvc(job)} type="button">
                     <span className="hcm-svc-bar" />
                     <div className="hcm-svc-top">
                       <span style={{ color: job.color, background: `${job.color}18` }}>{job.niche}</span>
                       {job.urgent && <span className="hcm-urgent-tag">Urgent</span>}
+                      {appliedJobs.has(job.id) && <span className="hcm-applied-tag"><CheckCircle2 size={10} />Applied</span>}
                       <span><Clock size={10} />{job.deadline}</span>
                     </div>
                     <strong>{job.title}</strong>
                     <div className="hcm-svc-meta">
                       <span><Globe2 size={11} />{job.region}</span>
-                      <span><Users size={11} />{job.proposals} proposals</span>
+                      <span><Users size={11} />{job.proposals + (appliedJobs.has(job.id) ? 1 : 0)} proposals</span>
                     </div>
                     {"skills" in job && job.skills.length > 0 && (
                       <div className="hcm-skill-chips">{job.skills.slice(0, 3).map((s) => <i key={s}>{s}</i>)}</div>
                     )}
                     <div className="hcm-svc-footer">
-                      <strong>{job.budget}</strong><span>Apply <ArrowRight size={11} /></span>
+                      <strong>{job.budget}</strong>
+                      <span>{appliedJobs.has(job.id) ? "View ✓" : "Apply"} <ArrowRight size={11} /></span>
                     </div>
                   </button>
                 ))}

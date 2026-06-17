@@ -6,6 +6,7 @@ export type ChainLink = {
   pinned?: boolean;
   pinnedAt?: string;
   reactions?: number;
+  tips?: number;
   text: string;
 };
 

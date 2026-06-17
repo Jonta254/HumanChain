@@ -18,7 +18,7 @@ export function NotificationCenter({
   const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   return (
-    <section className="notification-center-backdrop" role="dialog" aria-modal="true">
+    <section className="notification-center-backdrop" role="dialog" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="notification-center">
         <div className="notification-center-head">
           <div>

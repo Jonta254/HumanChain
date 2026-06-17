@@ -1499,32 +1499,44 @@ export function ChainsView({
             <span>Recent human moments</span>
             <p>Photo posts from verified humans. Every card begins with the human, the caption, and the real image they shared.</p>
           </div>
-          {visiblePosts.map((post, index) => (
-            <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
-              {(() => {
-                const selectedReaction = momentReactions[String(post.id)];
+          {visiblePosts.map((post, index) => {
+            const selectedReaction = momentReactions[String(post.id)];
+            const authorInitial = post.author.replace(/^@/, "").charAt(0).toUpperCase();
+            const totalEngagement = post.reactions + post.loves + post.tips;
 
-                return (
+            return (
+            <article className={`image-post ${post.pinned ? "pinned" : ""}`} key={post.id}>
               <div>
+                {/* Author row */}
                 <div className="post-head">
-                  <div>
-                    <strong>{post.pinned ? "Pinned - " : ""}{post.author}</strong>
-                    <small>{post.createdAt}</small>
+                  <div className="post-author-row">
+                    <div className="post-avatar" aria-hidden="true">{authorInitial}</div>
+                    <div>
+                      <strong>{post.author}</strong>
+                      <small>{post.createdAt}{post.storageStatus === "cloud-safe" ? " · ☁" : ""}</small>
+                    </div>
                   </div>
-                  {post.pinned ? <span className="pin-badge">Top chain</span> : null}
-                  {post.owner ? (
-                    <button
-                      className="delete-post-button"
-                      onClick={() => deletePost(post.id)}
-                      type="button"
-                    >
-                      Delete
-                    </button>
-                  ) : null}
+                  <div className="post-head-right">
+                    {post.pinned ? <span className="pin-badge">Pinned</span> : null}
+                    {post.owner ? (
+                      <button
+                        className="delete-post-button"
+                        onClick={() => deletePost(post.id)}
+                        title="Delete your post"
+                        type="button"
+                      >
+                        ✕
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
+
+                {/* Caption */}
                 <p className="post-caption">{post.caption}</p>
+
+                {/* Media */}
                 <div
-                  aria-label={`${post.author}'s moment media`}
+                  aria-label={`${post.author}'s moment`}
                   className="image-post-media"
                   role="group"
                 >
@@ -1539,76 +1551,97 @@ export function ChainsView({
                     />
                   )}
                 </div>
+
+                {/* Engagement bar */}
                 <div className="post-metrics">
-                  <span>{post.reactions} reactions</span>
-                  <span>{post.loves} loves</span>
-                  <span>{post.tips} tips</span>
-                  <span>{post.comments.length} comments</span>
-                  <span>{post.storageStatus === "cloud-safe" ? "cloud stored" : "local safe"}</span>
+                  <span>{post.loves > 0 ? `♥ ${post.loves}` : "♥ 0"}</span>
+                  <span>{post.reactions > 0 ? `✦ ${post.reactions}` : "✦ 0"}</span>
+                  <span>{post.tips > 0 ? `⚡ ${post.tips} tips` : ""}</span>
+                  <span>{post.comments.length > 0 ? `${post.comments.length} comment${post.comments.length !== 1 ? "s" : ""}` : ""}</span>
+                  {totalEngagement > 5 && <span className="post-hot-tag">🔥 Active</span>}
                 </div>
+
+                {/* Actions */}
                 <div className="reaction-row social-actions">
                   <button
-                    onClick={() =>
-                      payToPin({
-                        id: post.id,
-                        kind: "post",
-                        label: post.caption.slice(0, 42),
-                        text: post.caption,
-                      })
-                    }
-                    type="button"
-                  >
-                    Promote
-                  </button>
-                  <button
                     aria-pressed={selectedReaction?.reaction === "Love"}
-                    className={selectedReaction?.reaction === "Love" ? "active" : ""}
+                    className={`post-love-btn${selectedReaction?.reaction === "Love" ? " active" : ""}`}
                     onClick={() => reactToPost(post.id, "Love", "loves")}
                     type="button"
                   >
-                    Love
+                    {selectedReaction?.reaction === "Love" ? "♥ Loved" : "♥ Love"}
                   </button>
                   <button
-                    onClick={() => tipPost(post)}
+                    aria-pressed={selectedReaction?.reaction === "Inspired"}
+                    className={selectedReaction?.reaction === "Inspired" ? "active" : ""}
+                    onClick={() => reactToPost(post.id, "Inspired")}
                     type="button"
                   >
-                    Tip
+                    Inspired
                   </button>
                   <button
                     onClick={() => setActiveCommentPostId(post.id)}
                     type="button"
                   >
-                    Comment
+                    {post.comments.length > 0 ? `💬 ${post.comments.length}` : "Comment"}
                   </button>
-                  {["Inspired"].map((reaction) => (
+                  <button
+                    onClick={() => tipPost(post)}
+                    type="button"
+                  >
+                    ⚡ Tip
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (navigator.share) {
+                        void navigator.share({ title: post.caption, text: `${post.author} on HumanChain: "${post.caption}"` })
+                          .then(() => act("Shared", "Moment shared successfully."))
+                          .catch(() => {});
+                      } else {
+                        act("Share copied", "Sharing is available in World App.");
+                      }
+                    }}
+                    type="button"
+                  >
+                    Share
+                  </button>
+                  {post.owner ? null : (
                     <button
-                      aria-pressed={selectedReaction?.reaction === reaction}
-                      className={selectedReaction?.reaction === reaction ? "active" : ""}
-                      key={reaction}
-                      onClick={() => reactToPost(post.id, reaction)}
+                      onClick={() =>
+                        payToPin({
+                          id: post.id,
+                          kind: "post",
+                          label: post.caption.slice(0, 42),
+                          text: post.caption,
+                        })
+                      }
                       type="button"
                     >
-                      {reaction}
+                      Promote
                     </button>
-                  ))}
+                  )}
                 </div>
-                {post.comments.length ? (
+
+                {/* Top comments preview */}
+                {post.comments.length > 0 && (
                   <div className="comment-list">
-                    {post.comments.slice(0, 2).map((comment, index) => (
-                      <span key={`${post.id}-${comment}-${index}`}>{comment}</span>
+                    {post.comments.slice(0, 2).map((comment, ci) => (
+                      <div key={`${post.id}-${ci}`} className="comment-preview-row">
+                        <span className="comment-av">{comment.replace(/^@(\w+).*/, "$1").charAt(0).toUpperCase()}</span>
+                        <span>{comment}</span>
+                      </div>
                     ))}
-                    {post.comments.length > 2 ? (
-                      <button onClick={() => setActiveCommentPostId(post.id)} type="button">
+                    {post.comments.length > 2 && (
+                      <button className="comment-view-all" onClick={() => setActiveCommentPostId(post.id)} type="button">
                         View all {post.comments.length} comments
                       </button>
-                    ) : null}
+                    )}
                   </div>
-                ) : null}
+                )}
               </div>
-                );
-              })()}
             </article>
-          ))}
+            );
+          })}
           {activeCommentPost ? (
             <div className="comment-sheet-backdrop" role="presentation">
               <section
@@ -1823,6 +1856,15 @@ export function ChainsView({
                         success: "Tip is ready for World App payment.",
                         feature: "tip-chain-link",
                         points: 4,
+                        onConfirmed: async () => {
+                          setLinks((current) =>
+                            current.map((l) =>
+                              (link.id ? l.id === link.id : l.text === link.text)
+                                ? { ...l, tips: (l.tips ?? 0) + 1 }
+                                : l,
+                            ),
+                          );
+                        },
                       })
                     }
                     type="button"
