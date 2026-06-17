@@ -5984,38 +5984,52 @@ button.danger {
 
 .hp-ledger-panel {
   margin-top: 12px;
-  background: linear-gradient(135deg, #fffdf8, #f4f8ff);
+  background: var(--card);
 }
 
 .hp-ledger-list {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .hp-ledger-row {
   display: grid;
-  gap: 4px;
-  padding: 10px;
-  border: 1px solid rgba(32, 35, 40, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 253, 248, 0.78);
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
 }
+.hp-ledger-row:last-child { border-bottom: 0; }
 
 .hp-ledger-row strong {
-  color: var(--blue);
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
   font-size: 0.92rem;
+  font-weight: 900;
+  color: var(--green);
+  white-space: nowrap;
 }
 
 .hp-ledger-row span {
+  grid-column: 1;
+  grid-row: 1;
   color: var(--ink);
-  font-size: 0.82rem;
-  line-height: 1.34;
+  font-size: 0.78rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hp-ledger-row small {
+  grid-column: 1;
+  grid-row: 2;
   color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.65rem;
+  font-weight: 700;
 }
 
 .treasure-mark {
@@ -10676,10 +10690,10 @@ button,
   align-items: center;
   gap: 10px;
   padding: 11px 16px;
-  background: rgba(255,253,248,0.93);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(232,223,210,0.55);
+  background: rgba(244,248,246,0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(196,212,205,0.5);
 }
 
 .h9-avatar-btn {
@@ -16215,15 +16229,19 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 }
 
 .me-screen .hp-ledger-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 2px;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
+  min-height: 44px;
 }
 .me-screen .hp-ledger-row:last-child { border-bottom: 0; }
-.me-screen .hp-ledger-row span { font-size: 0.8rem; color: var(--ink); }
-.me-screen .hp-ledger-row strong { font-size: 0.82rem; font-weight: 900; color: var(--green); }
+.me-screen .hp-ledger-row span { grid-column: 1; grid-row: 1; font-size: 0.78rem; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.me-screen .hp-ledger-row small { grid-column: 1; grid-row: 2; font-size: 0.65rem; font-weight: 700; color: var(--muted); }
+.me-screen .hp-ledger-row strong { grid-column: 2; grid-row: 1 / 3; align-self: center; font-size: 0.9rem; font-weight: 900; color: var(--green); white-space: nowrap; }
 
 .me-screen .badge-cloud {
   display: flex;
@@ -17173,14 +17191,15 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   box-shadow: none !important;
 }
 
-/* Quick actions: lighter cards, no shadow */
+/* Quick actions: clean cards with subtle tint */
 .home-v9 .hc-quick button {
-  box-shadow: none !important;
+  box-shadow: 0 2px 8px rgba(19, 122, 87, 0.06) !important;
   border-color: var(--line) !important;
-  background: var(--paper) !important;
+  background: var(--paper-strong) !important;
 }
 .home-v9 .hc-quick button:active {
-  background: rgba(19, 122, 87, 0.05) !important;
+  background: rgba(19, 122, 87, 0.06) !important;
+  box-shadow: none !important;
 }
 
 /* Reputation card: no shadow, matches page */
@@ -17316,10 +17335,7 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 .me-screen .me-kpi-grid {
   gap: 8px;
 }
-/* HP ledger rows: consistent height */
-.me-screen .hp-ledger-row {
-  min-height: 44px;
-}
+/* HP ledger rows: height handled in base rule above */
 
 /* ── 6. CHAINS SCREEN: unified card borders ─────────────────── */
 
@@ -17835,26 +17851,27 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 .rep-hub-tabs {
   display: flex;
   gap: 4px;
-  margin: 0 16px 12px;
+  margin: 0 16px 14px;
   background: var(--line);
   border-radius: 14px;
   padding: 3px;
 }
 .rep-hub-tabs button {
   flex: 1;
-  padding: 8px 4px;
+  padding: 10px 4px;
   border: 0;
   border-radius: 11px;
   background: transparent;
   color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 800;
-  transition: background 0.15s, color 0.15s;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
 .rep-hub-tabs button.active {
   background: var(--paper-strong);
   color: var(--green);
-  box-shadow: 0 2px 8px rgba(20, 55, 42, 0.08);
+  box-shadow: 0 2px 10px rgba(19, 122, 87, 0.12);
 }
 
 /* Tier road */
@@ -18368,20 +18385,21 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
   align-items: center;
   gap: 5px;
   flex: 1;
-  padding: 9px 8px;
+  padding: 10px 8px;
   border: 1.5px solid var(--card-line);
   border-radius: 13px;
   background: var(--paper);
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 800;
-  transition: background 0.14s, border-color 0.14s, color 0.14s, box-shadow 0.14s;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s;
 }
 .create-page-cat-tab.active {
-  background: var(--paper-strong);
+  background: color-mix(in srgb, var(--cat-accent, var(--green)) 10%, var(--paper-strong));
   border-color: var(--cat-accent, var(--green));
+  border-width: 2px;
   color: var(--cat-accent, var(--green));
-  box-shadow: 0 2px 10px rgba(20, 55, 42, 0.1);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--cat-accent, var(--green)) 22%, transparent);
 }
 .create-page-cat-desc {
   margin: 8px 16px 0;

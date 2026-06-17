@@ -565,9 +565,24 @@ export function MarketplaceView({
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const label = `GPS: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`;
-        setMarketLocation({ accuracy: pos.coords.accuracy, label, lat: pos.coords.latitude, lng: pos.coords.longitude, source: "browser-gps", status: "ready" });
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        let label = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+        try {
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+            { headers: { "Accept-Language": "en" }, signal: AbortSignal.timeout(5000) },
+          );
+          if (r.ok) {
+            const geo = await r.json() as { address?: { city?: string; town?: string; village?: string; county?: string; state?: string; country?: string } };
+            const a = geo.address ?? {};
+            const place = a.city ?? a.town ?? a.village ?? a.county ?? a.state ?? "";
+            const country = a.country ?? "";
+            if (place || country) label = [place, country].filter(Boolean).join(", ");
+          }
+        } catch { /* keep coordinate fallback */ }
+        setMarketLocation({ accuracy: pos.coords.accuracy, label, lat, lng, source: "browser-gps", status: "ready" });
         setListingDraft((c) => ({ ...c, area: label }));
         earnPoints(5, "Nearby market connected with GPS consent.");
       },
@@ -575,7 +590,7 @@ export function MarketplaceView({
         setMarketLocation({ label: "Location not allowed", source: "unavailable", status: "denied" });
         act("Location not connected", "Enter your area manually below.");
       },
-      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 10_000 },
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 15_000 },
     );
   }
 
