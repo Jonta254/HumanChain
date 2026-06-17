@@ -450,7 +450,10 @@ export function HomeView({
       {/* ── 6 · Open Opportunities (horizontal scroll) ── */}
       <section className="h9-section" aria-label="Open opportunities">
         <div className="h9-section-head">
-          <strong>Open Opportunities</strong>
+          <div>
+            <strong>Open Opportunities</strong>
+            <p className="h9-section-sub">WLD-protected work for verified humans</p>
+          </div>
           <span className="h9-live-pill"><span className="h9-pulse" />Live</span>
         </div>
         <div className="h9-opp-scroll">
@@ -487,19 +490,19 @@ export function HomeView({
         <div className="hc-network-strip">
           <div className="hc-network-stat">
             <strong>214k+</strong>
-            <span>Humans</span>
+            <span>Verified humans</span>
           </div>
           <div className="hc-network-stat">
-            <strong>38</strong>
+            <strong>180+</strong>
             <span>Countries</span>
           </div>
           <div className="hc-network-stat">
             <strong>4.9k</strong>
-            <span>Online Now</span>
+            <span>Online now</span>
           </div>
           <div className="hc-network-stat">
-            <strong>Live</strong>
-            <span>WLD Payments</span>
+            <strong style={{ color: "var(--green)" }}>WLD</strong>
+            <span>Payments live</span>
           </div>
         </div>
       </section>
@@ -507,25 +510,30 @@ export function HomeView({
       {/* ── 7.3 · Leaderboard ────────────────────────── */}
       <section className="h9-section" aria-label="Weekly leaderboard">
         <div className="h9-section-head">
-          <strong>Top Chains This Week</strong>
+          <div>
+            <strong>Top Chains This Week</strong>
+            <p className="h9-section-sub">Ranked by Human Points earned</p>
+          </div>
           <button onClick={() => setTab("me")} type="button" className="h9-see-all">Your rank →</button>
         </div>
         <div className="hc-leaderboard">
           {LEADERBOARD_SEED.map((entry) => (
             <div key={entry.rank} className="hc-lb-row">
-              <span className={`hc-lb-rank${entry.rank <= 3 ? " top3" : ""}`}>#{entry.rank}</span>
+              <span className={`hc-lb-rank${entry.rank <= 3 ? " top3" : ""}`}>
+                {entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : entry.rank === 3 ? "🥉" : `#${entry.rank}`}
+              </span>
               <span className="hc-lb-flag">{entry.country}</span>
               <span className="hc-lb-handle">{entry.handle}</span>
               <span className="hc-lb-tier">{entry.tierLabel}</span>
-              <span className="hc-lb-score">{entry.score}</span>
+              <span className="hc-lb-score">{entry.score} HP</span>
             </div>
           ))}
           <div className="hc-lb-row hc-lb-you">
-            <span className="hc-lb-rank">#{chainScore > 448 ? "≤5" : "—"}</span>
+            <span className="hc-lb-rank">You</span>
             <span className="hc-lb-flag">🌍</span>
-            <span className="hc-lb-handle">{worldHandle} · You</span>
-            <span className="hc-lb-tier">{tier.current.label.split(" ")[0]}</span>
-            <span className="hc-lb-score">{chainScore}</span>
+            <span className="hc-lb-handle">{worldHandle}</span>
+            <span className="hc-lb-tier">{tier.current.label}</span>
+            <span className="hc-lb-score">{chainScore} HP</span>
           </div>
         </div>
       </section>
