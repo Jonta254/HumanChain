@@ -128,12 +128,12 @@ export function PaymentSheet({
                   <span className="ps-cstep-dot" />Unlocking
                 </span>
               </div>
-              {elapsed >= 12 && elapsed < 50 && (
+              {elapsed >= 12 && elapsed < 65 && (
                 <p className="ps-confirm-patience">
                   Still checking World Chain… can take up to 90s. Do not close.
                 </p>
               )}
-              {elapsed >= 50 && (
+              {elapsed >= 65 && (
                 <p className="ps-confirm-patience ps-confirm-patience-slow">
                   Network is slow — still confirming. Your payment is safe. Hang tight.
                 </p>

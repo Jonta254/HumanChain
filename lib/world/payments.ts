@@ -124,14 +124,22 @@ export async function payWithWorld({
     };
   }
 
-  let referenceResponse: Response;
+  let referenceStr: string;
   try {
-    referenceResponse = await fetchWithTimeout("/api/world/payment-reference", {
+    const referenceResponse = await fetchWithTimeout("/api/world/payment-reference", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount, feature, token }),
       timeoutMs: 8_000,
     });
+    const referencePayload = (await referenceResponse.json()) as { reference?: string; error?: string };
+    if (!referenceResponse.ok || !referencePayload.reference) {
+      return {
+        ok: false,
+        error: referencePayload.error ?? "Could not prepare payment reference.",
+      };
+    }
+    referenceStr = referencePayload.reference;
   } catch (error) {
     return {
       ok: false,
@@ -139,19 +147,7 @@ export async function payWithWorld({
     };
   }
 
-  const referencePayload = (await referenceResponse.json()) as {
-    reference?: string;
-    error?: string;
-  };
-
-  if (!referenceResponse.ok || !referencePayload.reference) {
-    return {
-      ok: false,
-      error: referencePayload.error ?? "Could not prepare payment reference.",
-    };
-  }
-
-  if (referencePayload.reference.length > 36) {
+  if (referenceStr.length > 36) {
     return {
       ok: false,
       error: "World payment reference is too long. Please try again.",
@@ -168,13 +164,13 @@ export async function payWithWorld({
   const tokenSymbol = miniKitTokenBySymbol[token];
 
   const payment = await MiniKit.pay({
-    reference: referencePayload.reference,
+    reference: referenceStr,
     to: treasuryAddress,
     tokens: [{ symbol: tokenSymbol, token_amount: tokenToDecimals(amount, tokenSymbol).toString() }],
     description,
     fallback: () => ({
       transactionId: "web-preview-payment",
-      reference: referencePayload.reference ?? "web-preview-reference",
+      reference: referenceStr ?? "web-preview-reference",
       from: "web-preview",
       chain: "worldchain" as PayResult["chain"],
       timestamp: new Date().toISOString(),
@@ -204,7 +200,7 @@ export async function payWithWorld({
     amount,
     feature,
     payload: payment.data,
-    reference: referencePayload.reference,
+    reference: referenceStr,
     token,
   });
 

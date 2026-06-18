@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const controller = new AbortController();
-    const timerId = setTimeout(() => controller.abort(), 15_000);
+    const timerId = setTimeout(() => controller.abort(), 10_000);
     response = await fetch(
       `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transactionId}?app_id=${appId}&type=payment`,
       {
