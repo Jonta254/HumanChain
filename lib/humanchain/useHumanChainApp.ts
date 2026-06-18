@@ -592,6 +592,40 @@ export function useHumanChainApp() {
           });
         }
 
+        if (listingsRes.status === "fulfilled" && listingsRes.value.listings?.length) {
+          const dbListings = listingsRes.value.listings as Array<{
+            id: string; title: string; price: number; condition: string;
+            category: string; description?: string; seller_wallet: string;
+            seller_username: string; location?: string; status: string; created_at: string;
+          }>;
+          setMarketplaceListings((cur) => {
+            const seenIds = new Set(cur.map((l) => String(l.id)));
+            const incoming = dbListings
+              .filter((l) => !seenIds.has(l.id))
+              .map((l): MarketplaceListing => ({
+                id: Number(l.id.replace(/-/g, "").slice(0, 10)) || Date.now(),
+                seller: l.seller_username,
+                sellerWallet: l.seller_wallet,
+                title: l.title,
+                price: String(l.price),
+                bidFloor: "",
+                duration: "3 days",
+                saleMode: "direct",
+                condition: l.condition,
+                area: l.location ?? l.category,
+                link: "",
+                details: l.description ?? "",
+                photos: [],
+                ratings: 0,
+                tips: 0,
+                status: l.status === "sold" ? "sold" : "active",
+                createdAt: new Date(l.created_at).toLocaleString(),
+                dataStorageStatus: "cloud-safe",
+              }));
+            return incoming.length ? [...cur, ...incoming].slice(0, 80) : cur;
+          });
+        }
+
         // Sync this user's current points/streak up to Supabase
         void syncUserToSupabase(wallet, { username: verifiedHuman!.username, pts: points, str: streak });
       } catch { /* Supabase not configured — app works offline */ }

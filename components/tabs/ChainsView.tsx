@@ -1133,6 +1133,7 @@ export function ChainsView({
           detail: "3 WLD confirmed. A 12-human premium group is ready with invite slots, pinned prompt, activity pulse, and quote room.",
           kind: "profile",
         });
+        act("Circle created", "Your 12-human room is live. Start the topic and invite members.");
         setActiveChainTool("circle");
       },
     });
@@ -1157,6 +1158,7 @@ export function ChainsView({
           detail: "1 WLD confirmed. Unique pulse insights are visible in Chains.",
           kind: "profile",
         });
+        act("World Pulse unlocked", "Live sentiment, strongest quote, and chain leaders are now visible.");
         setActiveChainTool("pulse");
       },
     });
@@ -1194,6 +1196,7 @@ export function ChainsView({
           detail: `4 WLD confirmed. ${item.label} now appears at the top with premium placement.`,
           kind: "profile",
         });
+        act("Pinned", `"${item.label}" is now at the top of Chains with a premium badge.`);
         setActiveChainTool("pin");
       },
     });
@@ -1624,7 +1627,9 @@ export function ChainsView({
                           .then(() => act("Shared", "Moment shared successfully."))
                           .catch(() => {});
                       } else {
-                        act("Share copied", "Sharing is available in World App.");
+                        void navigator.clipboard?.writeText(`${post.author} on HumanChain: "${post.caption}"`)
+                          .then(() => act("Copied!", "Moment text copied to clipboard."))
+                          .catch(() => act("Share", "Open in World App to share this moment."));
                       }
                     }}
                     type="button"

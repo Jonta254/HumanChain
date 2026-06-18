@@ -47,8 +47,8 @@ const guides = [
       "Chains tab has 8 active community rooms — Faith, Builders, Love, Culture, Health, Migration, Youth, Parents",
       "Enter a room to read real wisdom from verified humans across different countries",
       "Add a link to the main chain — your username appears on the live feed globally",
-      "Premium: pay 2 WLD to create a private Circle with up to 50 verified members",
-      "World Pulse (1 WLD) lets you send a chain message directly to 500+ active readers",
+      "Premium: pay 3 WLD to create a private Circle for 12 verified humans with a shared topic room",
+      "World Pulse (1 WLD) unlocks live sentiment, the strongest quote, active field, and who's driving the chain today",
     ],
   },
   {

@@ -2150,7 +2150,9 @@ export function StoriesView({
                     void navigator.share({ title: story.title, text: `"${story.title}" by ${story.author} on HumanChain` })
                       .catch(() => {});
                   } else {
-                    act("Story link copied", "Share your story from World App.");
+                    void navigator.clipboard?.writeText(`"${story.title}" by ${story.author} on HumanChain`)
+                      .then(() => act("Copied!", "Story info copied to clipboard."))
+                      .catch(() => act("Share", "Open in World App to share this story."));
                   }
                 }} type="button">Share</button>
                 {story.owner ? (

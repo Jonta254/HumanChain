@@ -472,7 +472,7 @@ export function HomeView({
       </section>
 
       {/* ── 7.5 · Daily streak nudge ─────────────────── */}
-      {!dailyAnswered && streak > 0 && (
+      {isVerified && !dailyAnswered && streak > 0 && (
         <section className="h9-section" aria-label="Streak nudge">
           <div className="hc-streak-nudge">
             <Flame size={18} style={{ flexShrink: 0, color: "#d87d3a" }} />
