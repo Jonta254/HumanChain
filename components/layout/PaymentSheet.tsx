@@ -116,29 +116,29 @@ export function PaymentSheet({
             </div>
             <div className="ps-confirm-body">
               <strong className="ps-confirm-title">Verifying on World Chain</strong>
-              <p className="ps-confirm-note">This can take 10–30 seconds. Please stay on this screen.</p>
+              <p className="ps-confirm-note">Usually 5–15 seconds. Stay on this screen.</p>
               <div className="ps-confirm-steps">
                 <span className="ps-cstep done"><CheckCircle size={11} />Payment sent</span>
                 <span className="ps-cstep-arrow">›</span>
-                <span className={`ps-cstep ${elapsed >= 3 ? "active" : "pending"}`}>
+                <span className={`ps-cstep ${elapsed >= 2 ? "active" : "pending"}`}>
                   <span className="ps-cstep-dot" />Verifying
                 </span>
                 <span className="ps-cstep-arrow">›</span>
-                <span className={`ps-cstep ${elapsed >= 30 ? "active" : "pending"}`}>
+                <span className={`ps-cstep ${elapsed >= 20 ? "active" : "pending"}`}>
                   <span className="ps-cstep-dot" />Unlocking
                 </span>
               </div>
-              {elapsed >= 8 && elapsed < 45 && (
+              {elapsed >= 12 && elapsed < 50 && (
                 <p className="ps-confirm-patience">
-                  Checking World Chain… this can take up to 90 seconds. Do not close this screen.
+                  Still checking World Chain… can take up to 90s. Do not close.
                 </p>
               )}
-              {elapsed >= 45 && (
+              {elapsed >= 50 && (
                 <p className="ps-confirm-patience ps-confirm-patience-slow">
                   Network is slow — still confirming. Your payment is safe. Hang tight.
                 </p>
               )}
-              <span className="ps-confirm-elapsed">{elapsed}s elapsed</span>
+              <span className="ps-confirm-elapsed">{elapsed}s</span>
             </div>
           </div>
         )}

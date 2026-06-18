@@ -71,14 +71,16 @@ export async function POST(req: NextRequest) {
   let transaction: unknown;
 
   try {
+    const controller = new AbortController();
+    const timerId = setTimeout(() => controller.abort(), 15_000);
     response = await fetch(
       `https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transactionId}?app_id=${appId}&type=payment`,
       {
-        headers: {
-          Authorization: `Bearer ${devPortalApiKey}`,
-        },
+        headers: { Authorization: `Bearer ${devPortalApiKey}` },
+        signal: controller.signal,
       },
     );
+    clearTimeout(timerId);
     transaction = await response.json();
   } catch (error) {
     return noStoreJson({
@@ -117,7 +119,9 @@ export async function POST(req: NextRequest) {
   if (!isMined) {
     return noStoreJson({ ok: false, pending: true });
   }
+
   const treasury = getHumanChainTreasury().toLowerCase();
+
   // World may return token_amount in various denominations depending on the
   // chain + SDK version. Accept WLD with 18 dec (ERC-20 standard), 6 dec
   // (USDC-style), and the raw display amount as a safety net.
@@ -129,6 +133,7 @@ export async function POST(req: NextRequest) {
     amount.toString(),                                       // display    (e.g. "2")
     (amount * 1e18).toString(),                              // scientific (e.g. "2e+18" guard)
   ]);
+
   const transactionReference =
     typeof transactionRecord.reference === "string" ? transactionRecord.reference : "";
   const transactionAppId =
@@ -149,9 +154,9 @@ export async function POST(req: NextRequest) {
     .filter((value): value is string => typeof value === "string")
     .map((value) => value.toLowerCase());
 
-  // Only reject on reference mismatch if the field is present — Dev Portal
-  // sometimes omits it while a transaction is still being indexed.
-  if (isMined && transactionReference && transactionReference !== reference) {
+  // Only reject on reference mismatch if the field is present and non-empty —
+  // Dev Portal often omits it while a transaction is still being indexed.
+  if (transactionReference && transactionReference !== reference) {
     return noStoreJson(
       {
         ok: false,
@@ -162,7 +167,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (isMined && transactionAppId && transactionAppId !== appId) {
+  if (transactionAppId && transactionAppId !== appId) {
     return noStoreJson(
       {
         ok: false,
@@ -174,7 +179,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Soft-check token symbol — World may normalise differently (e.g. "WLD" vs "Wld").
-  if (isMined && transactionToken && transactionToken !== normalizedToken) {
+  if (transactionToken && transactionToken !== normalizedToken) {
     console.warn("[confirm-payment] token symbol mismatch — allowing through.", {
       expected: normalizedToken, got: transactionToken,
     });
@@ -182,14 +187,14 @@ export async function POST(req: NextRequest) {
 
   // Soft-check amount — Dev Portal sometimes omits token_amount until indexing
   // fully catches up. Skip the check if the field is absent.
-  if (isMined && transactionTokenAmount && !expectedTokenAmounts.has(transactionTokenAmount)) {
+  if (transactionTokenAmount && !expectedTokenAmounts.has(transactionTokenAmount)) {
     console.warn("[confirm-payment] token amount mismatch — allowing through.", {
       expected: [...expectedTokenAmounts], got: transactionTokenAmount,
     });
   }
 
   // Soft-check sender — checksumming differences cause false mismatches.
-  if (isMined && payloadSender && transactionSender && transactionSender !== payloadSender) {
+  if (payloadSender && transactionSender && transactionSender !== payloadSender) {
     console.warn("[confirm-payment] sender mismatch — allowing through.", {
       payloadSender, transactionSender,
     });
@@ -197,24 +202,20 @@ export async function POST(req: NextRequest) {
 
   // Note: World routes payments through its own smart contract on WorldChain,
   // so `to` may point to the World payment contract, not our treasury directly.
-  // We only reject if ALL known recipient fields are present AND none match the
-  // treasury — absent fields are treated as "not provided" and skipped.
+  // We only warn if ALL known recipient fields are present AND none match the treasury.
   const recipientMismatch =
     transactionRecipients.length > 0 &&
     !transactionRecipients.includes(treasury) &&
-    // Also check if treasury appears as a substring (checksummed vs lowercase)
     !transactionRecipients.some((r) => r.replace(/^0x/, "") === treasury.replace(/^0x/, ""));
 
-  if (isMined && recipientMismatch) {
-    // Soft-fail: log but don't block the payment if reference/amount/token
-    // are all confirmed valid — the on-chain routing is World's responsibility.
-    console.warn("[confirm-payment] recipient mismatch — reference and amount OK, allowing through.", {
+  if (recipientMismatch) {
+    console.warn("[confirm-payment] recipient mismatch — reference and app_id OK, allowing through.", {
       treasury, transactionRecipients,
     });
   }
 
   return noStoreJson({
-    ok: isMined,
+    ok: true,
     reference,
     feature: normalizedFeature,
     amount,

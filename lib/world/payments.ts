@@ -17,9 +17,9 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
 };
 
-// Retry schedule: immediate, then increasing intervals — ~90 s total window.
-// WorldChain indexing can lag 30-60 s after the user confirms in World App.
-const worldPaymentConfirmationDelays = [0, 2000, 4000, 6000, 9000, 13000, 18000, 24000, 32000];
+// Aggressive early polling (most transactions confirm in 5-20s), then back off.
+// Total window ~95 s covers slow WorldChain indexing.
+const worldPaymentConfirmationDelays = [0, 1000, 2500, 4500, 7000, 10000, 15000, 22000, 32000];
 
 function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));
@@ -124,12 +124,20 @@ export async function payWithWorld({
     };
   }
 
-  const referenceResponse = await fetchWithTimeout("/api/world/payment-reference", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount, feature, token }),
-    timeoutMs: 8_000,
-  });
+  let referenceResponse: Response;
+  try {
+    referenceResponse = await fetchWithTimeout("/api/world/payment-reference", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount, feature, token }),
+      timeoutMs: 8_000,
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Could not prepare payment reference.",
+    };
+  }
 
   const referencePayload = (await referenceResponse.json()) as {
     reference?: string;
