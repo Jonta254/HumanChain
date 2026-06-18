@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import {
-  isRateLimited,
+  isRateLimitedKV,
   noStoreJson,
   rateLimitResponse,
   readJsonBody,
@@ -11,7 +11,7 @@ import { kvSAdd, kvSIsMember } from "@/lib/kv";
 const KV_NULLIFIER_KEY = "hc:nullifiers";
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "verify-proof", 20)) {
+  if (await isRateLimitedKV(req, "verify-proof", 20)) {
     return rateLimitResponse();
   }
 
