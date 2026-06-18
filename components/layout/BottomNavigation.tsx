@@ -40,20 +40,8 @@ export function BottomNavigation({
         {leftItems.map(renderItem)}
       </div>
 
-      <div className="bn-create-wrap">
-        <button
-          className={`bn-create${active === "create" ? " active" : ""}`}
-          aria-current={active === "create" ? "page" : undefined}
-          onClick={() => { void humanHaptic("medium"); onCreate(); }}
-          aria-label="Open Create page"
-          type="button"
-        >
-          <span className="bn-create-icon" aria-hidden="true">
-            <Plus size={26} strokeWidth={2.6} />
-          </span>
-          <span className="bn-create-label">Create</span>
-        </button>
-      </div>
+      {/* Create FAB slot hidden — create actions live in each tab's own flow */}
+      <div className="bn-create-wrap bn-create-hidden" aria-hidden="true" />
 
       <div className="bn-slot">
         {rightItems.map(renderItem)}

@@ -15,7 +15,6 @@ import {
   Lightbulb,
   MessageCircleQuestion,
   Settings,
-  Plus,
   Sparkles,
   Store,
   TrendingUp,
@@ -593,15 +592,9 @@ export function HomeView({
         </button>
       </section>
 
-      {/* ── Create FAB — emerald, launches post flow ──── */}
-      <button
-        className="h9-fab"
-        onClick={() => { act("Post a Moment", "Share a real photo or reflection — every moment builds trust."); setTab("chains"); }}
-        aria-label="Create"
-        type="button"
-      >
-        <Plus size={22} />
-        <span className="h9-fab-label">Create</span>
+      {/* ── AI Guide FAB ─────────────────────────────── */}
+      <button className="h9-fab" onClick={() => setAiGuideOpen(true)} aria-label="Open AI guide" type="button">
+        <Sparkles size={20} />
       </button>
 
       {aiGuideOpen && (

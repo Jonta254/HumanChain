@@ -19705,28 +19705,10 @@ html[data-world-mini-app="true"] .hc-back-btn {
 }
 .home-v9 .hc-explore-title { font-size: 1.05rem; }
 
-/* ── Create FAB — emerald, prominent, labelled ───────────────────── */
+/* ── AI Guide FAB — violet/blue, opens guide sheet ───────────────── */
 .h9-fab {
-  background: var(--brand-grad) !important;
-  box-shadow: 0 10px 32px rgba(19,122,87,0.46) !important;
-  width: 60px !important; height: 60px !important;
-  flex-direction: column;
-  gap: 2px;
-  bottom: calc(88px + var(--world-safe-bottom, 0px)) !important;
+  bottom: calc(88px + var(--world-safe-bottom, 0px));
 }
-.h9-fab-label {
-  font-size: 0.5rem;
-  font-weight: 950;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  line-height: 1;
-  color: #fff;
-}
-@keyframes h9FabPulse {
-  0%, 100% { box-shadow: 0 10px 32px rgba(19,122,87,0.46); }
-  50%       { box-shadow: 0 14px 44px rgba(19,122,87,0.7), 0 0 0 6px rgba(19,122,87,0.08); }
-}
-.h9-fab { animation: h9FabPulse 2.8s ease-in-out infinite; }
 
 /* ── Streak nudge: tighter, rounded ────────────────────────────── */
 .hc-streak-nudge { border-radius: 18px; }
@@ -19742,3 +19724,18 @@ html[data-world-mini-app="true"] .hc-back-btn {
 
 /* ── Bottom gap so last section clears the floating nav ─────────── */
 .home-v9 { padding-bottom: calc(100px + var(--world-safe-bottom, 0px)); }
+
+/* ── Hide center create slot — nav is now a flat 4-tab bar ──────── */
+.bn-create-hidden {
+  display: none !important;
+  width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+/* Rebalance nav to fill evenly when center slot is gone */
+.bottom-nav.bottom-nav--hc:has(.bn-create-hidden) {
+  grid-template-columns: 1fr 1fr;
+}
+.bottom-nav.bottom-nav--hc:has(.bn-create-hidden) .bn-slot {
+  grid-template-columns: 1fr 1fr;
+}
