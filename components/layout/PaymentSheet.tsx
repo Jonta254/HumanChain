@@ -124,16 +124,18 @@ export function PaymentSheet({
                   <span className="ps-cstep-dot" />Verifying
                 </span>
                 <span className="ps-cstep-arrow">›</span>
-                <span className="ps-cstep pending"><span className="ps-cstep-dot" />Unlocking</span>
+                <span className={`ps-cstep ${elapsed >= 30 ? "active" : "pending"}`}>
+                  <span className="ps-cstep-dot" />Unlocking
+                </span>
               </div>
-              {elapsed >= 8 && (
+              {elapsed >= 8 && elapsed < 45 && (
                 <p className="ps-confirm-patience">
-                  Still confirming… blockchain verification takes a moment. Do not close this screen.
+                  Checking World Chain… this can take up to 90 seconds. Do not close this screen.
                 </p>
               )}
-              {elapsed >= 20 && (
+              {elapsed >= 45 && (
                 <p className="ps-confirm-patience ps-confirm-patience-slow">
-                  Taking longer than usual — network may be busy. Your payment is safe. Hang tight.
+                  Network is slow — still confirming. Your payment is safe. Hang tight.
                 </p>
               )}
               <span className="ps-confirm-elapsed">{elapsed}s elapsed</span>

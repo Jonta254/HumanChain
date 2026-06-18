@@ -16,8 +16,9 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
 };
 
-// Retry schedule: immediate, then exponential back-off up to ~60 s total.
-const worldPaymentConfirmationDelays = [0, 1000, 2500, 4500, 7000, 11000, 17000];
+// Retry schedule: immediate, then increasing intervals — ~90 s total window.
+// WorldChain indexing can lag 30-60 s after the user confirms in World App.
+const worldPaymentConfirmationDelays = [0, 2000, 4000, 6000, 9000, 13000, 18000, 24000, 32000];
 
 function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));
