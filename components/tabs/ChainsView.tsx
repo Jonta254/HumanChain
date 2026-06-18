@@ -1210,7 +1210,19 @@ export function ChainsView({
 
   if (activeField) {
     const room =
-      fieldQuoteRooms[activeField.name as keyof typeof fieldQuoteRooms];
+      fieldQuoteRooms[activeField.name as keyof typeof fieldQuoteRooms] ?? null;
+
+    if (!room) {
+      return (
+        <div className="screen">
+          <section className="field-room-hero">
+            <button onClick={() => setActiveField(null)} type="button">Back</button>
+            <h2>{activeField.name}</h2>
+            <p>No content available for this field yet.</p>
+          </section>
+        </div>
+      );
+    }
 
     return (
       <div className="screen">

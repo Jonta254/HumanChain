@@ -554,7 +554,7 @@ export function MeView({
             try {
               const { shareWithWorld } = await import("@/lib/world/social");
               const username = verifiedHuman?.username ?? "a verified human";
-              const text = `${username} — ${tier} · ${chainScore} HP · ${passportMetrics.completedTrades} trades · ${streak} day streak on HumanChain.`;
+              const text = `${username} — ${tier.current.label} · ${chainScore} HP · ${passportMetrics.completedTrades} trades · ${streak} day streak on HumanChain.`;
               await shareWithWorld({ title: "My Human Passport", text, url: process.env.NEXT_PUBLIC_APP_URL ?? "https://humanchain.app" });
             } catch { /* share dismissed */ }
           }}

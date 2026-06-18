@@ -1740,7 +1740,7 @@ export function StoriesView({
                 },
                 detail: `Support ${activeUserStory.author}.`,
                 success: "Story tip is prepared for World App.",
-                feature: "tip-storyteller",
+                feature: "storyteller-tip",
                 points: 4,
                 onConfirmed: async () => {
                   const storyKey = `user:${activeUserStory.title}`;
@@ -1839,7 +1839,7 @@ export function StoriesView({
                 },
                 detail: "Support the human behind this story.",
                 success: "Story tip is prepared for World App.",
-                feature: "tip-storyteller",
+                feature: "storyteller-tip",
                 points: 4,
                 onConfirmed: async () => {
                   const storyKey = `pub:${activePublishedStory}`;
@@ -2434,7 +2434,7 @@ export function StoriesView({
                 },
                 detail: "Support the writer behind this story.",
                 success: "Storyteller tip is prepared for World App.",
-                feature: "tip-storyteller",
+                feature: "storyteller-tip",
                 points: 4,
                 onConfirmed: async () => {
                   const storyKey = `act:${activePublishedStory}`;
