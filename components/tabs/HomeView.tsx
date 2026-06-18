@@ -16,7 +16,6 @@ import {
   MessageCircleQuestion,
   Settings,
   Sparkles,
-  Store,
   TrendingUp,
   Users,
   Zap,
@@ -60,20 +59,12 @@ function getHumanChainId(handle: string) {
 
 // Strongest earned badge from REAL local signals. Null → honest empty state.
 function getStrongestBadge(args: { isVerified: boolean; streak: number; posts: number; trades: number }) {
-  if (args.trades >= 1) return { label: "Trusted Trader", icon: Store };
+  if (args.trades >= 1) return { label: "Trusted Trader", icon: Briefcase };
   if (args.streak >= 7) return { label: "Streak Builder", icon: Flame };
   if (args.posts >= 3)  return { label: "Contributor",    icon: Sparkles };
   if (args.isVerified)  return { label: "Verified Human", icon: BadgeCheck };
   return null;
 }
-
-const LEADERBOARD_SEED = [
-  { rank: 1, handle: "@mara_chain",       score: 847, tierLabel: "Gold",   country: "🇰🇪" },
-  { rank: 2, handle: "@ubuntu_builder",   score: 721, tierLabel: "Gold",   country: "🇿🇦" },
-  { rank: 3, handle: "@discipline_daily", score: 634, tierLabel: "Gold",   country: "🇮🇳" },
-  { rank: 4, handle: "@care_bridge",      score: 512, tierLabel: "Silver", country: "🇵🇭" },
-  { rank: 5, handle: "@builder_ama",      score: 448, tierLabel: "Silver", country: "🇧🇷" },
-];
 
 const openOpportunities = [
   { id: "opp-1", title: "Swahili–Portuguese Medical Translation", budget: "WLD 85",  niche: "Healthcare",    region: "Kenya → Brazil",  deadline: "5 days",  proposals: 3, urgent: true,  color: "#2f6fed", skills: ["Medical terms", "Swahili"] },
@@ -306,17 +297,12 @@ export function HomeView({
         </div>
       </header>
 
-      {/* ── 1.5 · Live activity ticker ───────────────── */}
+      {/* ── 1.5 · Live activity ticker + social proof ── */}
       <div className="hc-ticker" aria-live="polite" aria-label="Live activity">
         <span className="hc-ticker-dot" aria-hidden="true" />
         <span className="hc-ticker-text" key={tickerIdx}>{tickerMsg}</span>
-      </div>
-
-      {/* ── 1.6 · Live social proof ──────────────────── */}
-      <div className="hc-social-proof">
-        <span className="hc-sp-item"><span className="hc-sp-dot green" />{activityCount} answered this hour</span>
-        <span className="hc-sp-sep">·</span>
-        <span className="hc-sp-item">4.9k online now</span>
+        <span className="hc-ticker-sep" aria-hidden="true" />
+        <span className="hc-ticker-stat">{activityCount} answered · 4.9k live</span>
       </div>
 
       {/* ── 2 · Brief HumanChain Card ────────────────── */}
@@ -485,59 +471,6 @@ export function HomeView({
         </div>
       </section>
 
-      {/* ── 7 · Live network stats ───────────────────── */}
-      <section className="h9-section" aria-label="Network stats">
-        <div className="hc-network-strip">
-          <div className="hc-network-stat">
-            <strong>214k+</strong>
-            <span>Verified humans</span>
-          </div>
-          <div className="hc-network-stat">
-            <strong>180+</strong>
-            <span>Countries</span>
-          </div>
-          <div className="hc-network-stat">
-            <strong>4.9k</strong>
-            <span>Online now</span>
-          </div>
-          <div className="hc-network-stat">
-            <strong style={{ color: "var(--green)" }}>WLD</strong>
-            <span>Payments live</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 7.3 · Leaderboard ────────────────────────── */}
-      <section className="h9-section" aria-label="Weekly leaderboard">
-        <div className="h9-section-head">
-          <div>
-            <strong>Top Chains This Week</strong>
-            <p className="h9-section-sub">Ranked by Human Points earned</p>
-          </div>
-          <button onClick={() => setTab("me")} type="button" className="h9-see-all">Your rank →</button>
-        </div>
-        <div className="hc-leaderboard">
-          {LEADERBOARD_SEED.map((entry) => (
-            <div key={entry.rank} className="hc-lb-row">
-              <span className={`hc-lb-rank${entry.rank <= 3 ? " top3" : ""}`}>
-                {entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : entry.rank === 3 ? "🥉" : `#${entry.rank}`}
-              </span>
-              <span className="hc-lb-flag">{entry.country}</span>
-              <span className="hc-lb-handle">{entry.handle}</span>
-              <span className="hc-lb-tier">{entry.tierLabel}</span>
-              <span className="hc-lb-score">{entry.score} HP</span>
-            </div>
-          ))}
-          <div className="hc-lb-row hc-lb-you">
-            <span className="hc-lb-rank">You</span>
-            <span className="hc-lb-flag">🌍</span>
-            <span className="hc-lb-handle">{worldHandle}</span>
-            <span className="hc-lb-tier">{tier.current.label}</span>
-            <span className="hc-lb-score">{chainScore} HP</span>
-          </div>
-        </div>
-      </section>
-
       {/* ── 7.5 · Daily streak nudge ─────────────────── */}
       {!dailyAnswered && streak > 0 && (
         <section className="h9-section" aria-label="Streak nudge">
@@ -592,10 +525,6 @@ export function HomeView({
         </button>
       </section>
 
-      {/* ── AI Guide FAB ─────────────────────────────── */}
-      <button className="h9-fab" onClick={() => onOpenGuide()} aria-label="Open AI guide" type="button">
-        <Sparkles size={20} />
-      </button>
 
     </div>
   );
