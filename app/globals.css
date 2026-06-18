@@ -19710,6 +19710,43 @@ html[data-world-mini-app="true"] .hc-back-btn {
   bottom: calc(88px + var(--world-safe-bottom, 0px));
 }
 
+/* ── GOLDEN Create button — overrides the emerald brand grad ─────── */
+.bottom-nav--hc .bn-create {
+  background: linear-gradient(150deg, #b87d12 0%, #e8a820 38%, #ffd060 65%, #d49018 100%) !important;
+  border: 2.5px solid rgba(255, 235, 140, 0.55) !important;
+  color: #3a2206 !important;
+  box-shadow:
+    0 10px 28px rgba(210, 150, 20, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.35) inset !important;
+  animation: bnGoldGlow 3s ease-in-out infinite !important;
+}
+
+/* Sheen stays, just tinted gold */
+.bottom-nav--hc .bn-create::before {
+  background: linear-gradient(138deg, rgba(255,255,220,0.38) 0%, rgba(255,255,255,0) 55%) !important;
+}
+
+@keyframes bnGoldGlow {
+  0%, 100% {
+    box-shadow:
+      0 10px 28px rgba(210, 150, 20, 0.52),
+      0 0 0 0 rgba(210, 150, 20, 0);
+  }
+  50% {
+    box-shadow:
+      0 14px 42px rgba(210, 150, 20, 0.78),
+      0 0 0 6px rgba(210, 150, 20, 0.1);
+  }
+}
+
+.bottom-nav--hc .bn-create:active {
+  box-shadow: 0 6px 16px rgba(210, 150, 20, 0.4) !important;
+  animation: none !important;
+}
+
+/* Label under the + icon */
+.bn-create-label { color: inherit; }
+
 /* ── Streak nudge: tighter, rounded ────────────────────────────── */
 .hc-streak-nudge { border-radius: 18px; }
 .hc-streak-act {
