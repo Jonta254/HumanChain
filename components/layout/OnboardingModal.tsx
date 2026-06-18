@@ -40,6 +40,7 @@ export function OnboardingModal({ onComplete }: { onComplete: () => void }) {
           <X size={16} />
         </button>
 
+        <div className="ob-step-content" key={step}>
         <div className="ob-icon-wrap" style={{ background: `${current.color}18`, color: current.color }}>
           <Icon size={32} />
         </div>
@@ -52,6 +53,7 @@ export function OnboardingModal({ onComplete }: { onComplete: () => void }) {
 
         <h2 className="ob-title">{current.title}</h2>
         <p className="ob-body">{current.body}</p>
+        </div>
 
         <button
           className="ob-cta"

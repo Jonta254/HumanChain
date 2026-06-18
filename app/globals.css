@@ -19762,3 +19762,355 @@ html[data-world-mini-app="true"] .hc-back-btn {
 /* ── Bottom gap so last section clears the floating nav ─────────── */
 .home-v9 { padding-bottom: calc(100px + var(--world-safe-bottom, 0px)); }
 
+/* ═══════════════════════════════════════════════════════════════
+   FULL APP POLISH — perfection pass
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Onboarding: smooth content fade-slide between steps ─────── */
+@keyframes obStepIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ob-step-content {
+  animation: obStepIn 0.22s ease both;
+}
+/* Pill dots — bigger tap target */
+.ob-dot { width: 10px; height: 10px; cursor: pointer; }
+.ob-dot.active { width: 26px; }
+/* CTA button: bolder */
+.ob-cta { font-size: 0.94rem; letter-spacing: 0.01em; border-radius: 16px; min-height: 50px; }
+/* Skip button: more visible */
+.ob-skip {
+  width: 32px; height: 32px;
+  background: var(--paper-strong);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* ── 2. LoginGate: premium glass card refinements ───────────────── */
+.login-gate {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 100%;
+}
+.gate-card {
+  flex: 1;
+}
+/* Spin indicator is already wired via ::after in existing CSS.
+   Make the disabled text clearer with a subtle shimmer overlay. */
+.gate-primary:disabled {
+  background: linear-gradient(135deg, #c8a030, #b8881a) !important;
+  opacity: 0.85 !important;
+}
+/* Trust cards: tighter, cleaner */
+.gate-trust-grid > div {
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: var(--paper-strong);
+  border: 1px solid var(--card-edge);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+}
+.gate-trust-grid > div svg { color: var(--green); margin-bottom: 2px; }
+.gate-trust-grid > div strong { font-size: 0.8rem; color: var(--ink); }
+.gate-trust-grid > div span { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+
+/* ── 3. CreateView: visual hierarchy for paid vs free ───────────── */
+/* Free badge — emerald tint */
+.create-hub-cost-badge.free {
+  background: rgba(19, 122, 87, 0.10);
+  color: var(--green);
+  border: 1px solid rgba(19, 122, 87, 0.20);
+  font-weight: 800;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+/* Paid badge — amber/gold tint */
+.create-hub-cost-badge.paid {
+  background: rgba(184, 138, 31, 0.12);
+  color: #b88a1f;
+  border: 1px solid rgba(184, 138, 31, 0.28);
+  font-weight: 800;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+/* HP badge */
+.create-hub-hp-badge {
+  background: rgba(19, 122, 87, 0.08);
+  color: var(--green);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(19, 122, 87, 0.16);
+}
+/* Action card item: better press state */
+.create-hub-item--card {
+  transition: transform 0.12s ease, box-shadow 0.14s ease;
+}
+.create-hub-item--card:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+/* Category tab pills: indicator dot matches accent */
+.create-hub-cat-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--cat-accent, var(--green));
+  flex-shrink: 0;
+}
+/* Featured hero card: elevated shadow + gradient border */
+.create-hero {
+  position: relative;
+  overflow: hidden;
+}
+.create-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    138deg,
+    rgba(255,255,255,0.14) 0%,
+    rgba(255,255,255,0) 55%
+  );
+  pointer-events: none;
+}
+
+/* ── 4. AskView: empty state polish ─────────────────────────────── */
+.ask-empty-state,
+.ask-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.ask-empty-state svg, .ask-no-results svg { opacity: 0.4; }
+.ask-empty-state strong, .ask-no-results strong {
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.ask-empty-state p, .ask-no-results p {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  max-width: 260px;
+  margin: 0;
+}
+.ask-empty-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-grad);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 0;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+/* ── 5. ChainsView: image upload progress feedback ──────────────── */
+.moment-upload-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(19, 122, 87, 0.07);
+  border: 1px solid rgba(19, 122, 87, 0.18);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--green);
+  margin: 8px 0;
+  animation: fadeInUp 0.2s ease;
+}
+.moment-upload-progress svg {
+  animation: spin 1.2s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── 6. HP ledger empty state ────────────────────────────────────── */
+.ledger-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--muted);
+  border: 1.5px dashed var(--line);
+  border-radius: 16px;
+  margin: 8px 0;
+}
+.ledger-empty-state svg { opacity: 0.35; }
+.ledger-empty-state strong { font-size: 0.88rem; color: var(--ink); }
+.ledger-empty-state p { font-size: 0.76rem; line-height: 1.5; max-width: 260px; margin: 0; }
+
+/* ── 7. StoriesView: publish button disabled state ──────────────── */
+.primary-command:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+/* Live character counter: colour feedback */
+.exact-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: right;
+}
+.exact-count.ready {
+  color: var(--green);
+}
+
+/* ── 8. MarketplaceView: listing wizard step indicator ──────────── */
+.market-wizard-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 12px 16px 0;
+}
+.market-wizard-step {
+  flex: 1;
+  text-align: center;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--muted);
+  position: relative;
+}
+.market-wizard-step.active { color: var(--green); }
+.market-wizard-step.done { color: rgba(19,122,87,0.6); }
+.market-wizard-step::before {
+  content: "";
+  display: block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  margin: 0 auto 4px;
+}
+.market-wizard-step.active::before { background: var(--green); box-shadow: 0 0 0 3px rgba(19,122,87,0.18); }
+.market-wizard-step.done::before { background: rgba(19,122,87,0.55); }
+
+/* ── 9. Global: smooth active-press on all tappable cards ──────── */
+.panel,
+.hc-rep,
+.h9-opp,
+.hc-brief,
+.hc-explore-today,
+.hc-lb-row {
+  transition: transform 0.1s ease;
+}
+.hc-rep:active { transform: scale(0.985); }
+.h9-opp:active { transform: scale(0.97); }
+
+/* ── 10. Global: better section heading style ────────────────────── */
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--line);
+}
+.section-heading span {
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+.section-heading svg { color: var(--green); opacity: 0.7; }
+
+/* ── 11. PaymentSheet: Trust row WLD chip ────────────────────────── */
+.ps-trust-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  margin: 12px 0;
+}
+.ps-trust-row span { display: inline-flex; align-items: center; gap: 4px; }
+.ps-hp-badge {
+  background: rgba(19,122,87,0.1);
+  color: var(--green);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-weight: 900;
+}
+
+/* ── 12. Screens: consistent top-safe padding ────────────────────── */
+.chains-screen,
+.ask-screen,
+.me-screen,
+.market-screen,
+.stories-screen {
+  padding-top: calc(16px + var(--world-safe-top, 0px));
+}
+
+/* ── 13. Marketplace: gallery dots — larger tap target ───────────── */
+.gallery-dot,
+.market-gallery-dot {
+  min-width: 10px;
+  min-height: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* ── 14. MeView: passport check-in button pulse ─────────────────── */
+@keyframes checkInPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(19,122,87,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(19,122,87,0.15); }
+}
+.hcp-checkin-btn:not(:disabled) {
+  animation: checkInPulse 2.5s ease-in-out infinite;
+}
+
+/* ── 15. Toast: richer appearance ────────────────────────────────── */
+.toast {
+  border-left: 3px solid var(--green);
+}
+
+/* ── 16. Screen: smooth scroll momentum on all screens ──────────── */
+.screen {
+  scroll-behavior: smooth;
+}
+
+/* ── 17. Back button: pill shape refinement ─────────────────────── */
+.hc-back-btn {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* ── 18. Bottom nav active tab: scale icon slightly ─────────────── */
+.bottom-nav--hc .bn-tab.active .bn-icon svg {
+  transform: scale(1.12);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── 19. Ask threads: thread card press ──────────────────────────── */
+.thread-card { transition: transform 0.1s ease; }
+.thread-card:active { transform: scale(0.985); }
+
+/* ── 20. CreateView search: focus glow ───────────────────────────── */
+.create-page-search:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(19,122,87,0.12);
+}
+

@@ -2317,8 +2317,19 @@ export function StoriesView({
             <small className={microCharacters === 200 ? "exact-count ready" : "exact-count"}>
               {microCharacters}/200 characters
             </small>
-            <button className="primary-command" onClick={publishMicroStory} type="button">
-              Publish free story
+            <button
+              className="primary-command"
+              disabled={microCharacters !== 200 || !microDraft.coverImage}
+              onClick={publishMicroStory}
+              type="button"
+            >
+              {microCharacters === 200 && microDraft.coverImage
+                ? "Publish free story"
+                : microCharacters < 200
+                  ? `${200 - microCharacters} chars left`
+                  : !microDraft.coverImage
+                    ? "Add cover image first"
+                    : "Publish free story"}
             </button>
           </div>
         </div>
