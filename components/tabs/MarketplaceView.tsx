@@ -1503,6 +1503,11 @@ export function MarketplaceView({
                   const existing = loadJsonFromStorage<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(storageKeys.jobApplications, []);
                   if (!existing.find((a) => a.id === svcId)) {
                     saveJsonToStorage(storageKeys.jobApplications, [{ id: svcId, title: activeSvc.title, budget, poster, appliedAt: new Date().toISOString() }, ...existing]);
+                    fetch("/api/db/applications", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ listing_id: svcId, listing_title: activeSvc.title, applicant_wallet: humanIdentity?.wallet ?? "", message: `Budget: ${budget}` }),
+                    }).catch(() => null);
                   }
                   addNotification("Application sent!", `You applied to "${activeSvc.title}". The poster has been notified via World Chat.`, "marketplace");
                 }).catch(() => act("Chat unavailable", "Try from World App."));

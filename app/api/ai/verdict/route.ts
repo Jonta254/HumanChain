@@ -5,6 +5,7 @@ type VerdictRequest = {
   question: string;
   answers: Array<{ text: string; country?: string }>;
   feature?: string;
+  storyTitle?: string;
 };
 
 export type VerdictResult = {
@@ -22,15 +23,29 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ error: "Provide a question and at least one answer." }, { status: 400 });
   }
 
-  const { question, answers } = body;
+  const { question, answers, feature, storyTitle } = body;
   const capped = answers.slice(0, 30);
+  const isReflection = feature === "deep-story-reflection";
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return noStoreJson({ ok: false, pendingSetup: true }, { status: 503 });
   }
 
-  const prompt = `You are analyzing responses to a question asked to verified humans on HumanChain.
+  const prompt = isReflection
+    ? `You are a thoughtful guide helping a reader reflect on a story they just paid to experience on HumanChain.
+
+Story: "${storyTitle ?? question}"
+
+Generate a personal reflection guide with exactly these 4 fields.
+Respond ONLY with valid JSON, no markdown:
+{"mostSaid":"...","bestAnswer":"...","hardTruth":"...","finalVerdict":"..."}
+
+- mostSaid: the core theme or message of this story (1-2 sentences)
+- bestAnswer: the most memorable idea or moment from the story (1-2 sentences)
+- hardTruth: what this story challenges the reader to confront (1-2 sentences)
+- finalVerdict: a personal reflection prompt — a question for the reader to sit with (1-2 sentences)`
+    : `You are analyzing responses to a question asked to verified humans on HumanChain.
 
 Question: "${question}"
 

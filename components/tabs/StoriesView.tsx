@@ -1524,6 +1524,7 @@ export function StoriesView({
   );
   const [unlockedBonusStories, setUnlockedBonusStories] = useState<Set<string>>(new Set());
   const [unlockedReflections, setUnlockedReflections] = useState<Set<string>>(new Set());
+  const [reflectionTexts, setReflectionTexts] = useState<Record<string, { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } | "loading">>({});
   const [bookmarkedStories, setBookmarkedStories] = useState<Set<string>>(new Set());
   const [tippedStories, setTippedStories] = useState<Set<string>>(new Set());
   const [storyRatings, setStoryRatings] = useState<Record<number, number>>({});
@@ -2486,12 +2487,31 @@ export function StoriesView({
                 success: "Deep Story Reflection saved to your Human Vault.",
                 feature: "deep-story-reflection",
                 points: 12,
-                onConfirmed: () => {
-                  if (activePublishedStory) {
-                    setUnlockedReflections((prev) => new Set([...prev, activePublishedStory]));
+                onConfirmed: async () => {
+                  const storyKey = activePublishedStory;
+                  if (storyKey) {
+                    setUnlockedReflections((prev) => new Set([...prev, storyKey]));
+                    setReflectionTexts((prev) => ({ ...prev, [storyKey]: "loading" }));
                   }
                   act("Reflection saved", "Your private Deep Story Reflection is saved in your Human Vault.");
-                  recordHistory({ title: "Deep Story Reflection created", detail: `6 WLD confirmed. Private reflection created for ${activePublishedStory ?? "this story"}.`, kind: "story" });
+                  recordHistory({ title: "Deep Story Reflection created", detail: `6 WLD confirmed. Private reflection created for ${storyKey ?? "this story"}.`, kind: "story" });
+                  if (!storyKey) return;
+                  try {
+                    const storyLabel = publishedStory?.shelfTitle ?? String(storyKey);
+                    const res = await fetch("/api/ai/verdict", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ question: storyLabel, answers: [], feature: "deep-story-reflection", storyTitle: storyLabel }),
+                    });
+                    const data = await res.json() as { ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } };
+                    if (data.ok && data.verdict) {
+                      setReflectionTexts((prev) => ({ ...prev, [storyKey]: data.verdict! }));
+                    } else {
+                      setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
+                    }
+                  } catch {
+                    setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
+                  }
                 },
               });
             }}
@@ -2500,6 +2520,24 @@ export function StoriesView({
             {activePublishedStory && unlockedReflections.has(activePublishedStory) ? "✓ Reflection saved" : "Create Deep Reflection · 6 WLD"}
           </button>
         </div>
+        {activePublishedStory && unlockedReflections.has(activePublishedStory) ? (() => {
+          const rt = reflectionTexts[activePublishedStory];
+          if (rt === "loading") {
+            return <p style={{ opacity: 0.55, fontSize: "0.82rem", padding: "12px 0 0" }}>Generating your reflection…</p>;
+          }
+          if (rt && typeof rt === "object") {
+            return (
+              <div className="ask-verdict-panel" style={{ marginTop: 16 }}>
+                <span className="section-kicker">Your Deep Reflection</span>
+                <div className="ask-verdict-row"><strong>Core theme</strong><p>{rt.mostSaid}</p></div>
+                <div className="ask-verdict-row"><strong>Key insight</strong><p>{rt.bestAnswer}</p></div>
+                <div className="ask-verdict-row"><strong>What it challenges</strong><p>{rt.hardTruth}</p></div>
+                <div className="ask-verdict-row"><strong>Reflect on this</strong><p>{rt.finalVerdict}</p></div>
+              </div>
+            );
+          }
+          return null;
+        })() : null}
       </section>
     </div>
   );

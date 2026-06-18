@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { kvGet, kvSet } from "./kv";
 
 type RateLimitBucket = {
   count: number;
@@ -62,6 +63,25 @@ export function rateLimitResponse() {
   response.headers.set("Retry-After", "60");
 
   return response;
+}
+
+/** Distributed rate limit via KV. Use for critical endpoints (payments, proofs). */
+export async function isRateLimitedKV(
+  req: NextRequest,
+  key: string,
+  limit = 20,
+  windowSeconds = 60,
+): Promise<boolean> {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+  const window = Math.floor(Date.now() / (windowSeconds * 1000));
+  const kvKey = `rl:${key}:${ip}:${window}`;
+  const current = parseInt((await kvGet(kvKey)) ?? "0", 10);
+  if (current >= limit) return true;
+  await kvSet(kvKey, String(current + 1), windowSeconds);
+  return false;
 }
 
 export function isSafeMiniAppPath(path: string) {
