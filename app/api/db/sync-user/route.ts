@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
+import { getSessionWallet } from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,12 @@ export async function POST(req: NextRequest) {
       tier?: string;
     };
     if (!wallet) return NextResponse.json({ error: "wallet required" }, { status: 400 });
+
+    // Verify the request comes from the authenticated wallet owner.
+    const sessionWallet = getSessionWallet(req);
+    if (sessionWallet && sessionWallet !== wallet.toLowerCase()) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
+    }
 
     const db = createServiceClient();
 

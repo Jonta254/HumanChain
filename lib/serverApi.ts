@@ -71,3 +71,10 @@ export function isSafeMiniAppPath(path: string) {
 export function isWalletAddress(address: string) {
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 }
+
+/** Returns the verified wallet from the session cookie, or null if unauthenticated. */
+export function getSessionWallet(req: NextRequest): string | null {
+  const wallet = req.cookies.get("humanchain_wallet")?.value ?? null;
+  if (!wallet || !isWalletAddress(wallet)) return null;
+  return wallet.toLowerCase();
+}

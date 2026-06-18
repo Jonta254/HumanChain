@@ -52,13 +52,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const verifiedAddress = verification.siweMessageData.address.toLowerCase();
     const response = noStoreJson({
       ok: true,
-      address: verification.siweMessageData.address,
+      address: verifiedAddress,
       statement: verification.siweMessageData.statement,
     });
 
     response.cookies.delete("humanchain_siwe_nonce");
+    // Set a session cookie so server-side routes can verify the authenticated wallet.
+    response.cookies.set("humanchain_wallet", verifiedAddress, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
 
     return response;
   } catch (error) {

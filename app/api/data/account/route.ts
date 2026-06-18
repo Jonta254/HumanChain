@@ -2,6 +2,7 @@ import { get, put } from "@vercel/blob";
 import { createHash } from "node:crypto";
 import { NextRequest } from "next/server";
 import {
+  getSessionWallet,
   isRateLimited,
   isWalletAddress,
   noStoreJson,
@@ -85,6 +86,12 @@ export async function POST(req: NextRequest) {
       { error: "Send a snapshot to save." },
       { status: 400 },
     );
+  }
+
+  // Require the authenticated wallet to match the payload wallet on save.
+  const sessionWallet = getSessionWallet(req);
+  if (sessionWallet && sessionWallet !== payload.wallet.toLowerCase()) {
+    return noStoreJson({ error: "Unauthorized." }, { status: 403 });
   }
 
   const savedAt = new Date().toISOString();
