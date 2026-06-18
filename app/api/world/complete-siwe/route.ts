@@ -52,7 +52,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const verifiedAddress = verification.siweMessageData.address.toLowerCase();
+    const rawAddress = verification.siweMessageData.address;
+    if (!rawAddress) {
+      return noStoreJson({ ok: false, error: "Could not extract verified address." }, { status: 400 });
+    }
+    const verifiedAddress = rawAddress.toLowerCase();
     const response = noStoreJson({
       ok: true,
       address: verifiedAddress,
