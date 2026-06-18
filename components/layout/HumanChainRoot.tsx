@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
-import { formatCheckInTime, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
+import { formatCheckInTime, getChainScore, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
 import { BottomNavigation as BottomNav } from "@/components/layout/BottomNavigation";
 import { LoginGate } from "@/components/layout/LoginGate";
 import { OnboardingModal } from "@/components/layout/OnboardingModal";
 import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { NotificationPermissionPrompt } from "@/components/layout/NotificationPermissionPrompt";
 import { PaymentSheet } from "@/components/layout/PaymentSheet";
+import { AIGuideSheet } from "@/components/layout/AIGuideSheet";
 import { AskView } from "@/components/tabs/AskView";
 import { ChainsView } from "@/components/tabs/ChainsView";
 import { CreateView } from "@/components/tabs/CreateView";
@@ -45,6 +46,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
     if (typeof window === "undefined") return true;
     return Boolean(localStorage.getItem("hc_onboarded"));
   });
+
+  const [aiGuideOpen, setAiGuideOpen] = useState(false);
 
   // Track previous tab so the back button always returns to the right place
   const prevTabRef = useRef<typeof tab>("home");
@@ -253,6 +256,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             notificationUnreadCount={unreadNotificationCount}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             onOpenNotifications={() => setNotificationCenterOpen(true)}
+            onOpenGuide={() => setAiGuideOpen(true)}
             profileImage={profileImage}
             recordHistory={recordHistory}
             setDailyAnsweredAt={setDailyAnsweredAt}
@@ -329,6 +333,14 @@ export function HumanChainRoot(props: HumanChainAppState) {
             </div>
             <button aria-label="Dismiss" onClick={() => setToast(null)} type="button">✕</button>
           </div>
+        ) : null}
+        {aiGuideOpen ? (
+          <AIGuideSheet
+            chainScore={getChainScore({ points, streak, posts: humanPosts.filter((p) => p.owner).length, savedItems })}
+            onClose={() => setAiGuideOpen(false)}
+            points={points}
+            streak={streak}
+          />
         ) : null}
         {paymentPrompt ? (
           <PaymentSheet

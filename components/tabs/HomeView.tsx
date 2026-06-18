@@ -36,7 +36,6 @@ import {
   isVerifiedWorldHuman,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
-import { AIGuideSheet } from "@/components/layout/AIGuideSheet";
 import type { Tab, EarnPoints } from "@/types/ui";
 import type { VerifiedHuman } from "@/types/user";
 import type { HumanPost, DailyResponse } from "@/types/content";
@@ -125,6 +124,7 @@ export function HomeView({
   notificationUnreadCount,
   onEnableNotifications,
   onOpenNotifications,
+  onOpenGuide,
   points,
   profileImage,
   recordHistory,
@@ -150,6 +150,7 @@ export function HomeView({
   notificationUnreadCount: number;
   onEnableNotifications: () => void | Promise<void>;
   onOpenNotifications: () => void;
+  onOpenGuide: () => void;
   points: number;
   profileImage: string | null;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
@@ -165,7 +166,6 @@ export function HomeView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
-  const [aiGuideOpen, setAiGuideOpen] = useState(false);
   const [showDaily, setShowDaily] = useState(false);
   const [tickerIdx, setTickerIdx] = useState(0);
   const [activityCount, setActivityCount] = useState(() => 72 + (new Date().getMinutes() % 28));
@@ -402,7 +402,7 @@ export function HomeView({
               )
             )}
           </div>
-          <button className="hc-insight-ai" onClick={() => setAiGuideOpen(true)} aria-label="Open AI guide" type="button">
+          <button className="hc-insight-ai" onClick={() => onOpenGuide()} aria-label="Open AI guide" type="button">
             <ArrowRight size={16} />
           </button>
         </div>
@@ -423,7 +423,7 @@ export function HomeView({
             <span className="hc-quick-icon" style={{ "--qa": "#b88a1f" } as React.CSSProperties}><Briefcase size={18} /></span>
             <span>Work</span>
           </button>
-          <button onClick={() => setAiGuideOpen(true)} type="button">
+          <button onClick={() => onOpenGuide()} type="button">
             <span className="hc-quick-icon" style={{ "--qa": "#6657d9" } as React.CSSProperties}><Sparkles size={18} /></span>
             <span>Guide</span>
           </button>
@@ -593,13 +593,10 @@ export function HomeView({
       </section>
 
       {/* ── AI Guide FAB ─────────────────────────────── */}
-      <button className="h9-fab" onClick={() => setAiGuideOpen(true)} aria-label="Open AI guide" type="button">
+      <button className="h9-fab" onClick={() => onOpenGuide()} aria-label="Open AI guide" type="button">
         <Sparkles size={20} />
       </button>
 
-      {aiGuideOpen && (
-        <AIGuideSheet chainScore={chainScore} onClose={() => setAiGuideOpen(false)} points={points} streak={streak} />
-      )}
     </div>
   );
 }
