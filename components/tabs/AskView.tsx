@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MapPin,
   MessageCircleQuestion,
@@ -112,6 +112,9 @@ export function AskView({
     new Set(loadJsonFromStorage<string[]>(storageKeys.savedThreadIds, [])),
   );
   const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [voiceListening, setVoiceListening] = useState(false);
+  const [voiceTarget, setVoiceTarget] = useState<"question" | string>("question"); // "question" | answerKey
+  const recognitionRef = useRef<{ abort: () => void; start: () => void } | null>(null);
 
   const ANSWER_REACTION_EMOJIS = [
     { emoji: "💡", label: "Real" },
@@ -297,6 +300,61 @@ export function AskView({
     act("Question deleted", "Your Ask post was removed from this device.");
   }
 
+  function startVoice(target: "question" | string) {
+    // Stop any active session first
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+      recognitionRef.current = null;
+    }
+    if (voiceListening && voiceTarget === target) {
+      setVoiceListening(false);
+      return;
+    }
+    type SpeechRecognitionCtor = new () => {
+      lang: string;
+      interimResults: boolean;
+      maxAlternatives: number;
+      onstart: (() => void) | null;
+      onresult: ((e: { results: { [i: number]: { [j: number]: { transcript: string } } } }) => void) | null;
+      onerror: ((e: { error: string }) => void) | null;
+      onend: (() => void) | null;
+      abort: () => void;
+      start: () => void;
+    };
+    const w = typeof window !== "undefined" ? (window as unknown as Record<string, unknown>) : undefined;
+    const SR = w
+      ? ((w["SpeechRecognition"] ?? w["webkitSpeechRecognition"]) as SpeechRecognitionCtor | undefined)
+      : undefined;
+    if (!SR) {
+      act("Voice not available", "Your device or browser does not support voice input. Type your question instead.");
+      return;
+    }
+    const rec = new SR();
+    rec.lang = "en-US";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onstart = () => { setVoiceListening(true); setVoiceTarget(target); };
+    rec.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript ?? "";
+      if (!transcript) return;
+      if (target === "question") {
+        setQuestion((q) => q ? `${q} ${transcript}` : transcript);
+      } else {
+        setAnswerDrafts((d) => ({ ...d, [target]: d[target] ? `${d[target]} ${transcript}` : transcript }));
+      }
+    };
+    rec.onerror = (event) => {
+      if (event.error === "not-allowed" || event.error === "denied") {
+        act("Microphone blocked", "Allow microphone access in your device settings to use voice input.");
+      } else if (event.error !== "aborted") {
+        act("Voice stopped", "Could not capture audio — tap the mic again to retry.");
+      }
+    };
+    rec.onend = () => { setVoiceListening(false); recognitionRef.current = null; };
+    recognitionRef.current = rec;
+    try { rec.start(); } catch { act("Voice unavailable", "Tap the mic button again to start voice input."); }
+  }
+
   return (
     <div className="screen ask-screen">
       <TopBar title="Ask The World" subtitle="Verified human answers" />
@@ -309,10 +367,10 @@ export function AskView({
           </p>
         </div>
         <button
-          aria-pressed={false}
-          className="voice-orb"
-          onClick={() => act("Voice questions coming soon", "Record and transcribe questions with your voice — arriving in a future HumanChain update.")}
-          title="Voice questions — coming soon"
+          aria-pressed={voiceListening && voiceTarget === "question"}
+          className={`voice-orb${voiceListening && voiceTarget === "question" ? " listening" : ""}`}
+          onClick={() => startVoice("question")}
+          title={voiceListening && voiceTarget === "question" ? "Tap to stop recording" : "Tap to ask with your voice"}
           type="button"
         >
           <Mic size={24} />
@@ -445,7 +503,7 @@ export function AskView({
           <div className="ask-modes">
             {[
               ["Text", "Public question", "Free"],
-              ["Voice", "Coming soon", "Free"],
+              ["Voice", "Voice input", "Free"],
               ["Private", "Hide identity", "4 WLD"],
               ["Deep Verdict", "Human report", "6 WLD"],
             ].map(([mode, label, amount]) => (
@@ -461,7 +519,8 @@ export function AskView({
                   }
 
                   if (mode === "Voice") {
-                    act("Voice questions coming soon", "Record and post voice questions in an upcoming HumanChain update — no payment needed today.");
+                    setSelectedMode("Voice");
+                    startVoice("question");
                     return;
                   }
 
@@ -868,11 +927,17 @@ export function AskView({
         </div>
         <div className="compact-actions">
           <button
-            onClick={() => act("Voice answers coming soon", "Record and send voice answers in an upcoming HumanChain update — no payment needed today.")}
+            className={voiceListening && voiceTarget !== "question" ? "active" : ""}
+            onClick={() => {
+              const activeThread = threads.find((t) => t.answers.length === 0 || expandedAnswerQuestion === t.question);
+              const key = activeThread?.question ?? threads[0]?.question ?? "voice";
+              startVoice(key);
+            }}
             type="button"
-            title="Coming soon"
+            title={voiceListening && voiceTarget !== "question" ? "Tap to stop recording" : "Tap mic to dictate your answer"}
           >
-            Voice answer
+            <Mic size={14} />
+            {voiceListening && voiceTarget !== "question" ? "Listening…" : "Voice answer"}
           </button>
           <button
             className={countryAnswerUnlocked ? "active" : ""}

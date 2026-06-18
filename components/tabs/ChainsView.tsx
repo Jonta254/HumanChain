@@ -914,7 +914,7 @@ export function ChainsView({
 
   function publishPostWithPaymentCheck() {
     if (postMediaType === "video") {
-      act("Photo-first launch", "Moments accepts JPEG, PNG, or WebP photos for launch. Video can return after moderation and scan coverage is ready.");
+      act("Photos only", "Moments accepts JPEG, PNG, or WebP photos. Select a photo to post your verified moment.");
       return;
     }
 
@@ -1243,7 +1243,7 @@ export function ChainsView({
 
   return (
     <div className="screen chains-screen">
-      <TopBar title="Moments" subtitle="Photo-first proof-of-life posts from verified humans." />
+      <TopBar title="Moments" subtitle="Proof-of-life posts from verified humans." />
       <section className="chain-tools">
         <button
           onClick={() => {
@@ -1476,7 +1476,7 @@ export function ChainsView({
                       const file = event.target.files?.[0];
                       if (file) {
                         if (!file.type.startsWith("image/")) {
-                          act("Photo-first launch", "Moments accepts JPEG, PNG, or WebP photos for launch.");
+                          act("Photos only", "Select a JPEG, PNG, or WebP photo to post your verified moment.");
                           return;
                         }
 

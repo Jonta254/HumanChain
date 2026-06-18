@@ -3353,6 +3353,18 @@ button.danger {
   box-shadow: 0 0 0 8px rgba(255, 253, 248, 0.12);
 }
 
+.voice-orb.listening {
+  color: #fff;
+  background: radial-gradient(circle at 50% 50%, #e03030 0%, #a81515 100%);
+  box-shadow: 0 0 0 0 rgba(220, 40, 40, 0.5);
+  animation: voiceListenPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes voiceListenPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 40, 40, 0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(220, 40, 40, 0); }
+}
+
 .ask-signal-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
