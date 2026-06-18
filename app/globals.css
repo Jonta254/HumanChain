@@ -19725,17 +19725,3 @@ html[data-world-mini-app="true"] .hc-back-btn {
 /* ── Bottom gap so last section clears the floating nav ─────────── */
 .home-v9 { padding-bottom: calc(100px + var(--world-safe-bottom, 0px)); }
 
-/* ── Hide center create slot — nav is now a flat 4-tab bar ──────── */
-.bn-create-hidden {
-  display: none !important;
-  width: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-/* Rebalance nav to fill evenly when center slot is gone */
-.bottom-nav.bottom-nav--hc:has(.bn-create-hidden) {
-  grid-template-columns: 1fr 1fr;
-}
-.bottom-nav.bottom-nav--hc:has(.bn-create-hidden) .bn-slot {
-  grid-template-columns: 1fr 1fr;
-}
