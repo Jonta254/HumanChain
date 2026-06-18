@@ -2,6 +2,7 @@
 
 import { MiniKit } from "@worldcoin/minikit-js";
 import type { WalletAuthResult } from "@worldcoin/minikit-js/commands";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { isWorldMiniAppReady } from "./context";
 
 export async function authenticateHumanWallet() {
@@ -18,7 +19,7 @@ export async function authenticateHumanWallet() {
     };
   }
 
-  const nonceResponse = await fetch("/api/world/nonce");
+  const nonceResponse = await fetchWithTimeout("/api/world/nonce", { timeoutMs: 8_000 });
 
   if (!nonceResponse.ok) {
     throw new Error("Could not prepare World wallet login.");
@@ -44,10 +45,11 @@ export async function authenticateHumanWallet() {
 
   const payload = result.data;
 
-  const verifyResponse = await fetch("/api/world/complete-siwe", {
+  const verifyResponse = await fetchWithTimeout("/api/world/complete-siwe", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nonce, payload }),
+    timeoutMs: 10_000,
   });
 
   if (!verifyResponse.ok) {

@@ -52,6 +52,7 @@ import {
   parsePaymentAmount,
 } from "@/lib/humanchain/utils";
 import { defaultHumanChainPaymentToken, isValidHumanChainPaymentAmount } from "@/lib/worldPayments";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import {
   authenticateHumanWallet,
   getWorldMiniAppContext,
@@ -363,21 +364,22 @@ export function useHumanChainApp() {
   // ── Supabase sync helpers ─────────────────────────────────────────────────
   async function syncUserToSupabase(wallet: string, opts: { username?: string; pts?: number; str?: number; tier?: string }) {
     try {
-      await fetch("/api/db/sync-user", {
+      await fetchWithTimeout("/api/db/sync-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet, username: opts.username, points: opts.pts, streak: opts.str, tier: opts.tier }),
+        timeoutMs: 6_000,
       });
     } catch { /* non-critical */ }
   }
 
   async function logHpToSupabase(wallet: string, amount: number, reason: string) {
     try {
-      // HP ledger persists in Vercel Blob + Supabase for cross-device history
-      await fetch("/api/db/sync-user", {
+      await fetchWithTimeout("/api/db/sync-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet, points: undefined, _hpEntry: { amount, reason } }),
+        timeoutMs: 6_000,
       });
     } catch { /* non-critical */ }
   }
@@ -411,17 +413,18 @@ export function useHumanChainApp() {
   }
 
   async function refreshLatestHumanChainFeed() {
-    const response = await fetch("/api/data/feed", { cache: "no-store" });
+    const response = await fetchWithTimeout("/api/data/feed", { cache: "no-store", timeoutMs: 8_000 });
     const payload = (await response.json()) as PublicFeedPayload;
     if (payload.ok && payload.blobStorageReady) mergeLatestHumanChainFeed(payload);
   }
 
   async function syncHumanAccount(action: "load" | "save", snapshot?: AccountSyncSnapshot) {
     if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") return null;
-    const response = await fetch("/api/data/account", {
+    const response = await fetchWithTimeout("/api/data/account", {
       body: JSON.stringify({ action, snapshot, wallet: verifiedHuman.wallet }),
       headers: { "Content-Type": "application/json" },
       method: "POST",
+      timeoutMs: 10_000,
     });
     return (await response.json()) as { ok?: boolean; pendingSetup?: boolean; snapshot?: { savedAt?: string; snapshot?: AccountSyncSnapshot } | null };
   }
@@ -544,9 +547,9 @@ export function useHumanChainApp() {
     async function hydrateFromSupabase() {
       try {
         const [threadsRes, listingsRes, momentsRes] = await Promise.allSettled([
-          fetch("/api/db/threads").then((r) => r.json()),
-          fetch("/api/db/marketplace").then((r) => r.json()),
-          fetch("/api/db/moments").then((r) => r.json()),
+          fetchWithTimeout("/api/db/threads", { timeoutMs: 8_000 }).then((r) => r.json()),
+          fetchWithTimeout("/api/db/marketplace", { timeoutMs: 8_000 }).then((r) => r.json()),
+          fetchWithTimeout("/api/db/moments", { timeoutMs: 8_000 }).then((r) => r.json()),
         ]);
 
         if (threadsRes.status === "fulfilled" && threadsRes.value.threads?.length) {
@@ -615,10 +618,11 @@ export function useHumanChainApp() {
   async function sendWorldUserNotification({ detail, path = "/", sector, title }: { detail: string; path?: string; sector: NotificationItem["sector"]; title: string }) {
     if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") return false;
     if (!canSendWorldNotificationOnce(verifiedHuman.wallet, sector, title)) return false;
-    const response = await fetch("/api/world/send-notification", {
+    const response = await fetchWithTimeout("/api/world/send-notification", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ walletAddresses: [verifiedHuman.wallet], sector, title, message: detail, path, localisations: [{ language: "en", title, message: detail }] }),
+      timeoutMs: 6_000,
     });
     const payload = await response.json().catch(() => null);
     return response.ok && payload?.ok !== false;

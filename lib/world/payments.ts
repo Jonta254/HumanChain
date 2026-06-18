@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { Tokens, tokenToDecimals } from "@worldcoin/minikit-js/commands";
 import type { PayResult } from "@worldcoin/minikit-js/commands";
@@ -42,10 +43,11 @@ async function confirmWorldPayment(input: {
     let confirmation: WorldPaymentConfirmation;
 
     try {
-      confirmationResponse = await fetch("/api/world/confirm-payment", {
+      confirmationResponse = await fetchWithTimeout("/api/world/confirm-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
+        timeoutMs: 12_000,
       });
       confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
     } catch (error) {
@@ -122,10 +124,11 @@ export async function payWithWorld({
     };
   }
 
-  const referenceResponse = await fetch("/api/world/payment-reference", {
+  const referenceResponse = await fetchWithTimeout("/api/world/payment-reference", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ amount, feature, token }),
+    timeoutMs: 8_000,
   });
 
   const referencePayload = (await referenceResponse.json()) as {

@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { appLanguages } from "@/lib/data/languages";
 import { firstRunNotifications } from "@/lib/data/notifications";
 import { initialHumanPosts } from "@/lib/data/posts";
@@ -141,10 +142,11 @@ export async function storeSafeData(
   data: unknown,
 ) {
   try {
-    const response = await fetch("/api/data/store", {
+    const response = await fetchWithTimeout("/api/data/store", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data, id, kind }),
+      timeoutMs: 8_000,
     });
     const payload = (await response.json()) as { ok?: boolean; pendingSetup?: boolean; url?: string };
     return { ok: Boolean(payload.ok && payload.url), pendingSetup: Boolean(payload.pendingSetup), url: payload.url };

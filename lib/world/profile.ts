@@ -2,6 +2,7 @@
 
 import { MiniKit } from "@worldcoin/minikit-js";
 import { Permission } from "@worldcoin/minikit-js/commands";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import type { RawWorldUserProfile, WorldPermissionSnapshot, WorldUserProfile } from "./types";
 import { getWorldMiniAppContext, isWorldMiniAppReady } from "./context";
 
@@ -79,10 +80,11 @@ async function resolveWorldUserByAddress(address: string) {
     return fromMiniKit;
   }
 
-  const fromHumanChainApi = await fetch("/api/world/user-profile", {
+  const fromHumanChainApi = await fetchWithTimeout("/api/world/user-profile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ address }),
+    timeoutMs: 6_000,
   })
     .then(async (response) => {
       if (!response.ok) {
