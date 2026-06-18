@@ -9,6 +9,7 @@ import {
   validateMomentImage,
 } from "@/lib/humanchainPolicy";
 import {
+  compactStorageArray,
   loadJsonFromStorage,
   saveJsonToStorage,
   storageKeys,
@@ -731,6 +732,7 @@ export function ChainsView({
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.chainComments, chainComments);
+    compactStorageArray(storageKeys.chainComments, 500);
   }, [chainComments]);
 
   useEffect(() => {

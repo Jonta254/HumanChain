@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { isRateLimited, noStoreJson, rateLimitResponse, readJsonBody } from "@/lib/serverApi";
+import { isRateLimitedKV, noStoreJson, rateLimitResponse, readJsonBody } from "@/lib/serverApi";
 
 type VerdictRequest = {
   question: string;
@@ -16,7 +16,7 @@ export type VerdictResult = {
 };
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "ai-verdict", 5)) return rateLimitResponse();
+  if (await isRateLimitedKV(req, "ai-verdict", 5)) return rateLimitResponse();
 
   const body = await readJsonBody<VerdictRequest>(req);
   if (!body?.question || !Array.isArray(body.answers) || body.answers.length === 0) {

@@ -52,7 +52,14 @@ export function saveJsonToStorage(key: string, value: unknown) {
     window.localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
-    return false;
+    // Quota exceeded — shed the largest arrays and retry once.
+    try {
+      evictLargestArrays(3 * 1024 * 1024);
+      window.localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

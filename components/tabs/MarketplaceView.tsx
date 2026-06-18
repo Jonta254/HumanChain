@@ -44,6 +44,7 @@ import {
 import { normalizePaymentFeature } from "@/lib/worldPayments";
 import { validateAnswerInput, validateListingInput } from "@/lib/humanchainPolicy";
 import {
+  compactStorageArray,
   loadJsonFromStorage,
   saveJsonToStorage,
   storageKeys,
@@ -534,9 +535,9 @@ export function MarketplaceView({
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
   // ── Persist ───────────────────────────────────────────────────────────────
-  useEffect(() => { saveJsonToStorage(storageKeys.bids, marketBids); }, [marketBids]);
+  useEffect(() => { saveJsonToStorage(storageKeys.bids, marketBids); compactStorageArray(storageKeys.bids, 300); }, [marketBids]);
   useEffect(() => { saveJsonToStorage(storageKeys.marketRatings, marketRatings); }, [marketRatings]);
-  useEffect(() => { saveJsonToStorage(storageKeys.marketComments, marketComments); }, [marketComments]);
+  useEffect(() => { saveJsonToStorage(storageKeys.marketComments, marketComments); compactStorageArray(storageKeys.marketComments, 300); }, [marketComments]);
   useEffect(() => { saveJsonToStorage(storageKeys.marketHolds, marketHolds); }, [marketHolds]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────

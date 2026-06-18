@@ -7,6 +7,7 @@ import {
   validateStoryFile,
 } from "@/lib/humanchainPolicy";
 import {
+  compactStorageArray,
   loadJsonFromStorage,
   saveJsonToStorage,
   storageKeys,
@@ -1563,6 +1564,7 @@ export function StoriesView({
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.userStories, userStories);
+    compactStorageArray(storageKeys.userStories, 100);
   }, [userStories]);
 
   useEffect(() => {

@@ -16,6 +16,7 @@ import {
   validateQuestionInput,
 } from "@/lib/humanchainPolicy";
 import {
+  compactStorageArray,
   loadJsonFromStorage,
   saveJsonToStorage,
   storageKeys,
@@ -143,7 +144,10 @@ export function AskView({
     24 + (isVerifiedWorldHuman(humanIdentity) ? 26 : 0) + threads.filter((thread) => thread.owner).length * 4,
   );
 
-  useEffect(() => { saveJsonToStorage(storageKeys.askThreads, threads); }, [threads]);
+  useEffect(() => {
+    saveJsonToStorage(storageKeys.askThreads, threads);
+    compactStorageArray(storageKeys.askThreads, 200);
+  }, [threads]);
   useEffect(() => { saveJsonToStorage(storageKeys.answerReactions, answerReactions); }, [answerReactions]);
   useEffect(() => { saveJsonToStorage(storageKeys.savedThreadIds, [...savedThreadIds]); }, [savedThreadIds]);
 

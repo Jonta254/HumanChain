@@ -1,14 +1,14 @@
 import { NextRequest } from "next/server";
 import { verifySiweMessage } from "@worldcoin/minikit-js/siwe";
 import {
-  isRateLimited,
+  isRateLimitedKV,
   noStoreJson,
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "complete-siwe", 12)) {
+  if (await isRateLimitedKV(req, "complete-siwe", 12)) {
     return rateLimitResponse();
   }
 
