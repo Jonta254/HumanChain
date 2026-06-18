@@ -68,12 +68,35 @@ create table if not exists hc_hp_ledger (
   created_at  timestamptz not null default now()
 );
 
+-- Content reports
+create table if not exists hc_reports (
+  id               uuid primary key default gen_random_uuid(),
+  target_type      text not null,
+  target_id        text not null,
+  reason           text not null,
+  reporter_wallet  text,
+  created_at       timestamptz not null default now()
+);
+
+-- Job / service applications
+create table if not exists hc_applications (
+  id               uuid primary key default gen_random_uuid(),
+  listing_id       text not null,
+  listing_title    text,
+  applicant_wallet text not null,
+  message          text,
+  status           text not null default 'pending' check (status in ('pending','viewed','accepted','rejected')),
+  created_at       timestamptz not null default now()
+);
+
 -- Indexes
 create index if not exists hc_ask_threads_created  on hc_ask_threads(created_at desc);
 create index if not exists hc_ask_answers_thread   on hc_ask_answers(thread_id, created_at asc);
 create index if not exists hc_moments_created      on hc_moments(created_at desc);
 create index if not exists hc_marketplace_status   on hc_marketplace(status, created_at desc);
 create index if not exists hc_hp_ledger_wallet     on hc_hp_ledger(wallet, created_at desc);
+create index if not exists hc_reports_target       on hc_reports(target_type, target_id, created_at desc);
+create index if not exists hc_applications_listing on hc_applications(listing_id, created_at desc);
 
 -- RLS
 alter table hc_users        enable row level security;
@@ -82,6 +105,8 @@ alter table hc_ask_answers  enable row level security;
 alter table hc_moments      enable row level security;
 alter table hc_marketplace  enable row level security;
 alter table hc_hp_ledger    enable row level security;
+alter table hc_reports      enable row level security;
+alter table hc_applications enable row level security;
 
 -- Public read on all tables (service role writes via API routes)
 create policy "public read users"       on hc_users       for select using (true);

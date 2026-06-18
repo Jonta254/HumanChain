@@ -15,6 +15,9 @@ import {
   readJsonBody,
 } from "@/lib/serverApi";
 import { getHumanChainTreasury, getWorldAppId, getWorldDevPortalApiKey } from "@/lib/worldConfig";
+import { kvSAdd, kvSIsMember } from "@/lib/kv";
+
+const KV_TXN_KEY = "hc:confirmed-txns";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "confirm-payment", 20)) {
@@ -120,6 +123,12 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ ok: false, pending: true });
   }
 
+  // Idempotency guard: if we already confirmed this transactionId, return ok immediately.
+  const txId = payload.transactionId;
+  if (await kvSIsMember(KV_TXN_KEY, txId)) {
+    return noStoreJson({ ok: true, reference, feature: normalizedFeature, amount, token: normalizedToken });
+  }
+
   const treasury = getHumanChainTreasury().toLowerCase();
 
   // World may return token_amount in various denominations depending on the
@@ -213,6 +222,9 @@ export async function POST(req: NextRequest) {
       treasury, transactionRecipients,
     });
   }
+
+  // Record this transactionId as confirmed so replayed requests are idempotent.
+  await kvSAdd(KV_TXN_KEY, txId, 60 * 60 * 24 * 30); // 30-day TTL
 
   return noStoreJson({
     ok: true,

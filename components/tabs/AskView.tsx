@@ -93,6 +93,7 @@ export function AskView({
   const [boostedQuestions, setBoostedQuestions] = useState<Set<string>>(new Set());
   const [boostedAnswers, setBoostedAnswers] = useState<Set<string>>(new Set());
   const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(new Set());
+  const [verdictResults, setVerdictResults] = useState<Record<string, { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } | "loading">>({});
   const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
   const [reportingAnswer, setReportingAnswer] = useState<string | null>(null);
   const [reportedAnswers, setReportedAnswers] = useState<Set<string>>(new Set());
@@ -661,11 +662,32 @@ export function AskView({
             {verdictUnlocked && visibleAnswers.length > 0 ? (
               <div className="ask-verdict-panel">
                 <span className="section-kicker">Deep Verdict</span>
-                <div className="ask-verdict-row"><strong>Most said</strong><p>{visibleAnswers[0]?.text ?? "Collecting answers…"}</p></div>
-                <div className="ask-verdict-row"><strong>Best answer</strong><p>{visibleAnswers.reduce((a, b) => a.text.length > b.text.length ? a : b, visibleAnswers[0])?.text ?? "—"}</p></div>
-                <div className="ask-verdict-row"><strong>Answer count</strong><p>{visibleAnswers.length} verified human{visibleAnswers.length === 1 ? "" : "s"} responded</p></div>
-                <div className="ask-verdict-row"><strong>Hard truth</strong><p>Real answers from verified humans carry more weight than public opinion.</p></div>
-                <div className="ask-verdict-row"><strong>Final verdict</strong><p>Read all answers above — the truth is in the patterns, not one reply.</p></div>
+                {(() => {
+                  const vr = verdictResults[thread.question];
+                  if (vr === "loading") {
+                    return <p style={{ opacity: 0.6, fontSize: "0.85rem", padding: "8px 0" }}>Generating verdict…</p>;
+                  }
+                  if (vr && typeof vr === "object") {
+                    return (
+                      <>
+                        <div className="ask-verdict-row"><strong>Most said</strong><p>{vr.mostSaid}</p></div>
+                        <div className="ask-verdict-row"><strong>Best answer</strong><p>{vr.bestAnswer}</p></div>
+                        <div className="ask-verdict-row"><strong>Hard truth</strong><p>{vr.hardTruth}</p></div>
+                        <div className="ask-verdict-row"><strong>Final verdict</strong><p>{vr.finalVerdict}</p></div>
+                        <div className="ask-verdict-row"><strong>Answer count</strong><p>{visibleAnswers.length} verified human{visibleAnswers.length === 1 ? "" : "s"} responded</p></div>
+                      </>
+                    );
+                  }
+                  return (
+                    <>
+                      <div className="ask-verdict-row"><strong>Most said</strong><p>{visibleAnswers[0]?.text ?? "Collecting answers…"}</p></div>
+                      <div className="ask-verdict-row"><strong>Best answer</strong><p>{visibleAnswers.reduce((a, b) => a.text.length > b.text.length ? a : b, visibleAnswers[0])?.text ?? "—"}</p></div>
+                      <div className="ask-verdict-row"><strong>Answer count</strong><p>{visibleAnswers.length} verified human{visibleAnswers.length === 1 ? "" : "s"} responded</p></div>
+                      <div className="ask-verdict-row"><strong>Hard truth</strong><p>Real answers from verified humans carry more weight than public opinion.</p></div>
+                      <div className="ask-verdict-row"><strong>Final verdict</strong><p>Read all answers above — the truth is in the patterns, not one reply.</p></div>
+                    </>
+                  );
+                })()}
               </div>
             ) : null}
             {targetCountry !== "World" ? (
@@ -878,9 +900,27 @@ export function AskView({
                     success: "Deep Verdict unlocked. Scroll up to see the full human report.",
                     feature: "deep-verdict",
                     points: 12,
-                    onConfirmed: () => {
+                    onConfirmed: async () => {
                       setUnlockedVerdicts((prev) => new Set([...prev, thread.question]));
                       recordHistory({ title: "Deep Verdict unlocked", detail: thread.question, kind: "post" });
+                      const q = thread.question;
+                      const answersForVerdict = visibleAnswers.map((a) => ({ text: a.text, country: (a as { country?: string }).country }));
+                      setVerdictResults((prev) => ({ ...prev, [q]: "loading" }));
+                      try {
+                        const res = await fetch("/api/ai/verdict", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ question: q, answers: answersForVerdict, feature: "deep-verdict" }),
+                        });
+                        const data = await res.json() as { ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } };
+                        if (data.ok && data.verdict) {
+                          setVerdictResults((prev) => ({ ...prev, [q]: data.verdict! }));
+                        } else {
+                          setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
+                        }
+                      } catch {
+                        setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
+                      }
                     },
                   });
                 }}

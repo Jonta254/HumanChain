@@ -6,13 +6,9 @@ import {
   readJsonBody,
 } from "@/lib/serverApi";
 import { getWorldRpId } from "@/lib/worldConfig";
+import { kvSAdd, kvSIsMember } from "@/lib/kv";
 
-// Nullifier store persisted on globalThis so it survives Next.js hot-reloads
-// within a single instance. The World API also enforces uniqueness globally,
-// so this is an optimistic local guard. Replace with Redis/DB for multi-instance.
-const g = globalThis as typeof globalThis & { _hcNullifiers?: Set<string> };
-if (!g._hcNullifiers) g._hcNullifiers = new Set<string>();
-const usedNullifiers = g._hcNullifiers;
+const KV_NULLIFIER_KEY = "hc:nullifiers";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "verify-proof", 20)) {
@@ -53,7 +49,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (usedNullifiers.has(nullifierHash)) {
+  if (await kvSIsMember(KV_NULLIFIER_KEY, nullifierHash)) {
     return noStoreJson(
       { ok: false, error: "World ID proof already used. Each proof can only be verified once." },
       { status: 400 },
@@ -91,7 +87,7 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ ok: false, payload }, { status: 400 });
   }
 
-  usedNullifiers.add(nullifierHash);
+  await kvSAdd(KV_NULLIFIER_KEY, nullifierHash);
 
   return noStoreJson({ ok: true, payload });
 }
