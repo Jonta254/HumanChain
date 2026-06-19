@@ -35,6 +35,7 @@ import {
   Permission,
   requestWorldPermission,
 } from "@/lib/world";
+import { loadJsonFromStorage, storageKeys } from "@/lib/humanchain/storage";
 import {
   getChainScore,
   getLocalDateKey,
@@ -197,15 +198,15 @@ export function MeView({
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
   const [showAllLedger, setShowAllLedger] = useState(false);
-  const [jobApplications] = useState<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(() => {
-    try { return JSON.parse(typeof window !== "undefined" ? (localStorage.getItem("hc_job_applications") ?? "[]") : "[]"); } catch { return []; }
-  });
+  const [jobApplications] = useState<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(() =>
+    loadJsonFromStorage(storageKeys.jobApplications, []),
+  );
 
   // Restore profile image from localStorage on first mount
   useEffect(() => {
     if (!profileImage) {
       try {
-        const saved = localStorage.getItem("hc_profile_image");
+        const saved = localStorage.getItem(storageKeys.profileImage);
         if (saved) setProfileImage(saved);
       } catch {}
     }
@@ -285,7 +286,7 @@ export function MeView({
   function openDeepHumanMirror() {
     openPayment({
       title: "Deep Human Mirror",
-      amount: "6",
+      amount: "6 WLD",
       detail: "Unlock a private premium reflection from your profile activity, check-ins, questions, stories, and chain signals.",
       success: "Deep Human Mirror unlocked and stored in your Human Vault.",
       feature: "deep-world-verdict",
@@ -352,7 +353,7 @@ export function MeView({
                 reader.onload = () => {
                   const imageData = String(reader.result);
                   setProfileImage(imageData);
-                  try { localStorage.setItem("hc_profile_image", imageData); } catch {}
+                  try { localStorage.setItem(storageKeys.profileImage, imageData); } catch {}
                   recordHistory({ title: "Profile image updated", detail: "HumanChain profile image updated.", kind: "profile" });
                 };
                 reader.readAsDataURL(file);

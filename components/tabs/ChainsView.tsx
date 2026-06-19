@@ -1528,6 +1528,13 @@ export function ChainsView({
             <span>Recent human moments</span>
             <p>Photo posts from verified humans. Every card begins with the human, the caption, and the real image they shared.</p>
           </div>
+          {visiblePosts.length === 0 && (
+            <div className="chains-empty-state">
+              <span>📷</span>
+              <strong>No image posts yet</strong>
+              <p>Share a moment with a photo to be the first one here.</p>
+            </div>
+          )}
           {visiblePosts.map((post, index) => {
             const selectedReaction = momentReactions[String(post.id)];
             const authorInitial = post.author.replace(/^@/, "").charAt(0).toUpperCase();
@@ -1576,7 +1583,7 @@ export function ChainsView({
                       alt={post.caption}
                       decoding="async"
                       loading={index < 3 ? "eager" : "lazy"}
-                      src={post.image ?? ""}
+                      src={post.image ?? undefined}
                     />
                   )}
                 </div>
@@ -1636,7 +1643,7 @@ export function ChainsView({
                   >
                     Share
                   </button>
-                  {post.owner ? null : (
+                  {post.owner ? (
                     <button
                       onClick={() =>
                         payToPin({
@@ -1650,7 +1657,7 @@ export function ChainsView({
                     >
                       Promote
                     </button>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* Top comments preview */}

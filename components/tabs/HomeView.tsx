@@ -291,7 +291,7 @@ export function HomeView({
           >
             <Bell size={18} />
           </button>
-          <button className="h9-icon-btn" onClick={() => setTab("settings")} aria-label="Settings" type="button">
+          <button className="h9-icon-btn" onClick={() => setTab("me")} aria-label="Settings" type="button">
             <Settings size={18} />
           </button>
         </div>
@@ -508,7 +508,7 @@ export function HomeView({
       <section className="h9-section" aria-label="Explore today">
         <button
           className="hc-explore-today"
-          onClick={() => { setActiveField(communitySpotlight); setTab("chains"); }}
+          onClick={() => setTab("culture")}
           type="button"
         >
           <span className="hc-explore-glow" aria-hidden="true" />
@@ -516,11 +516,11 @@ export function HomeView({
             <span className="hc-explore-kicker"><Compass size={13} />Explore Today</span>
             <span className="hc-explore-go">Discover <ArrowRight size={13} /></span>
           </div>
-          <strong className="hc-explore-title">{communitySpotlight.name}</strong>
-          <p className="hc-explore-sub">{communitySpotlight.detail}</p>
+          <strong className="hc-explore-title">Culture Rooms</strong>
+          <p className="hc-explore-sub">Real stories from verified humans — Yoruba, Swahili, Andean, Caribbean and more. Pay to enter, learn, and share.</p>
           <div className="hc-explore-stats">
-            <span><Users size={12} />{communitySpotlight.members} members</span>
-            <span><Sparkles size={12} />Live moments &amp; stories</span>
+            <span><Users size={12} />30k+ members</span>
+            <span><Sparkles size={12} />8 cultures live</span>
           </div>
         </button>
       </section>

@@ -1830,7 +1830,7 @@ export function StoriesView({
             <span className="reader-page-counter">{page + 1} / {activePages.length}</span>
           </div>
           <button
-            className={`reader-tip-btn${tippedStories.has(`pub:${activePublishedStory}`) ? " tipped" : ""}`}
+            className={`reader-tip-btn${tippedStories.has(`pub:${activePublishedStory ?? "monthly"}`) ? " tipped" : ""}`}
             onClick={() =>
               openPayment({
                 title: "Tip storyteller",
@@ -1845,14 +1845,14 @@ export function StoriesView({
                 feature: "storyteller-tip",
                 points: 4,
                 onConfirmed: async () => {
-                  const storyKey = `pub:${activePublishedStory}`;
+                  const storyKey = `pub:${activePublishedStory ?? "monthly"}`;
                   setTippedStories((prev) => new Set([...prev, storyKey]));
                 },
               })
             }
             type="button"
           >
-            {tippedStories.has(`pub:${activePublishedStory}`) ? "⚡ Tipped" : "⚡ Tip"}
+            {tippedStories.has(`pub:${activePublishedStory ?? "monthly"}`) ? "⚡ Tipped" : "⚡ Tip"}
           </button>
           <div
             className="reader-progress"
@@ -1908,7 +1908,7 @@ export function StoriesView({
         </section>
         <section className="reader-bookmark-row">
           {(() => {
-            const bmKey = `bm:${activePublishedStory}`;
+            const bmKey = `bm:${activePublishedStory ?? "monthly"}`;
             const alreadyBookmarked = bookmarkedStories.has(bmKey);
             return (
               <button
@@ -1918,7 +1918,7 @@ export function StoriesView({
                   if (alreadyBookmarked) return;
                   openPayment({
                     title: "Bookmark this story",
-                    amount: "0.5",
+                    amount: "0.5 WLD",
                     detail: "Save this story permanently to your HumanChain reading list.",
                     success: "Story bookmarked to your permanent reading list.",
                     feature: "story-bookmark",
@@ -1959,17 +1959,22 @@ export function StoriesView({
         ) : (
           <section className="stories-library-list">
             {savedKeys.map((key) => {
+              const isMonthly = key === "monthly";
               const entry = publishedStoryCollection[key as keyof typeof publishedStoryCollection];
-              if (!entry) return null;
+              if (!entry && !isMonthly) return null;
+              const shelfTitle = isMonthly ? "The Door That Waited" : (entry?.shelfTitle ?? key);
+              const previewText = isMonthly
+                ? storyPages[0]?.text?.slice(0, 80)
+                : entry?.pages?.[0]?.text?.slice(0, 80);
               return (
                 <article className="stories-library-card" key={key}>
                   <div className="slc-info">
-                    <strong>{entry.shelfTitle ?? key}</strong>
-                    <p>{entry.pages?.[0]?.text?.slice(0, 80) ?? "Human story"}…</p>
+                    <strong>{shelfTitle}</strong>
+                    <p>{previewText ?? "Human story"}…</p>
                   </div>
                   <button
                     onClick={() => {
-                      setActivePublishedStory(key as keyof typeof publishedStoryCollection);
+                      setActivePublishedStory(isMonthly ? null : key as keyof typeof publishedStoryCollection);
                       setPage(0);
                       setIsReading(true);
                       setStoriesTab("browse");

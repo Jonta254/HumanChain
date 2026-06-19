@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getChainScore, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
+import { storageKeys } from "@/lib/humanchain/storage";
 import { BottomNavigation as BottomNav } from "@/components/layout/BottomNavigation";
 import { LoginGate } from "@/components/layout/LoginGate";
 import { OnboardingModal } from "@/components/layout/OnboardingModal";
@@ -20,6 +21,7 @@ import { MarketplaceView } from "@/components/tabs/MarketplaceView";
 import { MeView } from "@/components/tabs/MeView";
 import { SettingsView } from "@/components/tabs/SettingsView";
 import { StoriesView } from "@/components/tabs/StoriesView";
+import { CultureView } from "@/components/tabs/CultureView";
 import type { HumanChainAppState } from "@/lib/humanchain/useHumanChainApp";
 
 export function HumanChainRoot(props: HumanChainAppState) {
@@ -44,7 +46,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
 
   const [onboardingDone, setOnboardingDone] = useState(() => {
     if (typeof window === "undefined") return true;
-    return Boolean(localStorage.getItem("hc_onboarded"));
+    return Boolean(localStorage.getItem(storageKeys.onboarded));
   });
 
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
@@ -67,12 +69,12 @@ export function HumanChainRoot(props: HumanChainAppState) {
 
   const TAB_LABELS: Record<typeof tab, string> = {
     home: "Home", ask: "Ask", chains: "Chains", stories: "Stories",
-    market: "Market", me: "Passport", create: "Create", settings: "Settings",
+    market: "Market", me: "Passport", create: "Create", settings: "Settings", culture: "Culture",
   };
   const backLabel = TAB_LABELS[prevTab === tab ? "home" : prevTab] ?? "Home";
 
   function completeOnboarding() {
-    if (typeof window !== "undefined") localStorage.setItem("hc_onboarded", "1");
+    if (typeof window !== "undefined") localStorage.setItem(storageKeys.onboarded, "1");
     setOnboardingDone(true);
     earnPoints(25, "Welcome bonus — you started your HumanChain journey!");
   }
@@ -222,6 +224,17 @@ export function HumanChainRoot(props: HumanChainAppState) {
             setTab={setTab}
             shareReferralLink={shareReferralLink}
             streak={streak}
+            verifiedHuman={verifiedHuman}
+            worldContext={worldContext}
+          />
+        );
+      case "culture":
+        return (
+          <CultureView
+            act={act}
+            earnPoints={earnPoints}
+            openPayment={openPayment}
+            setTab={setTab}
             verifiedHuman={verifiedHuman}
             worldContext={worldContext}
           />

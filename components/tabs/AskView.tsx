@@ -98,8 +98,12 @@ export function AskView({
   const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
   const [reportingAnswer, setReportingAnswer] = useState<string | null>(null);
   const [reportedAnswers, setReportedAnswers] = useState<Set<string>>(new Set());
-  const [countryAnswerUnlocked, setCountryAnswerUnlocked] = useState(false);
-  const [anonymousAnswerUnlocked, setAnonymousAnswerUnlocked] = useState(false);
+  const [countryAnswerUnlocked, setCountryAnswerUnlocked] = useState(() =>
+    loadJsonFromStorage<boolean>(storageKeys.countryAnswerUnlocked, false),
+  );
+  const [anonymousAnswerUnlocked, setAnonymousAnswerUnlocked] = useState(() =>
+    loadJsonFromStorage<boolean>(storageKeys.anonymousAnswerUnlocked, false),
+  );
   const [askSearch, setAskSearch] = useState("");
   const [askFeedFilter, setAskFeedFilter] = useState("All");
   const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
@@ -798,7 +802,7 @@ export function AskView({
                               if (alreadyBoosted) return;
                               openPayment({
                                 title: "Boost this answer to top",
-                                amount: "0.5",
+                                amount: "0.5 WLD",
                                 detail: "Your answer moves to the top of this thread for 24 hours.",
                                 success: "Answer boosted — it now appears first in this thread.",
                                 feature: "quick-answer-boost",
@@ -921,9 +925,13 @@ export function AskView({
                           setVerdictResults((prev) => ({ ...prev, [q]: data.verdict! }));
                         } else {
                           setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
+                          setUnlockedVerdicts((prev) => { const next = new Set(prev); next.delete(q); return next; });
+                          act("Verdict unavailable", "The AI could not process this verdict. Your WLD has been noted — try again.");
                         }
                       } catch {
                         setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
+                        setUnlockedVerdicts((prev) => { const next = new Set(prev); next.delete(q); return next; });
+                        act("Verdict unavailable", "Connection issue. Your WLD has been noted — try again.");
                       }
                     },
                   });
@@ -999,6 +1007,7 @@ export function AskView({
                 points: 8,
                 onConfirmed: async () => {
                   setCountryAnswerUnlocked(true);
+                  saveJsonToStorage(storageKeys.countryAnswerUnlocked, true);
                   recordHistory({ title: "Country answer unlocked", detail: "1 WLD. Country-labelled answers now active.", kind: "post" });
                 },
               });
@@ -1023,6 +1032,7 @@ export function AskView({
                 points: 6,
                 onConfirmed: async () => {
                   setAnonymousAnswerUnlocked(true);
+                  saveJsonToStorage(storageKeys.anonymousAnswerUnlocked, true);
                   recordHistory({ title: "Anonymous answer unlocked", detail: "1.5 WLD. Anonymous verified answers now active.", kind: "post" });
                 },
               });

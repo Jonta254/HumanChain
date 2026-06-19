@@ -520,10 +520,10 @@ export function MarketplaceView({
   const [svcSearch, setSvcSearch] = useState("");
   const [activeSvc, setActiveSvc] = useState<SvcListing | null>(null);
   const [localJobs, setLocalJobs] = useState<LocalJob[]>(() =>
-    loadJsonFromStorage<LocalJob[]>("hc_local_jobs", []),
+    loadJsonFromStorage<LocalJob[]>(storageKeys.localJobs, []),
   );
   const [localServices, setLocalServices] = useState<LocalService[]>(() =>
-    loadJsonFromStorage<LocalService[]>("hc_local_services", []),
+    loadJsonFromStorage<LocalService[]>(storageKeys.localServices, []),
   );
   const [jobForm, setJobFormState] = useState({
     title: "", detail: "", niche: "legal", budget: "", deadline: "1 week", region: "",
@@ -531,7 +531,9 @@ export function MarketplaceView({
   const [serviceForm, setServiceFormState] = useState({
     title: "", detail: "", niche: "translation", rate: "", region: "", languages: "",
   });
-  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
+  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(
+    () => new Set(loadJsonFromStorage<Array<{ id: string }>>(storageKeys.jobApplications, []).map((a) => a.id)),
+  );
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
   // ── Persist ───────────────────────────────────────────────────────────────
@@ -906,7 +908,7 @@ export function MarketplaceView({
         };
         const next = [job, ...localJobs];
         setLocalJobs(next);
-        saveJsonToStorage("hc_local_jobs", next);
+        saveJsonToStorage(storageKeys.localJobs, next);
         recordHistory({ title: "Job posted", detail: `${title} · ${budget}`, kind: "market" });
         earnPoints(10, "Job posted.");
         setJobFormState({ title: "", detail: "", niche: "legal", budget: "", deadline: "1 week", region: "" });
@@ -938,7 +940,7 @@ export function MarketplaceView({
         };
         const next = [svc, ...localServices];
         setLocalServices(next);
-        saveJsonToStorage("hc_local_services", next);
+        saveJsonToStorage(storageKeys.localServices, next);
         recordHistory({ title: "Service listed", detail: `${title} · ${rate}`, kind: "market" });
         earnPoints(12, "Service listed.");
         setServiceFormState({ title: "", detail: "", niche: "translation", rate: "", region: "", languages: "" });

@@ -19,13 +19,13 @@ export async function POST(req: NextRequest) {
   if (await isRateLimitedKV(req, "ai-verdict", 5)) return rateLimitResponse();
 
   const body = await readJsonBody<VerdictRequest>(req);
-  if (!body?.question || !Array.isArray(body.answers) || body.answers.length === 0) {
+  const isReflection = body?.feature === "deep-story-reflection";
+  if (!body?.question || (!isReflection && (!Array.isArray(body.answers) || body.answers.length === 0))) {
     return noStoreJson({ error: "Provide a question and at least one answer." }, { status: 400 });
   }
 
   const { question, answers, feature, storyTitle } = body;
-  const capped = answers.slice(0, 30);
-  const isReflection = feature === "deep-story-reflection";
+  const capped = (answers ?? []).slice(0, 30);
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -71,7 +71,7 @@ Respond ONLY with valid JSON, no markdown:
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "claude-haiku-4-5-20251022",
         max_tokens: 400,
         messages: [{ role: "user", content: prompt }],
       }),

@@ -9,7 +9,7 @@ const guides = [
     title: "Reputation Coach",
     steps: [
       "Answer the daily question every day — each answer adds +18 HP",
-      "Post one real photo moment each day — adds +10 HP and builds trust",
+      "Post one real photo moment each day — adds +16 HP and builds trust",
       "Complete verified marketplace trades — every confirmed WLD payment adds trust score",
       "Keep your streak alive — a 7-day streak unlocks Streak Builder badge",
       "Earn enough HP to reach Gold Human status (420+ HP)",
