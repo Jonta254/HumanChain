@@ -900,8 +900,8 @@ export function useHumanChainApp() {
     }
     try {
       const earnedPoints = paymentPrompt.points ?? 0;
-      if (earnedPoints > 0) earnPoints(earnedPoints, `${paymentPrompt.title} payment reward`);
       await paymentPrompt.onConfirmed?.(amount);
+      if (earnedPoints > 0) earnPoints(earnedPoints, `${paymentPrompt.title} payment reward`);
       const formattedAmount = formatPaymentAmount(amount, paymentToken);
       const isKindTip = getPaymentKind(feature) === "tip";
       recordHistory({ title: isKindTip ? "Tip payment confirmed" : "Payment confirmed", detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`, kind: getPaymentKind(feature) });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
-import { getSessionWallet } from "@/lib/serverApi";
+import { getSessionWallet, isWalletAddress } from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       streak?: number;
       tier?: string;
     };
-    if (!wallet) return NextResponse.json({ error: "wallet required" }, { status: 400 });
+    if (!wallet || !isWalletAddress(wallet)) return NextResponse.json({ error: "wallet required" }, { status: 400 });
 
     // Verify the request comes from the authenticated wallet owner.
     const sessionWallet = getSessionWallet(req);
