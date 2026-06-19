@@ -9,7 +9,7 @@ import {
   normalizePaymentToken,
 } from "@/lib/worldPayments";
 import {
-  isRateLimited,
+  isRateLimitedKV,
   noStoreJson,
   rateLimitResponse,
   readJsonBody,
@@ -20,7 +20,7 @@ import { kvSAdd, kvSIsMember } from "@/lib/kv";
 const KV_TXN_KEY = "hc:confirmed-txns";
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "confirm-payment", 20)) {
+  if (await isRateLimitedKV(req, "confirm-payment", 20)) {
     return rateLimitResponse();
   }
 

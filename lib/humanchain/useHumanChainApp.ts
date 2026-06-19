@@ -884,7 +884,7 @@ export function useHumanChainApp() {
     let treasuryRecipient: string | undefined;
     try {
       const result = await payWithWorld({ amount, description: paymentPrompt.detail, feature, token: paymentToken });
-      if ("pendingSetup" in result && result.pendingSetup) { setToast({ title: "World setup needed", detail: result.message }); setPaymentBusy(false); return; }
+      if ("pendingSetup" in result && result.pendingSetup) { setToast({ title: "World setup needed", detail: result.message }); setPaymentPrompt(null); setPaymentBusy(false); return; }
       if ("pendingWorldApp" in result && result.pendingWorldApp) { setToast({ title: "Open in World App", detail: result.message }); setPaymentBusy(false); return; }
       if ("ok" in result && !result.ok) {
         const detail = "error" in result && result.error ? result.error : "World payments are only counted after backend verification.";

@@ -8,14 +8,14 @@ import {
   normalizePaymentToken,
 } from "@/lib/worldPayments";
 import {
-  isRateLimited,
+  isRateLimitedKV,
   noStoreJson,
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "payment-reference", 20)) {
+  if (await isRateLimitedKV(req, "payment-reference", 20)) {
     return rateLimitResponse();
   }
 

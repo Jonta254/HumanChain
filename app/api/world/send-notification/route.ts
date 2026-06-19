@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       pendingSetup: true,
       message:
         "World notifications are being finalized. In-app activity still works.",
-    });
+    }, { status: 503 });
   }
 
   const response = await fetch(
