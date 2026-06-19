@@ -38,6 +38,7 @@ export const storageKeys = {
   createdCultures: "humanchain_created_cultures",
   culturePosts: "humanchain_culture_posts",
   onboarded: "hc_onboarded",
+  likedCulturePosts: "humanchain_liked_culture_posts",
 } as const;
 
 export function loadJsonFromStorage<T>(key: string, fallback: T): T {
@@ -107,13 +108,12 @@ export function storageUsageBytes(): number {
 // Evict the largest HumanChain array keys until usage drops below `targetBytes`.
 export function evictLargestArrays(targetBytes = 3 * 1024 * 1024) {
   if (typeof window === "undefined") return;
-  const HCPrefix = "humanchain_";
   while (storageUsageBytes() > targetBytes) {
     let biggestKey = "";
     let biggestSize = 0;
     for (let i = 0; i < window.localStorage.length; i++) {
       const k = window.localStorage.key(i) ?? "";
-      if (!k.startsWith(HCPrefix)) continue;
+      if (!k.startsWith("humanchain_") && !k.startsWith("hc_")) continue;
       const size = (window.localStorage.getItem(k)?.length ?? 0) * 2;
       if (size > biggestSize) { biggestSize = size; biggestKey = k; }
     }

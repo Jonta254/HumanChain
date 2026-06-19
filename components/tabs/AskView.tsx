@@ -980,6 +980,7 @@ export function AskView({
         <div className="compact-actions">
           <button
             className={voiceListening && voiceTarget !== "question" ? "active" : ""}
+            disabled={threads.length === 0}
             onClick={() => {
               const activeThread = threads.find((t) => t.answers.length === 0 || expandedAnswerQuestion === t.question);
               const key = activeThread?.question ?? threads[0]?.question ?? "voice";

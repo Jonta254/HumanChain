@@ -2090,6 +2090,11 @@ export function StoriesView({
                     return;
                   }
 
+                  if (story.key === "monthly") {
+                    setIsReading(true);
+                    setPage(0);
+                  }
+
                   act(
                     story.title,
                     story.price === "Free"
@@ -2456,8 +2461,8 @@ export function StoriesView({
           >
             Tip Storyteller
           </button>
-          <button
-            className={activePublishedStory && unlockedBonusStories.has(activePublishedStory) ? "active" : ""}
+          {activePublishedStory && <button
+            className={unlockedBonusStories.has(activePublishedStory) ? "active" : ""}
             onClick={() => {
               if (activePublishedStory && unlockedBonusStories.has(activePublishedStory)) {
                 act("Bonus pages unlocked", "Author notes and reader reflections are already visible below.");
@@ -2480,10 +2485,10 @@ export function StoriesView({
             }}
             type="button"
           >
-            {activePublishedStory && unlockedBonusStories.has(activePublishedStory) ? "✓ Bonus unlocked" : "Unlock Bonus Pages · 2 WLD"}
-          </button>
-          <button
-            className={activePublishedStory && unlockedReflections.has(activePublishedStory) ? "active" : ""}
+            {unlockedBonusStories.has(activePublishedStory) ? "✓ Bonus unlocked" : "Unlock Bonus Pages · 2 WLD"}
+          </button>}
+          {activePublishedStory && <button
+            className={unlockedReflections.has(activePublishedStory) ? "active" : ""}
             onClick={() => {
               if (activePublishedStory && unlockedReflections.has(activePublishedStory)) {
                 act("Reflection ready", "Your Deep Story Reflection is already saved.");
@@ -2526,8 +2531,8 @@ export function StoriesView({
             }}
             type="button"
           >
-            {activePublishedStory && unlockedReflections.has(activePublishedStory) ? "✓ Reflection saved" : "Create Deep Reflection · 6 WLD"}
-          </button>
+            {unlockedReflections.has(activePublishedStory) ? "✓ Reflection saved" : "Create Deep Reflection · 6 WLD"}
+          </button>}
         </div>
         {activePublishedStory && unlockedReflections.has(activePublishedStory) ? (() => {
           const rt = reflectionTexts[activePublishedStory];

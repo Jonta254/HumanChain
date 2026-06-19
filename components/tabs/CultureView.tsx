@@ -301,7 +301,9 @@ export function CultureView({
     () => loadJsonFromStorage(storageKeys.culturePosts, {}),
   );
   const [newPost, setNewPost] = useState({ title: "", body: "" });
-  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(
+    () => new Set(loadJsonFromStorage<string[]>(storageKeys.likedCulturePosts, [])),
+  );
   const [createForm, setCreateForm] = useState({
     name: "", region: "", flag: "", tagline: "", preview: "", topics: "",
   });
@@ -630,7 +632,9 @@ export function CultureView({
                   className={`cv-like-btn${likedPosts.has(post.id) ? " liked" : ""}`}
                   onClick={() => {
                     if (likedPosts.has(post.id)) return;
-                    setLikedPosts((prev) => new Set([...prev, post.id]));
+                    const next = new Set([...likedPosts, post.id]);
+                    setLikedPosts(next);
+                    saveJsonToStorage(storageKeys.likedCulturePosts, [...next]);
                     earnPoints(1, "Liked a culture story.");
                   }}
                   type="button"

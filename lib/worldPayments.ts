@@ -43,6 +43,8 @@ export const humanChainPaymentFeatures = {
   "link-reaction-pack": 0.5,
   "story-bookmark": 0.5,
   "market-hold-notify": 0.5,
+  "culture-room-entry": 2,
+  "culture-room-create": 3,
 } as const;
 
 export type HumanChainPaymentFeature = keyof typeof humanChainPaymentFeatures;

@@ -684,6 +684,7 @@ export function ChainsView({
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null);
   const [commentSort, setCommentSort] = useState<"relevant" | "newest">("relevant");
   const [chainCommentDrafts, setChainCommentDrafts] = useState<Record<string, string>>({});
+  const [chainLinkCommentSort, setChainLinkCommentSort] = useState<"top" | "newest">("top");
   const [activeChainCommentKey, setActiveChainCommentKey] = useState<string | null>(null);
   const [chainComments, setChainComments] = useState<Record<string, string[]>>(() =>
     loadJsonFromStorage<Record<string, string[]>>(storageKeys.chainComments, {}),
@@ -1857,7 +1858,7 @@ export function ChainsView({
                 </div>
                 <p>{link.text}</p>
                 <div className="reaction-row">
-                  <button
+                  {link.owner && <button
                     onClick={() =>
                       payToPin({
                         id: link.id,
@@ -1869,7 +1870,7 @@ export function ChainsView({
                     type="button"
                   >
                     Pin 4 WLD
-                  </button>
+                  </button>}
                   <button
                     onClick={() => {
                       setLinks((current) =>
@@ -1963,8 +1964,8 @@ export function ChainsView({
                   </button>
                 </div>
                 <div className="comment-sort-row" aria-label="Chain comment sorting">
-                  <button className="active" type="button">Top</button>
-                  <button type="button">Newest</button>
+                  <button className={chainLinkCommentSort === "top" ? "active" : ""} onClick={() => setChainLinkCommentSort("top")} type="button">Top</button>
+                  <button className={chainLinkCommentSort === "newest" ? "active" : ""} onClick={() => setChainLinkCommentSort("newest")} type="button">Newest</button>
                 </div>
                 <div className="comment-thread">
                   {activeChainComments.length ? (
