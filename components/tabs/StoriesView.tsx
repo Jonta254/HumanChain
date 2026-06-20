@@ -2321,7 +2321,7 @@ export function StoriesView({
           ))}
         </div>
         {storyShelf
-          .filter((s) => activeCategoryFilter === "All" || s.category === activeCategoryFilter || activeCategoryFilter === s.category.replace(" Stories", ""))
+          .filter((s) => activeCategoryFilter === "All" || s.category === activeCategoryFilter || s.category + " Stories" === activeCategoryFilter)
           .map((story) => {
           const storyKey =
             story.key !== "monthly" ? (story.key as PublishedStoryKey) : null;

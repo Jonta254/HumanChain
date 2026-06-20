@@ -14972,6 +14972,8 @@ html[data-world-mini-app="true"] .bottom-nav {
   overflow: visible;
 }
 .bottom-nav--hc .bn-slot { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.bottom-nav--hc .bn-slot:last-child { grid-template-columns: 1fr 1fr 1fr; }
+.bottom-nav--hc .bn-slot:last-child .bn-label { font-size: 0.58rem; }
 .bottom-nav--hc .bn-create {
   transform: translateY(-16px);
   width: 58px; height: 58px;
@@ -21235,7 +21237,7 @@ button:not([disabled]) { cursor: pointer; }
 
 /* ── All screen containers: proper safe-area padding ───────────────── */
 .screen {
-  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 /* ── Story Featured Quote Hero ─────────────────────────────────────── */

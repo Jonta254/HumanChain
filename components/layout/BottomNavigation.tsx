@@ -1,6 +1,6 @@
 "use client";
 
-import { Award, Compass, Home, Plus, Store } from "lucide-react";
+import { Award, BookOpen, Compass, Home, Plus, Store } from "lucide-react";
 import { humanHaptic } from "@/lib/worldMiniApp";
 import type { Tab } from "@/types/ui";
 
@@ -30,8 +30,9 @@ export function BottomNavigation({
     ["chains", "Discover",           <Compass key="discover" size={22} />],
   ];
   const rightItems: Array<[Tab, string, React.ReactNode]> = [
-    ["me",     "Reputation",           <Award key="reputation" size={22} />],
-    ["market", appLanguage.nav.market, <Store key="market"     size={22} />],
+    ["stories", "Stories",              <BookOpen key="stories"    size={22} />],
+    ["me",      "Passport",             <Award    key="reputation" size={22} />],
+    ["market",  appLanguage.nav.market, <Store    key="market"     size={22} />],
   ];
 
   return (

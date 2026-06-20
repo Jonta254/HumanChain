@@ -5,6 +5,7 @@ import {
   ArrowRight,
   BadgeCheck,
   Bell,
+  BookOpen,
   Briefcase,
   Camera,
   Clock,
@@ -409,9 +410,9 @@ export function HomeView({
             <span className="hc-quick-icon" style={{ "--qa": "#b88a1f" } as React.CSSProperties}><Briefcase size={18} /></span>
             <span>Work</span>
           </button>
-          <button onClick={() => onOpenGuide()} type="button">
-            <span className="hc-quick-icon" style={{ "--qa": "#6657d9" } as React.CSSProperties}><Sparkles size={18} /></span>
-            <span>Guide</span>
+          <button onClick={() => setTab("stories")} type="button">
+            <span className="hc-quick-icon" style={{ "--qa": "#6657d9" } as React.CSSProperties}><BookOpen size={18} /></span>
+            <span>Stories</span>
           </button>
         </div>
       </section>
