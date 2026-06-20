@@ -1684,8 +1684,8 @@ export function MarketplaceView({
                       {listing.status === "sold" && <span className="hcm-thumb-sold">SOLD</span>}
                     </button>
                     <div className="hcm-stored-info">
-                      <strong>{listing.title}</strong>
-                      <span>{listing.price} · {listing.condition} · {listing.area}</span>
+                      <strong>{listing.title || "Untitled item"}</strong>
+                      <span>{listing.price || "Price not set"} · {listing.condition || "Condition not set"} · {listing.area || "Area not set"}</span>
                       <small>{listing.saleMode === "bidding" ? `Bidding, floor ${listing.bidFloor}` : "Direct"} · {listing.ratings ?? 0} ratings · {listing.tips ?? 0} tips</small>
                     </div>
                     <div className="hcm-stored-acts">

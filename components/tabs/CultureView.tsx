@@ -30,6 +30,7 @@ type CultureRoom = {
   entryFee: string;
   color: string;
   creator: string;
+  creatorWallet?: string;
   featured: boolean;
 };
 
@@ -57,7 +58,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Language", "Festivals", "Food", "Proverbs", "Art"],
     members: 3240,
     stories: 188,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#1a6b40",
     creator: "@adaeze_ng",
     featured: true,
@@ -72,7 +73,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Trade History", "Music", "Food", "Architecture", "Language"],
     members: 2180,
     stories: 134,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#1a4a6b",
     creator: "@mwangi_k",
     featured: true,
@@ -87,7 +88,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Quechua", "Weaving", "Spirituality", "Food", "Music"],
     members: 1870,
     stories: 112,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#6b2a18",
     creator: "@inti_quispe",
     featured: false,
@@ -102,7 +103,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Language", "Dim Sum", "Opera", "Business", "Film"],
     members: 4120,
     stories: 267,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#6b1a1a",
     creator: "@wing_hk",
     featured: true,
@@ -117,7 +118,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Music", "Carnival", "Food", "Patois", "History"],
     members: 5640,
     stories: 341,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#1a4a1e",
     creator: "@rasta_t",
     featured: true,
@@ -132,7 +133,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Griots", "Sufi Music", "Hospitality", "Trade", "Textiles"],
     members: 1430,
     stories: 89,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#5a3a12",
     creator: "@moussa_dakar",
     featured: false,
@@ -147,7 +148,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Festivals", "Classical Arts", "Cuisine", "Language", "Spirituality"],
     members: 8920,
     stories: 512,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#5a1a6b",
     creator: "@priya_delhi",
     featured: true,
@@ -162,7 +163,7 @@ const SEED_ROOMS: CultureRoom[] = [
     topics: ["Mythology", "Folk Craft", "Food", "Design", "Nature"],
     members: 2760,
     stories: 156,
-    entryFee: "2 WLD",
+    entryFee: "1 WLD",
     color: "#1a2e4a",
     creator: "@sigrid_oslo",
     featured: false,
@@ -320,10 +321,11 @@ export function CultureView({
     openPayment({
       title: `Enter ${room.name}`,
       amount: room.entryFee,
-      detail: `Unlock full access to ${room.name} — curated stories, cultural guides, and posts from verified humans who live this culture.`,
+      detail: `1 WLD paid to HumanChain treasury. Unlocks full access to ${room.name} — stories, cultural guides, and posts from verified humans who live this culture.`,
       success: `Welcome to ${room.name}. You now have full access.`,
       feature: "culture-room-entry",
       points: 10,
+      context: { creatorHandle: room.creator, creatorWallet: room.creatorWallet },
       onConfirmed: async () => {
         const next = new Set([...unlockedRooms, room.id]);
         setUnlockedRooms(next);
@@ -344,8 +346,8 @@ export function CultureView({
     openPayment({
       title: "Launch Culture Room — 3 WLD",
       amount: "3 WLD",
-      detail: `Launch "${name.trim()}" on HumanChain. Verified humans worldwide can discover and pay to enter it.`,
-      success: "Culture room is live. Share it to grow your community.",
+      detail: `3 WLD paid to HumanChain treasury. "${name.trim()}" goes live — verified humans can pay 1 WLD to enter and entry fees are tracked for creator payouts.`,
+      success: "Culture room is live. Verified humans can now pay to enter.",
       feature: "culture-room-create",
       points: 20,
       onConfirmed: async () => {
@@ -359,9 +361,10 @@ export function CultureView({
           topics: createForm.topics.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 5),
           members: 1,
           stories: 0,
-          entryFee: "2 WLD",
+          entryFee: "1 WLD",
           color: "#137a57",
           creator: handle,
+          creatorWallet: verifiedHuman?.wallet,
           featured: false,
         };
         const nextCreated = [room, ...createdRooms];

@@ -17,9 +17,9 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
 };
 
-// Aggressive early polling (most transactions confirm in 5-20s), then back off.
-// Total window ~95 s covers slow WorldChain indexing.
-const worldPaymentConfirmationDelays = [0, 1000, 2500, 4500, 7000, 10000, 15000, 22000, 32000];
+// Hit the confirmation endpoint fast — most WorldChain txns index in 3-8s.
+// Total window ~55s with tight early polls so the UI unlocks quickly.
+const worldPaymentConfirmationDelays = [0, 600, 1400, 2500, 4000, 6500, 10000, 15000, 22000];
 
 function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));
