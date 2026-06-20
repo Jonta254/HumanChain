@@ -42,6 +42,94 @@ const onePageStoryPhotos = [
   "/images/story-scene-onepage-write-color.png",
 ];
 
+const fatherStoryPhotos = [
+  "/images/story-cover-door-color.png",
+  "/images/story-scene-bitcoin-network-color.png",
+];
+
+const moneyStoryPhotos = [
+  "/images/story-cover-onepage-color.png",
+  "/images/story-scene-orb-verify-color.png",
+];
+
+const featuredQuotes = [
+  { text: "I opened the window before I opened the door.", story: "The Door That Waited" },
+  { text: "Bitcoin did not make me rich. It made me think differently about what rich means.", story: "Bitcoin By Satoshi" },
+  { text: "The Orb told her she was unique. It did not tell her she was safe. But it was a beginning.", story: "The ORB" },
+  { text: "I survived because somebody did not wait to know whether I deserved kindness.", story: "One Page From My Life" },
+  { text: "My father apologized without using the word sorry. He repaired my bicycle.", story: "The Father Who Listened" },
+  { text: "When the money ran out, I learned which relationships had been about comfort and which had been about me.", story: "When the Money Ran Out" },
+];
+
+const communityVoices = [
+  {
+    id: "cv1",
+    author: "@faith_link",
+    flag: "🇳🇬",
+    country: "Nigeria",
+    text: "I lost my job on a Friday. By Sunday I had helped three strangers online for free. Not because I was fine. Because giving reminded me I still had something worth giving.",
+    likes: 847,
+    saves: 312,
+    time: "3 days ago",
+    category: "Life",
+  },
+  {
+    id: "cv2",
+    author: "@mara_chain",
+    flag: "🇰🇪",
+    country: "Kenya",
+    text: "My grandmother never went to school but she could calculate market prices faster than my calculator. Intelligence is not one shape. We just built the tests wrong.",
+    likes: 1203,
+    saves: 567,
+    time: "1 week ago",
+    category: "Wisdom",
+  },
+  {
+    id: "cv3",
+    author: "@renato_human",
+    flag: "🇧🇷",
+    country: "Brazil",
+    text: "The day I stopped pretending to be okay was the day real help could actually reach me. Honesty is not weakness. It is a door that lets people in.",
+    likes: 934,
+    saves: 421,
+    time: "5 days ago",
+    category: "Health",
+  },
+  {
+    id: "cv4",
+    author: "@ubuntu_builder",
+    flag: "🇿🇦",
+    country: "South Africa",
+    text: "I paid back my first debt before I paid myself. My father said: your name must arrive before your money. Twenty years later I understand he was teaching me to last.",
+    likes: 678,
+    saves: 289,
+    time: "2 days ago",
+    category: "Money",
+  },
+  {
+    id: "cv5",
+    author: "@discipline_daily",
+    flag: "🇮🇳",
+    country: "India",
+    text: "My mother worked twelve hours and still cooked dinner. She never called it sacrifice. She called it love without an invoice. That is the hardest kind to repay.",
+    likes: 1456,
+    saves: 634,
+    time: "4 days ago",
+    category: "Family",
+  },
+  {
+    id: "cv6",
+    author: "@quiet_words",
+    flag: "🇯🇵",
+    country: "Japan",
+    text: "In my culture, silence between two people can mean they trust each other enough not to perform. Some conversations happen only in presence. Not every feeling needs a sentence.",
+    likes: 523,
+    saves: 198,
+    time: "6 days ago",
+    category: "Culture",
+  },
+];
+
 const publishedStoryImagePages = new Set([0, 3, 6]);
 const monthlyStoryImagePages = new Set([0, 4, 8, 12, 16, 20, 24, 28]);
 
@@ -723,6 +811,112 @@ const publishedStoryCollection = {
       },
     ],
   },
+  father: {
+    title: "The Father Who Listened",
+    subtitle: "A Story About Repair Across a Generation",
+    author: "a human story by only1",
+    publisher: "jontAWorld",
+    price: "Read",
+    shelfTitle: "The Father Who Listened",
+    coverArt: "closed-door" as const,
+    coverPhoto: "/images/story-cover-door-color.png",
+    photos: fatherStoryPhotos,
+    pages: [
+      {
+        art: "closed-door" as const,
+        text: "My father spoke in instructions. Come here. Eat. Study. Sleep. For twenty-two years I answered him in actions. I came. I ate. I studied. I slept. We never had a conversation.",
+      },
+      {
+        art: "key-ticket" as const,
+        text: "He was a carpenter who believed that a man's worth was measured in what he built and what he did not break. He built four walls, a roof, a table, three beds, and an expectation too heavy to carry.",
+      },
+      {
+        art: "memory-table" as const,
+        text: "My mother explained him to us like a weather forecast: your father is tired today, your father is worried about money, your father is proud but does not know the word. We became experts in reading the silence between his sentences.",
+      },
+      {
+        art: "repaired-cup" as const,
+        text: "When I was sixteen, I failed an exam. He said nothing. He went to the workshop and sanded a chair leg until midnight. In the morning the chair was perfect and we did not speak about the failure. I understood later that he was managing his own fear about my future.",
+      },
+      {
+        art: "honest-message" as const,
+        text: "I left for the city at twenty-two. He drove me to the bus and did not get out. When the bus moved I watched through the window. He stood outside the car with his hand on the roof, still facing forward, not watching me leave. I thought he did not care. I was wrong about the posture. He could not watch me go.",
+      },
+      {
+        art: "phone-thread" as const,
+        text: "We called once a month. He always ended the call with: work hard. I always replied: I will. I told my friends he was a difficult man. My friends who had lost their fathers said nothing. I understood from their silence that I was not yet grateful enough for the alive version.",
+      },
+      {
+        art: "stair-symbol" as const,
+        text: "The year I turned thirty, he became sick. I returned home for three weeks. We sat in the same room more than we had in a decade. He fixed small things. I brought him water. We talked around our feelings like two people avoiding a wet floor.",
+      },
+      {
+        art: "plant-door" as const,
+        text: "On the seventh day, he called me to the workshop. He showed me a box he had made for my apartment. Dovetail joints. Waxed interior. My initials carved on the lid. He had been building it for six months without telling me.",
+      },
+      {
+        art: "repaired-cup" as const,
+        text: "I held the box and did not know what to say. He said: your grandfather made me a chair when I left home. I never thanked him properly. I am not making that mistake again. This is what love looked like in his language. A joint fit so tight it needed no apology.",
+      },
+      {
+        art: "open-window" as const,
+        text: "I said: I know you were doing your best. He said: I know I missed things. That was all. Six words of repair for twenty-two years of instructions. It was not enough and it was exactly enough. Human message: some fathers speak only in what they build for you. Learn to read wood.",
+      },
+    ],
+  },
+  money: {
+    title: "When the Money Ran Out",
+    subtitle: "A Survival Story From Lagos to London",
+    author: "a human story by only1",
+    publisher: "jontAWorld",
+    price: "Read",
+    shelfTitle: "When the Money Ran Out",
+    coverArt: "memory-table" as const,
+    coverPhoto: "/images/story-cover-onepage-color.png",
+    photos: moneyStoryPhotos,
+    pages: [
+      {
+        art: "low-battery" as const,
+        text: "There is a specific silence that happens when your account reaches zero and you have seven days until salary. It is not the silence of poverty. It is the silence of a person trying to calculate whether shame or resourcefulness will arrive first.",
+      },
+      {
+        art: "memory-table" as const,
+        text: "I was twenty-seven in London, earning a wage that sounded large in Lagos but felt invisible against the rent. I had come with two suitcases and the confidence of someone who had not yet met a UK heating bill in February.",
+      },
+      {
+        art: "phone-thread" as const,
+        text: "My flatmate Ada was from Accra. She could make jollof rice last four days. She knew which supermarkets reduced prices at 8pm. She had a list of free museum days memorized like scripture. I arrived calling these tricks poverty. I left calling them intelligence.",
+      },
+      {
+        art: "notes" as const,
+        text: "The month the money ran out completely, I ate eggs in eleven different configurations. Boiled, scrambled, fried, in soup, with bread, without bread, cold from the fridge at midnight because the alternative was nothing. I learned that hunger is a great simplifier of preferences.",
+      },
+      {
+        art: "stair-symbol" as const,
+        text: "I called my mother once. She sent what she could, which was not much, and told me: the person who survives the lean months becomes impossible to break. I did not believe her at the time. I wrote it on a Post-it above my desk because I needed something to argue with.",
+      },
+      {
+        art: "earth-chain" as const,
+        text: "On HumanChain I asked: how do you keep dignity when you cannot afford the life you imagined? A man from Manila wrote: dignity is not a budget item. A woman from Nairobi wrote: I stopped performing abundance and started performing honesty. Both became my daily reading.",
+      },
+      {
+        art: "repaired-cup" as const,
+        text: "When money returned — slowly, then more steadily — I noticed what I kept from the lean months. The habit of cooking real food. The ability to sit with discomfort without catastrophizing. The knowledge that I could survive the unimaginable because I had, in fact, imagined it wrong the entire time.",
+      },
+      {
+        art: "open-window" as const,
+        text: "What I lost was the people who disappeared when I could no longer afford to be useful to them. I had bought friendship with availability and abundance. When those ran out, I discovered who had been staying for me and who had been staying for what I could provide.",
+      },
+      {
+        art: "sunrise-windows" as const,
+        text: "I am back in Lagos now. I earn more. I spend less. I save with a precision that frightens the version of me who arrived in London with two suitcases and no weather coat. That version needed the lean months. He was too confident to learn gently.",
+      },
+      {
+        art: "add-link" as const,
+        text: "I added this link on HumanChain: the money running out was not the end of anything. It was a measurement. It showed me exactly what I was made of when comfort could no longer cover it. Human message: lean months are tuition. You choose whether to graduate.",
+      },
+    ],
+  },
   onePage: {
     title: "One Page From My Life",
     subtitle: "A Human Submission",
@@ -813,42 +1007,77 @@ const storyShelf = [
   {
     key: "monthly",
     title: "The Door That Waited",
-    label: "Monthly Human Story",
+    label: "Monthly Human Story · Free",
     publisher: "jontAWorld",
-    detail: "A life story about returning through small openings.",
+    detail: "A woman, a child, and a blue door. A story about returning through small openings.",
     price: "Free",
+    readTime: "12 min",
+    readers: "18.4k",
+    category: "Life",
+  },
+  {
+    key: "father",
+    title: "The Father Who Listened",
+    label: "Human Story · 10 chapters",
+    publisher: "jontAWorld",
+    detail: "A carpenter. A box with dovetail joints. Twenty-two years of unsaid words.",
+    price: "Read",
+    readTime: "8 min",
+    readers: "11.2k",
+    category: "Family",
+  },
+  {
+    key: "money",
+    title: "When the Money Ran Out",
+    label: "Survival Story · 10 chapters",
+    publisher: "jontAWorld",
+    detail: "Lagos to London. Eggs eleven ways. What lean months teach you about people.",
+    price: "Read",
+    readTime: "9 min",
+    readers: "14.7k",
+    category: "Money",
   },
   {
     key: "bitcoin",
     title: "Bitcoin By Satoshi",
-    label: "Published Short Story",
+    label: "World Economy Story",
     publisher: "jontAWorld",
-    detail: "One Seed, One World: Bitcoin, World, and the Human Chain.",
+    detail: "One Seed, One World: Bitcoin, the Worldcoin ORB, and the Human Chain.",
     price: "Read",
+    readTime: "10 min",
+    readers: "22.1k",
+    category: "Builder",
   },
   {
     key: "orb",
     title: "The ORB",
-    label: "World Story",
+    label: "World Story · Identity",
     publisher: "jontAWorld",
-    detail: "A cinematic story about proof, identity, and being seen.",
+    detail: "A cinematic story about proof, uniqueness, and what it means to be seen.",
     price: "Read",
+    readTime: "6 min",
+    readers: "16.8k",
+    category: "World",
   },
   {
     key: "onePage",
     title: "One Page From My Life",
-    label: "Human Submissions",
+    label: "Human Submission",
     publisher: "jontAWorld",
-    detail: "Paid stories from verified humans, reviewed before publishing.",
+    detail: "A notebook with one page left. A bus stop stranger. One act of kindness that changed a direction.",
     price: "Read",
+    readTime: "5 min",
+    readers: "9.3k",
+    category: "Life",
   },
 ];
 
 const storyCategories = [
-  "World Stories",
-  "Money Stories",
-  "Faith Stories",
+  "All",
   "Life Stories",
+  "Money Stories",
+  "Family",
+  "World Stories",
   "Builder Stories",
 ];
 
@@ -1520,6 +1749,9 @@ export function StoriesView({
   const [page, setPage] = useState(0);
   const [liked, setLiked] = useState(false);
   const [rating, setRating] = useState(0);
+  const [featuredQuoteIdx, setFeaturedQuoteIdx] = useState(0);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState("All");
+  const [likedVoices, setLikedVoices] = useState<Set<string>>(() => new Set());
   const [userStories, setUserStories] = useState<UserStory[]>(() =>
     loadJsonFromStorage<UserStory[]>(storageKeys.userStories, []),
   );
@@ -1561,6 +1793,11 @@ export function StoriesView({
   useEffect(() => {
     scrollMiniAppToTop();
   }, [activePublishedStory, activeUserStory, isReading, page]);
+
+  useEffect(() => {
+    const id = setInterval(() => setFeaturedQuoteIdx((i) => (i + 1) % featuredQuotes.length), 6000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.userStories, userStories);
@@ -2045,6 +2282,27 @@ export function StoriesView({
           Read Published Story
         </button>
       </section>
+      {/* ── Featured Quote ─────────────────────────────────── */}
+      <section className="story-quote-hero">
+        <span className="story-quote-kicker">Human line of the moment</span>
+        <blockquote className="story-quote-text" key={featuredQuoteIdx}>
+          "{featuredQuotes[featuredQuoteIdx].text}"
+        </blockquote>
+        <cite className="story-quote-cite">— {featuredQuotes[featuredQuoteIdx].story}</cite>
+        <div className="story-quote-dots">
+          {featuredQuotes.map((_, i) => (
+            <button
+              key={i}
+              className={`story-qdot${i === featuredQuoteIdx ? " active" : ""}`}
+              onClick={() => setFeaturedQuoteIdx(i)}
+              type="button"
+              aria-label={`Quote ${i + 1}`}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Published Story Library ─────────────────────────── */}
       <section className="panel story-market">
         <div className="section-heading">
           <span>Published Story Library</span>
@@ -2054,14 +2312,17 @@ export function StoriesView({
           {storyCategories.map((category) => (
             <button
               key={category}
-              onClick={() => act(category, "This story category is now selected.")}
+              className={activeCategoryFilter === category ? "active" : ""}
+              onClick={() => setActiveCategoryFilter(category)}
               type="button"
             >
               {category}
             </button>
           ))}
         </div>
-        {storyShelf.map((story) => {
+        {storyShelf
+          .filter((s) => activeCategoryFilter === "All" || s.category === activeCategoryFilter || activeCategoryFilter === s.category.replace(" Stories", ""))
+          .map((story) => {
           const storyKey =
             story.key !== "monthly" ? (story.key as PublishedStoryKey) : null;
           const thumbnailSrc = storyKey
@@ -2074,13 +2335,17 @@ export function StoriesView({
                 alt={`${story.title} colored story cover`}
                 src={thumbnailSrc}
               />
-              <div>
-                <span>{story.label}</span>
+              <div className="shelf-row-body">
+                <span className="shelf-label">{story.label}</span>
                 <h3>{story.title}</h3>
-                <small>publisher: {story.publisher}</small>
-                <p>{story.detail}</p>
+                <p className="shelf-detail">{story.detail}</p>
+                <div className="shelf-meta-row">
+                  <span>📖 {story.readTime}</span>
+                  <span>👥 {story.readers} readers</span>
+                </div>
               </div>
               <button
+                className="shelf-read-btn"
                 onClick={() => {
                   if (storyKey) {
                     setPage(0);
@@ -2099,16 +2364,78 @@ export function StoriesView({
                     story.title,
                     story.price === "Free"
                       ? "Open this story."
-                      : `${story.price} will unlock this short story.`,
+                      : "Tap Read to open this story.",
                   );
                 }}
                 type="button"
               >
-                {story.price}
+                {story.price === "Free" ? "Free" : "Read"}
               </button>
             </article>
           );
         })}
+      </section>
+
+      {/* ── Community Voices ──────────────────────────────────── */}
+      <section className="panel story-market">
+        <div className="section-heading">
+          <span>Community Voices</span>
+          <BookOpen size={18} />
+        </div>
+        <p className="section-sub">Short true stories from verified humans worldwide.</p>
+        {communityVoices.map((voice) => (
+          <article className="cv-voice-card" key={voice.id}>
+            <div className="cv-voice-top">
+              <span className="cv-voice-flag">{voice.flag}</span>
+              <div className="cv-voice-author">
+                <strong>{voice.author}</strong>
+                <span>{voice.country} · {voice.time}</span>
+              </div>
+              <span className="cv-voice-cat">{voice.category}</span>
+            </div>
+            <p className="cv-voice-text">"{voice.text}"</p>
+            <div className="cv-voice-actions">
+              <button
+                className={likedVoices.has(voice.id) ? "cv-voice-liked" : ""}
+                onClick={() => {
+                  setLikedVoices((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(voice.id)) { next.delete(voice.id); } else {
+                      next.add(voice.id);
+                      earnPoints(2, "You appreciated a human voice.");
+                    }
+                    return next;
+                  });
+                }}
+                type="button"
+              >
+                {likedVoices.has(voice.id) ? "♥" : "♡"} {voice.likes + (likedVoices.has(voice.id) ? 1 : 0)}
+              </button>
+              <span>🔖 {voice.saves}</span>
+              <button
+                onClick={() => openPayment({
+                  title: `Tip ${voice.author}`,
+                  amount: "1 WLD",
+                  detail: `Send 1 WLD to support ${voice.author}'s writing. Your tip goes to HumanChain treasury and is credited to the creator.`,
+                  success: "Tip sent! The creator is notified.",
+                  feature: "storyteller-tip",
+                  allowCustomAmount: true,
+                  minAmount: 0.1,
+                  maxAmount: 10,
+                  points: 4,
+                  context: { tippedAuthor: voice.author },
+                  onConfirmed: async () => {
+                    earnPoints(4, `You tipped ${voice.author}.`);
+                    recordHistory({ title: `Tip · ${voice.author}`, detail: "Story tip confirmed.", kind: "tip" });
+                  },
+                })}
+                type="button"
+              >
+                ⚡ Tip
+              </button>
+            </div>
+          </article>
+        ))}
       </section>
       {userStories.length ? (
         <section className="panel story-market">

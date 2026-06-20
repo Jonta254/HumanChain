@@ -21238,3 +21238,192 @@ button:not([disabled]) { cursor: pointer; }
   padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
+/* ── Story Featured Quote Hero ─────────────────────────────────────── */
+.story-quote-hero {
+  margin: 0 0 4px;
+  padding: 20px 18px 16px;
+  background: linear-gradient(135deg, #0f2e20 0%, #1a4a32 100%);
+  border-radius: 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.story-quote-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 40%, rgba(212,175,55,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.story-quote-kicker {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+  opacity: 0.85;
+}
+.story-quote-text {
+  font-size: 1.01rem;
+  line-height: 1.55;
+  color: #f0ede5;
+  font-style: italic;
+  font-weight: 500;
+  margin: 0 0 10px;
+  animation: story-quote-fade 0.5s ease;
+}
+@keyframes story-quote-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.story-quote-cite {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 700;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+.story-quote-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.story-qdot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.story-qdot.active {
+  background: var(--gold);
+  transform: scale(1.3);
+}
+
+/* ── Enhanced shelf row ────────────────────────────────────────────── */
+.shelf-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.shelf-label {
+  color: var(--gold) !important;
+  font-size: 0.73rem !important;
+  font-weight: 800 !important;
+}
+.shelf-detail {
+  margin: 4px 0 6px !important;
+  color: var(--muted) !important;
+  font-size: 0.81rem !important;
+  line-height: 1.35 !important;
+}
+.shelf-meta-row {
+  display: flex;
+  gap: 10px;
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.shelf-read-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  align-self: start;
+  margin-top: 2px;
+}
+.category-strip button.active {
+  background: var(--ink);
+  color: var(--paper-strong);
+}
+.section-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: -4px 0 8px;
+}
+
+/* ── Community Voice Cards ────────────────────────────────────────── */
+.cv-voice-card {
+  background: var(--paper-strong);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cv-voice-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cv-voice-flag {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.cv-voice-author {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.cv-voice-author strong {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.cv-voice-author span {
+  font-size: 0.73rem;
+  color: var(--muted);
+}
+.cv-voice-cat {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: rgba(19,122,87,0.1);
+  color: var(--green);
+}
+.cv-voice-text {
+  font-size: 0.89rem;
+  line-height: 1.6;
+  color: var(--ink);
+  font-style: italic;
+  margin: 0;
+}
+.cv-voice-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.cv-voice-actions button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.cv-voice-actions button.cv-voice-liked {
+  color: #e05252;
+  border-color: #e05252;
+}
+.cv-voice-actions span {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
