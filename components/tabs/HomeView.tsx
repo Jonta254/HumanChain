@@ -13,11 +13,9 @@ import {
   Flame,
   Globe2,
   Hexagon,
-  Lightbulb,
   MessageCircleQuestion,
   Settings,
   Sparkles,
-  TrendingUp,
   Users,
   Zap,
 } from "lucide-react";
@@ -31,7 +29,6 @@ import {
   getPrimaryProfileImage,
   getReputationHealth,
   getReputationTier,
-  getTrustPassportMetrics,
   getWorldDisplayUsername,
   isVerifiedWorldHuman,
   requireVerifiedPublicAction,
@@ -223,15 +220,11 @@ export function HomeView({
   // Only count listings that reached "sold" status as completed trades.
   // "payment-ready" is the default publish status and does not mean a sale was made.
   const completedTrades = marketplaceListings.filter((l) => l.status === "sold").length;
-  const passportMetrics = getTrustPassportMetrics({
-    completedTrades, human: verifiedHuman, points, posts: userPostCount, savedItems, streak,
-  });
   const chainScore = getChainScore({ points, streak, posts: userPostCount, savedItems });
   const tier = getReputationTier(chainScore);
   const health = getReputationHealth(chainScore);
   const humanChainId = getHumanChainId(worldHandle);
   const strongestBadge = getStrongestBadge({ isVerified, streak, posts: userPostCount, trades: completedTrades });
-  const communitySpotlight = chainFields[(new Date().getDate() - 1) % chainFields.length];
   const greeting = getGreeting();
   const joinLabel = formatJoinDate(joinedAt);
 
@@ -242,14 +235,6 @@ export function HomeView({
       : tier.next
         ? `You're ${tier.toGo} points from ${tier.next.label}. Share a proof-of-work moment to climb faster.`
         : "You're at the top of the chain. Mentor a newcomer to keep your reputation strong.";
-
-  const improvementTip = !dailyAnswered
-    ? "Answer the daily reflection"
-    : userPostCount < 1
-      ? "Post your first proof-of-work moment"
-      : completedTrades < 1
-        ? "Complete a verified marketplace trade"
-        : "Help a community member to grow trust";
 
   function submitDailyAnswer() {
     if (!requireVerifiedPublicAction(verifiedHuman, act, "answering today's question")) return;
@@ -304,15 +289,7 @@ export function HomeView({
         </div>
       </header>
 
-      {/* ── 1.5 · Live activity ticker + social proof ── */}
-      <div className="hc-ticker" aria-live="polite" aria-label="Live activity">
-        <span className="hc-ticker-dot" aria-hidden="true" />
-        <span className="hc-ticker-text" key={tickerIdx}>{tickerMsg}</span>
-        <span className="hc-ticker-sep" aria-hidden="true" />
-        <span className="hc-ticker-stat">{activityCount} answered · 4.9k live</span>
-      </div>
-
-      {/* ── 2 · Brief HumanChain Card ────────────────── */}
+      {/* ── 2 · Identity card ────────────────────────── */}
       <section className="h9-hero" aria-label="Your HumanChain card">
         <div className="hc-brief">
           <span className="hc-brief-sheen" aria-hidden="true" />
@@ -332,7 +309,7 @@ export function HomeView({
             </span>
           </div>
 
-          {/* Row 2: score inline with tier + badge */}
+          {/* Row 2: score + tier + badge */}
           <div className="hc-brief-mid">
             <div className="hc-brief-score-row">
               <b className="hc-brief-score-num">{chainScore}</b>
@@ -368,7 +345,29 @@ export function HomeView({
         </div>
       </section>
 
-      {/* ── 3 · AI insight (next best move) ──────────── */}
+      {/* ── 3 · Quick actions ────────────────────────── */}
+      <section className="h9-section" aria-label="Quick actions">
+        <div className="hc-quick">
+          <button onClick={() => { act("Ask Humanity", "Ask one honest question — verified humans answer."); setTab("ask"); }} type="button">
+            <span className="hc-quick-icon" style={{ "--qa": "#2f6fed" } as React.CSSProperties}><MessageCircleQuestion size={18} /></span>
+            <span>Ask</span>
+          </button>
+          <button onClick={() => { act("Post Moment", "Share a real photo or reflection — every moment builds trust."); setTab("chains"); }} type="button">
+            <span className="hc-quick-icon" style={{ "--qa": "#137a57" } as React.CSSProperties}><Camera size={18} /></span>
+            <span>Moment</span>
+          </button>
+          <button onClick={() => { act("Find Work", "Browse verified opportunities and apply with escrow protection."); setTab("market"); }} type="button">
+            <span className="hc-quick-icon" style={{ "--qa": "#b88a1f" } as React.CSSProperties}><Briefcase size={18} /></span>
+            <span>Work</span>
+          </button>
+          <button onClick={() => setTab("stories")} type="button">
+            <span className="hc-quick-icon" style={{ "--qa": "#6657d9" } as React.CSSProperties}><BookOpen size={18} /></span>
+            <span>Stories</span>
+          </button>
+        </div>
+      </section>
+
+      {/* ── 4 · AI insight (next best move) ──────────── */}
       <section className="h9-section" aria-label="AI insight">
         <div className="hc-insight">
           <span className="hc-insight-icon"><Sparkles size={18} /></span>
@@ -409,56 +408,40 @@ export function HomeView({
         </div>
       </section>
 
-      {/* ── 4 · Quick actions ────────────────────────── */}
-      <section className="h9-section" aria-label="Quick actions">
-        <div className="hc-quick">
-          <button onClick={() => { act("Ask Humanity", "Ask one honest question — verified humans answer."); setTab("ask"); }} type="button">
-            <span className="hc-quick-icon" style={{ "--qa": "#2f6fed" } as React.CSSProperties}><MessageCircleQuestion size={18} /></span>
-            <span>Ask</span>
-          </button>
-          <button onClick={() => { act("Post Moment", "Share a real photo or reflection — every moment builds trust."); setTab("chains"); }} type="button">
-            <span className="hc-quick-icon" style={{ "--qa": "#137a57" } as React.CSSProperties}><Camera size={18} /></span>
-            <span>Moment</span>
-          </button>
-          <button onClick={() => { act("Find Work", "Browse verified opportunities and apply with escrow protection."); setTab("market"); }} type="button">
-            <span className="hc-quick-icon" style={{ "--qa": "#b88a1f" } as React.CSSProperties}><Briefcase size={18} /></span>
-            <span>Work</span>
-          </button>
-          <button onClick={() => setTab("stories")} type="button">
-            <span className="hc-quick-icon" style={{ "--qa": "#6657d9" } as React.CSSProperties}><BookOpen size={18} /></span>
-            <span>Stories</span>
-          </button>
-        </div>
-      </section>
-
-      {/* ── 4.5 · Story of the Day ───────────────────── */}
-      <section className="h9-section" aria-label="Story of the day">
-        <button className="hc-story-teaser" onClick={() => setTab("stories")} type="button">
-          <span className="hc-story-teaser-kicker"><BookOpen size={12} />Story of the Day</span>
-          <p className="hc-story-teaser-quote">&ldquo;I opened the window before I opened the door.&rdquo;</p>
-          <span className="hc-story-teaser-attr">— The Door That Waited · Life Stories</span>
-          <span className="hc-story-teaser-read">Read now <ArrowRight size={12} /></span>
-        </button>
-      </section>
-
-      {/* ── 5 · Reputation mini card ─────────────────── */}
-      <section className="h9-section" aria-label="Reputation">
-        <button className="hc-rep" onClick={() => setTab("me")} type="button">
-          <div className="hc-rep-head">
-            <strong>Reputation</strong>
-            <span className="hc-rep-cat" style={{ color: health.color, background: `${health.color}1a` }}>{health.label}</span>
+      {/* ── 5 · Streak at risk (urgent nudge) ────────── */}
+      {isVerified && !dailyAnswered && streak > 0 && (
+        <section className="h9-section" aria-label="Streak nudge">
+          <div className="hc-streak-nudge">
+            <Flame size={18} style={{ flexShrink: 0, color: "#d87d3a" }} />
+            <div className="hc-streak-nudge-body">
+              <strong>{streak}-day streak at risk</strong>
+              <p>Answer today&apos;s question to protect your chain and earn +18 HP.</p>
+            </div>
+            <button onClick={() => setShowDaily(true)} type="button" className="hc-streak-act">
+              Answer <Zap size={12} />
+            </button>
           </div>
-          <div className="hc-rep-bar"><i style={{ width: `${tier.pct}%` }} /></div>
-          <span className="hc-rep-progress">{tier.next ? `${tier.toGo} pts to ${tier.next.label} · Level ${tier.level}` : "Founder — top of the chain"}</span>
-          <div className="hc-rep-signals">
-            <span className="hc-rep-pos"><TrendingUp size={12} />{streak}-day streak</span>
-            <span className="hc-rep-pos"><BadgeCheck size={12} />Trust {passportMetrics.helpfulScore}</span>
-            <span className="hc-rep-tip"><Lightbulb size={12} />{improvementTip}</span>
-          </div>
-        </button>
-      </section>
+        </section>
+      )}
 
-      {/* ── 6 · Open Opportunities (horizontal scroll) ── */}
+      {/* ── 6 · Profile completion (unverified only) ──── */}
+      {!isVerified && (
+        <section className="h9-section" aria-label="Profile completion">
+          <div className="hc-profile-complete">
+            <div className="hc-pc-steps">
+              <div className="hc-pc-step done"><span>✓</span><p>Joined</p></div>
+              <div className="hc-pc-step next"><span>2</span><p>World ID</p></div>
+              <div className="hc-pc-step"><span>3</span><p>Post moment</p></div>
+              <div className="hc-pc-step"><span>4</span><p>First trade</p></div>
+            </div>
+            <button className="hc-pc-cta" onClick={() => act("Verify with World ID", "Open World App and tap Verify. Your human proof stays private — only the zero-knowledge proof is shared.")} type="button">
+              <BadgeCheck size={14} /> Verify with World ID — unlock full HumanChain
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ── 7 · Open Opportunities (horizontal scroll) ── */}
       <section className="h9-section" aria-label="Open opportunities">
         <div className="h9-section-head">
           <div>
@@ -467,7 +450,7 @@ export function HomeView({
           </div>
           <span className="h9-live-pill"><span className="h9-pulse" />Live</span>
         </div>
-        <div className="h9-opp-scroll">
+        <div className="h9-opps-scroll">
           {openOpportunities.map((opp) => (
             <button
               key={opp.id}
@@ -496,40 +479,15 @@ export function HomeView({
         </div>
       </section>
 
-      {/* ── 7.5 · Daily streak nudge ─────────────────── */}
-      {isVerified && !dailyAnswered && streak > 0 && (
-        <section className="h9-section" aria-label="Streak nudge">
-          <div className="hc-streak-nudge">
-            <Flame size={18} style={{ flexShrink: 0, color: "#d87d3a" }} />
-            <div className="hc-streak-nudge-body">
-              <strong>{streak}-day streak at risk</strong>
-              <p>Answer today&apos;s question to protect your chain and earn +18 HP.</p>
-            </div>
-            <button onClick={() => setShowDaily(true)} type="button" className="hc-streak-act">
-              Answer <Zap size={12} />
-            </button>
-          </div>
-        </section>
-      )}
+      {/* ── 8 · Live activity ticker (social proof) ──── */}
+      <div className="hc-ticker" aria-live="polite" aria-label="Live activity">
+        <span className="hc-ticker-dot" aria-hidden="true" />
+        <span className="hc-ticker-text" key={tickerIdx}>{tickerMsg}</span>
+        <span className="hc-ticker-sep" aria-hidden="true" />
+        <span className="hc-ticker-stat">{activityCount} answered · 4.9k live</span>
+      </div>
 
-      {/* ── 7.6 · Profile completion ──────────────────── */}
-      {!isVerified && (
-        <section className="h9-section" aria-label="Profile completion">
-          <div className="hc-profile-complete">
-            <div className="hc-pc-steps">
-              <div className={`hc-pc-step done`}><span>✓</span><p>Joined</p></div>
-              <div className={`hc-pc-step ${isVerified ? "done" : "next"}`}><span>2</span><p>World ID</p></div>
-              <div className="hc-pc-step"><span>3</span><p>Post moment</p></div>
-              <div className="hc-pc-step"><span>4</span><p>First trade</p></div>
-            </div>
-            <button className="hc-pc-cta" onClick={() => act("Verify with World ID", "Open World App and tap Verify. Your human proof stays private — only the zero-knowledge proof is shared.")} type="button">
-              <BadgeCheck size={14} /> Verify with World ID — unlock full HumanChain
-            </button>
-          </div>
-        </section>
-      )}
-
-      {/* ── 7.8 · Community Live feed ────────────────── */}
+      {/* ── 9 · Community Live feed ──────────────────── */}
       <section className="h9-section" aria-label="Live moments">
         <div className="h9-section-head">
           <strong>Live Moments</strong>
@@ -562,7 +520,17 @@ export function HomeView({
         </div>
       </section>
 
-      {/* ── 8 · Explore Today (one combined card) ────── */}
+      {/* ── 10 · Story of the Day ────────────────────── */}
+      <section className="h9-section" aria-label="Story of the day">
+        <button className="hc-story-teaser" onClick={() => setTab("stories")} type="button">
+          <span className="hc-story-teaser-kicker"><BookOpen size={12} />Story of the Day</span>
+          <p className="hc-story-teaser-quote">&ldquo;I opened the window before I opened the door.&rdquo;</p>
+          <span className="hc-story-teaser-attr">— The Door That Waited · Life Stories</span>
+          <span className="hc-story-teaser-read">Read now <ArrowRight size={12} /></span>
+        </button>
+      </section>
+
+      {/* ── 11 · Explore Today ───────────────────────── */}
       <section className="h9-section" aria-label="Explore today">
         <button
           className="hc-explore-today"
@@ -582,7 +550,6 @@ export function HomeView({
           </div>
         </button>
       </section>
-
 
     </div>
   );

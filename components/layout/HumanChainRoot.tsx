@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getChainScore, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
@@ -338,8 +338,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
           </button>
         ) : null}
         {toast ? (
-          <div aria-live="polite" className="toast toast-enter" role="status">
-            <CheckCircle2 size={18} />
+          <div aria-live="polite" className={`toast toast-enter${/fail|not confirm|not prepar|error|invalid|denied|wrong|mismatch/i.test(toast.title) ? " toast-error" : ""}`} role="status">
+            {/fail|not confirm|not prepar|error|invalid|denied|wrong|mismatch/i.test(toast.title) ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
             <div>
               <strong>{toast.title}</strong>
               <span>{toast.detail}</span>

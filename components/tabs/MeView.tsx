@@ -420,25 +420,6 @@ export function MeView({
           <span>{`${humanChainId.replace(/-/g, "")}<<<${chainScore.toString().padStart(6, "0")}`}</span>
         </div>
       </section>
-      <section className="profile-passport-map" aria-label="Digital passport sections">
-        {[
-          "Digital Human Card",
-          "Reputation Passport",
-          "Growth Analytics",
-          "Achievements",
-          "Communities",
-          "Marketplace",
-          "Activity",
-        ].map((section) => (
-          <button
-            key={section}
-            onClick={() => setProfileView(section === "Activity" ? "activity" : "overview")}
-            type="button"
-          >
-            {section}
-          </button>
-        ))}
-      </section>
       <nav className="me-view-tabs" aria-label="Me sections">
         <button
           aria-pressed={profileView === "overview"}
