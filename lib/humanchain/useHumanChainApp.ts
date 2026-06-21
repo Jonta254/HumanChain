@@ -911,8 +911,10 @@ export function useHumanChainApp() {
       addNotification(notifTitle, notifDetail, "payments");
       void sendWorldUserNotification({ title: notifTitle, detail: notifDetail, sector: "payments", path: "/?tab=me" });
       setToast({ title: `${formattedAmount} confirmed`, detail: paymentPrompt.success });
+    } finally {
+      setPaymentBusy(false);
       setPaymentPrompt(null);
-    } finally { setPaymentBusy(false); }
+    }
   }
 
   return {
