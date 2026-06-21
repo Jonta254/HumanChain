@@ -65,16 +65,25 @@ function getStrongestBadge(args: { isVerified: boolean; streak: number; posts: n
 }
 
 const openOpportunities = [
-  { id: "opp-1", title: "Swahili–Portuguese Medical Translation", budget: "WLD 85",  niche: "Healthcare",    region: "Kenya → Brazil",  deadline: "5 days",  proposals: 3, urgent: true,  color: "#2f6fed", skills: ["Medical terms", "Swahili"] },
-  { id: "opp-2", title: "South African Mining Regulation Consultant", budget: "WLD 220", niche: "Legal",       region: "South Africa",    deadline: "12 days", proposals: 7, urgent: false, color: "#137a57", skills: ["SA mining law", "MPRDA"] },
+  { id: "opp-1", title: "Swahili–Portuguese Medical Translation", budget: "WLD 85",  niche: "Healthcare",    region: "Kenya → Brazil",         deadline: "5 days",  proposals: 3,  urgent: true,  color: "#2f6fed", skills: ["Medical terms", "Swahili"] },
+  { id: "opp-2", title: "South African Mining Regulation Consultant", budget: "WLD 220", niche: "Legal",    region: "South Africa",            deadline: "12 days", proposals: 7,  urgent: false, color: "#137a57", skills: ["SA mining law", "MPRDA"] },
+  { id: "opp-3", title: "Filipino–Arabic Early Childhood Curriculum", budget: "WLD 140", niche: "Education", region: "Philippines → UAE",       deadline: "3 days",  proposals: 2,  urgent: true,  color: "#7c3aed", skills: ["Arabic", "Child education"] },
+  { id: "opp-4", title: "UX Research for West African Fintech App",   budget: "WLD 175", niche: "Tech",      region: "India × Ghana",          deadline: "9 days",  proposals: 11, urgent: false, color: "#0f766e", skills: ["UX research", "Fintech"] },
+  { id: "opp-5", title: "Brazilian Street Food Business Strategy",    budget: "WLD 95",  niche: "Business",  region: "Brazil",                  deadline: "7 days",  proposals: 4,  urgent: false, color: "#b45309", skills: ["Business plan", "Food market"] },
+  { id: "opp-6", title: "Indonesian–Dutch Legal Document Review",     budget: "WLD 160", niche: "Legal",     region: "Indonesia → Netherlands", deadline: "2 days",  proposals: 1,  urgent: true,  color: "#be185d", skills: ["Legal translation", "Dutch"] },
 ];
 
 const dailyHumanQuestion = getDailyQuestion();
 
 const seedMoments = [
-  { id: "m1", initials: "AK", bg: "#137a57", handle: "@amara_k", loc: "Lagos · Nigeria", verified: true, time: "2m ago", text: "Just collected my first WLD airdrop. The future of identity is here — and it feels surreal to be part of it.", likes: 24, replies: 6 },
-  { id: "m2", initials: "RJ", bg: "#2f6fed", handle: "@ravi_j", loc: "Mumbai · India", verified: true, time: "9m ago", text: "Culture Room is wild — 12 people deep in a conversation about digital identity and no bots in sight.", likes: 41, replies: 13 },
-  { id: "m3", initials: "CN", bg: "#6657d9", handle: "@chidi_n", loc: "Abuja · Nigeria", verified: true, time: "17m ago", text: "Answered 25 daily questions in a row. This streak isn't just a number — it's discipline made visible.", likes: 58, replies: 9 },
+  { id: "m1", initials: "AK", bg: "#137a57", handle: "@amara_k",       loc: "Lagos · Nigeria",      verified: true,  time: "2m ago",  text: "Just collected my first WLD airdrop. The future of identity is here — and it feels surreal to be part of it.", likes: 24,  replies: 6 },
+  { id: "m2", initials: "RJ", bg: "#2f6fed", handle: "@ravi_j",        loc: "Mumbai · India",       verified: true,  time: "9m ago",  text: "Culture Room is wild — 12 people deep in a conversation about digital identity and no bots in sight.", likes: 41, replies: 13 },
+  { id: "m3", initials: "CN", bg: "#6657d9", handle: "@chidi_n",       loc: "Abuja · Nigeria",      verified: true,  time: "17m ago", text: "Answered 25 daily questions in a row. This streak isn't just a number — it's discipline made visible.", likes: 58, replies: 9 },
+  { id: "m4", initials: "SL", bg: "#b45309", handle: "@sofia_lima",    loc: "São Paulo · Brazil",   verified: true,  time: "31m ago", text: "Sold my first handmade piece on HumanChain Marketplace. Buyer was in Nairobi. The world is smaller than we think.", likes: 87, replies: 22 },
+  { id: "m5", initials: "MH", bg: "#0f766e", handle: "@maya_h",        loc: "Cairo · Egypt",        verified: true,  time: "48m ago", text: "Completed a translation job for a doctor in Brazil. Swahili to Portuguese. Nobody told me my skills had a global market.", likes: 63, replies: 17 },
+  { id: "m6", initials: "JB", bg: "#7c3aed", handle: "@jayden_builds", loc: "Accra · Ghana",        verified: false, time: "1h ago",  text: "Six months of daily questions. My answers in January sound like they came from a different person. That person is gone.", likes: 112, replies: 34 },
+  { id: "m7", initials: "NP", bg: "#be185d", handle: "@nadia_ph",      loc: "Cebu · Philippines",   verified: true,  time: "2h ago",  text: "My grandmother can't read but she answered today's question by voice. I transcribed it word for word. It was the best answer I've seen.", likes: 201, replies: 48 },
+  { id: "m8", initials: "TK", bg: "#1d4ed8", handle: "@taro_k",        loc: "Osaka · Japan",        verified: true,  time: "3h ago",  text: "Opened a Culture Room for Japanese diaspora. 47 people joined in one hour. We're all carrying the same two languages.", likes: 74, replies: 19 },
 ];
 
 function getGreeting() {
@@ -155,17 +164,23 @@ export function HomeView({
     "A human from South Africa answered today's question",
     "4.9k humans online — the chain is live now",
     "New verdict forming in Health & Healing",
-    "3 new opportunities posted in the last hour",
+    "6 new opportunities posted in the last hour",
     "A builder from Brazil posted a proof-of-work moment",
     "7 humans reached Gold tier this week",
     "214k verified humans active in 38 countries",
     "AI Guide helped 128 humans today",
     "A verified trade completed in Nairobi 2 minutes ago",
     "New story submitted from the Philippines",
-    "Lagos-routed question received 12 answers today",
-    "Faith & Prayer gained 47 new chain links",
-    "A healthcare worker from Uganda just got hired",
-    "WLD escrow protected a Swahili translation job",
+    "Lagos-routed question received 12 answers in one hour",
+    "Faith & Prayer gained 47 new chain links today",
+    "A healthcare translator from Uganda just got hired on the marketplace",
+    "WLD escrow protected a Swahili–Portuguese job this morning",
+    "A Japanese diaspora Culture Room opened — 47 joined in one hour",
+    "Someone's grandmother answered a daily question by voice. It was the best one.",
+    "A verified human made their first marketplace sale — buyer was in Nairobi",
+    "Streak builder from Ghana hit 90 days in a row",
+    "New ask thread: what does your culture say about rest?",
+    "A migration worker from the Philippines unlocked their first Human Passport tier",
   ];
 
   const [dailyCountdown, setDailyCountdown] = useState(() => {
