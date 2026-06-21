@@ -16500,18 +16500,16 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   color: #fff;
 }
 
-/* ── Story Reader: full-screen reading experience ──────────────────────── */
+/* ── Story Reader: flex-column layout — no fixed bars, text always readable ── */
 .story-reader-screen {
   padding-top: 0;
-  /* Enough bottom space to clear the fixed reader-actions bar (≈62px)
-     sitting at 80px above the bottom nav, plus a comfortable gap.
-     Without this the bookmark button on the last page is hidden behind
-     the fixed action bar at max scroll. */
-  padding-bottom: calc(200px + var(--world-safe-bottom, 0px));
+  padding-bottom: 0 !important;
+  overflow: hidden !important; /* outer shell does NOT scroll — inner body does */
 }
+/* Header bar — always visible at top, not sticky (outside scroll area) */
 .story-reader-screen .reader-top {
-  position: sticky;
-  top: 0;
+  position: relative;
+  flex-shrink: 0;
   z-index: 10;
   background: rgba(255,255,255,0.92);
   backdrop-filter: blur(20px);
@@ -16552,9 +16550,16 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   border-radius: 0 3px 3px 0;
   transition: width 0.35s ease;
 }
+/* Inner scroll body — this is what actually scrolls */
+.story-reader-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
 /* Story page: the main reading area */
 .story-reader-screen .story-page {
-  padding: 24px 18px 160px;
+  padding: 20px 18px 48px;
   border-radius: 0;
   border-left: none;
   border-right: none;
@@ -16637,19 +16642,19 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 }
 .reader-bookmark-inline:hover { background: rgba(19,122,87,0.1); border-color: rgba(19,122,87,0.5); }
 .reader-bookmark-inline.active { background: rgba(19,122,87,0.12); color: var(--green); opacity: 0.6; cursor: default; }
-/* Fixed prev/save/next bar */
+/* Prev/Save/Next bar — always visible at the bottom, no fixed positioning */
 .story-reader-screen .reader-actions {
-  position: fixed;
-  bottom: calc(80px + var(--world-safe-bottom, 0px));
-  left: 0;
-  right: 0;
+  position: static;
+  flex-shrink: 0;
   display: flex;
   gap: 8px;
   padding: 10px 16px;
+  padding-bottom: calc(10px + var(--world-safe-bottom, 0px));
   background: rgba(255,255,255,0.94);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--line);
+  border-radius: 0;
 }
 .story-reader-screen .reader-actions button {
   flex: 1;

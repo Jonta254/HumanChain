@@ -1993,6 +1993,7 @@ export function StoriesView({
             Tip
           </button>
         </section>
+        <div className="story-reader-body">
         <article className="story-page user-story-page">
           <header className="reader-masthead">
             <span>{activeUserStory.author} - {activeUserStory.createdAt}</span>
@@ -2040,6 +2041,7 @@ export function StoriesView({
             )}
           </div>
         </article>
+        </div>
       </div>
     );
   }
@@ -2096,6 +2098,7 @@ export function StoriesView({
             style={{ "--progress": `${readPercent}%` } as React.CSSProperties}
           />
         </section>
+        <div className="story-reader-body">
         <article className="story-page">
           {page === 0 ? (
             <header className="reader-masthead">
@@ -2155,6 +2158,7 @@ export function StoriesView({
             </>
           )}
         </article>
+        </div>
         <section className="reader-actions">
           <button
             disabled={page === 0}
