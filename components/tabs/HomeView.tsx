@@ -156,7 +156,6 @@ export function HomeView({
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
   const [dailyDraft, setDailyDraft] = useState("");
-  const [showDaily, setShowDaily] = useState(false);
   const [tickerIdx, setTickerIdx] = useState(0);
   const [activityCount, setActivityCount] = useState(() => 72 + (new Date().getMinutes() % 28));
 
@@ -368,62 +367,68 @@ export function HomeView({
         </div>
       </section>
 
-      {/* ── 4 · AI insight (next best move) ──────────── */}
-      <section className="h9-section" aria-label="AI insight">
-        <div className="hc-insight">
-          <span className="hc-insight-icon"><Sparkles size={18} /></span>
-          <div className="hc-insight-body">
-            <span className="hc-insight-kicker">AI Guide · your next best move</span>
-            <p>{aiInsight}</p>
-            {dailyAnswered && (
-              <div className="hc-daily-done">
-                <span className="hc-daily-done-check">✓</span>
-                <span>Answered today · Next question in <strong>{formatCountdown(dailyCountdown)}</strong></span>
-              </div>
-            )}
-            {isVerified && !dailyAnswered && (
-              showDaily ? (
-                <div className="hc-insight-daily">
-                  <p className="hc-insight-q">{dailyHumanQuestion}</p>
-                  <textarea
-                    className="h9-daily-area"
-                    onChange={(e) => setDailyDraft(e.target.value)}
-                    placeholder={homeCopy.dailyPlaceholder}
-                    rows={2}
-                    value={dailyDraft}
-                  />
-                  <button className="hc-insight-submit" onClick={submitDailyAnswer} type="button">
-                    Submit answer <Zap size={13} />
-                  </button>
-                </div>
-              ) : (
-                <button className="hc-insight-cta" onClick={() => setShowDaily(true)} type="button">
-                  Answer today <Zap size={12} />+18 HP
-                </button>
-              )
-            )}
-          </div>
-          <button className="hc-insight-ai" onClick={() => onOpenGuide()} aria-label="Open AI guide" type="button">
-            <ArrowRight size={16} />
-          </button>
-        </div>
-      </section>
-
-      {/* ── 5 · Streak at risk (urgent nudge) ────────── */}
-      {isVerified && !dailyAnswered && streak > 0 && (
-        <section className="h9-section" aria-label="Streak nudge">
-          <div className="hc-streak-nudge">
-            <Flame size={18} style={{ flexShrink: 0, color: "#d87d3a" }} />
-            <div className="hc-streak-nudge-body">
-              <strong>{streak}-day streak at risk</strong>
-              <p>Answer today&apos;s question to protect your chain and earn +18 HP.</p>
+      {/* ── 4 · Daily Question + AI Guide ───────────── */}
+      <section className="h9-section" aria-label="Daily question and AI guide">
+        <div className="hc-daily-card">
+          {/* Header */}
+          <div className="hc-daily-card-head">
+            <div className="hc-daily-card-label">
+              <Sparkles size={14} />
+              <span>AI Guide · Your Next Best Move</span>
             </div>
-            <button onClick={() => setShowDaily(true)} type="button" className="hc-streak-act">
-              Answer <Zap size={12} />
+            <button className="hc-daily-card-open" onClick={() => onOpenGuide()} aria-label="Open AI guide" type="button">
+              <ArrowRight size={15} />
             </button>
           </div>
-        </section>
-      )}
+
+          {/* AI insight message */}
+          <p className="hc-daily-insight">{aiInsight}</p>
+
+          {/* Daily question block */}
+          {!dailyAnswered && isVerified && (
+            <div className="hc-daily-q-block">
+              <div className="hc-daily-q-label">
+                <span className="hc-daily-q-dot" />
+                Today&apos;s question
+              </div>
+              <p className="hc-daily-q-text">{dailyHumanQuestion}</p>
+              <textarea
+                className="hc-daily-q-area"
+                onChange={(e) => setDailyDraft(e.target.value)}
+                placeholder={homeCopy.dailyPlaceholder}
+                rows={2}
+                value={dailyDraft}
+              />
+              <button className="hc-daily-q-submit" onClick={submitDailyAnswer} type="button">
+                Submit answer <Zap size={13} />
+              </button>
+            </div>
+          )}
+
+          {/* Already answered */}
+          {dailyAnswered && (
+            <div className="hc-daily-done-row">
+              <span className="hc-daily-done-check">✓</span>
+              <span>Today answered · Next question in <strong>{formatCountdown(dailyCountdown)}</strong></span>
+            </div>
+          )}
+
+          {/* Not verified nudge */}
+          {!isVerified && (
+            <div className="hc-daily-unverified">
+              <span>Verify with World ID to answer daily questions and earn HP.</span>
+            </div>
+          )}
+
+          {/* Streak at risk banner inside the card */}
+          {isVerified && !dailyAnswered && streak > 0 && (
+            <div className="hc-daily-streak-risk">
+              <Flame size={14} />
+              <span><strong>{streak}-day streak at risk</strong> — answer now to protect it</span>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ── 6 · Profile completion (unverified only) ──── */}
       {!isVerified && (

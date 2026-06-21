@@ -16980,6 +16980,231 @@ html[data-world-mini-app="true"] .story-reader-screen .reader-actions,
 .hcm-plan-row { border-radius: 16px; transition: box-shadow 0.12s; }
 .hcm-plan-row:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
 
+/* ── Services top CTA row ───────────────────────────────────────────── */
+.hcm-svc-cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px 16px 4px;
+}
+.hcm-svc-cta-post,
+.hcm-svc-cta-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 10px;
+  border-radius: 18px;
+  min-height: 76px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  transition: box-shadow 0.12s, transform 0.1s;
+}
+.hcm-svc-cta-post:active, .hcm-svc-cta-offer:active { transform: scale(0.97); }
+.hcm-svc-cta-post {
+  border: 1.5px solid rgba(47,111,237,0.25);
+  background: linear-gradient(145deg, rgba(47,111,237,0.06), rgba(47,111,237,0.02));
+  color: var(--blue);
+}
+.hcm-svc-cta-post svg { color: var(--blue); }
+.hcm-svc-cta-offer {
+  border: 1.5px solid rgba(19,122,87,0.25);
+  background: linear-gradient(145deg, rgba(19,122,87,0.07), rgba(19,122,87,0.02));
+  color: var(--green);
+}
+.hcm-svc-cta-offer svg { color: var(--green); }
+.hcm-svc-cta-post small,
+.hcm-svc-cta-offer small {
+  font-size: 0.62rem;
+  font-weight: 700;
+  opacity: 0.75;
+  display: block;
+}
+
+/* ── Bid item actions row on market cards ───────────────────────────── */
+.hcm-item-bid-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+}
+.hcm-bid-quick-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  background: var(--brand-grad);
+  border-radius: 10px;
+  border: none;
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  transition: opacity 0.12s;
+}
+.hcm-item-bid-row span { display: inline-flex; align-items: center; gap: 4px; }
+.hcm-bid-closes { color: var(--muted); font-size: 0.72rem; }
+
+/* ── Home daily question card ─────────────────────────────────────────
+   Replaces the old .hc-insight, .hc-streak-nudge, and .hc-insight-daily
+   with a single unified card. */
+.hc-daily-card {
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f0fdf7 0%, #fafffe 100%);
+  border: 1.5px solid rgba(19,122,87,0.18);
+  box-shadow: 0 2px 14px rgba(19,122,87,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hc-daily-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.hc-daily-card-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--green);
+}
+.hc-daily-card-label svg { color: var(--green); }
+.hc-daily-card-open {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(19,122,87,0.1);
+  color: var(--green);
+  border: none;
+}
+.hc-daily-insight {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.45;
+}
+/* Daily question block */
+.hc-daily-q-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 14px;
+  border: 1px solid rgba(19,122,87,0.12);
+}
+.hc-daily-q-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--green);
+  opacity: 0.8;
+}
+.hc-daily-q-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+.hc-daily-q-text {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.38;
+  letter-spacing: -0.008em;
+}
+.hc-daily-q-area {
+  width: 100%;
+  border: 1.5px solid rgba(19,122,87,0.2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  color: var(--ink);
+  background: #fff;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.hc-daily-q-area:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(19,122,87,0.12); }
+.hc-daily-q-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  min-height: 44px;
+  background: var(--brand-grad);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+/* Already answered */
+.hc-daily-done-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 8px 12px;
+  background: rgba(19,122,87,0.05);
+  border-radius: 12px;
+}
+.hc-daily-done-row strong { color: var(--green); }
+.hc-daily-done-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+/* Streak risk inline */
+.hc-daily-streak-risk {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.76rem;
+  color: #d87d3a;
+  background: rgba(216,125,58,0.08);
+  border: 1px solid rgba(216,125,58,0.2);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.hc-daily-streak-risk strong { font-weight: 900; }
+.hc-daily-streak-risk svg { flex-shrink: 0; color: #d87d3a; }
+/* Unverified nudge */
+.hc-daily-unverified {
+  font-size: 0.76rem;
+  color: var(--muted);
+  padding: 8px 0 2px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    GLOBAL FLOW IMPROVEMENTS
    ═══════════════════════════════════════════════════════════════════════ */

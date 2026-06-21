@@ -1768,24 +1768,34 @@ export function MarketplaceView({
                       <p className="hcm-item-quality">{getShortText(item.quality, 90)}</p>
                       {item.bidding && (
                         <div className="hcm-item-bid-row">
-                          <span>Best: {topBid(item)?.amount ?? item.bidding.floor} WLD</span>
-                          <span>Closes {item.bidding.ends}</span>
+                          <span><Gavel size={11} />Best: <strong>{topBid(item)?.amount ?? item.bidding.floor} WLD</strong></span>
+                          <span className="hcm-bid-closes">Closes {item.bidding.ends}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Actions */}
-                    <div className="hcm-item-actions">
-                      <button className="hcm-act-view" onClick={() => { setActiveItem(item); setGalleryIdx(0); }} type="button">View</button>
-                      <button onClick={() => rateItem(item)} type="button"><Star size={13} /></button>
-                      <button onClick={() => tipItem(item)} type="button"><Zap size={13} /></button>
-                      <button aria-busy={busyAction === `chat:${itemKey(item)}`} disabled={Boolean(busyAction)} onClick={() => void chatSeller(item)} type="button">
-                        <MessageCircle size={13} />
-                      </button>
-                      <button aria-busy={busyAction === `share:${itemKey(item)}`} disabled={Boolean(busyAction)} onClick={() => void shareItem(item)} type="button">
-                        <Send size={13} />
-                      </button>
-                    </div>
+                    {item.bidding ? (
+                      <div className="hcm-item-bid-actions">
+                        <button className="hcm-bid-quick-btn" onClick={() => { setActiveItem(item); setGalleryIdx(0); }} type="button">
+                          <Gavel size={13} />Place Bid — {minNextBid(item)} WLD+
+                        </button>
+                        <button onClick={() => rateItem(item)} type="button"><Star size={13} /></button>
+                        <button aria-busy={busyAction === `chat:${itemKey(item)}`} disabled={Boolean(busyAction)} onClick={() => void chatSeller(item)} type="button"><MessageCircle size={13} /></button>
+                      </div>
+                    ) : (
+                      <div className="hcm-item-actions">
+                        <button className="hcm-act-view" onClick={() => { setActiveItem(item); setGalleryIdx(0); }} type="button">View</button>
+                        <button onClick={() => rateItem(item)} type="button"><Star size={13} /></button>
+                        <button onClick={() => tipItem(item)} type="button"><Zap size={13} /></button>
+                        <button aria-busy={busyAction === `chat:${itemKey(item)}`} disabled={Boolean(busyAction)} onClick={() => void chatSeller(item)} type="button">
+                          <MessageCircle size={13} />
+                        </button>
+                        <button aria-busy={busyAction === `share:${itemKey(item)}`} disabled={Boolean(busyAction)} onClick={() => void shareItem(item)} type="button">
+                          <Send size={13} />
+                        </button>
+                      </div>
+                    )}
                   </article>
                 );
               }) : (
@@ -1858,6 +1868,20 @@ export function MarketplaceView({
           ════════════════════════════════════════════════════════════════ */}
       {topTab === "services" && (
         <>
+          {/* Post / List CTAs — always at top */}
+          <div className="hcm-svc-cta-row">
+            <button className="hcm-svc-cta-post" onClick={() => setSvcMode("post-job")} type="button">
+              <PlusCircle size={18} />
+              <span>Post a Job</span>
+              <small>2 WLD · WLD escrow</small>
+            </button>
+            <button className="hcm-svc-cta-offer" onClick={() => setSvcMode("offer-service")} type="button">
+              <Star size={18} />
+              <span>List Service</span>
+              <small>2 WLD · Global reach</small>
+            </button>
+          </div>
+
           <div className="hcm-search-wrap">
             <Search size={15} />
             <input aria-label="Search services" placeholder="Search jobs, services, regions…" value={svcSearch} onChange={(e) => setSvcSearch(e.target.value)} />
@@ -1985,10 +2009,6 @@ export function MarketplaceView({
             <div className="hcm-empty"><Sparkles size={28} /><strong>No listings</strong><p>{svcSearch ? `No results for "${svcSearch}"` : "Post a job or list your service."}</p></div>
           )}
 
-          <div className="hcm-svc-bottom">
-            <button onClick={() => setSvcMode("post-job")} type="button"><PlusCircle size={15} /><span>Post a Job</span><small>2 WLD</small></button>
-            <button onClick={() => setSvcMode("offer-service")} type="button"><Star size={15} /><span>List Service</span><small>2 WLD</small></button>
-          </div>
         </>
       )}
     </div>
