@@ -94,7 +94,7 @@ async function confirmWorldPayment(input: {
     confirmation: lastConfirmation,
     error:
       lastConfirmation?.error ??
-      "World payment is still pending. Please wait a moment and try the action again if it does not unlock.",
+      "World payment is still pending on WorldChain. Your WLD has been sent — do not pay again.",
     ok: false,
   };
 }

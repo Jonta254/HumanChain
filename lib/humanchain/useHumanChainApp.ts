@@ -887,9 +887,17 @@ export function useHumanChainApp() {
       if ("pendingSetup" in result && result.pendingSetup) { setToast({ title: "World setup needed", detail: result.message }); setPaymentPrompt(null); setPaymentBusy(false); return; }
       if ("pendingWorldApp" in result && result.pendingWorldApp) { setToast({ title: "Open in World App", detail: result.message }); setPaymentBusy(false); return; }
       if ("ok" in result && !result.ok) {
-        const detail = "error" in result && result.error ? result.error : "World payments are only counted after backend verification.";
-        const isStillPending = detail.toLowerCase().includes("still pending");
-        setToast({ title: isStillPending ? "Payment processing" : "Payment not confirmed", detail });
+        // "payment" in result means MiniKit.pay() completed — WLD was already deducted from the
+        // user's wallet before confirmation ran. Close the sheet immediately so the Pay button
+        // cannot be tapped again and trigger a second charge.
+        const paymentWasSent = "payment" in result;
+        const rawDetail = "error" in result && result.error ? result.error : "World payments are only counted after backend verification.";
+        const detail = paymentWasSent
+          ? "Your WLD was sent and is being verified on WorldChain. Do NOT pay again — the feature will unlock once confirmed."
+          : rawDetail;
+        const isStillPending = rawDetail.toLowerCase().includes("still pending");
+        setToast({ title: isStillPending || paymentWasSent ? "Payment sent — confirming" : "Payment not confirmed", detail });
+        if (paymentWasSent) setPaymentPrompt(null);
         setPaymentBusy(false); return;
       }
       if ("error" in result && result.error) { setToast({ title: "Payment not prepared", detail: result.error }); setPaymentBusy(false); return; }
