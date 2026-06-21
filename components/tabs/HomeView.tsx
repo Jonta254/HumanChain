@@ -250,7 +250,6 @@ export function HomeView({
     ]);
     recordHistory({ title: "Daily Human answer", detail: dailyDraft.trim() || "Answered today's HumanChain question.", kind: "post" });
     earnPoints(18, "Your Daily Human answer entered today's global verdict.");
-    setShowDaily(false);
   }
 
   return (
@@ -290,59 +289,36 @@ export function HomeView({
       </header>
 
       {/* ── 2 · Identity card ────────────────────────── */}
+      {/* ── 2 · Compact identity card ────────────────── */}
       <section className="h9-hero" aria-label="Your HumanChain card">
-        <div className="hc-brief">
+        <button className="hc-brief-compact" onClick={() => setTab("me")} type="button">
           <span className="hc-brief-sheen" aria-hidden="true" />
-
-          {/* Row 1: avatar + identity + verified chip */}
-          <div className="hc-brief-top">
-            <span className="hc-brief-av" style={{ background: primaryProfileImage ? "transparent" : "linear-gradient(135deg,#1f8f8a,#0f7a57)" }}>
-              {primaryProfileImage ? <img alt="" src={primaryProfileImage} /> : profileInitial}
-              {isVerified && <span className="hc-brief-pip"><BadgeCheck size={10} /></span>}
-            </span>
-            <div className="hc-brief-id">
-              <strong>{worldHandle}</strong>
-              <span className="hc-brief-code">{humanChainId} · Joined {joinLabel}</span>
+          <div className="hc-brief-compact-top">
+            <b className="hc-brief-score-num">{chainScore}</b>
+            <div className="hc-brief-compact-meta">
+              <span className="hc-brief-level">Lv.{tier.level} · {tier.current.label}</span>
+              {strongestBadge && (
+                <span className="hc-brief-badge"><strongestBadge.icon size={10} />{strongestBadge.label}</span>
+              )}
             </div>
             <span className={`hc-brief-verify ${isVerified ? "on" : ""}`}>
               <BadgeCheck size={11} />{isVerified ? "Verified" : "Preview"}
             </span>
           </div>
-
-          {/* Row 2: score + tier + badge */}
-          <div className="hc-brief-mid">
-            <div className="hc-brief-score-row">
-              <b className="hc-brief-score-num">{chainScore}</b>
-              <div className="hc-brief-score-meta">
-                <span className="hc-brief-level">Lv.{tier.level} · {tier.current.label}</span>
-                <span className="hc-brief-health"><i style={{ background: health.color }} />{health.label}</span>
-              </div>
-            </div>
-            {strongestBadge ? (
-              <span className="hc-brief-badge"><strongestBadge.icon size={11} />{strongestBadge.label}</span>
-            ) : (
-              <span className="hc-brief-badge empty">Start building</span>
-            )}
-          </div>
-
-          {/* Row 3: tier progress bar */}
           <div className="hc-brief-progress" aria-label={`${tier.pct}% to ${tier.next?.label ?? "Founder"}`}>
             <i style={{ width: `${tier.pct}%` }} />
           </div>
-
-          {/* Row 4: 4-stat strip */}
           <div className="hc-brief-stats">
             <div className="hc-bstat"><span>{points}</span><label>HP</label></div>
             <div className="hc-bstat"><span>{streak}d</span><label>Streak</label></div>
             <div className="hc-bstat"><span>{userPostCount}</span><label>Posts</label></div>
             <div className="hc-bstat"><span>{completedTrades}</span><label>Trades</label></div>
           </div>
-
-          {/* Row 5: view passport */}
-          <button className="hc-brief-view" onClick={() => setTab("me")} type="button">
-            View Passport <ArrowRight size={12} />
-          </button>
-        </div>
+          <div className="hc-brief-compact-footer">
+            <span className="hc-brief-code">{humanChainId}</span>
+            <span className="hc-brief-passport-link">View Passport <ArrowRight size={11} /></span>
+          </div>
+        </button>
       </section>
 
       {/* ── 3 · Quick actions ────────────────────────── */}
@@ -493,14 +469,14 @@ export function HomeView({
         <span className="hc-ticker-stat">{activityCount} answered · 4.9k live</span>
       </div>
 
-      {/* ── 9 · Community Live feed ──────────────────── */}
+      {/* ── 9 · Community Live feed — capped at 3 ────── */}
       <section className="h9-section" aria-label="Live moments">
         <div className="h9-section-head">
           <strong>Live Moments</strong>
           <span className="h9-live-pill"><span className="h9-pulse" />Live</span>
         </div>
         <div className="hc-feed">
-          {seedMoments.map((m) => (
+          {seedMoments.slice(0, 3).map((m) => (
             <div key={m.id} className="hc-moment">
               <div className="hc-moment-av" style={{ background: m.bg }}>
                 {m.initials}
@@ -521,41 +497,30 @@ export function HomeView({
             </div>
           ))}
           <button className="hc-view-more" onClick={() => setTab("chains")} type="button">
-            See all moments <ArrowRight size={13} />
+            See all {seedMoments.length} moments <ArrowRight size={13} />
           </button>
         </div>
       </section>
 
-      {/* ── 10 · Story of the Day ────────────────────── */}
-      <section className="h9-section" aria-label="Story of the day">
-        <button className="hc-story-teaser" onClick={() => setTab("stories")} type="button">
-          <span className="hc-story-teaser-kicker"><BookOpen size={12} />Story of the Day</span>
-          <p className="hc-story-teaser-quote">&ldquo;I opened the window before I opened the door.&rdquo;</p>
-          <span className="hc-story-teaser-attr">— The Door That Waited · Life Stories</span>
-          <span className="hc-story-teaser-read">Read now <ArrowRight size={12} /></span>
-        </button>
-      </section>
-
-      {/* ── 11 · Explore Today ───────────────────────── */}
-      <section className="h9-section" aria-label="Explore today">
-        <button
-          className="hc-explore-today"
-          onClick={() => setTab("culture")}
-          type="button"
-        >
-          <span className="hc-explore-glow" aria-hidden="true" />
-          <div className="hc-explore-head">
-            <span className="hc-explore-kicker"><Compass size={13} />Explore Today</span>
-            <span className="hc-explore-go">Discover <ArrowRight size={13} /></span>
+      {/* ── 10 · Quick-access row: Story + Culture ───── */}
+      <div className="h9-bottom-chips">
+        <button className="h9-chip-story" onClick={() => setTab("stories")} type="button">
+          <BookOpen size={14} />
+          <div>
+            <strong>Story of the Day</strong>
+            <span>The Door That Waited</span>
           </div>
-          <strong className="hc-explore-title">Culture Rooms</strong>
-          <p className="hc-explore-sub">Real stories from verified humans — Yoruba, Swahili, Andean, Caribbean and more. Pay to enter, learn, and share.</p>
-          <div className="hc-explore-stats">
-            <span><Users size={12} />30k+ members</span>
-            <span><Sparkles size={12} />8 cultures live</span>
-          </div>
+          <ArrowRight size={13} />
         </button>
-      </section>
+        <button className="h9-chip-culture" onClick={() => setTab("culture")} type="button">
+          <Compass size={14} />
+          <div>
+            <strong>Culture Rooms</strong>
+            <span>8 cultures live</span>
+          </div>
+          <ArrowRight size={13} />
+        </button>
+      </div>
 
     </div>
   );

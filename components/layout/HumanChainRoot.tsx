@@ -307,8 +307,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
             worldContext={worldContext}
           />
         )}
-        {/* Floating back button — replaces Android hardware back key */}
-        {verifiedHuman && tab !== "home" ? (
+        {/* Floating back button — shown on tabs without their own header navigation */}
+        {verifiedHuman && tab !== "home" && tab !== "market" && tab !== "stories" ? (
           <button
             aria-label={`Back to ${backLabel}`}
             className="hc-back-btn"

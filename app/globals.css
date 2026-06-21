@@ -17205,6 +17205,193 @@ html[data-world-mini-app="true"] .story-reader-screen .reader-actions,
   padding: 8px 0 2px;
 }
 
+/* ── Compact identity card (replaces tall hc-brief) ───────────────── */
+.home-v9 .hc-brief-compact {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 18px 14px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #137a57 0%, #0d5e42 100%);
+  color: #fff;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(19,90,60,0.28);
+}
+.home-v9 .hc-brief-compact::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.home-v9 .hc-brief-compact-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.home-v9 .hc-brief-compact-top .hc-brief-score-num {
+  font-size: 2rem;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.home-v9 .hc-brief-compact-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.home-v9 .hc-brief-compact-meta .hc-brief-level {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.9);
+}
+.home-v9 .hc-brief-compact-meta .hc-brief-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  padding: 2px 8px;
+  width: fit-content;
+}
+.home-v9 .hc-brief-compact .hc-brief-verify {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 3px 9px;
+}
+.home-v9 .hc-brief-compact .hc-brief-verify.on {
+  color: #fff;
+  background: rgba(255,255,255,0.22);
+}
+.home-v9 .hc-brief-compact .hc-brief-progress {
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0;
+}
+.home-v9 .hc-brief-compact .hc-brief-progress i {
+  display: block;
+  height: 100%;
+  background: rgba(255,255,255,0.75);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.home-v9 .hc-brief-compact .hc-brief-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: rgba(0,0,0,0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 0;
+}
+.home-v9 .hc-brief-compact .hc-bstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+.home-v9 .hc-brief-compact .hc-bstat + .hc-bstat {
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+.home-v9 .hc-brief-compact .hc-bstat span {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+}
+.home-v9 .hc-brief-compact .hc-bstat label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+.home-v9 .hc-brief-compact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.home-v9 .hc-brief-compact-footer .hc-brief-code {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.06em;
+}
+.home-v9 .hc-brief-passport-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+}
+
+/* ── Bottom quick-access chips (Story + Culture) ───────────────────── */
+.h9-bottom-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+.h9-chip-story,
+.h9-chip-culture {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: 16px;
+  border: 1.5px solid var(--card-line);
+  background: var(--card);
+  color: var(--ink);
+  text-align: left;
+  transition: box-shadow 0.12s, transform 0.1s;
+}
+.h9-chip-story:active, .h9-chip-culture:active { transform: scale(0.97); }
+.h9-chip-story svg, .h9-chip-culture svg { flex-shrink: 0; color: var(--muted); }
+.h9-chip-story > div, .h9-chip-culture > div { flex: 1; min-width: 0; }
+.h9-chip-story strong, .h9-chip-culture strong {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 900;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.h9-chip-story span, .h9-chip-culture span {
+  display: block;
+  font-size: 0.64rem;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.h9-chip-story > svg:last-child, .h9-chip-culture > svg:last-child { color: var(--muted); }
+
+/* ── Market: remove left-padding compensation for back button ─────── */
+.hcm-root { padding-left: 0 !important; }
+
 /* ═══════════════════════════════════════════════════════════════════════
    GLOBAL FLOW IMPROVEMENTS
    ═══════════════════════════════════════════════════════════════════════ */
