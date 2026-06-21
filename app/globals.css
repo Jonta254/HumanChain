@@ -16500,18 +16500,39 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   color: #fff;
 }
 
-/* ── Story Reader: flex-column layout — no fixed bars, text always readable ── */
+/* ══════════════════════════════════════════════════════════════════════
+   STORY READER — fully self-contained flex layout.
+   Does NOT use .screen class to avoid inherited padding/overflow conflicts.
+   Three zones: header (fixed height) | body (flex:1, scrolls) | actions (fixed height)
+   ══════════════════════════════════════════════════════════════════════ */
 .story-reader-screen {
-  padding-top: 0;
-  padding-bottom: 0 !important;
-  overflow: hidden !important; /* outer shell does NOT scroll — inner body does */
+  /* Fill the viewport exactly like .screen does in World App */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--premium-bg);
+  /* No inherited padding from .screen */
+  padding: 0;
 }
-/* Header bar — always visible at top, not sticky (outside scroll area) */
+/* Safe-area top spacer so header clears World App chrome */
+.story-reader-screen::before {
+  content: "";
+  display: block;
+  height: env(safe-area-inset-top, 0px);
+  flex-shrink: 0;
+}
+/* Header bar — always visible, never scrolls */
 .story-reader-screen .reader-top {
   position: relative;
   flex-shrink: 0;
   z-index: 10;
-  background: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--line);
@@ -16522,7 +16543,7 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 }
 .story-reader-screen .reader-top button {
   flex-shrink: 0;
-  min-height: 36px;
+  min-height: 40px;
   border: 1.5px solid var(--card-line);
   border-radius: 10px;
   background: var(--card);
@@ -16550,21 +16571,21 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   border-radius: 0 3px 3px 0;
   transition: width 0.35s ease;
 }
-/* Inner scroll body — this is what actually scrolls */
+/* Scroll body — the ONLY scrolling zone */
 .story-reader-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
-/* Story page: the main reading area */
+/* Story page — flat, readable, no card chrome */
 .story-reader-screen .story-page {
   padding: 20px 18px 48px;
-  border-radius: 0;
-  border-left: none;
-  border-right: none;
-  box-shadow: none;
-  background: transparent;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
   min-height: unset;
 }
 /* Body text — comfortable long-form reading typography */
@@ -16642,15 +16663,16 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 }
 .reader-bookmark-inline:hover { background: rgba(19,122,87,0.1); border-color: rgba(19,122,87,0.5); }
 .reader-bookmark-inline.active { background: rgba(19,122,87,0.12); color: var(--green); opacity: 0.6; cursor: default; }
-/* Prev/Save/Next bar — always visible at the bottom, no fixed positioning */
+/* Prev/Save/Next bar — anchored at bottom, always visible, never overlaps text */
 .story-reader-screen .reader-actions {
   position: static;
   flex-shrink: 0;
   display: flex;
   gap: 8px;
   padding: 10px 16px;
-  padding-bottom: calc(10px + var(--world-safe-bottom, 0px));
-  background: rgba(255,255,255,0.94);
+  /* Extra bottom padding so buttons clear the World App bottom nav */
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px) + var(--world-safe-bottom, 0px));
+  background: rgba(255,255,255,0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--line);
