@@ -1961,7 +1961,7 @@ export function StoriesView({
 
   if (activeUserStory) {
     return (
-      <div className="story-reader-screen">
+      <div className="screen story-reader-screen">
         <section className="reader-top">
           <button onClick={() => setActiveUserStory(null)} type="button">
             Stories
@@ -2051,7 +2051,7 @@ export function StoriesView({
     const isLastPage = page === activePages.length - 1;
 
     return (
-      <div className="story-reader-screen">
+      <div className="screen story-reader-screen">
         <section className="reader-top">
           <button
             className="reader-back-btn"
