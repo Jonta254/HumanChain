@@ -69,18 +69,6 @@ const openOpportunities = [
   { id: "opp-2", title: "South African Mining Regulation Consultant", budget: "WLD 220", niche: "Legal",       region: "South Africa",    deadline: "12 days", proposals: 7, urgent: false, color: "#137a57", skills: ["SA mining law", "MPRDA"] },
 ];
 
-const chainFields = [
-  { name: "Builders & Money",  members: "31.2k", mood: "ambition",  detail: "Business ideas, WLD use, startup truth." },
-  { name: "Health & Healing",  members: "22.6k", mood: "recovery",  detail: "Daily strength, mental health, caregiving." },
-  { name: "Culture Rooms",     members: "44.1k", mood: "belonging", detail: "Language, food, music, migration, identity." },
-  { name: "Faith & Prayer",    members: "18.4k", mood: "hope",      detail: "Sharing daily strength across beliefs." },
-  { name: "Youth & Future",    members: "39.7k", mood: "future",    detail: "Skills, identity, ambition, and purpose." },
-  { name: "Love & Family",     members: "27.8k", mood: "care",      detail: "Family repair, parenting, forgiveness." },
-  { name: "Migration & Home",  members: "16.9k", mood: "memory",   detail: "Documents, loneliness, work, belonging." },
-  { name: "Parents & Children",members: "20.5k", mood: "care",      detail: "Lessons from parents, teachers, builders." },
-];
-type ChainField = (typeof chainFields)[number];
-
 const dailyHumanQuestion = getDailyQuestion();
 
 const seedMoments = [
@@ -126,7 +114,6 @@ export function HomeView({
   savedItems,
   setDailyAnsweredAt,
   setDailyAnsweredDate,
-  setActiveField,
   setDailyAnswered,
   setDailyResponses,
   setTab,
@@ -152,7 +139,6 @@ export function HomeView({
   savedItems: number;
   setDailyAnsweredAt: Dispatch<SetStateAction<string | null>>;
   setDailyAnsweredDate: Dispatch<SetStateAction<string | null>>;
-  setActiveField: Dispatch<SetStateAction<ChainField | null>>;
   setDailyAnswered: Dispatch<SetStateAction<boolean>>;
   setDailyResponses: Dispatch<SetStateAction<DailyResponse[]>>;
   setTab: (tab: Tab) => void;

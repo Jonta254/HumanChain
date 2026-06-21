@@ -274,7 +274,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             recordHistory={recordHistory}
             setDailyAnsweredAt={setDailyAnsweredAt}
             setDailyAnsweredDate={setDailyAnsweredDate}
-            setActiveField={setActiveField}
             points={points}
             setDailyAnswered={setDailyAnswered}
             setDailyResponses={setDailyResponses}

@@ -116,7 +116,7 @@ export function PaymentSheet({
             </div>
             <div className="ps-confirm-body">
               <strong className="ps-confirm-title">Verifying on World Chain</strong>
-              <p className="ps-confirm-note">Usually 5–15 seconds. Stay on this screen.</p>
+              <p className="ps-confirm-note">Usually 10–30 seconds. Stay on this screen.</p>
               <div className="ps-confirm-steps">
                 <span className="ps-cstep done"><CheckCircle size={11} />Payment sent</span>
                 <span className="ps-cstep-arrow">›</span>
@@ -130,7 +130,7 @@ export function PaymentSheet({
               </div>
               {elapsed >= 12 && elapsed < 65 && (
                 <p className="ps-confirm-patience">
-                  Still checking World Chain… can take up to 90s. Do not close.
+                  Still checking World Chain… can take up to 60s. Do not close.
                 </p>
               )}
               {elapsed >= 65 && (
