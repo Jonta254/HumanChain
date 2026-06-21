@@ -14972,8 +14972,7 @@ html[data-world-mini-app="true"] .bottom-nav {
   overflow: visible;
 }
 .bottom-nav--hc .bn-slot { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.bottom-nav--hc .bn-slot:last-child { grid-template-columns: 1fr 1fr 1fr; }
-.bottom-nav--hc .bn-slot:last-child .bn-label { font-size: 0.58rem; }
+.bottom-nav--hc .bn-slot:last-child { grid-template-columns: 1fr 1fr; }
 .bottom-nav--hc .bn-create {
   transform: translateY(-16px);
   width: 58px; height: 58px;
@@ -20667,6 +20666,49 @@ html[data-world-mini-app="true"] .ai-guide-sheet {
   font-weight: 800 !important;
   color: var(--green) !important;
 }
+
+/* ── Hero card: 4-stat row ───────────────────────────────────────────── */
+.home-v9 .hc-brief-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin-top:2px; border-top:1px solid rgba(255,255,255,0.15); padding-top:10px; }
+.home-v9 .hc-bstat { display:flex; flex-direction:column; align-items:center; gap:2px; }
+.home-v9 .hc-bstat + .hc-bstat { border-left:1px solid rgba(255,255,255,0.12); }
+.home-v9 .hc-bstat span { font-size:1.02rem; font-weight:950; color:#fff; line-height:1; letter-spacing:-0.02em; }
+.home-v9 .hc-bstat label { font-size:0.58rem; font-weight:700; color:rgba(255,255,255,0.62); text-transform:uppercase; letter-spacing:0.06em; }
+
+/* ── Story of the Day teaser card ───────────────────────────────────── */
+.home-v9 .hc-story-teaser {
+  width:100%; text-align:left; display:flex; flex-direction:column; gap:6px;
+  border-radius:22px !important;
+  padding:16px 17px !important;
+  background:linear-gradient(148deg,#1a0e3a 0%,#2d1a55 55%,#3d2060 100%) !important;
+  border:1.5px solid rgba(140,90,220,0.22) !important;
+  box-shadow:0 12px 32px rgba(60,20,100,0.22) !important;
+  position:relative; overflow:hidden;
+}
+.home-v9 .hc-story-teaser::before {
+  content:''; position:absolute; top:-30px; right:-20px; width:90px; height:90px;
+  background:radial-gradient(circle,rgba(140,90,220,0.18),transparent 70%);
+}
+.home-v9 .hc-story-teaser-kicker { display:inline-flex; align-items:center; gap:5px; font-size:0.6rem; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; color:rgba(190,150,255,0.85); }
+.home-v9 .hc-story-teaser-quote { font-size:0.92rem; font-weight:800; color:#fff; line-height:1.38; font-style:italic; margin:2px 0; }
+.home-v9 .hc-story-teaser-attr { font-size:0.65rem; color:rgba(190,150,255,0.65); font-weight:700; }
+.home-v9 .hc-story-teaser-read { display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:0.72rem; font-weight:900; color:rgba(190,150,255,0.9); }
+.home-v9 .hc-story-teaser:active { transform:scale(0.98); }
+
+/* ── Community Live feed ─────────────────────────────────────────────── */
+.home-v9 .hc-feed { display:flex; flex-direction:column; gap:10px; }
+.home-v9 .hc-moment { display:flex; gap:10px; padding:13px 14px; border-radius:18px; background:var(--card); border:1px solid rgba(19,122,87,0.08); box-shadow:0 2px 10px rgba(13,40,30,0.06); }
+.home-v9 .hc-moment-av { flex-shrink:0; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:900; color:#fff; position:relative; }
+.home-v9 .hc-moment-pip { position:absolute; bottom:-1px; right:-1px; width:13px; height:13px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#ffe9a8,#d8a93c); border:2px solid var(--card); }
+.home-v9 .hc-moment-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+.home-v9 .hc-moment-meta { display:flex; align-items:center; gap:5px; }
+.home-v9 .hc-moment-handle { font-size:0.76rem; font-weight:900; color:var(--ink); }
+.home-v9 .hc-moment-loc { font-size:0.65rem; color:var(--muted); }
+.home-v9 .hc-moment-time { font-size:0.62rem; color:var(--muted); margin-left:auto; }
+.home-v9 .hc-moment-text { font-size:0.8rem; color:var(--ink); line-height:1.45; }
+.home-v9 .hc-moment-actions { display:flex; gap:12px; margin-top:2px; }
+.home-v9 .hc-moment-act { font-size:0.68rem; font-weight:800; color:var(--muted); display:inline-flex; align-items:center; gap:3px; }
+.home-v9 .hc-moment-act.liked { color:var(--green); }
+.home-v9 .hc-view-more { width:100%; text-align:center; font-size:0.75rem; font-weight:900; color:var(--green); padding:10px; border-radius:14px; background:rgba(19,122,87,0.05); border:1px solid rgba(19,122,87,0.1); }
 
 /* ══════════════════════════════════════════════════════════════════════
    CULTURE ROOMS — full tab design

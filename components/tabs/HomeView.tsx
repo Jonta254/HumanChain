@@ -86,6 +86,12 @@ type ChainField = (typeof chainFields)[number];
 
 const dailyHumanQuestion = getDailyQuestion();
 
+const seedMoments = [
+  { id: "m1", initials: "AK", bg: "#137a57", handle: "@amara_k", loc: "Lagos · Nigeria", verified: true, time: "2m ago", text: "Just collected my first WLD airdrop. The future of identity is here — and it feels surreal to be part of it.", likes: 24, replies: 6 },
+  { id: "m2", initials: "RJ", bg: "#2f6fed", handle: "@ravi_j", loc: "Mumbai · India", verified: true, time: "9m ago", text: "Culture Room is wild — 12 people deep in a conversation about digital identity and no bots in sight.", likes: 41, replies: 13 },
+  { id: "m3", initials: "CN", bg: "#6657d9", handle: "@chidi_n", loc: "Abuja · Nigeria", verified: true, time: "17m ago", text: "Answered 25 daily questions in a row. This streak isn't just a number — it's discipline made visible.", likes: 58, replies: 9 },
+];
+
 function getGreeting() {
   const h = new Date().getHours();
   if (h < 12) return "Good morning";
@@ -347,7 +353,15 @@ export function HomeView({
             <i style={{ width: `${tier.pct}%` }} />
           </div>
 
-          {/* Row 4: view passport */}
+          {/* Row 4: 4-stat strip */}
+          <div className="hc-brief-stats">
+            <div className="hc-bstat"><span>{points}</span><label>HP</label></div>
+            <div className="hc-bstat"><span>{streak}d</span><label>Streak</label></div>
+            <div className="hc-bstat"><span>{userPostCount}</span><label>Posts</label></div>
+            <div className="hc-bstat"><span>{completedTrades}</span><label>Trades</label></div>
+          </div>
+
+          {/* Row 5: view passport */}
           <button className="hc-brief-view" onClick={() => setTab("me")} type="button">
             View Passport <ArrowRight size={12} />
           </button>
@@ -415,6 +429,16 @@ export function HomeView({
             <span>Stories</span>
           </button>
         </div>
+      </section>
+
+      {/* ── 4.5 · Story of the Day ───────────────────── */}
+      <section className="h9-section" aria-label="Story of the day">
+        <button className="hc-story-teaser" onClick={() => setTab("stories")} type="button">
+          <span className="hc-story-teaser-kicker"><BookOpen size={12} />Story of the Day</span>
+          <p className="hc-story-teaser-quote">&ldquo;I opened the window before I opened the door.&rdquo;</p>
+          <span className="hc-story-teaser-attr">— The Door That Waited · Life Stories</span>
+          <span className="hc-story-teaser-read">Read now <ArrowRight size={12} /></span>
+        </button>
       </section>
 
       {/* ── 5 · Reputation mini card ─────────────────── */}
@@ -504,6 +528,39 @@ export function HomeView({
           </div>
         </section>
       )}
+
+      {/* ── 7.8 · Community Live feed ────────────────── */}
+      <section className="h9-section" aria-label="Live moments">
+        <div className="h9-section-head">
+          <strong>Live Moments</strong>
+          <span className="h9-live-pill"><span className="h9-pulse" />Live</span>
+        </div>
+        <div className="hc-feed">
+          {seedMoments.map((m) => (
+            <div key={m.id} className="hc-moment">
+              <div className="hc-moment-av" style={{ background: m.bg }}>
+                {m.initials}
+                {m.verified && <span className="hc-moment-pip"><BadgeCheck size={7} /></span>}
+              </div>
+              <div className="hc-moment-body">
+                <div className="hc-moment-meta">
+                  <span className="hc-moment-handle">{m.handle}</span>
+                  <span className="hc-moment-loc">{m.loc}</span>
+                  <span className="hc-moment-time">{m.time}</span>
+                </div>
+                <p className="hc-moment-text">{m.text}</p>
+                <div className="hc-moment-actions">
+                  <span className="hc-moment-act"><Zap size={11} />{m.likes}</span>
+                  <span className="hc-moment-act"><MessageCircleQuestion size={11} />{m.replies} replies</span>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button className="hc-view-more" onClick={() => setTab("chains")} type="button">
+            See all moments <ArrowRight size={13} />
+          </button>
+        </div>
+      </section>
 
       {/* ── 8 · Explore Today (one combined card) ────── */}
       <section className="h9-section" aria-label="Explore today">
