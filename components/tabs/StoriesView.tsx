@@ -2064,10 +2064,7 @@ export function StoriesView({
           >
             ← Back
           </button>
-          <div className="reader-top-center">
-            <span className="reader-title-short">{activeTitle}</span>
-            <span className="reader-page-counter">{page + 1} / {activePages.length}</span>
-          </div>
+          <span className="reader-title-short">{activeTitle}</span>
           <button
             className={`reader-tip-btn${tippedStories.has(`pub:${activePublishedStory ?? "monthly"}`) ? " tipped" : ""}`}
             onClick={() =>
@@ -2099,16 +2096,23 @@ export function StoriesView({
           />
         </section>
         <div className="story-reader-body">
-        <article className="story-page">
+        <article className="story-page" key={page}>
           {page === 0 ? (
             <header className="reader-masthead">
-              <span className="reader-kicker">{publishedStory ? "Published story" : "Monthly human story"}</span>
+              <span className="reader-kicker">{publishedStory ? "Published Story" : "Monthly Human Story"}</span>
               <h1>{activeTitle}</h1>
-              <small>
-                {activePublisher}{publishedStory ? ` · ${activeAuthor}` : ""}
-              </small>
+              <div className="reader-byline">
+                <span className="reader-byline-publisher">{activePublisher}{publishedStory && activeAuthor ? ` · ${activeAuthor}` : ""}</span>
+                <span className="reader-byline-meta">{Math.ceil(activePages.length * 0.6)} min read · {activePages.length} pages</span>
+              </div>
+              <div className="reader-masthead-rule" />
             </header>
-          ) : null}
+          ) : (
+            <div className="reader-chapter-header">
+              <span className="reader-chapter-label">{activeTitle}</span>
+              <span className="reader-page-num">Page {page + 1} of {activePages.length}</span>
+            </div>
+          )}
           {current.image ? (
             <StoryWallImage
               alt={current.image.alt}
@@ -2116,16 +2120,19 @@ export function StoriesView({
               src={current.image.photo}
             />
           ) : null}
-          {page > 0 ? <span className="reader-chapter">{activeTitle}</span> : null}
-          <p>{current.text}</p>
+          <p className={page > 0 ? "reader-body-p reader-drop-cap" : "reader-body-p"}>{current.text}</p>
           {current.nextHint && !isLastPage ? (
-            <p className="reader-next-hint">{current.nextHint}</p>
+            <div className="reader-next-teaser">
+              <span className="reader-next-label">Coming up</span>
+              <p className="reader-next-text">{current.nextHint}</p>
+            </div>
           ) : null}
           {isLastPage && (
             <>
               <div className="reader-end-card">
-                <span>✓ Story complete — {readPercent}% read</span>
-                <p>You finished "{activeTitle}". Leave a tip for the author or bookmark it to your reading list.</p>
+                <div className="reader-end-icon">✦</div>
+                <h3 className="reader-end-title">Story Complete</h3>
+                <p className="reader-end-desc">You read all of "{activeTitle}". If it moved you, leave a tip for the author.</p>
               </div>
               {(() => {
                 const bmKey = `bm:${activePublishedStory ?? "monthly"}`;
@@ -2161,23 +2168,25 @@ export function StoriesView({
         </div>
         <section className="reader-actions">
           <button
+            className="reader-prev-btn"
             disabled={page === 0}
             onClick={() => setPage((value) => Math.max(0, value - 1))}
             type="button"
           >
-            ← Prev
+            ←
           </button>
-          <button onClick={saveStory} type="button">
-            Save
+          <button className="reader-save-btn" onClick={saveStory} type="button">
+            ✦ Save
           </button>
           <button
+            className="reader-next-btn"
             disabled={isLastPage}
             onClick={() =>
               setPage((value) => Math.min(activePages.length - 1, value + 1))
             }
             type="button"
           >
-            Next →
+            {isLastPage ? "The End" : "Continue →"}
           </button>
         </section>
       </div>
