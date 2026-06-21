@@ -2115,11 +2115,44 @@ export function StoriesView({
           ) : null}
           {page > 0 ? <span className="reader-chapter">{activeTitle}</span> : null}
           <p>{current.text}</p>
+          {current.nextHint && !isLastPage ? (
+            <p className="reader-next-hint">{current.nextHint}</p>
+          ) : null}
           {isLastPage && (
-            <div className="reader-end-card">
-              <span>✓ Story complete — {readPercent}% read</span>
-              <p>You finished "{activeTitle}". Leave a tip for the author or bookmark it to your reading list.</p>
-            </div>
+            <>
+              <div className="reader-end-card">
+                <span>✓ Story complete — {readPercent}% read</span>
+                <p>You finished "{activeTitle}". Leave a tip for the author or bookmark it to your reading list.</p>
+              </div>
+              {(() => {
+                const bmKey = `bm:${activePublishedStory ?? "monthly"}`;
+                const alreadyBookmarked = bookmarkedStories.has(bmKey);
+                return (
+                  <button
+                    className={`story-bookmark-btn reader-bookmark-inline${alreadyBookmarked ? " active" : ""}`}
+                    disabled={alreadyBookmarked}
+                    onClick={() => {
+                      if (alreadyBookmarked) return;
+                      openPayment({
+                        title: "Bookmark this story",
+                        amount: "0.5 WLD",
+                        detail: "Save this story permanently to your HumanChain reading list.",
+                        success: "Story bookmarked to your permanent reading list.",
+                        feature: "story-bookmark",
+                        points: 5,
+                        onConfirmed: async () => {
+                          setBookmarkedStories((prev) => new Set([...prev, bmKey]));
+                          setSavedItems((c) => c + 1);
+                        },
+                      });
+                    }}
+                    type="button"
+                  >
+                    {alreadyBookmarked ? "✦ Saved to library" : "✦ Bookmark this story · 0.5 WLD"}
+                  </button>
+                );
+              })()}
+            </>
           )}
         </article>
         <section className="reader-actions">
@@ -2142,36 +2175,6 @@ export function StoriesView({
           >
             Next →
           </button>
-        </section>
-        <section className="reader-bookmark-row">
-          {(() => {
-            const bmKey = `bm:${activePublishedStory ?? "monthly"}`;
-            const alreadyBookmarked = bookmarkedStories.has(bmKey);
-            return (
-              <button
-                className={`story-bookmark-btn${alreadyBookmarked ? " active" : ""}`}
-                disabled={alreadyBookmarked}
-                onClick={() => {
-                  if (alreadyBookmarked) return;
-                  openPayment({
-                    title: "Bookmark this story",
-                    amount: "0.5 WLD",
-                    detail: "Save this story permanently to your HumanChain reading list.",
-                    success: "Story bookmarked to your permanent reading list.",
-                    feature: "story-bookmark",
-                    points: 5,
-                    onConfirmed: async () => {
-                      setBookmarkedStories((prev) => new Set([...prev, bmKey]));
-                      setSavedItems((c) => c + 1);
-                    },
-                  });
-                }}
-                type="button"
-              >
-                {alreadyBookmarked ? "✦ Saved" : "✦ Bookmark · 0.5 WLD"}
-              </button>
-            );
-          })()}
         </section>
       </div>
     );
@@ -2377,7 +2380,7 @@ export function StoriesView({
       </section>
 
       {/* ── Community Voices ──────────────────────────────────── */}
-      <section className="panel story-market">
+      <section className="community-voices-section">
         <div className="section-heading">
           <span>Community Voices</span>
           <BookOpen size={18} />
@@ -2437,6 +2440,7 @@ export function StoriesView({
           </article>
         ))}
       </section>
+      {/* ── User published stories ──────────────────────────────── */}
       {userStories.length ? (
         <section className="panel story-market">
           <div className="section-heading">

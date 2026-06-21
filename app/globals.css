@@ -16500,14 +16500,22 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   color: #fff;
 }
 
-.story-reader-screen { padding-top: 0; }
+/* ── Story Reader: full-screen reading experience ──────────────────────── */
+.story-reader-screen {
+  padding-top: 0;
+  /* Enough bottom space to clear the fixed reader-actions bar (≈62px)
+     sitting at 80px above the bottom nav, plus a comfortable gap.
+     Without this the bookmark button on the last page is hidden behind
+     the fixed action bar at max scroll. */
+  padding-bottom: calc(200px + var(--world-safe-bottom, 0px));
+}
 .story-reader-screen .reader-top {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(255,255,255,0.88);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
@@ -16515,6 +16523,7 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   gap: 12px;
 }
 .story-reader-screen .reader-top button {
+  flex-shrink: 0;
   min-height: 36px;
   border: 1.5px solid var(--card-line);
   border-radius: 10px;
@@ -16523,6 +16532,7 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   font-size: 0.76rem;
   font-weight: 900;
   padding: 0 12px;
+  white-space: nowrap;
   transition: background 0.12s;
 }
 .story-reader-screen .reader-top span {
@@ -16536,25 +16546,65 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 2px;
+  height: 3px;
   width: var(--progress, 0%);
   background: var(--brand-grad);
-  transition: width 0.3s ease;
+  border-radius: 0 3px 3px 0;
+  transition: width 0.35s ease;
 }
+/* Story page: the main reading area */
 .story-reader-screen .story-page {
-  padding: 20px 16px 120px;
+  padding: 24px 18px 160px;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  box-shadow: none;
+  background: transparent;
+  min-height: unset;
 }
-.story-reader-screen .story-page p {
-  font-size: 1rem;
-  line-height: 1.72;
+/* Body text — comfortable long-form reading typography */
+.story-reader-screen .story-page > p {
+  font-size: 1.06rem;
+  line-height: 1.82;
   color: var(--ink);
+  letter-spacing: 0.005em;
+  margin: 0 0 1.1em;
+}
+/* Next-page hint — subtle teaser at the bottom of each page */
+.reader-next-hint {
+  font-size: 0.82rem !important;
+  line-height: 1.5 !important;
+  color: var(--muted) !important;
+  font-style: italic;
+  border-left: 2px solid var(--line);
+  padding-left: 12px;
+  margin-top: 20px !important;
+  opacity: 0.75;
+}
+/* Chapter label above text on pages > 0 */
+.reader-chapter {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 900;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+/* Masthead on page 0 */
+.story-reader-screen .reader-masthead {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
 .story-reader-screen .reader-masthead h1 {
-  font-size: 1.5rem;
+  font-size: 1.55rem;
   font-weight: 950;
   letter-spacing: -0.025em;
   color: var(--ink);
-  margin: 8px 0 4px;
+  margin: 8px 0 6px;
+  line-height: 1.18;
 }
 .story-reader-screen .reader-masthead span {
   font-size: 0.68rem;
@@ -16564,9 +16614,30 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   letter-spacing: 0.08em;
 }
 .story-reader-screen .reader-masthead small {
-  font-size: 0.72rem;
+  display: block;
+  font-size: 0.73rem;
   color: var(--muted);
+  margin-top: 4px;
 }
+/* Inline bookmark button inside story-page on last page */
+.reader-bookmark-inline {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 20px;
+  border: 1.5px solid rgba(19,122,87,0.3);
+  border-radius: 14px;
+  background: rgba(19,122,87,0.05);
+  color: var(--green);
+  font-size: 0.84rem;
+  font-weight: 900;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.reader-bookmark-inline:hover { background: rgba(19,122,87,0.1); border-color: rgba(19,122,87,0.5); }
+.reader-bookmark-inline.active { background: rgba(19,122,87,0.12); color: var(--green); opacity: 0.6; cursor: default; }
+/* Fixed prev/save/next bar */
 .story-reader-screen .reader-actions {
   position: fixed;
   bottom: calc(80px + var(--world-safe-bottom, 0px));
@@ -16575,9 +16646,9 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   display: flex;
   gap: 8px;
   padding: 10px 16px;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--line);
 }
 .story-reader-screen .reader-actions button {
@@ -16592,11 +16663,16 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   transition: background 0.12s, transform 0.1s;
 }
 .story-reader-screen .reader-actions button:active { transform: scale(0.97); }
-.story-reader-screen .reader-actions button:disabled { opacity: 0.38; }
+.story-reader-screen .reader-actions button:disabled { opacity: 0.35; }
 .story-reader-screen .reader-actions button:last-child {
   background: var(--brand-grad);
   border-color: transparent;
   color: #fff;
+}
+.story-reader-screen .reader-actions button:last-child:disabled {
+  background: var(--card);
+  color: var(--muted);
+  border-color: var(--card-line);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -21406,9 +21482,27 @@ button:not([disabled]) { cursor: pointer; }
   margin: -4px 0 8px;
 }
 
+/* ── Browse screen: clear section separation ──────────────────────── */
+.stories-screen .panel.story-market {
+  margin-bottom: 0;
+}
+/* Distinct header for community voices section */
+.stories-screen .community-voices-section {
+  background: linear-gradient(135deg, rgba(47,111,237,0.04) 0%, rgba(102,87,217,0.04) 100%);
+  border: 1px solid rgba(47,111,237,0.1);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stories-screen .community-voices-section .section-heading {
+  margin: 0;
+}
+
 /* ── Community Voice Cards ────────────────────────────────────────── */
 .cv-voice-card {
-  background: var(--paper-strong);
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 14px;
