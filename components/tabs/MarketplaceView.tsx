@@ -36,6 +36,7 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
+import { Button, Haptic, Spinner, Typography, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import {
   chatWithWorld,
   getWorldMiniAppContext,
@@ -1034,15 +1035,19 @@ export function MarketplaceView({
                   value={bidDrafts[seedItem.id] ?? ""}
                   onChange={(e) => setBidDrafts((c) => ({ ...c, [seedItem.id]: e.target.value }))}
                 />
-                <button
-                  className="hcm-bid-submit"
-                  aria-busy={busyAction === `bid:${seedItem.id}`}
-                  disabled={Boolean(busyAction)}
-                  onClick={() => void placeBid(seedItem)}
-                  type="button"
-                >
-                  {busyAction === `bid:${seedItem.id}` ? "Sending…" : "Place Bid"}
-                </button>
+                <Haptic variant="impact" type="medium" asChild>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    aria-busy={busyAction === `bid:${seedItem.id}`}
+                    disabled={Boolean(busyAction)}
+                    onClick={() => void placeBid(seedItem)}
+                    type="button"
+                  >
+                    {busyAction === `bid:${seedItem.id}` ? <Spinner /> : null}
+                    {busyAction === `bid:${seedItem.id}` ? "Sending…" : "Place Bid"}
+                  </Button>
+                </Haptic>
               </div>
               {/* Existing bids */}
               {(marketBids[seedItem.id] ?? []).slice(0, 3).map((bid) => (
@@ -1177,25 +1182,32 @@ export function MarketplaceView({
           {/* Actions — hidden if sold */}
           {!isSold && (
           <div className="hcm-detail-actions">
-            <button
-              className="hcm-act-primary"
-              aria-busy={busyAction === `hold:${k}`}
-              disabled={Boolean(busyAction) || isOwner}
-              onClick={() => void holdItem(activeItem)}
-              type="button"
-            >
-              {isOwner ? "Your listing" : busyAction === `hold:${k}` ? "Holding…" : "Book / Hold Item"}
-            </button>
-            <button
-              className="hcm-act-chat"
-              aria-busy={busyAction === `chat:${k}`}
-              disabled={Boolean(busyAction)}
-              onClick={() => void chatSeller(activeItem)}
-              type="button"
-            >
-              <MessageCircle size={15} />
-              {busyAction === `chat:${k}` ? "Opening…" : isOwner ? "Share via Chat" : "Message Seller"}
-            </button>
+            <Haptic variant="impact" type="medium" asChild>
+              <Button
+                variant="primary"
+                fullWidth
+                aria-busy={busyAction === `hold:${k}`}
+                disabled={Boolean(busyAction) || isOwner}
+                onClick={() => void holdItem(activeItem)}
+                type="button"
+              >
+                {busyAction === `hold:${k}` ? <Spinner /> : null}
+                {isOwner ? "Your listing" : busyAction === `hold:${k}` ? "Holding…" : "Book / Hold Item"}
+              </Button>
+            </Haptic>
+            <Haptic variant="selection" asChild>
+              <Button
+                variant="secondary"
+                fullWidth
+                aria-busy={busyAction === `chat:${k}`}
+                disabled={Boolean(busyAction)}
+                onClick={() => void chatSeller(activeItem)}
+                type="button"
+              >
+                <MessageCircle size={15} />
+                {busyAction === `chat:${k}` ? "Opening…" : isOwner ? "Share via Chat" : "Message Seller"}
+              </Button>
+            </Haptic>
             <div className="hcm-act-row">
               <button onClick={() => rateItem(activeItem)} type="button"><Star size={14} />Rate</button>
               <button onClick={() => tipItem(activeItem)} type="button"><Zap size={14} />Tip</button>
@@ -1490,35 +1502,38 @@ export function MarketplaceView({
           )}
 
           <div className="hcm-detail-actions">
-            <button
-              className="hcm-act-primary"
-              disabled={hasApplied}
-              onClick={() => {
-                if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying to jobs" : "contacting providers")) return;
-                void chatWithWorld({
-                  message: `Hi ${poster}, I'm interested in "${activeSvc.title}" on HumanChain. Budget: ${budget}. Let's connect.`,
-                  to: [poster.replace(/^@/, "")],
-                }).then(() => {
-                  setAppliedJobs((prev) => new Set([...prev, svcId]));
-                  earnPoints(5, `Applied to ${activeSvc.title}.`);
-                  recordHistory({ title: isJob ? "Job application sent" : "Provider contacted", detail: `${activeSvc.title} · ${budget}`, kind: "market" });
-                  act("Application sent!", `World Chat opened with ${poster}.`);
-                  const existing = loadJsonFromStorage<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(storageKeys.jobApplications, []);
-                  if (!existing.find((a) => a.id === svcId)) {
-                    saveJsonToStorage(storageKeys.jobApplications, [{ id: svcId, title: activeSvc.title, budget, poster, appliedAt: new Date().toISOString() }, ...existing]);
-                    fetch("/api/db/applications", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ listing_id: svcId, listing_title: activeSvc.title, applicant_wallet: humanIdentity?.wallet ?? "", message: `Budget: ${budget}` }),
-                    }).catch(() => null);
-                  }
-                  addNotification("Application sent!", `You applied to "${activeSvc.title}". The poster has been notified via World Chat.`, "marketplace");
-                }).catch(() => act("Chat unavailable", "Try from World App."));
-              }}
-              type="button"
-            >
-              <MessageCircle size={15} />{hasApplied ? "Applied ✓" : isJob ? "Apply via World Chat" : "Contact Provider"}
-            </button>
+            <Haptic variant="impact" type="medium" asChild>
+              <Button
+                variant="primary"
+                fullWidth
+                disabled={hasApplied}
+                onClick={() => {
+                  if (!requireVerifiedPublicAction(humanIdentity, act, isJob ? "applying to jobs" : "contacting providers")) return;
+                  void chatWithWorld({
+                    message: `Hi ${poster}, I'm interested in "${activeSvc.title}" on HumanChain. Budget: ${budget}. Let's connect.`,
+                    to: [poster.replace(/^@/, "")],
+                  }).then(() => {
+                    setAppliedJobs((prev) => new Set([...prev, svcId]));
+                    earnPoints(5, `Applied to ${activeSvc.title}.`);
+                    recordHistory({ title: isJob ? "Job application sent" : "Provider contacted", detail: `${activeSvc.title} · ${budget}`, kind: "market" });
+                    act("Application sent!", `World Chat opened with ${poster}.`);
+                    const existing = loadJsonFromStorage<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(storageKeys.jobApplications, []);
+                    if (!existing.find((a) => a.id === svcId)) {
+                      saveJsonToStorage(storageKeys.jobApplications, [{ id: svcId, title: activeSvc.title, budget, poster, appliedAt: new Date().toISOString() }, ...existing]);
+                      fetch("/api/db/applications", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ listing_id: svcId, listing_title: activeSvc.title, applicant_wallet: humanIdentity?.wallet ?? "", message: `Budget: ${budget}` }),
+                      }).catch(() => null);
+                    }
+                    addNotification("Application sent!", `You applied to "${activeSvc.title}". The poster has been notified via World Chat.`, "marketplace");
+                  }).catch(() => act("Chat unavailable", "Try from World App."));
+                }}
+                type="button"
+              >
+                <MessageCircle size={15} />{hasApplied ? "Applied ✓" : isJob ? "Apply via World Chat" : "Contact Provider"}
+              </Button>
+            </Haptic>
             <button
               className="hcm-act-chat"
               onClick={() => {

@@ -1,3 +1,5 @@
+@import "@worldcoin/mini-apps-ui-kit-react/dist/globals.css";
+
 :root {
   /* HumanChain Premium — near-white clarity + emerald brand + silver/diamond cards */
   --paper: #f4f8f6;
@@ -8960,6 +8962,125 @@ html[data-world-mini-app="true"] .bottom-nav {
     border-radius: 22px;
   }
 }
+
+/* ── World UI Kit BottomBar nav ── */
+.bottom-nav--hc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+}
+.bn-tabs-left,
+.bn-tabs-right {
+  display: flex;
+  flex: 1;
+}
+.bn-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--brand-grad);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(19, 122, 87, 0.38);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.bn-fab:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(19, 122, 87, 0.25); }
+.bn-fab.active { background: linear-gradient(135deg, #137a57, #2f6fed); }
+.hc-nav-safe { position: fixed; bottom: 0; left: 0; right: 0; z-index: 5; }
+
+/* ── TopBar back button ── */
+.hc-topbar-back {
+  position: fixed;
+  top: calc(var(--world-safe-top, env(safe-area-inset-top, 0px)));
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: rgba(244, 248, 246, 0.94);
+  backdrop-filter: blur(18px);
+}
+
+/* ── Drawer overrides to match HumanChain palette ── */
+.ps-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+}
+.ps-amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ps-amount-num { color: var(--ink); }
+.ps-world-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--green);
+  background: rgba(19, 122, 87, 0.08);
+  border: 1px solid rgba(19, 122, 87, 0.18);
+  border-radius: 10px;
+  padding: 3px 8px;
+}
+.ps-detail { color: var(--muted); }
+.ps-trust-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.ps-trust-row span { display: flex; align-items: center; gap: 4px; }
+.ps-hp-badge { color: var(--green); font-weight: 700; }
+.ps-confirming {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: rgba(19, 122, 87, 0.05);
+  border: 1px solid rgba(19, 122, 87, 0.15);
+  border-radius: 14px;
+}
+.ps-confirm-body { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.ps-confirm-note, .ps-confirm-patience { color: var(--muted); font-size: 0.78rem; }
+.ps-confirm-patience-slow { color: var(--coral); }
+.ps-confirm-steps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 0.7rem; }
+.ps-cstep { display: flex; align-items: center; gap: 3px; }
+.ps-cstep.done { color: var(--green); font-weight: 600; }
+.ps-cstep.active { color: var(--ink); font-weight: 600; }
+.ps-cstep.pending { color: var(--muted); }
+.ps-cstep-arrow { color: var(--muted); }
+.ps-cstep-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.ps-confirm-elapsed { font-size: 0.68rem; color: var(--muted); }
+.ps-note { font-size: 0.72rem; color: var(--muted); text-align: center; }
+.ps-amount-field { display: flex; flex-direction: column; gap: 6px; }
+.ps-amount-input-wrap { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.ps-amount-input-wrap input { flex: 1; border: none; background: none; font-size: 1rem; color: var(--ink); outline: none; }
+.ps-amount-unit { font-size: 0.8rem; font-weight: 600; color: var(--green); }
+
+/* AI Guide drawer */
+.ai-guide-body { padding: 16px 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.ai-guide-stats-row { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ai-guide-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ai-guide-stat strong { font-size: 1.1rem; font-weight: 800; color: var(--ink); }
+.ai-guide-stat span { font-size: 0.68rem; color: var(--muted); }
+.ai-guide-intro { color: var(--muted); }
+.ai-guide-topics { display: flex; flex-direction: column; }
+.ai-guide-topic-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(19, 122, 87, 0.08); color: var(--green); }
+.ai-guide-back-btn { margin-bottom: 8px; }
+.ai-guide-steps { padding: 4px 0; }
 
 @media (max-width: 380px), (max-height: 700px) {
   .screen {

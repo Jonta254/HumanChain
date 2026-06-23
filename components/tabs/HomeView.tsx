@@ -19,6 +19,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { Button, Haptic, Typography, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import { getWorldMiniAppContext } from "@/lib/worldMiniApp";
 import { getDailyQuestion } from "@/lib/data/dailyQuestions";
 import { type AppLanguage } from "@/lib/data/languages";
@@ -155,6 +156,7 @@ export function HomeView({
   verifiedHuman: VerifiedHuman | null;
   worldContext: ReturnType<typeof getWorldMiniAppContext>;
 }) {
+  const { selection, impact } = useHaptics();
   const [dailyDraft, setDailyDraft] = useState("");
   const [tickerIdx, setTickerIdx] = useState(0);
   const [activityCount, setActivityCount] = useState(() => 72 + (new Date().getMinutes() % 28));
@@ -375,9 +377,11 @@ export function HomeView({
                 rows={2}
                 value={dailyDraft}
               />
-              <button className="hc-daily-q-submit" onClick={submitDailyAnswer} type="button">
-                Submit answer <Zap size={13} />
-              </button>
+              <Haptic variant="impact" type="medium" asChild>
+                <Button variant="primary" fullWidth onClick={() => { impact("medium"); submitDailyAnswer(); }} type="button">
+                  Submit answer <Zap size={13} />
+                </Button>
+              </Haptic>
             </div>
           )}
 
@@ -416,9 +420,11 @@ export function HomeView({
               <div className="hc-pc-step"><span>3</span><p>Post moment</p></div>
               <div className="hc-pc-step"><span>4</span><p>First trade</p></div>
             </div>
-            <button className="hc-pc-cta" onClick={() => act("Verify with World ID", "Open World App and tap Verify. Your human proof stays private — only the zero-knowledge proof is shared.")} type="button">
-              <BadgeCheck size={14} /> Verify with World ID — unlock full HumanChain
-            </button>
+            <Haptic variant="impact" type="medium" asChild>
+              <Button variant="primary" fullWidth onClick={() => act("Verify with World ID", "Open World App and tap Verify. Your human proof stays private — only the zero-knowledge proof is shared.")} type="button">
+                <BadgeCheck size={14} /> Verify with World ID — unlock full HumanChain
+              </Button>
+            </Haptic>
           </div>
         </section>
       )}
@@ -496,9 +502,11 @@ export function HomeView({
               </div>
             </div>
           ))}
-          <button className="hc-view-more" onClick={() => setTab("chains")} type="button">
-            See all {seedMoments.length} moments <ArrowRight size={13} />
-          </button>
+          <Haptic variant="selection" asChild>
+            <Button variant="tertiary" fullWidth onClick={() => { selection(); setTab("chains"); }} type="button">
+              See all {seedMoments.length} moments <ArrowRight size={13} />
+            </Button>
+          </Haptic>
         </div>
       </section>
 

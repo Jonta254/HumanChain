@@ -11,6 +11,7 @@ import {
   Send,
   ShieldCheck,
 } from "lucide-react";
+import { Button, Haptic, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import {
   validateAnswerInput,
   validateQuestionInput,
@@ -79,6 +80,7 @@ export function AskView({
   openPayment: OpenPayment;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
 }) {
+  const { impact, selection } = useHaptics();
   const [question, setQuestion] = useState("");
   const [selectedMode, setSelectedMode] = useState("Text");
   const [selectedTopic, setSelectedTopic] = useState("Life");
@@ -576,26 +578,29 @@ export function AskView({
             </button>
           ))}
         </div>
-        <button
-          className="primary-command"
-          disabled={!question.trim()}
-          onClick={() => {
-            if (activeAskService === "country" && selectedCountryRoute === "World") {
-              unlockEnteredCountryRoute();
-              return;
-            }
-
-            publishQuestion();
-          }}
-          type="button"
-        >
-          <Send size={18} />
-          {activeAskService === "country"
-            ? selectedCountryRoute === "World"
-              ? "Unlock country route"
-              : `Ask ${selectedCountryRoute}`
-            : "Ask Verified Humans"}
-        </button>
+        <Haptic variant="impact" type="medium" asChild>
+          <Button
+            variant="primary"
+            fullWidth
+            disabled={!question.trim()}
+            onClick={() => {
+              impact("medium");
+              if (activeAskService === "country" && selectedCountryRoute === "World") {
+                unlockEnteredCountryRoute();
+                return;
+              }
+              publishQuestion();
+            }}
+            type="button"
+          >
+            <Send size={18} />
+            {activeAskService === "country"
+              ? selectedCountryRoute === "World"
+                ? "Unlock country route"
+                : `Ask ${selectedCountryRoute}`
+              : "Ask Verified Humans"}
+          </Button>
+        </Haptic>
       </section>
 
       <section className="ask-board">

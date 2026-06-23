@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
+import { Haptic, SafeAreaView, TopBar, VerificationBadge, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getChainScore, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
 import { storageKeys } from "@/lib/humanchain/storage";
@@ -43,6 +44,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
     deleteLocalAccount, enableHumanChainNotifications, enterPreview, enterWithWorld,
     keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink,
   } = props;
+
+  const { selection, notification } = useHaptics();
 
   const [onboardingDone, setOnboardingDone] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -307,26 +310,39 @@ export function HumanChainRoot(props: HumanChainAppState) {
             worldContext={worldContext}
           />
         )}
-        {/* Floating back button — shown on tabs without their own header navigation */}
+        {/* Back button — shown on tabs without their own header navigation */}
         {verifiedHuman && tab !== "home" && tab !== "market" && tab !== "stories" ? (
-          <button
-            aria-label={`Back to ${backLabel}`}
-            className="hc-back-btn"
-            onClick={goBack}
-            type="button"
-          >
-            <ArrowLeft size={15} />
-            <span>{backLabel}</span>
-          </button>
+          <TopBar
+            className="hc-topbar-back"
+            startAdornment={
+              <Haptic variant="selection" asChild>
+                <button
+                  aria-label={`Back to ${backLabel}`}
+                  className="hc-back-btn"
+                  onClick={() => { selection(); goBack(); }}
+                  type="button"
+                >
+                  <ArrowLeft size={15} />
+                  <span>{backLabel}</span>
+                </button>
+              </Haptic>
+            }
+            endAdornment={
+              verifiedHuman ? (
+                <VerificationBadge verified={Boolean(verifiedHuman)} />
+              ) : null
+            }
+          />
         ) : null}
 
         {verifiedHuman && tab !== "home" && tab !== "me" && tab !== "create" ? (
-          <button
-            aria-label="Open Human Passport"
-            className="floating-profile-button"
-            onClick={() => setTab("me")}
-            type="button"
-          >
+          <Haptic variant="selection" asChild>
+            <button
+              aria-label="Open Human Passport"
+              className="floating-profile-button"
+              onClick={() => { selection(); setTab("me"); }}
+              type="button"
+            >
             {getPrimaryProfileImage(profileImage, verifiedHuman, worldContext) ? (
               <img alt="" src={getPrimaryProfileImage(profileImage, verifiedHuman, worldContext)} />
             ) : (
@@ -334,7 +350,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
                 {getWorldDisplayUsername(worldContext, verifiedHuman).replace(/^@/, "").trim().charAt(0).toUpperCase() || "H"}
               </span>
             )}
-          </button>
+            </button>
+          </Haptic>
         ) : null}
         {toast ? (
           <div aria-live="polite" className={`toast toast-enter${/fail|not confirm|not prepar|error|invalid|denied|wrong|mismatch/i.test(toast.title) ? " toast-error" : ""}`} role="status">
@@ -380,15 +397,18 @@ export function HumanChainRoot(props: HumanChainAppState) {
           />
         ) : null}
         {verifiedHuman ? (
-          <BottomNav
-            active={tab}
-            appLanguage={appLanguage}
-            onChange={(nextTab) => {
-              if (nextTab === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
-              setTab(nextTab);
-            }}
-            onCreate={() => setTab("create")}
-          />
+          <SafeAreaView edges={["bottom"]} className="hc-nav-safe">
+            <BottomNav
+              active={tab}
+              appLanguage={appLanguage}
+              onChange={(nextTab) => {
+                if (nextTab === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
+                selection();
+                setTab(nextTab);
+              }}
+              onCreate={() => { notification("success"); setTab("create"); }}
+            />
+          </SafeAreaView>
         ) : null}
       </section>
     </main>

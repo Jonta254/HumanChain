@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { HeartHandshake, PlusCircle, ShieldCheck, Star, Upload, Users } from "lucide-react";
+import { Button, Haptic, Spinner, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import { getDailyQuestion } from "@/lib/data/dailyQuestions";
 import {
   humanChainErrorStates,
@@ -676,6 +677,7 @@ export function ChainsView({
 }) {
   const [linkText, setLinkText] = useState("");
   const [postCaption, setPostCaption] = useState("");
+  const { impact } = useHaptics();
   const [postPreview, setPostPreview] = useState<string | null>(null);
   const [postFile, setPostFile] = useState<File | null>(null);
   const [postMediaType, setPostMediaType] = useState<"image" | "video">("image");
@@ -1326,9 +1328,11 @@ export function ChainsView({
                   </div>
                 </div>
               ) : (
-                <button className="primary-command" onClick={unlockCircle} type="button">
-                  Create Circle - 3 WLD
-                </button>
+                <Haptic variant="impact" type="medium" asChild>
+                  <Button variant="primary" fullWidth onClick={() => { impact("medium"); unlockCircle(); }} type="button">
+                    Create Circle - 3 WLD
+                  </Button>
+                </Haptic>
               )}
             </>
           ) : null}
@@ -1350,9 +1354,11 @@ export function ChainsView({
                   <small>Unlocked {chainPremium.pulsePaidAt}</small>
                 </div>
               ) : (
-                <button className="primary-command" onClick={unlockWorldPulse} type="button">
-                  Unlock Pulse - 1 WLD
-                </button>
+                <Haptic variant="impact" type="medium" asChild>
+                  <Button variant="primary" fullWidth onClick={() => { impact("medium"); unlockWorldPulse(); }} type="button">
+                    Unlock Pulse - 1 WLD
+                  </Button>
+                </Haptic>
               )}
             </>
           ) : null}
@@ -1517,11 +1523,12 @@ export function ChainsView({
                     type="file"
                   />
                 </label>
-                <button disabled={isPublishingPost} onClick={publishPostWithPaymentCheck} type="button">
-                  {isPublishingPost
-                    ? "Publishing..."
-                    : "Publish image"}
-                </button>
+                <Haptic variant="impact" type="medium" asChild>
+                  <Button variant="primary" disabled={isPublishingPost} onClick={() => { impact("medium"); publishPostWithPaymentCheck(); }} type="button">
+                    {isPublishingPost ? <Spinner /> : null}
+                    {isPublishingPost ? "Publishing..." : "Publish image"}
+                  </Button>
+                </Haptic>
               </div>
             </section>
           )}

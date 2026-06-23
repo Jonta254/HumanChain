@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOpen, Compass, Home, Plus, Store } from "lucide-react";
-import { humanHaptic } from "@/lib/worldMiniApp";
+import { BottomBar, Haptic, TabItem, Tabs } from "@worldcoin/mini-apps-ui-kit-react";
 import type { Tab } from "@/types/ui";
 
 type NavLanguage = {
@@ -11,9 +11,6 @@ type NavLanguage = {
   };
 };
 
-// HumanChain primary nav: Home | Discover | (+ Create) | Reputation | Market.
-// Create is a raised center FAB, not a tab. Discover → ChainsView (Moments/Links/Rooms).
-// Reputation → MeView (passport + profile). Market → MarketplaceView.
 export function BottomNavigation({
   active,
   appLanguage,
@@ -25,57 +22,36 @@ export function BottomNavigation({
   onChange: (tab: Tab) => void;
   onCreate: () => void;
 }) {
-  const leftItems: Array<[Tab, string, React.ReactNode]> = [
-    ["home",   appLanguage.nav.home, <Home    key="home"     size={22} />],
-    ["chains", "Discover",           <Compass key="discover" size={22} />],
-  ];
-  const rightItems: Array<[Tab, string, React.ReactNode]> = [
-    ["stories", "Stories",              <BookOpen key="stories" size={22} />],
-    ["market",  appLanguage.nav.market, <Store    key="market"  size={22} />],
-  ];
-
   return (
-    <nav className="bottom-nav bottom-nav--hc" aria-label="Primary navigation">
-      <div className="bn-slot">
-        {leftItems.map(renderItem)}
-      </div>
+    <BottomBar className="bottom-nav--hc" aria-label="Primary navigation">
+      <Tabs
+        value={active}
+        onValueChange={(v) => onChange(v as Tab)}
+        className="bn-tabs-left"
+      >
+        <TabItem value="home"   icon={<Home    size={22} />} label={appLanguage.nav.home} />
+        <TabItem value="chains" icon={<Compass size={22} />} label="Discover" />
+      </Tabs>
 
-      <div className="bn-create-wrap">
+      <Haptic variant="impact" type="medium" asChild>
         <button
-          className={`bn-create${active === "create" ? " active" : ""}`}
-          aria-current={active === "create" ? "page" : undefined}
-          onClick={() => { void humanHaptic("medium"); onCreate(); }}
           aria-label="Open Create page"
+          className={`bn-fab${active === "create" ? " active" : ""}`}
+          onClick={onCreate}
           type="button"
         >
-          <span className="bn-create-icon" aria-hidden="true">
-            <Plus size={26} strokeWidth={2.6} />
-          </span>
-          <span className="bn-create-label">Create</span>
+          <Plus size={26} strokeWidth={2.6} />
         </button>
-      </div>
+      </Haptic>
 
-      <div className="bn-slot">
-        {rightItems.map(renderItem)}
-      </div>
-    </nav>
-  );
-
-  function renderItem([key, label, icon]: [Tab, string, React.ReactNode]) {
-    const isActive = active === key;
-    return (
-      <button
-        aria-current={isActive ? "page" : undefined}
-        className={`bn-tab${isActive ? " active" : ""}`}
-        data-tab={key}
-        key={key}
-        onClick={() => { void humanHaptic("light"); onChange(key); }}
-        type="button"
+      <Tabs
+        value={active}
+        onValueChange={(v) => onChange(v as Tab)}
+        className="bn-tabs-right"
       >
-        {isActive && <span className="bn-pip" aria-hidden="true" />}
-        <span className="bn-icon" aria-hidden="true">{icon}</span>
-        <span className="bn-label">{label}</span>
-      </button>
-    );
-  }
+        <TabItem value="stories" icon={<BookOpen size={22} />} label="Stories" />
+        <TabItem value="market"  icon={<Store    size={22} />} label={appLanguage.nav.market} />
+      </Tabs>
+    </BottomBar>
+  );
 }

@@ -1,6 +1,20 @@
 "use client";
+
 import { useState } from "react";
-import { BookOpen, ShieldCheck, Sparkles, Store, Users, X } from "lucide-react";
+import { BookOpen, ChevronLeft, ShieldCheck, Sparkles, Store, Users } from "lucide-react";
+import {
+  BottomBar,
+  BulletList,
+  BulletListItem,
+  Button,
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  Haptic,
+  ListItem,
+  Typography,
+} from "@worldcoin/mini-apps-ui-kit-react";
 
 const guides = [
   {
@@ -80,45 +94,71 @@ export function AIGuideSheet({
   const activeGuide = guides.find((g) => g.id === active);
 
   return (
-    <div className="ai-guide-backdrop" role="dialog" aria-modal="true" aria-label="AI Guide">
-      <div className="ai-guide-sheet">
-        <div className="ai-guide-header">
-          <div>
-            <strong>HumanChain Guide</strong>
-            <span>{points} HP · {streak}d streak · Score {chainScore}</span>
-          </div>
-          <button aria-label="Close guide" onClick={onClose} type="button"><X size={20} /></button>
+    <Drawer open onOpenChange={(open) => { if (!open) onClose(); }} height="full">
+      <DrawerContent>
+        <DrawerHeader icon={<Sparkles size={20} />}>
+          <DrawerTitle>
+            {activeGuide ? activeGuide.title : "HumanChain Guide"}
+          </DrawerTitle>
+        </DrawerHeader>
+
+        <div className="ai-guide-body">
+          {!activeGuide ? (
+            <>
+              <div className="ai-guide-stats-row">
+                <span className="ai-guide-stat"><strong>{points}</strong><span>HP</span></span>
+                <span className="ai-guide-stat"><strong>{streak}d</strong><span>streak</span></span>
+                <span className="ai-guide-stat"><strong>{chainScore}</strong><span>score</span></span>
+              </div>
+              <Typography variant="body" level={2} className="ai-guide-intro">
+                Your personal guide for HumanChain. Tap any topic for real, actionable steps.
+              </Typography>
+              <div className="ai-guide-topics">
+                {guides.map((guide) => (
+                  <Haptic key={guide.id} variant="selection" asChild>
+                    <ListItem
+                      label={guide.title}
+                      description={`${guide.steps.length} steps`}
+                      startAdornment={<span className="ai-guide-topic-icon">{guide.icon}</span>}
+                      onClick={() => setActive(guide.id)}
+                    />
+                  </Haptic>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <Haptic variant="selection" asChild>
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => setActive(null)}
+                  type="button"
+                  className="ai-guide-back-btn"
+                >
+                  <ChevronLeft size={16} />
+                  Back to topics
+                </Button>
+              </Haptic>
+              <BulletList className="ai-guide-steps">
+                {activeGuide.steps.map((step, i) => (
+                  <BulletListItem key={i}>
+                    <Typography variant="body" level={2}>{step}</Typography>
+                  </BulletListItem>
+                ))}
+              </BulletList>
+            </>
+          )}
         </div>
 
-        {!activeGuide ? (
-          <div className="ai-guide-topics">
-            <p className="ai-guide-intro">Your personal guide for HumanChain. Tap any topic to read real, actionable steps.</p>
-            {guides.map((guide) => (
-              <button key={guide.id} className="ai-guide-topic-btn" onClick={() => setActive(guide.id)} type="button">
-                <span className="ai-guide-topic-icon">{guide.icon}</span>
-                <div>
-                  <strong>{guide.title}</strong>
-                  <span>{guide.steps.length} steps</span>
-                </div>
-                <span className="ai-guide-topic-arrow">›</span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="ai-guide-content">
-            <button className="ai-guide-back" onClick={() => setActive(null)} type="button">← Back to topics</button>
-            <div className="ai-guide-topic-header">
-              {activeGuide.icon}
-              <strong>{activeGuide.title}</strong>
-            </div>
-            <ol className="ai-guide-steps">
-              {activeGuide.steps.map((step, i) => (
-                <li key={i}><span>{i + 1}</span><p>{step}</p></li>
-              ))}
-            </ol>
-          </div>
-        )}
-      </div>
-    </div>
+        <BottomBar>
+          <Haptic variant="selection" asChild>
+            <Button variant="secondary" fullWidth onClick={onClose} type="button">
+              Close
+            </Button>
+          </Haptic>
+        </BottomBar>
+      </DrawerContent>
+    </Drawer>
   );
 }

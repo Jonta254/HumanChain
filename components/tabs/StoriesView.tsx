@@ -2,6 +2,7 @@
 
 import { BookOpen, Library, ShieldCheck, Upload, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button, Haptic, Spinner, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import {
   humanChainErrorStates,
   validateStoryFile,
@@ -1748,6 +1749,7 @@ export function StoriesView({
   const [activeUserStory, setActiveUserStory] = useState<UserStory | null>(null);
   const [page, setPage] = useState(0);
   const [liked, setLiked] = useState(false);
+  const { impact } = useHaptics();
   const [rating, setRating] = useState(0);
   const [featuredQuoteIdx, setFeaturedQuoteIdx] = useState(0);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState("All");
@@ -2619,9 +2621,11 @@ export function StoriesView({
             ) : fileDraft.fileText ? (
               <pre className="draft-text-preview">{fileDraft.fileText}</pre>
             ) : null}
-            <button className="primary-command" onClick={publishFileStory} type="button">
-              Publish file - 4 WLD
-            </button>
+            <Haptic variant="impact" type="medium" asChild>
+              <Button variant="primary" fullWidth onClick={() => { impact("medium"); publishFileStory(); }} type="button">
+                Publish file - 4 WLD
+              </Button>
+            </Haptic>
           </div>
           <div className="story-publish-panel">
             <strong>Free Short Story</strong>
@@ -2676,20 +2680,23 @@ export function StoriesView({
             <small className={microCharacters === 200 ? "exact-count ready" : "exact-count"}>
               {microCharacters}/200 characters
             </small>
-            <button
-              className="primary-command"
-              disabled={microCharacters !== 200 || !microDraft.coverImage}
-              onClick={publishMicroStory}
-              type="button"
-            >
-              {microCharacters === 200 && microDraft.coverImage
-                ? "Publish free story"
-                : microCharacters < 200
-                  ? `${200 - microCharacters} chars left`
-                  : !microDraft.coverImage
-                    ? "Add cover image first"
-                    : "Publish free story"}
-            </button>
+            <Haptic variant="impact" type="medium" asChild>
+              <Button
+                variant="primary"
+                fullWidth
+                disabled={microCharacters !== 200 || !microDraft.coverImage}
+                onClick={() => { impact("medium"); publishMicroStory(); }}
+                type="button"
+              >
+                {microCharacters === 200 && microDraft.coverImage
+                  ? "Publish free story"
+                  : microCharacters < 200
+                    ? `${200 - microCharacters} chars left`
+                    : !microDraft.coverImage
+                      ? "Add cover image first"
+                      : "Publish free story"}
+              </Button>
+            </Haptic>
           </div>
         </div>
       </section>

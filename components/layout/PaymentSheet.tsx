@@ -1,7 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, ShieldCheck, X, Zap } from "lucide-react";
+import { CheckCircle, ShieldCheck } from "lucide-react";
+import {
+  BottomBar,
+  Button,
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  Haptic,
+  Spinner,
+  Token,
+  Typography,
+} from "@worldcoin/mini-apps-ui-kit-react";
 import {
   humanChainPaymentTokens,
   isValidHumanChainPaymentAmount,
@@ -45,128 +57,135 @@ export function PaymentSheet({
     : `0 ${tokenLabel}`;
 
   return (
-    <div className="ps-backdrop" role="dialog" aria-modal="true" aria-label="Payment">
-      <div className="ps-sheet">
+    <Drawer
+      open
+      onOpenChange={(open) => { if (!open && !busy) onCancel(); }}
+      dismissible={!busy}
+    >
+      <DrawerContent>
+        <DrawerHeader icon={<Token value="WLD" size={32} />}>
+          <DrawerTitle>
+            {payment.title}
+          </DrawerTitle>
+        </DrawerHeader>
 
-        {/* Header */}
-        <div className="ps-header">
-          <div className="ps-header-left">
+        <div className="ps-body">
+          {/* Amount display */}
+          <div className="ps-amount-row">
+            <Typography variant="number" level={1} className="ps-amount-num">
+              {displayAmount}
+            </Typography>
             <span className="ps-world-badge">
-              <ShieldCheck size={13} />
+              <ShieldCheck size={12} />
               World App Pay
             </span>
-            <strong className="ps-amount">{displayAmount}</strong>
           </div>
-          <button
-            className="ps-close"
-            onClick={onCancel}
-            disabled={busy}
-            aria-label="Cancel payment"
-            type="button"
-          >
-            <X size={18} />
-          </button>
-        </div>
 
-        {/* Title */}
-        <p className="ps-title">{payment.title}</p>
-        {payment.detail ? <p className="ps-detail">{payment.detail}</p> : null}
-
-        {/* Custom amount input */}
-        {payment.allowCustomAmount && (
-          <label className="ps-amount-field">
-            <span>Amount (WLD)</span>
-            <div className="ps-amount-input-wrap">
-              <input
-                aria-label="Tip amount in WLD"
-                inputMode="decimal"
-                min={payment.minAmount ?? 0.1}
-                max={payment.maxAmount ?? 100}
-                onChange={(e) => setCustomAmount(e.target.value)}
-                placeholder="1.0"
-                step="0.1"
-                type="number"
-                value={customAmount}
-              />
-              <span className="ps-amount-unit">WLD</span>
-            </div>
-          </label>
-        )}
-
-        {/* Trust row */}
-        <div className="ps-trust-row">
-          <span><ShieldCheck size={12} />Backend verified</span>
-          <span>WLD only</span>
-          {payment.points ? (
-            <span className="ps-hp-badge"><Zap size={11} />+{payment.points} HP</span>
+          {payment.detail ? (
+            <Typography variant="body" level={2} className="ps-detail">
+              {payment.detail}
+            </Typography>
           ) : null}
-        </div>
 
-        {/* Confirming state */}
-        {busy && (
-          <div className="ps-confirming" role="status" aria-live="polite">
-            <div className="ps-confirm-ring" aria-hidden="true">
-              <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="22" cy="22" r="18" stroke="rgba(19,122,87,0.12)" strokeWidth="3.5" />
-                <circle cx="22" cy="22" r="18" stroke="var(--green)" strokeWidth="3.5"
-                  strokeLinecap="round" strokeDasharray="113" strokeDashoffset="28"
-                  className="ps-ring-arc" />
-              </svg>
-              <ShieldCheck size={16} className="ps-ring-icon" />
-            </div>
-            <div className="ps-confirm-body">
-              <strong className="ps-confirm-title">Verifying on World Chain</strong>
-              <p className="ps-confirm-note">Usually 10–30 seconds. Stay on this screen.</p>
-              <div className="ps-confirm-steps">
-                <span className="ps-cstep done"><CheckCircle size={11} />Payment sent</span>
-                <span className="ps-cstep-arrow">›</span>
-                <span className={`ps-cstep ${elapsed >= 2 ? "active" : "pending"}`}>
-                  <span className="ps-cstep-dot" />Verifying
-                </span>
-                <span className="ps-cstep-arrow">›</span>
-                <span className={`ps-cstep ${elapsed >= 20 ? "active" : "pending"}`}>
-                  <span className="ps-cstep-dot" />Unlocking
-                </span>
+          {/* Custom amount input */}
+          {payment.allowCustomAmount && (
+            <label className="ps-amount-field">
+              <Typography variant="label" level={2} as="span">Amount (WLD)</Typography>
+              <div className="ps-amount-input-wrap">
+                <input
+                  aria-label="Tip amount in WLD"
+                  inputMode="decimal"
+                  min={payment.minAmount ?? 0.1}
+                  max={payment.maxAmount ?? 100}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                  placeholder="1.0"
+                  step="0.1"
+                  type="number"
+                  value={customAmount}
+                />
+                <span className="ps-amount-unit">WLD</span>
               </div>
-              {elapsed >= 12 && elapsed < 65 && (
-                <p className="ps-confirm-patience">
-                  Still checking World Chain… can take up to 60s. Do not close.
-                </p>
-              )}
-              {elapsed >= 65 && (
-                <p className="ps-confirm-patience ps-confirm-patience-slow">
-                  Network is slow — still confirming. Your payment is safe. Hang tight.
-                </p>
-              )}
-              <span className="ps-confirm-elapsed">{elapsed}s</span>
-            </div>
-          </div>
-        )}
+            </label>
+          )}
 
-        {/* Actions */}
-        <div className="ps-actions">
-          <button
-            className="ps-cancel"
-            disabled={busy}
-            onClick={onCancel}
-            type="button"
-          >
-            Cancel
-          </button>
-          <button
-            className="ps-pay"
-            disabled={!amountValid || busy}
-            onClick={() => void onConfirm(amount)}
-            type="button"
-          >
-            {busy ? "Confirming…" : `Pay ${displayAmount}`}
-          </button>
+          {/* Trust row */}
+          <div className="ps-trust-row">
+            <span><ShieldCheck size={12} />Backend verified</span>
+            <span>WLD only</span>
+            {payment.points ? (
+              <span className="ps-hp-badge">+{payment.points} HP</span>
+            ) : null}
+          </div>
+
+          {/* Confirming state */}
+          {busy && (
+            <div className="ps-confirming" role="status" aria-live="polite">
+              <div className="ps-confirm-ring" aria-hidden="true">
+                <Spinner />
+              </div>
+              <div className="ps-confirm-body">
+                <Typography variant="subtitle" level={1} as="strong">
+                  Verifying on World Chain
+                </Typography>
+                <Typography variant="body" level={2} className="ps-confirm-note">
+                  Usually 10–30 seconds. Stay on this screen.
+                </Typography>
+                <div className="ps-confirm-steps">
+                  <span className="ps-cstep done"><CheckCircle size={11} />Payment sent</span>
+                  <span className="ps-cstep-arrow">›</span>
+                  <span className={`ps-cstep ${elapsed >= 2 ? "active" : "pending"}`}>
+                    <span className="ps-cstep-dot" />Verifying
+                  </span>
+                  <span className="ps-cstep-arrow">›</span>
+                  <span className={`ps-cstep ${elapsed >= 20 ? "active" : "pending"}`}>
+                    <span className="ps-cstep-dot" />Unlocking
+                  </span>
+                </div>
+                {elapsed >= 12 && elapsed < 65 && (
+                  <Typography variant="body" level={2} className="ps-confirm-patience">
+                    Still checking World Chain… can take up to 60s. Do not close.
+                  </Typography>
+                )}
+                {elapsed >= 65 && (
+                  <Typography variant="body" level={2} className="ps-confirm-patience ps-confirm-patience-slow">
+                    Network is slow — still confirming. Your payment is safe. Hang tight.
+                  </Typography>
+                )}
+                <span className="ps-confirm-elapsed">{elapsed}s</span>
+              </div>
+            </div>
+          )}
+
+          <Typography variant="body" level={2} className="ps-note">
+            World App opens for confirmation. HumanChain unlocks this only after backend verification.
+          </Typography>
         </div>
 
-        <p className="ps-note">
-          World App opens for confirmation. HumanChain unlocks this only after backend payment verification.
-        </p>
-      </div>
-    </div>
+        <BottomBar>
+          <Haptic variant="selection" asChild>
+            <Button
+              variant="secondary"
+              fullWidth
+              disabled={busy}
+              onClick={onCancel}
+              type="button"
+            >
+              Cancel
+            </Button>
+          </Haptic>
+          <Haptic variant="impact" type="medium" asChild>
+            <Button
+              variant="primary"
+              fullWidth
+              disabled={!amountValid || busy}
+              onClick={() => void onConfirm(amount)}
+              type="button"
+            >
+              {busy ? <Spinner /> : `Pay ${displayAmount}`}
+            </Button>
+          </Haptic>
+        </BottomBar>
+      </DrawerContent>
+    </Drawer>
   );
 }
