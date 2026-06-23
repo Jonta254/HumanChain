@@ -1,6 +1,7 @@
 "use client";
 
 import { BadgeCheck, Bell, CircleDollarSign, Radio, ShieldCheck } from "lucide-react";
+import { Button, Haptic, Spinner, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import type { AppLanguage } from "@/lib/data/languages";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 
@@ -24,6 +25,7 @@ export function LoginGate({
   worldContext: WorldMiniAppContext;
 }) {
   const gateCopy = appLanguage.gate;
+  const { impact, selection } = useHaptics();
 
   return (
     <div className="login-gate">
@@ -54,19 +56,36 @@ export function LoginGate({
               <strong>{gateCopy.notificationsAllowed}</strong>
               <span>{gateCopy.notificationsDetail}</span>
             </div>
-            <button onClick={onEnableNotifications} type="button">
-              {gateCopy.ready}
-            </button>
+            <Haptic variant="selection" asChild>
+              <Button variant="tertiary" size="sm" onClick={() => { selection(); void onEnableNotifications(); }} type="button">
+                {gateCopy.ready}
+              </Button>
+            </Haptic>
           </div>
         ) : null}
-        <button className="gate-primary" disabled={busy} onClick={onVerify} type="button">
-          <ShieldCheck size={19} />
-          {busy ? gateCopy.checkingWallet : gateCopy.continueWithWorld}
-        </button>
+        <Haptic variant="impact" type="medium" asChild>
+          <Button
+            variant="primary"
+            fullWidth
+            disabled={busy}
+            onClick={() => { impact("medium"); void onVerify(); }}
+            type="button"
+          >
+            {busy ? <Spinner /> : <ShieldCheck size={19} />}
+            {busy ? gateCopy.checkingWallet : gateCopy.continueWithWorld}
+          </Button>
+        </Haptic>
         {showPreview ? (
-          <button className="gate-secondary" onClick={onPreview} type="button">
-            {gateCopy.preview}
-          </button>
+          <Haptic variant="selection" asChild>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => { selection(); onPreview(); }}
+              type="button"
+            >
+              {gateCopy.preview}
+            </Button>
+          </Haptic>
         ) : null}
       </section>
       <section className="gate-trust-grid" aria-label={gateCopy.trustLabel}>

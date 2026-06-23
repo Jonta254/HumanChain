@@ -231,9 +231,16 @@ export function loadStoredHpLedger(): HpLedgerRecord[] {
   return loadJsonFromStorage<HpLedgerRecord[]>(storageKeys.hpLedger, []);
 }
 
+function detectLocaleLanguageCode(): string {
+  if (typeof navigator === "undefined") return appLanguages[0].code;
+  const preferred = (navigator.language ?? "en").slice(0, 2).toLowerCase();
+  const match = appLanguages.find((l) => l.code === preferred);
+  return match ? match.code : appLanguages[0].code;
+}
+
 export function loadStoredAppMemory(): AppMemory {
   const fallback: AppMemory = {
-    appLanguageCode: appLanguages[0].code,
+    appLanguageCode: detectLocaleLanguageCode(),
     dailyAnswered: false,
     dailyAnsweredAt: null,
     dailyAnsweredDate: null,

@@ -142,7 +142,7 @@ export function AIGuideSheet({
               </Haptic>
               <BulletList className="ai-guide-steps">
                 {activeGuide.steps.map((step, i) => (
-                  <BulletListItem key={i}>
+                  <BulletListItem key={i} bulletPoint={String(i + 1)}>
                     <Typography variant="body" level={2}>{step}</Typography>
                   </BulletListItem>
                 ))}

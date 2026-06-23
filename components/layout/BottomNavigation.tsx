@@ -23,7 +23,7 @@ export function BottomNavigation({
   onCreate: () => void;
 }) {
   return (
-    <BottomBar className="bottom-nav--hc" aria-label="Primary navigation">
+    <BottomBar aria-label="Primary navigation">
       <Tabs
         value={active}
         onValueChange={(v) => onChange(v as Tab)}
