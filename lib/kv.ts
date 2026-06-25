@@ -62,3 +62,15 @@ export async function kvSAdd(key: string, member: string, exSeconds?: number): P
   set.add(member);
   g._hcKvSets!.set(key, set);
 }
+
+// Atomic set-if-not-exists. Returns true if the key was set (first time), false if already existed.
+export async function kvSetNx(key: string, value: string, exSeconds: number): Promise<boolean> {
+  if (hasUpstash()) {
+    const result = await upstashCmd(["SET", key, value, "EX", exSeconds, "NX"]);
+    return result === "OK";
+  }
+  const entry = g._hcKvMem!.get(key);
+  if (entry && (!entry.exAt || Date.now() <= entry.exAt)) return false;
+  g._hcKvMem!.set(key, { value, exAt: Date.now() + exSeconds * 1000 });
+  return true;
+}

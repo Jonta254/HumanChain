@@ -46,15 +46,19 @@ export async function POST(req: NextRequest) {
     );
 
     if (!verification.isValid) {
-      return noStoreJson(
+      const failRes = noStoreJson(
         { ok: false, error: "Invalid wallet signature." },
         { status: 401 },
       );
+      failRes.cookies.delete("humanchain_siwe_nonce");
+      return failRes;
     }
 
     const rawAddress = verification.siweMessageData.address;
     if (!rawAddress) {
-      return noStoreJson({ ok: false, error: "Could not extract verified address." }, { status: 400 });
+      const failRes = noStoreJson({ ok: false, error: "Could not extract verified address." }, { status: 400 });
+      failRes.cookies.delete("humanchain_siwe_nonce");
+      return failRes;
     }
     const verifiedAddress = rawAddress.toLowerCase();
     const response = noStoreJson({
@@ -69,18 +73,20 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: "/",
-      sameSite: "lax",
+      sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
 
     return response;
   } catch (error) {
-    return noStoreJson(
+    const failRes = noStoreJson(
       {
         ok: false,
         error: error instanceof Error ? error.message : "Wallet auth failed.",
       },
       { status: 400 },
     );
+    failRes.cookies.delete("humanchain_siwe_nonce");
+    return failRes;
   }
 }

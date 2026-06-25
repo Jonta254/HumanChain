@@ -13,6 +13,9 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
+import { kvSet } from "@/lib/kv";
+
+const REFERENCE_TTL_SECONDS = 60 * 15; // 15 minutes
 
 export async function POST(req: NextRequest) {
   if (await isRateLimitedKV(req, "payment-reference", 20)) {
@@ -47,8 +50,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const reference = randomUUID();
+  // Store reference server-side so confirm-payment can validate it wasn't forged.
+  await kvSet(
+    `hc:ref:${reference}`,
+    JSON.stringify({ feature: normalizedFeature, amount, token: normalizedToken }),
+    REFERENCE_TTL_SECONDS,
+  );
+
   return noStoreJson({
-    reference: randomUUID(),
+    reference,
     feature: normalizedFeature,
     token: normalizedToken,
   });

@@ -15,9 +15,21 @@ export default function manifest(): MetadataRoute.Manifest {
     icons: [
       {
         src: "/images/humanchain-logo.png",
-        sizes: "1024x1024",
+        sizes: "192x192",
         type: "image/png",
         purpose: "any",
+      },
+      {
+        src: "/images/humanchain-logo.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/images/humanchain-logo.png",
+        sizes: "1024x1024",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

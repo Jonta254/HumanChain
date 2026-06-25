@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     httpOnly: true,
     maxAge: 60 * 10,
     path: "/",
-    sameSite: "lax",
+    sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
   });
 

@@ -1,16 +1,6 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function NotFound() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const t = setTimeout(() => router.replace("/"), 1500);
-    return () => clearTimeout(t);
-  }, [router]);
-
   return (
     <div
       style={{
@@ -21,7 +11,7 @@ export default function NotFound() {
         width: "100%",
         minHeight: "100dvh",
         background: "linear-gradient(180deg, #f7fbf9 0%, #eef4f1 100%)",
-        gap: "16px",
+        gap: "20px",
         textAlign: "center",
         padding: "24px",
       }}
@@ -32,8 +22,19 @@ export default function NotFound() {
         style={{ width: 56, height: 56, borderRadius: 16, objectFit: "cover" }}
       />
       <span style={{ fontSize: 15, fontWeight: 800, color: "#15201c" }}>
-        Returning to HumanChain…
+        Page not found
       </span>
+      <Link
+        href="/"
+        style={{
+          fontSize: 14,
+          color: "#137a57",
+          fontWeight: 600,
+          textDecoration: "underline",
+        }}
+      >
+        Return to HumanChain
+      </Link>
     </div>
   );
 }

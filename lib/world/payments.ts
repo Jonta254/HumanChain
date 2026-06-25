@@ -19,7 +19,7 @@ const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
 
 // WorldChain transactions typically mine in 3-8s, but can take 30-90s during congestion.
 // Poll aggressively early, then back off. Total window ~120s covers > 99% of cases.
-const worldPaymentConfirmationDelays = [0, 600, 1400, 2500, 4000, 6500, 10000, 15000, 20000, 28000, 38000];
+const worldPaymentConfirmationDelays = [600, 1400, 2500, 4000, 6500, 10000, 15000, 20000, 28000, 38000];
 
 function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));

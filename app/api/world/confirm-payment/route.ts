@@ -15,9 +15,9 @@ import {
   readJsonBody,
 } from "@/lib/serverApi";
 import { getHumanChainTreasury, getWorldAppId, getWorldDevPortalApiKey } from "@/lib/worldConfig";
-import { kvSAdd, kvSIsMember } from "@/lib/kv";
+import { kvGet, kvSetNx } from "@/lib/kv";
 
-const KV_TXN_KEY = "hc:confirmed-txns";
+const TXN_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 export async function POST(req: NextRequest) {
   if (await isRateLimitedKV(req, "confirm-payment", 20)) {
@@ -54,6 +54,15 @@ export async function POST(req: NextRequest) {
   ) {
     return noStoreJson(
       { error: "Missing payment confirmation data." },
+      { status: 400 },
+    );
+  }
+
+  // Validate reference was genuinely issued by our payment-reference endpoint.
+  const storedRef = await kvGet(`hc:ref:${reference}`);
+  if (!storedRef) {
+    return noStoreJson(
+      { ok: false, error: "Payment reference not found or expired." },
       { status: 400 },
     );
   }
@@ -123,9 +132,10 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ ok: false, pending: true });
   }
 
-  // Idempotency guard: if we already confirmed this transactionId, return ok immediately.
+  // Atomic idempotency: SET NX ensures only one request wins even under concurrent calls.
   const txId = payload.transactionId;
-  if (await kvSIsMember(KV_TXN_KEY, txId)) {
+  const isNew = await kvSetNx(`hc:txn:${txId}`, "1", TXN_TTL_SECONDS);
+  if (!isNew) {
     return noStoreJson({ ok: true, reference, feature: normalizedFeature, amount, token: normalizedToken });
   }
 
@@ -223,9 +233,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Record this transactionId as confirmed so replayed requests are idempotent.
-  await kvSAdd(KV_TXN_KEY, txId, 60 * 60 * 24 * 30); // 30-day TTL
-
+  // txn key was already set atomically above — no further write needed.
   return noStoreJson({
     ok: true,
     reference,

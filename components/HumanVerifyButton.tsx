@@ -74,9 +74,8 @@ export function HumanVerifyButton({
   function handleClick() {
     if (verificationReady) {
       setIsOpen(true);
-    } else {
-      onVerified?.();
     }
+    // When verificationReady is false, do nothing — never bypass World ID.
   }
 
   return (
@@ -87,7 +86,7 @@ export function HumanVerifyButton({
           fullWidth
           type="button"
           onClick={handleClick}
-          disabled={loading}
+          disabled={loading || !verificationReady}
         >
           {loading ? (
             <Spinner />
