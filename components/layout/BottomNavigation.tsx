@@ -23,6 +23,7 @@ export function BottomNavigation({
   onCreate: () => void;
 }) {
   return (
+    <div className="bottom-nav--hc">
     <BottomBar aria-label="Primary navigation">
       <Tabs
         value={active}
@@ -53,5 +54,6 @@ export function BottomNavigation({
         <TabItem value="market"  icon={<Store    size={22} />} label={appLanguage.nav.market} />
       </Tabs>
     </BottomBar>
+    </div>
   );
 }

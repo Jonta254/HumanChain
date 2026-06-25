@@ -1,4 +1,4 @@
-@import "@worldcoin/mini-apps-ui-kit-react/dist/globals.css";
+@import "@worldcoin/mini-apps-ui-kit-react/styles.css";
 
 :root {
   /* HumanChain Premium — near-white clarity + emerald brand + silver/diamond cards */
@@ -15095,7 +15095,7 @@ html[data-world-mini-app="true"] .bottom-nav {
 /* ════════════════════════════════════════════════════════════════════
    BOTTOM NAV — Home | Discover | (+ Create) | Reputation | Market
    ════════════════════════════════════════════════════════════════════ */
-.bottom-nav.bottom-nav--hc {
+.bottom-nav--hc {
   grid-template-columns: 1fr auto 1fr;
   align-items: end;
   gap: 6px;
@@ -18269,7 +18269,7 @@ a[href^="https"] {
    ════════════════════════════════════════════════════════════════════ */
 
 /* ── Container ─────────────────────────────────────────────────────── */
-.bottom-nav.bottom-nav--hc {
+.bottom-nav--hc {
   position: fixed;
   left: 50%;
   bottom: 0;
@@ -18288,7 +18288,7 @@ a[href^="https"] {
   overflow: visible;
 }
 
-html[data-world-mini-app="true"] .bottom-nav.bottom-nav--hc {
+html[data-world-mini-app="true"] .bottom-nav--hc {
   left: 10px;
   right: 10px;
   bottom: max(10px, var(--world-safe-bottom, 0px));
