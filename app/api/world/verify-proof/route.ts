@@ -72,12 +72,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const verifyBody = {
+    ...(idkitResponse as Record<string, unknown>),
+    action,
+    ...(signal ? { signal } : {}),
+  };
+
   const response = await fetch(
     `https://developer.world.org/api/v4/verify/${rpId}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(idkitResponse),
+      body: JSON.stringify(verifyBody),
     },
   );
 
@@ -87,7 +93,7 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ ok: false, payload }, { status: 400 });
   }
 
-  await kvSAdd(KV_NULLIFIER_KEY, nullifierHash);
+  await kvSAdd(KV_NULLIFIER_KEY, nullifierHash, 60 * 60 * 24 * 365); // 1-year TTL
 
   return noStoreJson({ ok: true, payload });
 }

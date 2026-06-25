@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import {
-  isRateLimited,
+  isRateLimitedKV,
   noStoreJson,
   rateLimitResponse,
   readJsonBody,
@@ -16,7 +16,7 @@ function isEthAddress(address: string) {
 }
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "world-user-profile", 30)) {
+  if (await isRateLimitedKV(req, "world-user-profile", 30)) {
     return rateLimitResponse();
   }
 

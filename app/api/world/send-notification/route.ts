@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import {
-  isRateLimited,
+  isRateLimitedKV,
   isSafeMiniAppPath,
   isWalletAddress,
   noStoreJson,
@@ -10,7 +10,7 @@ import {
 import { getWorldAppId } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "send-notification", 10)) {
+  if (await isRateLimitedKV(req, "send-notification", 10)) {
     return rateLimitResponse();
   }
 

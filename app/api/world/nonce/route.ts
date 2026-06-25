@@ -1,7 +1,10 @@
 import { randomBytes } from "crypto";
-import { noStoreJson } from "@/lib/serverApi";
+import { NextRequest } from "next/server";
+import { isRateLimitedKV, noStoreJson, rateLimitResponse } from "@/lib/serverApi";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (await isRateLimitedKV(req, "siwe-nonce", 20)) return rateLimitResponse();
+
   const nonce = randomBytes(16).toString("hex");
   const response = noStoreJson({ nonce });
 

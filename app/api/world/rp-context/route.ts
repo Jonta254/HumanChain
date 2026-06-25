@@ -1,9 +1,11 @@
 import { NextRequest } from "next/server";
 import { signRequest } from "@worldcoin/idkit/signing";
-import { noStoreJson } from "@/lib/serverApi";
+import { isRateLimitedKV, noStoreJson, rateLimitResponse } from "@/lib/serverApi";
 import { getWorldRpId } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
+  if (await isRateLimitedKV(req, "rp-context", 30)) return rateLimitResponse();
+
   const body = (await req.json().catch(() => null)) as {
     action?: string;
   } | null;

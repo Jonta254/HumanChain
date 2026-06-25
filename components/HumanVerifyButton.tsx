@@ -7,6 +7,7 @@ import {
   type IDKitResult,
   type RpContext,
 } from "@worldcoin/idkit";
+import { Button, Haptic, Spinner, VerificationBadge } from "@worldcoin/mini-apps-ui-kit-react";
 import { getWorldAppId } from "@/lib/worldConfig";
 
 type HumanVerifyButtonProps = {
@@ -28,6 +29,7 @@ export function HumanVerifyButton({
   const [isOpen, setIsOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [verificationReady, setVerificationReady] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -39,20 +41,17 @@ export function HumanVerifyButton({
     })
       .then((response) => response.json())
       .then((data: { ok?: boolean; rpContext?: RpContext }) => {
-        if (!isMounted) {
-          return;
-        }
-
+        if (!isMounted) return;
         setRpContext(data.rpContext ?? null);
         setVerificationReady(Boolean(data.ok && data.rpContext));
       })
       .catch(() => {
-        if (!isMounted) {
-          return;
-        }
-
+        if (!isMounted) return;
         setRpContext(null);
         setVerificationReady(false);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
       });
 
     return () => {
@@ -64,11 +63,7 @@ export function HumanVerifyButton({
     const response = await fetch("/api/world/verify-proof", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        idkitResponse: proof,
-        action,
-        signal,
-      }),
+      body: JSON.stringify({ idkitResponse: proof, action, signal }),
     });
 
     if (!response.ok) {
@@ -76,21 +71,37 @@ export function HumanVerifyButton({
     }
   }
 
+  function handleClick() {
+    if (verificationReady) {
+      setIsOpen(true);
+    } else {
+      onVerified?.();
+    }
+  }
+
   return (
     <>
-      <button
-        onClick={() => {
-          if (verificationReady) {
-            setIsOpen(true);
-            return;
-          }
+      <Haptic variant="impact" type="medium" asChild>
+        <Button
+          variant="primary"
+          fullWidth
+          type="button"
+          onClick={handleClick}
+          disabled={loading}
+        >
+          {loading ? (
+            <Spinner />
+          ) : verificationReady ? (
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <VerificationBadge verified />
+              {label}
+            </span>
+          ) : (
+            fallbackLabel
+          )}
+        </Button>
+      </Haptic>
 
-          onVerified?.();
-        }}
-        type="button"
-      >
-        {verificationReady ? label : fallbackLabel}
-      </button>
       {verificationReady && rpContext ? (
         <IDKitRequestWidget
           action={action}
