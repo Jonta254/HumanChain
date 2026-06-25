@@ -80,7 +80,7 @@ export function AskView({
   openPayment: OpenPayment;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
 }) {
-  const { impact, selection } = useHaptics();
+  const { impact } = useHaptics();
   const [question, setQuestion] = useState("");
   const [selectedMode, setSelectedMode] = useState("Text");
   const [selectedTopic, setSelectedTopic] = useState("Life");

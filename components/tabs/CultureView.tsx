@@ -729,7 +729,7 @@ export function CultureView({
               <span>{activeRoom.region}</span>
             </div>
           </div>
-          <p className="cv-rh-tagline">"{activeRoom.tagline}"</p>
+          <p className="cv-rh-tagline">&quot;{activeRoom.tagline}&quot;</p>
           <div className="cv-rh-stats">
             <span><Users size={12} />{(activeRoom.members / 1000).toFixed(1)}k members</span>
             <span><Star size={12} />{activeRoom.stories + myPosts.length} stories</span>

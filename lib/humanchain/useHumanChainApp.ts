@@ -167,17 +167,20 @@ export function useHumanChainApp() {
     const time = formatShortTime();
     const warnTitle = `${streak}-day streak at risk`;
     const warnDetail = "Answer today's HumanChain question before midnight to protect your chain.";
-    setNotifications((cur) => [{
-      id: Date.now(),
-      title: warnTitle,
-      detail: warnDetail,
-      sector: "daily" as const,
-      time,
-      read: false,
-    }, ...cur].slice(0, 60));
+    const t = setTimeout(() => {
+      setNotifications((cur) => [{
+        id: Date.now(),
+        title: warnTitle,
+        detail: warnDetail,
+        sector: "daily" as const,
+        time,
+        read: false,
+      }, ...cur].slice(0, 60));
+    }, 0);
     if (verifiedHuman?.wallet && verifiedHuman.mode === "world" && notificationReady) {
       void sendWorldUserNotification({ title: warnTitle, detail: warnDetail, sector: "daily", path: "/?tab=ask" });
     }
+    return () => clearTimeout(t);
   }, [streak, dailyAnswered]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Scroll to top on tab/auth change ──────────────────────────────────────

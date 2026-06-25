@@ -10,7 +10,6 @@ import {
   Info,
   LockKeyhole,
   MessageCircle,
-  Settings,
   Shield,
   ShieldCheck,
   Sparkles,

@@ -19,7 +19,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { Button, Haptic, Typography, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
+import { Button, Haptic, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import { getWorldMiniAppContext } from "@/lib/worldMiniApp";
 import { getDailyQuestion } from "@/lib/data/dailyQuestions";
 import { type AppLanguage } from "@/lib/data/languages";
@@ -28,7 +28,6 @@ import {
   getChainScore,
   getLocalDateKey,
   getPrimaryProfileImage,
-  getReputationHealth,
   getReputationTier,
   getWorldDisplayUsername,
   isVerifiedWorldHuman,
@@ -94,12 +93,7 @@ function getGreeting() {
   return "Good evening";
 }
 
-function formatJoinDate(iso: string | null): string {
-  if (!iso) return "Today";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "Today";
-  return d.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" });
-}
+
 
 // ---------------------------------------------------------------------------
 // Component
@@ -111,7 +105,6 @@ export function HomeView({
   dailyAnswered,
   earnPoints,
   humanPosts,
-  joinedAt,
   marketplaceListings,
   notificationReady,
   notificationUnreadCount,
@@ -136,7 +129,6 @@ export function HomeView({
   dailyAnswered: boolean;
   earnPoints: EarnPoints;
   humanPosts: HumanPost[];
-  joinedAt: string | null;
   marketplaceListings: MarketplaceListing[];
   notificationReady: boolean;
   notificationUnreadCount: number;
@@ -224,11 +216,9 @@ export function HomeView({
   const completedTrades = marketplaceListings.filter((l) => l.status === "sold").length;
   const chainScore = getChainScore({ points, streak, posts: userPostCount, savedItems });
   const tier = getReputationTier(chainScore);
-  const health = getReputationHealth(chainScore);
   const humanChainId = getHumanChainId(worldHandle);
   const strongestBadge = getStrongestBadge({ isVerified, streak, posts: userPostCount, trades: completedTrades });
   const greeting = getGreeting();
-  const joinLabel = formatJoinDate(joinedAt);
 
   const aiInsight = !isVerified
     ? "Verify with World ID to unlock your HumanChain reputation and start earning trust."

@@ -20,7 +20,6 @@ import {
   Star,
   Mic,
   Store,
-  Upload,
 } from "lucide-react";
 import {
   getNextMilestone,
@@ -43,7 +42,7 @@ import {
   getTrustPassportMetrics,
   getWorldDisplayUsername,
   isVerifiedWorldHuman,
-  isWorldUsernamePlaceholder,
+
 } from "@/lib/humanchain/utils";
 import { TopBar } from "@/components/layout/TopBar";
 import { Stat } from "@/components/ui/Stat";
@@ -148,7 +147,6 @@ export function MeView({
   historyRecords,
   hpLedger,
   humanPosts,
-  lastCheckInAt,
   lastCheckInDate,
   links,
   marketLocation,
@@ -175,7 +173,6 @@ export function MeView({
   historyRecords: HistoryRecord[];
   hpLedger: HpLedgerRecord[];
   humanPosts: HumanPost[];
-  lastCheckInAt: string | null;
   lastCheckInDate: string | null;
   links: ChainLink[];
   marketLocation: MarketLocationState;
@@ -218,14 +215,6 @@ export function MeView({
   const todayKey = getLocalDateKey();
   const checkedInToday = lastCheckInDate === todayKey;
   const worldProfileImage = verifiedHuman?.profilePictureUrl ?? worldContext.profilePictureUrl;
-  const identityLabel =
-    verifiedHuman?.mode === "world"
-      ? isWorldUsernamePlaceholder(displayUsername)
-        ? "World profile syncing"
-        : "World username verified"
-      : verifiedHuman?.wallet
-        ? "World profile syncing"
-        : "World account pending";
   const syncLabel =
     accountSyncStatus === "ready"
       ? "Cloud sync active"

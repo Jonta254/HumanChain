@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { HeartHandshake, PlusCircle, ShieldCheck, Star, Upload, Users } from "lucide-react";
 import { Button, Haptic, Spinner, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import { getDailyQuestion } from "@/lib/data/dailyQuestions";

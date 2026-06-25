@@ -305,7 +305,7 @@ export function CreateView({
             <div className="create-page-empty">
               <Search size={26} />
               <strong>No actions match</strong>
-              <p>Try "moment", "job", "story", or "ask".</p>
+              <p>Try &quot;moment&quot;, &quot;job&quot;, &quot;story&quot;, or &quot;ask&quot;.</p>
             </div>
           )}
         </div>

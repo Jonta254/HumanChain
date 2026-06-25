@@ -29,7 +29,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
   const {
     accountSyncStatus, activeField, appLanguage, chainEntryNonce,
     dailyAnswered, earnPoints, feedRefreshNonce,
-    gateBusy, historyRecords, hpLedger, humanPosts, joinedAt, lastCheckInAt, lastCheckInDate,
+    gateBusy, historyRecords, hpLedger, humanPosts, lastCheckInDate,
     links, marketLocation, marketplaceListings, notificationCenterOpen,
     notificationPromptDismissed, notificationReady, notifications,
     paymentBusy, paymentPrompt, paymentToken, points, profileImage,
@@ -217,7 +217,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             openPayment={openPayment}
             points={points}
             profileImage={profileImage}
-            lastCheckInAt={lastCheckInAt}
             lastCheckInDate={lastCheckInDate}
             recordHistory={recordHistory}
             referralShareCount={referralShareCount}
@@ -266,7 +265,6 @@ export function HumanChainRoot(props: HumanChainAppState) {
             dailyAnswered={dailyAnswered}
             earnPoints={earnPoints}
             humanPosts={humanPosts}
-            joinedAt={joinedAt}
             marketplaceListings={marketplaceListings}
             notificationReady={notificationReady}
             notificationUnreadCount={unreadNotificationCount}

@@ -2,7 +2,7 @@
 
 import { BookOpen, Library, ShieldCheck, Upload, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button, Haptic, Spinner, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
+import { Button, Haptic, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import {
   humanChainErrorStates,
   validateStoryFile,
@@ -2134,7 +2134,7 @@ export function StoriesView({
               <div className="reader-end-card">
                 <div className="reader-end-icon">✦</div>
                 <h3 className="reader-end-title">Story Complete</h3>
-                <p className="reader-end-desc">You read all of "{activeTitle}". If it moved you, leave a tip for the author.</p>
+                <p className="reader-end-desc">You read all of &quot;{activeTitle}&quot;. If it moved you, leave a tip for the author.</p>
               </div>
               {(() => {
                 const bmKey = `bm:${activePublishedStory ?? "monthly"}`;
@@ -2304,7 +2304,7 @@ export function StoriesView({
       <section className="story-quote-hero">
         <span className="story-quote-kicker">Human line of the moment</span>
         <blockquote className="story-quote-text" key={featuredQuoteIdx}>
-          "{featuredQuotes[featuredQuoteIdx].text}"
+          &quot;{featuredQuotes[featuredQuoteIdx].text}&quot;
         </blockquote>
         <cite className="story-quote-cite">— {featuredQuotes[featuredQuoteIdx].story}</cite>
         <div className="story-quote-dots">
@@ -2411,7 +2411,7 @@ export function StoriesView({
               </div>
               <span className="cv-voice-cat">{voice.category}</span>
             </div>
-            <p className="cv-voice-text">"{voice.text}"</p>
+            <p className="cv-voice-text">&quot;{voice.text}&quot;</p>
             <div className="cv-voice-actions">
               <button
                 className={likedVoices.has(voice.id) ? "cv-voice-liked" : ""}

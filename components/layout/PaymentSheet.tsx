@@ -41,7 +41,10 @@ export function PaymentSheet({
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    if (!busy) { setElapsed(0); return; }
+    if (!busy) {
+      const t = setTimeout(() => setElapsed(0), 0);
+      return () => clearTimeout(t);
+    }
     const id = setInterval(() => setElapsed((s) => s + 1), 1000);
     return () => clearInterval(id);
   }, [busy]);

@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     return noStoreJson({ error: "Provide a question and at least one answer." }, { status: 400 });
   }
 
-  const { question, answers, feature, storyTitle } = body;
+  const { question, answers, storyTitle } = body;
   const capped = (answers ?? []).slice(0, 30);
 
   const apiKey = process.env.ANTHROPIC_API_KEY;

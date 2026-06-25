@@ -36,7 +36,7 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
-import { Button, Haptic, Spinner, Typography, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
+import { Button, Haptic, Spinner } from "@worldcoin/mini-apps-ui-kit-react";
 import {
   chatWithWorld,
   getWorldMiniAppContext,
