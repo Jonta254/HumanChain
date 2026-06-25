@@ -876,6 +876,104 @@ button:active {
   }
 }
 
+/* ── 12 · LEGAL SHEET ────────────────────────────────────────────────────── */
+.legal-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--premium-bg, #f4f8f6);
+  display: flex;
+  flex-direction: column;
+  animation: hcFadeSlide 0.18s var(--ease) both;
+  overflow: hidden;
+}
+.legal-sheet-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+.legal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(248,252,250,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(19,122,87,0.1);
+  flex-shrink: 0;
+}
+.legal-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--green, #137a57);
+  font-size: 0.86rem;
+  font-weight: 900;
+  padding: 8px 2px;
+  min-height: 44px;
+}
+.legal-back-btn:active { opacity: 0.6; transform: scale(0.97) !important; }
+.legal-header-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--ink, #15201c);
+  margin: 0 auto;
+  padding-right: 60px;
+}
+.legal-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 20px 18px 0;
+  scrollbar-width: none;
+}
+.legal-body::-webkit-scrollbar { display: none; }
+.legal-h1 {
+  font-size: 1.5rem;
+  font-weight: 950;
+  color: var(--ink, #15201c);
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+.legal-h2 {
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: var(--ink, #15201c);
+  margin: 20px 0 6px;
+  letter-spacing: -0.01em;
+}
+.legal-section { margin-bottom: 4px; }
+.legal-p {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #3a4a44;
+  line-height: 1.62;
+  margin: 0 0 10px;
+}
+.legal-ul {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+.legal-ul li {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #3a4a44;
+  line-height: 1.5;
+  padding-left: 4px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    END MODERNIZATION
    ═══════════════════════════════════════════════════════════════════════ */

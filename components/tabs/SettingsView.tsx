@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import {
   BadgeCheck,
@@ -10,6 +11,7 @@ import {
   Info,
   LockKeyhole,
   MessageCircle,
+  ScrollText,
   Shield,
   ShieldCheck,
   Sparkles,
@@ -17,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import { AppSettingsBar } from "@/components/layout/AppSettingsBar";
+import { LegalSheet } from "@/components/layout/LegalSheet";
 import { SafetyCenter } from "@/components/tabs/SafetyCenter";
 import { TopBar } from "@/components/layout/TopBar";
 import { humanHaptic } from "@/lib/world/haptics";
@@ -52,8 +55,11 @@ export function SettingsView({
   setTab: Dispatch<SetStateAction<Tab>>;
   worldContext: WorldMiniAppContext;
 }) {
+  const [legalDoc, setLegalDoc] = useState<"terms" | "privacy" | null>(null);
+
   return (
     <div className="screen settings-screen">
+      {legalDoc && <LegalSheet doc={legalDoc} onClose={() => setLegalDoc(null)} />}
       <TopBar title="Settings" subtitle="Controls, privacy, and World integration" />
 
       {/* ── App controls ──────────────────────────────────── */}
@@ -237,6 +243,35 @@ export function SettingsView({
               <span className="sv-row-sub">Available on every post and answer</span>
             </div>
             <MessageCircle size={14} color="#d63a4a" />
+          </button>
+        </div>
+      </section>
+
+      {/* ── Legal ─────────────────────────────────────────── */}
+      <section className="panel sv-panel">
+        <div className="sv-section-head"><ScrollText size={16} /><strong>Legal</strong></div>
+        <div className="sv-rows">
+          <button
+            className="sv-row"
+            onClick={async () => { await humanHaptic("light"); setLegalDoc("terms"); }}
+            type="button"
+          >
+            <div className="sv-row-left">
+              <span className="sv-row-label">Terms of Use</span>
+              <span className="sv-row-sub">Rules, payments, and your rights</span>
+            </div>
+            <ChevronRight size={15} className="sv-chevron" />
+          </button>
+          <button
+            className="sv-row"
+            onClick={async () => { await humanHaptic("light"); setLegalDoc("privacy"); }}
+            type="button"
+          >
+            <div className="sv-row-left">
+              <span className="sv-row-label">Privacy Policy</span>
+              <span className="sv-row-sub">What we collect, store, and never sell</span>
+            </div>
+            <ChevronRight size={15} className="sv-chevron" />
           </button>
         </div>
       </section>
