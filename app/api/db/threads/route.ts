@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
+import { isRateLimited, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
 
 export async function GET() {
   try {
@@ -17,14 +18,16 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (isRateLimited(req, "db-threads-post", 10)) return rateLimitResponse();
+
   try {
     const { question, author_wallet, author_username } = await req.json() as {
       question: string;
       author_wallet: string;
       author_username: string;
     };
-    if (!question || !author_wallet)
-      return NextResponse.json({ error: "question and author_wallet required" }, { status: 400 });
+    if (!question || !author_wallet || !isWalletAddress(author_wallet))
+      return NextResponse.json({ error: "question and valid author_wallet required" }, { status: 400 });
 
     const db = createServiceClient();
     const { data, error } = await db

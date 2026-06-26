@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
+import { isRateLimited, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,6 +20,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (isRateLimited(req, "db-marketplace-post", 10)) return rateLimitResponse();
+
   try {
     const body = await req.json() as {
       title: string;
@@ -30,8 +33,8 @@ export async function POST(req: NextRequest) {
       seller_username: string;
       location?: string;
     };
-    if (!body.title || !body.seller_wallet)
-      return NextResponse.json({ error: "title and seller_wallet required" }, { status: 400 });
+    if (!body.title || !body.seller_wallet || !isWalletAddress(body.seller_wallet))
+      return NextResponse.json({ error: "title and valid seller_wallet required" }, { status: 400 });
 
     const db = createServiceClient();
     const { data, error } = await db
