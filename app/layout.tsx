@@ -8,20 +8,41 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  applicationName: "HumanChain",
-  title: "HumanChain",
+  applicationName: "Josiah - Raw Signal",
+  title: {
+    default: "Josiah - Raw Signal",
+    template: "%s | Raw Signal",
+  },
   description:
-    "Ask real humans, post moments, trade nearby, and read stories — verified by World ID.",
+    "A cinematic digital portfolio for Josiah: electrician, developer, designer, and builder of systems connecting circuits, code, and people.",
+  keywords: [
+    "Josiah",
+    "Raw Signal",
+    "electrician",
+    "developer",
+    "designer",
+    "portfolio",
+    "web apps",
+    "design systems",
+  ],
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/images/humanchain-logo.png",
-    apple: "/images/humanchain-logo.png",
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
   },
   openGraph: {
-    title: "HumanChain",
+    type: "website",
+    title: "Josiah - Raw Signal",
     description:
-      "A verified human network for wisdom, stories, marketplace listings, and nearby commerce inside World App.",
-    images: ["/images/story-cover-door-color.png"],
+      "I wire things - circuits, code, and connections. Explore Josiah's Raw Signal portfolio, work, writing, and systems thinking.",
+    images: ["/world-assets/verdex/verdex-showcase-1-markets-1080x1080.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Josiah - Raw Signal",
+    description:
+      "A digital operating system for circuits, code, design craft, nature, and human connection.",
+    images: ["/world-assets/verdex/verdex-showcase-1-markets-1080x1080.png"],
   },
 };
 
@@ -31,7 +52,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#fbf7ef",
+  themeColor: "#050608",
 };
 
 export default function RootLayout({
