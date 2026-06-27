@@ -7,7 +7,8 @@ import {
   type IDKitResult,
   type RpContext,
 } from "@worldcoin/idkit";
-import { getWorldAppId } from "@/lib/worldConfig";
+import { recordWorldHumanProofEvent } from "@/lib/humanchain/worldSession";
+import { getPublicWorldAppId } from "@/lib/worldConfig";
 
 type HumanVerifyButtonProps = {
   action: string;
@@ -24,7 +25,7 @@ export function HumanVerifyButton({
   label,
   onVerified,
 }: HumanVerifyButtonProps) {
-  const appId = getWorldAppId() as `app_${string}`;
+  const appId = getPublicWorldAppId() as `app_${string}`;
   const [isOpen, setIsOpen] = useState(false);
   const [rpContext, setRpContext] = useState<RpContext | null>(null);
   const [verificationReady, setVerificationReady] = useState(false);
@@ -74,6 +75,8 @@ export function HumanVerifyButton({
     if (!response.ok) {
       throw new Error("Human verification failed.");
     }
+
+    recordWorldHumanProofEvent({ action, signal });
   }
 
   return (

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { signRequest } from "@worldcoin/idkit/signing";
 import { noStoreJson } from "@/lib/serverApi";
-import { getWorldRpId } from "@/lib/worldConfig";
+import { getWorldRpId, getWorldRpSigningKey } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as {
@@ -14,8 +14,9 @@ export async function POST(req: NextRequest) {
   }
 
   const rpId = getWorldRpId();
+  const signingKey = getWorldRpSigningKey();
 
-  if (!rpId || !process.env.RP_SIGNING_KEY) {
+  if (!rpId || !signingKey) {
     return noStoreJson(
       {
         ok: false,
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   const { createdAt, expiresAt, nonce, sig } = signRequest({
     action,
-    signingKeyHex: process.env.RP_SIGNING_KEY,
+    signingKeyHex: signingKey,
   });
 
   return noStoreJson({

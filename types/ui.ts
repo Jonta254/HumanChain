@@ -29,7 +29,10 @@ export type PaymentRequest = {
   minAmount?: number;
   success: string;
   feature?: string;
-  onConfirmed?: (amount: number) => void | Promise<void>;
+  onConfirmed?: (
+    amount: number,
+    receipt?: { paymentReference?: string; transactionId?: string },
+  ) => void | Promise<void>;
   points?: number;
 };
 

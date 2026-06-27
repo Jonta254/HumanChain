@@ -7,6 +7,7 @@ import { initialLinks } from "@/lib/data/chains";
 import { marketplaceItems } from "@/lib/data/marketplace";
 import { loadJsonFromStorage, storageKeys } from "@/lib/humanchain/storage";
 import { getLocalDateKey, normalizeWorldUsername } from "@/lib/humanchain/utils";
+import { loadVerifiedHumanFromSession } from "@/lib/humanchain/worldSession";
 import {
   getWorldMiniAppContext,
   getWorldUserByAddress,
@@ -243,6 +244,13 @@ export function loadStoredAppMemory(): AppMemory {
     verifiedHuman: null,
   };
   const stored = loadJsonFromStorage<Partial<AppMemory>>(storageKeys.appMemory, fallback);
+  const worldContext = getWorldMiniAppContext();
+  const restoredWorldHuman = loadVerifiedHumanFromSession(worldContext);
+  const legacyWalletAuthHuman =
+    stored.verifiedHuman?.mode === "world" &&
+    stored.verifiedHuman.verificationSource === "wallet-auth"
+      ? stored.verifiedHuman
+      : null;
   return {
     ...fallback,
     ...stored,
@@ -251,6 +259,6 @@ export function loadStoredAppMemory(): AppMemory {
     dailyAnsweredDate: stored.dailyAnsweredDate === getLocalDateKey() ? stored.dailyAnsweredDate : null,
     marketLocation: stored.marketLocation ?? fallback.marketLocation,
     notificationWelcomeSent: Boolean(stored.notificationWelcomeSent),
-    verifiedHuman: stored.verifiedHuman ?? fallback.verifiedHuman,
+    verifiedHuman: restoredWorldHuman ?? legacyWalletAuthHuman ?? fallback.verifiedHuman,
   };
 }

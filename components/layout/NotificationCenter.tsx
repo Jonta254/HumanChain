@@ -27,7 +27,7 @@ export function NotificationCenter({
             <p>
               {notificationReady
                 ? "World App notification permission is connected for HumanChain mini-app alerts."
-                : "Enable World App notifications for inbox, marketplace, payment, story, and account alerts."}
+                : "Enable World App notifications for Ask replies, chain reactions, payments, stories, and account alerts."}
             </p>
           </div>
           <button onClick={onClose} type="button">

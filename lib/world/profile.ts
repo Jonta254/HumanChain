@@ -40,6 +40,37 @@ export function normalizeWorldUserProfile(profile: RawWorldUserProfile): WorldUs
   };
 }
 
+function hasWorldProfileData(profile: WorldUserProfile | null | undefined) {
+  return Boolean(profile?.username || profile?.profilePictureUrl || profile?.walletAddress);
+}
+
+function mergeWorldUserProfiles(
+  ...profiles: Array<WorldUserProfile | null | undefined>
+): WorldUserProfile | null {
+  const merged = profiles.reduce<WorldUserProfile>((current, profile) => ({
+    profilePictureUrl: current.profilePictureUrl ?? profile?.profilePictureUrl,
+    username: current.username ?? profile?.username,
+    walletAddress: current.walletAddress ?? profile?.walletAddress,
+  }), {});
+
+  return hasWorldProfileData(merged) ? merged : null;
+}
+
+function getCurrentMiniKitUserProfile(address?: string): WorldUserProfile | null {
+  const context = getWorldMiniAppContext();
+  const contextWallet = context.walletAddress;
+
+  if (address && contextWallet && contextWallet.toLowerCase() !== address.toLowerCase()) {
+    return null;
+  }
+
+  return mergeWorldUserProfiles({
+    profilePictureUrl: context.profilePictureUrl,
+    username: context.username,
+    walletAddress: contextWallet ?? address,
+  });
+}
+
 export async function getWorldUserByAddress(
   address?: string,
 ): Promise<WorldUserProfile | null> {
@@ -71,15 +102,47 @@ export async function getWorldUserByAddress(
 }
 
 async function resolveWorldUserByAddress(address: string) {
-  const fromMiniKit = await MiniKit.getUserByAddress(address)
+  const fromCurrentUser = getCurrentMiniKitUserProfile(address);
+  const fromMiniKitAddress = await MiniKit.getUserByAddress(address)
     .then((profile) => normalizeWorldUserProfile(profile))
     .catch(() => null);
 
-  if (fromMiniKit?.username) {
-    return fromMiniKit;
+  const username = fromMiniKitAddress?.username ?? fromCurrentUser?.username;
+  const fromMiniKitUsername = username
+    ? await getWorldUserByUsername(username).catch(() => null)
+    : null;
+  const fromUsernamesApi = await fetchWorldUserProfileByAddress(address);
+
+  return mergeWorldUserProfiles(
+    fromCurrentUser,
+    fromMiniKitAddress,
+    fromMiniKitUsername,
+    fromUsernamesApi,
+  );
+}
+
+export async function getWorldUserByUsername(username?: string): Promise<WorldUserProfile | null> {
+  const normalizedUsername = username?.trim().replace(/^@+/, "");
+
+  if (!normalizedUsername) {
+    return null;
   }
 
-  const fromHumanChainApi = await fetch("/api/world/user-profile", {
+  const miniKitWithUsernameLookup = MiniKit as unknown as {
+    getUserByUsername?: (input: string) => Promise<RawWorldUserProfile>;
+  };
+
+  if (!miniKitWithUsernameLookup.getUserByUsername) {
+    return null;
+  }
+
+  return miniKitWithUsernameLookup.getUserByUsername(normalizedUsername)
+    .then((profile) => normalizeWorldUserProfile(profile))
+    .catch(() => null);
+}
+
+async function fetchWorldUserProfileByAddress(address: string) {
+  return fetch("/api/world/user-profile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ address }),
@@ -96,8 +159,6 @@ async function resolveWorldUserByAddress(address: string) {
       return normalizeWorldUserProfile(payload.profile);
     })
     .catch(() => null);
-
-  return fromHumanChainApi?.username ? fromHumanChainApi : fromMiniKit;
 }
 
 export async function requestWorldPermission(permission: Permission) {
@@ -117,7 +178,7 @@ export async function requestWorldPermission(permission: Permission) {
     permission,
     fallback: () => ({
       permission,
-      status: "success",
+      status: "unavailable",
       version: 1,
       timestamp: new Date().toISOString(),
     }),
@@ -161,5 +222,13 @@ export async function getWorldPermissions() {
     };
   }
 
-  return miniKitWithPermissions.getPermissions({});
+  return miniKitWithPermissions.getPermissions({}).catch(() => ({
+    executedWith: "fallback",
+    data: {
+      permissions: getWorldMiniAppContext().permissions ?? {},
+      status: "unavailable",
+      timestamp: new Date().toISOString(),
+      version: 1,
+    },
+  }));
 }

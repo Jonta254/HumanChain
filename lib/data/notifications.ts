@@ -21,11 +21,11 @@ export const firstRunNotifications: NotificationItem[] = [
   },
   {
     id: 103,
-    title: "Marketplace alerts",
+    title: "Chain and story alerts",
     detail:
-      "Bids, holds, accepted offers, boosts, listing expiry, and receipt updates use marketplace notifications.",
+      "Chain reactions, tips, story unlocks, saved verdicts, and useful reply updates belong here.",
     time: "Now",
-    sector: "marketplace",
+    sector: "daily",
     read: false,
   },
   {

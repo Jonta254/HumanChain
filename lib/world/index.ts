@@ -5,6 +5,7 @@ export { humanHaptic } from "./haptics";
 export {
   getWorldPermissions,
   getWorldUserByAddress,
+  getWorldUserByUsername,
   normalizeWorldUserProfile,
   requestWorldPermission,
 } from "./profile";

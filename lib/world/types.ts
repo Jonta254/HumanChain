@@ -6,6 +6,7 @@ export type WorldPaymentInput = {
   amount: number;
   description: string;
   feature: string;
+  onStatus?: (status: WorldPaymentStatus) => void;
   token?: HumanChainPaymentToken;
 };
 
@@ -19,6 +20,15 @@ export type WorldPaymentConfirmation = {
     status?: string;
   };
 };
+
+export type WorldPaymentStatus =
+  | "preparing"
+  | "opening-world-app"
+  | "submitted"
+  | "verifying"
+  | "confirmed"
+  | "pending"
+  | "failed";
 
 export type WorldShareInput = {
   text: string;
@@ -49,6 +59,11 @@ export type WorldMiniAppContext = {
     right: number;
     top: number;
   };
+  verificationStatus?: {
+    isDocumentVerified?: boolean;
+    isOrbVerified?: boolean;
+    isSecureDocumentVerified?: boolean;
+  };
   username?: string;
   walletAddress?: string;
   worldAppVersion?: number;
@@ -73,6 +88,11 @@ export type RawWorldAppContext = {
     right: number;
     top: number;
   };
+  verification_status?: {
+    is_document_verified?: boolean;
+    is_orb_verified?: boolean;
+    is_secure_document_verified?: boolean;
+  };
   wallet_address?: string;
   world_app_version?: number;
 };
@@ -83,6 +103,16 @@ export type RawMiniKitUser = {
   permissions?: WorldPermissionSnapshot;
   profilePictureUrl?: string;
   profile_picture_url?: string;
+  verificationStatus?: {
+    isDocumentVerified?: boolean;
+    isOrbVerified?: boolean;
+    isSecureDocumentVerified?: boolean;
+  };
+  verification_status?: {
+    is_document_verified?: boolean;
+    is_orb_verified?: boolean;
+    is_secure_document_verified?: boolean;
+  };
   username?: string;
   walletAddress?: string;
   wallet_address?: string;

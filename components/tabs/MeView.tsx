@@ -16,7 +16,6 @@ import {
   Share2,
   ShieldCheck,
   Star,
-  Store,
   Upload,
   Wallet,
 } from "lucide-react";
@@ -43,7 +42,7 @@ import {
 import { TopBar } from "@/components/layout/TopBar";
 import { Stat } from "@/components/ui/Stat";
 import type { WorldMiniAppContext } from "@/lib/world/types";
-import type { MarketplaceListing, MarketLocationState } from "@/types/market";
+import type { MarketplaceListing } from "@/types/market";
 import type { HumanPost } from "@/types/content";
 import type { HistoryRecord, HpLedgerRecord } from "@/types/reputation";
 import type { OpenPayment, EarnPoints, Tab } from "@/types/ui";
@@ -111,7 +110,7 @@ const profileBadges = [
   "Chain keeper",
   "Story reader",
   "Answer helper",
-  "Market seller",
+  "Verdict builder",
 ];
 
 const pointRules = [
@@ -121,8 +120,8 @@ const pointRules = [
   ["Ask a useful question", "+20 HP"],
   ["Add a chain link", "+12 HP"],
   ["Publish image post", "+16 HP"],
-  ["Store marketplace listing", "+10 HP"],
-  ["Enable nearby market", "+5 HP"],
+  ["Save a verdict", "+5 HP"],
+  ["Invite a human", "+25 HP"],
   ["React to image post", "+5 HP"],
   ["Enter a field", "+6 HP"],
   ["Copy field quote", "+3 HP"],
@@ -146,7 +145,6 @@ export function MeView({
   lastCheckInAt,
   lastCheckInDate,
   links,
-  marketLocation,
   marketplaceListings,
   onCheckIn,
   openPayment,
@@ -173,7 +171,6 @@ export function MeView({
   lastCheckInAt: string | null;
   lastCheckInDate: string | null;
   links: ChainLink[];
-  marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
   onCheckIn: () => void;
   openPayment: OpenPayment;
@@ -297,7 +294,7 @@ export function MeView({
         <div>
           <span className="section-kicker">Verified Human Passport</span>
           <h2>{displayUsername}</h2>
-          <p>{identityLabel}. {syncLabel}. Trust score, HP records, market activity, and mini-app notification status stay together here.</p>
+          <p>{identityLabel}. {syncLabel}. Trust score, HP records, saved verdicts, story activity, and notification status stay together here.</p>
         </div>
         <button
           disabled={checkedInToday}
@@ -346,7 +343,7 @@ export function MeView({
           "Growth Analytics",
           "Achievements",
           "Communities",
-          "Marketplace",
+          "Human Vault",
           "Activity",
         ].map((section) => (
           <button
@@ -420,7 +417,7 @@ export function MeView({
             ))}
           </div>
         ) : (
-          <p>Check in, answer, post, trade, or confirm a WLD action to create your first HP record.</p>
+          <p>Check in, answer, post, read, invite, or confirm a WLD action to create your first HP record.</p>
         )}
       </section>
       <ReferralCard
@@ -452,12 +449,12 @@ export function MeView({
           <span><strong>{passportMetrics.verification}</strong>Verification</span>
           <span><strong>{passportMetrics.tenure}</strong>Tenure</span>
           <span><strong>{passportMetrics.helpfulScore}</strong>Helpfulness</span>
-          <span><strong>{passportMetrics.completedTrades}</strong>Completed trades</span>
-          <span><strong>{passportMetrics.disputeRate}</strong>Dispute rate</span>
+          <span><strong>{savedItems}</strong>Saved items</span>
+          <span><strong>{historyRecords.length}</strong>Activity records</span>
           <span><strong>{passportMetrics.moderationState}</strong>Moderation</span>
         </div>
         <p>
-          Wallet addresses stay out of primary public UI. HumanChain shows World usernames, coarse area, helpfulness, trade completion, and moderation state instead.
+          Wallet addresses stay out of primary public UI. HumanChain shows World usernames, helpfulness, saved human value, activity records, and moderation state instead.
         </p>
       </section>
       <section className="panel human-history-panel">
@@ -488,55 +485,25 @@ export function MeView({
       </section>
       <section className="panel human-history-panel">
         <div className="section-heading">
-          <span>Marketplace vault</span>
-          <Store size={18} />
+          <span>Premium Human Vault</span>
+          <Wallet size={18} />
         </div>
-        <article className="market-vault-row">
-          <div>
-            <strong>Nearby market location</strong>
-            <span>{marketLocation.label}</span>
-            <small>
-              {marketLocation.status === "ready"
-                ? `Active by ${marketLocation.source === "browser-gps" ? "GPS consent" : "manual area"}`
-                : "Not active yet. Open Market and tap GPS or use area."}
-            </small>
-          </div>
-          <button onClick={() => act("Nearby market", marketLocation.label)} type="button">
-            View
+        {[
+          ["Deep Human Mirror", "Private profile reflection from check-ins, questions, stories, and chain signals."],
+          ["Saved Verdicts", `${savedItems} saved item${savedItems === 1 ? "" : "s"} ready for review.`],
+          ["Story Reflections", "Deep Story Reflection unlocks and reading notes stay here."],
+          ["Voice Signals", "Voice questions and answers become part of your human identity."],
+        ].map(([title, detail]) => (
+          <button
+            className="library-row"
+            key={title}
+            onClick={() => act(title, detail)}
+            type="button"
+          >
+            <strong>{title}</strong>
+            <span>{detail}</span>
           </button>
-        </article>
-        {marketplaceListings.length ? (
-          marketplaceListings.slice(0, 5).map((listing) => (
-            <article className="market-vault-row" key={listing.id}>
-              <div>
-                <strong>{listing.title}</strong>
-                <span>
-                  {listing.price} - {listing.condition} - {listing.photos.length} photos
-                </span>
-                <small>{listing.area} - {listing.status}</small>
-                <small>
-                  {listing.saleMode === "bidding"
-                    ? `Bid window ${listing.duration}, floor ${listing.bidFloor || "not set"}`
-                    : "Direct inbox/chat sale"}
-                </small>
-                <small>{listing.dataStorageStatus === "cloud-safe" ? "Safe data receipt attached" : "Saved locally until backend receipt is available"}</small>
-              </div>
-              <button
-                onClick={() =>
-                  act(
-                    "Marketplace listing opened",
-                    `${listing.title} is stored in your HumanChain marketplace history.`,
-                  )
-                }
-                type="button"
-              >
-                View
-              </button>
-            </article>
-          ))
-        ) : (
-          <p>Your stored marketplace listings, business ads, and paid boosts will appear here.</p>
-        )}
+        ))}
       </section>
       <section className="badge-cloud">
         {profileBadges.map((badge) => (
@@ -675,7 +642,7 @@ export function MeView({
                 </article>
               ))
             ) : (
-              <p>Your actions, payments, posts, bids, and notification changes will appear here.</p>
+              <p>Your actions, payments, posts, answers, story saves, and notification changes will appear here.</p>
             )}
           </section>
           <section className="panel points-ledger">

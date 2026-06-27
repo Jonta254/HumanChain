@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, LockKeyhole, Radio, Settings, Store, Upload } from "lucide-react";
+import { Bell, LockKeyhole, Radio, Settings, Upload } from "lucide-react";
 import { appLanguages, settingsEssentialsByLanguage, type AppLanguage } from "@/lib/data/languages";
 import { formatWorldLaunchLocation } from "@/lib/humanchain/utils";
 import type { WorldMiniAppContext } from "@/lib/world/types";
@@ -98,13 +98,13 @@ export function AppSettingsBar({
             <strong>{settingsCopy.worldContext}</strong>
             <span>{settingsCopy.openedFrom} {worldLaunchLabel}</span>
             <span>{worldContext.deviceOS ?? activeLanguage.gate.deviceFallback} {settingsCopy.deviceReady}</span>
-            <p>World MiniKit provides launch and device context. Nearby market asks for World App WebView location permission only when you tap GPS, or uses your manual area.</p>
+            <p>World MiniKit provides launch and device context. HumanChain uses that context for safe-area layout, World profile sync, permissions, and account recovery.</p>
           </div>
           <div className="settings-section compact">
             <strong>Notification sectors</strong>
             {[
-              "Inbox replies and World Chat messages",
-              "Marketplace bids, accepted offers, boosts, and listing expiry",
+              "Ask replies and useful human responses",
+              "Chain reactions, tips, and premium unlock receipts",
               "Daily questions, streaks, story drops, payments, and account safety",
             ].map((point) => (
               <p key={point}>{point}</p>
@@ -121,13 +121,13 @@ export function AppSettingsBar({
             <strong>Data and account controls</strong>
             <p>
               HumanChain stores preview data on this device until backend storage
-              is connected. Remove stored listings, posts, history, or the whole
+              is connected. Remove legacy data, posts, history, or the whole
               local account view from here.
             </p>
             <div className="settings-control-grid">
               <button onClick={clearMarketplaceData} type="button">
-                <Store size={16} />
-                Clear marketplace
+                <Radio size={16} />
+                Clear legacy data
               </button>
               <button onClick={clearPostData} type="button">
                 <Upload size={16} />

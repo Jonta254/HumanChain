@@ -853,15 +853,15 @@ const storyCategories = [
 
 const creatorEconomy = [
   ["Story tips", "Readers reward stories that move them."],
-  ["Featured answers", "Top answers can earn visibility and future rewards."],
-  ["Premium reflections", "Deep Story and Deep Verdict unlocks support creators."],
-  ["Chain boosts", "Humans can boost important fields and links with WLD."],
-  ["Marketplace publishing", "Sellers and businesses pay small fees to list, boost, and promote."],
+  ["Bonus pages", "Readers unlock author notes and deeper context."],
+  ["Deep reflections", "Private reflections turn a story into personal guidance."],
+  ["Featured links", "Important reader links can rise into the monthly chain."],
+  ["Story archive", "Human stories stay organized by theme and month."],
 ];
 
 const trustTools = [
   "Verified-only publishing",
-  "Marketplace listing history",
+  "Story review history",
   "Story review queue",
   "Report harmful content",
   "Anti-spam question limits",
@@ -2163,7 +2163,7 @@ export function StoriesView({
       </section>
       <section className="panel creator-card">
         <div className="section-heading">
-          <span>WLD creator economy</span>
+          <span>Story depth features</span>
           <Wallet size={18} />
         </div>
         {creatorEconomy.map(([title, detail]) => (

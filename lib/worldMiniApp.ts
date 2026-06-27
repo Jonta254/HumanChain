@@ -7,6 +7,7 @@ export {
   getWorldMiniAppContext,
   getWorldPermissions,
   getWorldUserByAddress,
+  getWorldUserByUsername,
   humanHaptic,
   isWorldMiniAppReady,
   normalizeWorldUserProfile,

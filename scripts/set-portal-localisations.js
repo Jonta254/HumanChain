@@ -6,7 +6,7 @@
  * that the MCP tool does not expose.
  *
  * Usage:
- *   DEV_PORTAL_API_KEY=your_key node scripts/set-portal-localisations.js
+ *   APP_ID=app_xxx DEV_PORTAL_API_KEY=your_key node scripts/set-portal-localisations.js
  *
  * Find your API key:
  *   developer.worldcoin.org → Settings → API Keys → Copy key
@@ -14,13 +14,20 @@
 
 "use strict";
 
-const APP_ID = "app_fd34958eed3f67a6710d76c46d261f77";
-const API_KEY = process.env.DEV_PORTAL_API_KEY;
+const APP_ID =
+  process.env.APP_ID ||
+  process.env.NEXT_PUBLIC_WORLD_APP_ID ||
+  "app_fd34958eed3f67a6710d76c46d261f77";
+const API_KEY =
+  process.env.DEV_PORTAL_API_KEY ||
+  process.env.API_KEY ||
+  process.env.WORLD_DEV_PORTAL_API_KEY ||
+  process.env.MINIKIT_DEV_PORTAL_API_KEY;
 
 if (!API_KEY) {
   console.error("\n❌ Missing DEV_PORTAL_API_KEY environment variable.");
   console.error("   Get it from: developer.worldcoin.org → Settings → API Keys");
-  console.error("   Run as: DEV_PORTAL_API_KEY=your_key node scripts/set-portal-localisations.js\n");
+  console.error("   Run as: APP_ID=app_xxx DEV_PORTAL_API_KEY=your_key node scripts/set-portal-localisations.js\n");
   process.exit(1);
 }
 

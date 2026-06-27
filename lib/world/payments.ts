@@ -9,15 +9,15 @@ import {
   isHumanChainPaymentToken,
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
-import type { WorldPaymentConfirmation, WorldPaymentInput } from "./types";
+import type { WorldPaymentConfirmation, WorldPaymentInput, WorldPaymentStatus } from "./types";
 import { isWorldMiniAppReady } from "./context";
 
 const miniKitTokenBySymbol: Record<HumanChainPaymentToken, Tokens> = {
   WLD: Tokens.WLD,
 };
 
-// Retry schedule: immediate, then exponential back-off up to ~60 s total.
-const worldPaymentConfirmationDelays = [0, 2000, 4000, 6000, 9000, 13000, 18000, 25000];
+const confirmationRequestTimeoutMs = 4500;
+const worldPaymentConfirmationDelays = [0, 750, 1500, 2500, 3500, 5000, 7500, 10000, 15000];
 
 function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));
@@ -26,6 +26,7 @@ function waitForWorldConfirmation(delayMs: number) {
 async function confirmWorldPayment(input: {
   amount: number;
   feature: string;
+  onStatus?: (status: WorldPaymentStatus) => void;
   payload: PayResult;
   reference: string;
   token: HumanChainPaymentToken;
@@ -33,6 +34,8 @@ async function confirmWorldPayment(input: {
   let lastConfirmation: WorldPaymentConfirmation | null = null;
 
   for (const delayMs of worldPaymentConfirmationDelays) {
+    input.onStatus?.("verifying");
+
     if (delayMs > 0) {
       await waitForWorldConfirmation(delayMs);
     }
@@ -41,16 +44,23 @@ async function confirmWorldPayment(input: {
     let confirmation: WorldPaymentConfirmation;
 
     try {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), confirmationRequestTimeoutMs);
       confirmationResponse = await fetch("/api/world/confirm-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
+        signal: controller.signal,
       });
+      window.clearTimeout(timeout);
       confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
     } catch (error) {
       lastConfirmation = {
-        error: error instanceof Error ? error.message : "World payment confirmation request failed.",
+        error: error instanceof Error && error.name !== "AbortError"
+          ? error.message
+          : "World payment confirmation lookup timed out.",
         ok: false,
+        pending: true,
       };
       continue;
     }
@@ -77,6 +87,7 @@ async function confirmWorldPayment(input: {
 
     // Confirmed.
     if (confirmation.ok) {
+      input.onStatus?.("confirmed");
       return { confirmation, ok: true };
     }
 
@@ -96,8 +107,10 @@ export async function payWithWorld({
   amount,
   description,
   feature,
+  onStatus,
   token = defaultHumanChainPaymentToken,
 }: WorldPaymentInput) {
+  onStatus?.("preparing");
   const treasuryAddress = getHumanChainTreasury();
 
   if (!treasuryAddress) {
@@ -151,6 +164,7 @@ export async function payWithWorld({
 
   const tokenSymbol = miniKitTokenBySymbol[token];
 
+  onStatus?.("opening-world-app");
   const payment = await MiniKit.pay({
     reference: referencePayload.reference,
     to: treasuryAddress,
@@ -169,6 +183,7 @@ export async function payWithWorld({
   }));
 
   if (payment.executedWith === "error") {
+    onStatus?.("failed");
     return {
       ok: false,
       error: payment.error,
@@ -176,6 +191,7 @@ export async function payWithWorld({
   }
 
   if (payment.executedWith === "fallback") {
+    onStatus?.("failed");
     return {
       ok: false,
       pendingWorldApp: true,
@@ -184,15 +200,18 @@ export async function payWithWorld({
     };
   }
 
+  onStatus?.("submitted");
   const confirmationResult = await confirmWorldPayment({
     amount,
     feature,
+    onStatus,
     payload: payment.data,
     reference: referencePayload.reference,
     token,
   });
 
   if (!confirmationResult.ok) {
+    onStatus?.("pending");
     return {
       ok: false,
       error: confirmationResult.error ?? "World payment could not be confirmed.",
@@ -205,6 +224,7 @@ export async function payWithWorld({
     ok: true,
     payment,
     confirmation: confirmationResult.confirmation,
+    reference: referencePayload.reference,
     recipient: treasuryAddress,
   };
 }

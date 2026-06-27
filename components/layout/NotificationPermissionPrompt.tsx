@@ -21,12 +21,12 @@ export function NotificationPermissionPrompt({
         <span className="section-kicker">HumanChain alerts</span>
         <h2>Stay connected to real human activity.</h2>
         <p>
-          {username} can receive useful World App alerts for replies, marketplace holds,
-          payments, story drops, daily questions, and account safety.
+          {username} can receive useful World App alerts for Ask replies,
+          chain reactions, tips, payments, story drops, daily questions, and account safety.
         </p>
         <div className="notification-guide-list">
           <span>Welcome message and user guide</span>
-          <span>Inbox, bids, tips, and payment receipts</span>
+          <span>Ask replies, tips, and payment receipts</span>
           <span>Daily chain prompts and important account alerts</span>
         </div>
         <div className="notification-prompt-actions">

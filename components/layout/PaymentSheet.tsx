@@ -8,6 +8,7 @@ import {
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
 import { formatPaymentAmount, getPaymentFeature, parsePaymentAmount } from "@/lib/humanchain/utils";
+import type { WorldPaymentStatus } from "@/lib/world/types";
 import type { PaymentRequest } from "@/types/ui";
 
 export function PaymentSheet({
@@ -16,12 +17,14 @@ export function PaymentSheet({
   onConfirm,
   payment,
   selectedToken,
+  status,
 }: {
   busy: boolean;
   onCancel: () => void;
   onConfirm: (amount?: number) => void | Promise<void>;
   payment: PaymentRequest;
   selectedToken: HumanChainPaymentToken;
+  status?: WorldPaymentStatus | null;
 }) {
   const [customAmount, setCustomAmount] = useState(() =>
     parsePaymentAmount(payment.amount).toString(),
@@ -36,6 +39,15 @@ export function PaymentSheet({
   const displayAmount = Number.isFinite(amount)
     ? formatPaymentAmount(amount, selectedToken)
     : `0 ${tokenLabel}`;
+  const statusCopy = {
+    "opening-world-app": "Approve in World App",
+    confirmed: "Confirmed",
+    failed: "Could not confirm",
+    pending: "Still verifying with World",
+    preparing: "Preparing secure reference",
+    submitted: "Payment submitted",
+    verifying: "Checking World Chain",
+  } satisfies Record<WorldPaymentStatus, string>;
 
   return (
     <div className="ps-backdrop" role="dialog" aria-modal="true" aria-label="Payment">
@@ -100,7 +112,7 @@ export function PaymentSheet({
             <span className="ps-dot" />
             <span className="ps-dot" />
             <span className="ps-dot" />
-            <span>Confirming on World Chain…</span>
+            <span>{status ? statusCopy[status] : "Confirming on World Chain..."}</span>
           </div>
         )}
 
@@ -120,7 +132,7 @@ export function PaymentSheet({
             onClick={() => void onConfirm(amount)}
             type="button"
           >
-            {busy ? "Confirming…" : `Pay ${displayAmount}`}
+            {busy ? status ? statusCopy[status] : "Confirming..." : `Pay ${displayAmount}`}
           </button>
         </div>
 

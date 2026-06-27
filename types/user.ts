@@ -5,18 +5,42 @@ import type { MarketBid, MarketHold, MarketLocationState, MarketplaceListing } f
 import type { NotificationItem } from "./ui";
 
 export type VerifiedHuman = {
+  authenticatedAt?: string;
   deviceOS?: string;
   lastSeenAt?: string;
   launchLocation?: string | null;
   profilePictureUrl?: string;
+  sessionVersion?: 1;
   username: string;
+  verificationSource?: "wallet-auth";
   wallet?: string;
+  worldAppVersion?: number;
   mode: "world" | "preview";
 };
 
 export type HumanIdentity = {
   username: string;
   wallet?: string;
+};
+
+export type WorldHumanSession = {
+  appVersion: 1;
+  authenticatedAt: string;
+  deviceOS?: string;
+  lastSeenAt: string;
+  launchLocation?: string | null;
+  mode: "world";
+  profilePictureUrl?: string;
+  username: string;
+  verificationSource: "wallet-auth";
+  wallet: string;
+  worldAppVersion?: number;
+};
+
+export type WorldHumanProofEvent = {
+  action: string;
+  signal?: string;
+  verifiedAt: string;
 };
 
 export type AppMemory = {

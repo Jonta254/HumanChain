@@ -1267,7 +1267,7 @@ export function ChainsView({
 
   return (
     <div className="screen">
-      <TopBar title="Moments" subtitle="Photo-first proof-of-life posts from verified humans." />
+      <TopBar title="Daily Chain" subtitle="One daily thread of links, moments, and quote rooms from verified humans." />
       <section className="chain-tools">
         <button
           onClick={() => {
@@ -1381,8 +1381,8 @@ export function ChainsView({
         </section>
       ) : null}
       <section className="chain-map">
-        <span className="section-kicker">World field</span>
-        <h2>Moments, links, and quote rooms from real humans.</h2>
+        <span className="section-kicker">Today&apos;s chain</span>
+        <h2>Add one useful link. Let the world carry it forward.</h2>
         <div className="chain-orbit" aria-hidden="true">
           <span />
           <i />
@@ -1402,7 +1402,7 @@ export function ChainsView({
           onClick={() => setChainView("quotes")}
           type="button"
         >
-          Links
+          Daily Links
         </button>
         <button
           className={chainView === "groups" ? "active" : ""}

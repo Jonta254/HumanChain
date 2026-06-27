@@ -7,7 +7,7 @@ import {
   rateLimitResponse,
   readJsonBody,
 } from "@/lib/serverApi";
-import { getWorldAppId } from "@/lib/worldConfig";
+import { getWorldAppId, getWorldDevPortalApiKey } from "@/lib/worldConfig";
 
 export async function POST(req: NextRequest) {
   if (isRateLimited(req, "send-notification", 10)) {
@@ -72,8 +72,9 @@ export async function POST(req: NextRequest) {
   }
 
   const appId = getWorldAppId();
+  const devPortalApiKey = getWorldDevPortalApiKey();
 
-  if (!appId || !process.env.DEV_PORTAL_API_KEY) {
+  if (!appId || !devPortalApiKey) {
     return noStoreJson({
       ok: false,
       pendingSetup: true,
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.DEV_PORTAL_API_KEY}`,
+        Authorization: `Bearer ${devPortalApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

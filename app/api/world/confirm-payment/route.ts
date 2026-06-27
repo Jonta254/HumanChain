@@ -90,6 +90,10 @@ export async function POST(req: NextRequest) {
 
   // 4xx from World means bad credentials or malformed request — hard fail so the
   // client stops retrying immediately.
+  if (response.status === 404) {
+    return noStoreJson({ ok: false, pending: true });
+  }
+
   if (response.status >= 400 && response.status < 500) {
     return noStoreJson(
       { ok: false, error: "World payment lookup failed.", transaction },
