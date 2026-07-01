@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { isRateLimitedKV, noStoreJson, rateLimitResponse, readJsonBody } from "@/lib/serverApi";
+import { getSessionWallet, isRateLimitedKV, noStoreJson, rateLimitResponse, readJsonBody } from "@/lib/serverApi";
 
 type VerdictRequest = {
   question: string;
@@ -17,6 +17,10 @@ export type VerdictResult = {
 
 export async function POST(req: NextRequest) {
   if (await isRateLimitedKV(req, "ai-verdict", 5)) return rateLimitResponse();
+
+  if (!getSessionWallet(req)) {
+    return noStoreJson({ error: "Authentication required." }, { status: 401 });
+  }
 
   const body = await readJsonBody<VerdictRequest>(req);
   const isReflection = body?.feature === "deep-story-reflection";

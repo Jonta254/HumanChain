@@ -20228,6 +20228,13 @@ html[data-world-mini-app="true"] .hc-back-btn {
 }
 .hcp-status.verified { background: linear-gradient(135deg, #ffe9a8, #d8a93c); color: #3a2a06; }
 .hcp-status.preview  { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
+.hcp-worldid-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 0.58rem; font-weight: 900; padding: 2px 7px;
+  border-radius: 999px;
+  background: linear-gradient(135deg,#2f6fed,#1a4fcf);
+  color: #fff;
+}
 
 .hcp-tier-row { display: flex; align-items: center; gap: 7px; }
 .hcp-tier { font-size: 0.72rem; font-weight: 800; color: rgba(255,255,255,0.92); }

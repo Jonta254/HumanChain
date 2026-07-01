@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     maxAge: 60 * 10,
     path: "/",
     sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
   });
 
   return response;

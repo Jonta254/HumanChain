@@ -30,6 +30,7 @@ import {
   REFERRAL_HP_PER_SHARE,
   referralMilestones,
 } from "@/lib/humanchain/referral";
+import { HumanVerifyButton } from "@/components/HumanVerifyButton";
 import {
   Permission,
   requestWorldPermission,
@@ -195,6 +196,10 @@ export function MeView({
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
   const [showAllLedger, setShowAllLedger] = useState(false);
+  const [worldIdVerified, setWorldIdVerified] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return Boolean(localStorage.getItem(storageKeys.worldIdVerified));
+  });
   const [jobApplications] = useState<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(() =>
     loadJsonFromStorage(storageKeys.jobApplications, []),
   );
@@ -244,7 +249,8 @@ export function MeView({
   const nextPassportTarget = chainScore >= 420 ? 720 : chainScore >= 200 ? 420 : 200;
   const passportProgress = Math.min(100, Math.round((chainScore / nextPassportTarget) * 100));
   const earnedBadges = [
-    { active: isVerifiedWorldHuman(verifiedHuman), label: "Verified Human" },
+    { active: isVerifiedWorldHuman(verifiedHuman), label: "World Auth" },
+    { active: worldIdVerified, label: "World ID Verified" },
     { active: streak >= 7, label: "7-day Streak" },
     { active: ownedPosts.length > 0, label: "Moment Maker" },
     { active: savedItems > 0, label: "Wisdom Saver" },
@@ -358,6 +364,9 @@ export function MeView({
               <span className={`hcp-status ${isVerified ? "verified" : "preview"}`}>
                 <BadgeCheck size={9} />{isVerified ? "Verified" : "Preview"}
               </span>
+              {worldIdVerified && (
+                <span className="hcp-worldid-badge"><BadgeCheck size={9} />World ID</span>
+              )}
             </div>
             <div className="hcp-tier-row">
               <span className="hcp-tier">{tier.current.label}</span>
@@ -503,6 +512,41 @@ export function MeView({
           public chain handle across questions, stories, tips, and fields.
         </p>
       </section>
+      {/* ── World ID Verification ─────────────────────── */}
+      <section className="panel world-id-verify-panel" aria-label="World ID verification">
+        <div className="section-heading">
+          <span>World ID</span>
+          <BadgeCheck size={18} />
+        </div>
+        {worldIdVerified ? (
+          <div className="wiv-verified-row">
+            <BadgeCheck size={20} />
+            <div>
+              <strong>World ID Verified</strong>
+              <span>Your unique humanity is confirmed via World ID. +50 HP awarded.</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="wiv-intro">
+              Confirm you are a unique, real human using World ID orb or device credential. This is separate from wallet login — it proves you are not a bot.
+            </p>
+            <HumanVerifyButton
+              action="humanchain-verify-humanity"
+              label="Verify with World ID"
+              fallbackLabel="World ID not available"
+              onVerified={() => {
+                try { localStorage.setItem(storageKeys.worldIdVerified, "1"); } catch {}
+                setWorldIdVerified(true);
+                earnPoints(50, "World ID human proof verified — unique humanity confirmed.");
+                recordHistory({ title: "World ID verified", detail: "Proof of unique humanity confirmed via World ID orb or device credential.", kind: "profile" });
+                act("World ID Verified", "Your unique humanity is confirmed. +50 HP awarded to your passport.");
+              }}
+            />
+          </>
+        )}
+      </section>
+
       <section className="panel trust-passport-detail">
         <div className="section-heading">
           <span>Trust Passport</span>
