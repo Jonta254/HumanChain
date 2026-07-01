@@ -532,7 +532,7 @@ export function MeView({
               Confirm you are a unique, real human using World ID orb or device credential. This is separate from wallet login — it proves you are not a bot.
             </p>
             <HumanVerifyButton
-              action="humanchain-verify-humanity"
+              action="verify-human"
               label="Verify with World ID"
               fallbackLabel="World ID not available"
               onVerified={() => {

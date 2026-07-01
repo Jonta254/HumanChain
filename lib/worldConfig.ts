@@ -1,5 +1,5 @@
-export const defaultWorldAppId = "app_97e4c10f331dd72c24d29ba5f98e5bb7";
-export const defaultWorldRpId = "rp_11af98b36fc272da";
+export const defaultWorldAppId = "app_fd34958eed3f67a6710d76c46d261f77";
+export const defaultWorldRpId = "rp_0717c6ad5e52999e";
 export const defaultHumanChainTreasury =
   "0x6588e8765c495a9d44e93b0293aedd7ecd6167fc";
 
