@@ -35,8 +35,8 @@ function TermsContent() {
         Effective date: June 25, 2026. Last updated: June 25, 2026.
       </LegalP>
       <LegalP>
-        Welcome to HumanChain. By accessing or using this mini app ("HumanChain", "the App",
-        "the Service") you agree to these Terms of Use ("Terms"). If you do not agree, do not
+        Welcome to HumanChain. By accessing or using this mini app (&quot;HumanChain&quot;, &quot;the App&quot;,
+        &quot;the Service&quot;) you agree to these Terms of Use (&quot;Terms&quot;). If you do not agree, do not
         use the App.
       </LegalP>
 
@@ -93,7 +93,7 @@ function TermsContent() {
       <LegalSection title="5. WLD payments">
         <LegalP>
           Certain premium features require payment in WLD tokens via World App. All payments
-          are processed by World App's native payment system — HumanChain never has access to
+          are processed by World App&apos;s native payment system — HumanChain never has access to
           your private keys or wallet credentials.
         </LegalP>
         <LegalP>
@@ -107,14 +107,14 @@ function TermsContent() {
         <LegalP>
           The HumanChain name, logo, design system, and all original content produced by
           HumanChain are the intellectual property of HumanChain and its licensors. Nothing in
-          these Terms grants you a right to use HumanChain's intellectual property except to
+          these Terms grants you a right to use HumanChain&apos;s intellectual property except to
           use the Service as intended.
         </LegalP>
       </LegalSection>
 
       <LegalSection title="7. Disclaimer of warranties">
         <LegalP>
-          THE APP IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
+          THE APP IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND,
           EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
           FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. HUMANCHAIN DOES NOT WARRANT
           THAT THE APP WILL BE UNINTERRUPTED, ERROR-FREE, OR FREE OF HARMFUL COMPONENTS.
@@ -127,7 +127,7 @@ function TermsContent() {
           FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING
           LOSS OF PROFITS, DATA, OR GOODWILL, ARISING FROM YOUR USE OF OR INABILITY TO USE
           THE APP, EVEN IF HUMANCHAIN HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-          HUMANCHAIN'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS SHALL NOT EXCEED THE AMOUNT YOU
+          HUMANCHAIN&apos;S TOTAL LIABILITY TO YOU FOR ALL CLAIMS SHALL NOT EXCEED THE AMOUNT YOU
           PAID TO HUMANCHAIN IN THE 12 MONTHS PRECEDING THE CLAIM.
         </LegalP>
       </LegalSection>
@@ -167,7 +167,7 @@ function PrivacyContent() {
         Effective date: June 25, 2026. Last updated: June 25, 2026.
       </LegalP>
       <LegalP>
-        This Privacy Policy explains how HumanChain ("we", "our", "the App") collects, uses,
+        This Privacy Policy explains how HumanChain (&quot;we&quot;, &quot;our&quot;, &quot;the App&quot;) collects, uses,
         and protects information when you use HumanChain inside World App.
       </LegalP>
 
@@ -192,7 +192,7 @@ function PrivacyContent() {
           reverse it to identify you.
         </LegalP>
         <LegalP><strong>World username and profile picture.</strong> We fetch your public World
-          username and profile picture URL from World App's username service to display your
+          username and profile picture URL from World App&apos;s username service to display your
           identity within HumanChain. This data is public on World App.
         </LegalP>
         <LegalP><strong>User-generated content.</strong> Posts (moments), Ask questions and

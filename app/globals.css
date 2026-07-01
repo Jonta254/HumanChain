@@ -21782,8 +21782,32 @@ html[data-world-mini-app="true"] .ai-guide-sheet {
 .cv-composer-footer { display: flex; align-items: center; justify-content: space-between; }
 .cv-img-btn {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.73rem; font-weight: 800; color: var(--muted);
-  background: transparent; border: 0; padding: 6px 0;
+  font-size: 0.73rem; font-weight: 800; color: var(--green);
+  background: rgba(19,122,87,0.06); border: 1px solid rgba(19,122,87,0.18);
+  padding: 6px 12px; border-radius: 999px; min-height: 34px;
+  transition: background 0.12s ease;
+}
+.cv-img-btn:active { background: rgba(19,122,87,0.12); }
+.cv-img-preview {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 160px;
+  border: 1px solid rgba(19,122,87,0.14);
+}
+.cv-img-preview img {
+  width: 100%; height: 160px; object-fit: cover; display: block;
+}
+.cv-img-remove {
+  position: absolute; top: 6px; right: 6px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: 0;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 .cv-post-btn {
   display: inline-flex; align-items: center; justify-content: center;

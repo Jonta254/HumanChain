@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowLeft,
   Globe2,
@@ -9,6 +9,7 @@ import {
   Plus,
   Star,
   Users,
+  X,
 } from "lucide-react";
 import { loadJsonFromStorage, saveJsonToStorage, storageKeys } from "@/lib/humanchain/storage";
 import type { OpenPayment, EarnPoints, Tab } from "@/types/ui";
@@ -454,7 +455,8 @@ export function CultureView({
   const [userPosts, setUserPosts] = useState<Record<string, CulturePost[]>>(
     () => loadJsonFromStorage(storageKeys.culturePosts, {}),
   );
-  const [newPost, setNewPost] = useState({ title: "", body: "" });
+  const [newPost, setNewPost] = useState({ title: "", body: "", imageUrl: "" });
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(
     () => new Set(loadJsonFromStorage<string[]>(storageKeys.likedCulturePosts, [])),
   );
@@ -546,6 +548,7 @@ export function CultureView({
       flag: "🌍",
       title: newPost.title.trim(),
       body: newPost.body.trim(),
+      ...(newPost.imageUrl ? { imageUrl: newPost.imageUrl, imageAlt: newPost.title.trim() } : {}),
       likes: 0,
       createdAt: "Just now",
     };
@@ -554,7 +557,7 @@ export function CultureView({
     const next = { ...userPosts, [activeRoom.id]: capped };
     setUserPosts(next);
     saveJsonToStorage(storageKeys.culturePosts, next);
-    setNewPost({ title: "", body: "" });
+    setNewPost({ title: "", body: "", imageUrl: "" });
     act("Story shared", "Your cultural story is live in this room for all members to read.");
     earnPoints(12, "Cultural story contributed.");
   }
@@ -759,10 +762,44 @@ export function CultureView({
               rows={4}
               maxLength={1400}
             />
+            {newPost.imageUrl && (
+              <div className="cv-img-preview">
+                <img src={newPost.imageUrl} alt="Preview" />
+                <button
+                  className="cv-img-remove"
+                  type="button"
+                  aria-label="Remove image"
+                  onClick={() => setNewPost((p) => ({ ...p, imageUrl: "" }))}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
             <div className="cv-composer-footer">
-              <button className="cv-img-btn" type="button"><ImageIcon size={14} /> Add image</button>
+              <button
+                className="cv-img-btn"
+                type="button"
+                aria-label="Add image"
+                onClick={() => photoInputRef.current?.click()}
+              >
+                <ImageIcon size={14} /> Add image
+              </button>
               <button className="cv-post-btn" onClick={submitPost} type="button">Share to room</button>
             </div>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              aria-hidden="true"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const url = URL.createObjectURL(file);
+                setNewPost((p) => ({ ...p, imageUrl: url }));
+                e.target.value = "";
+              }}
+            />
           </div>
         )}
 
