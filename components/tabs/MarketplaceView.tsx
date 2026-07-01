@@ -814,6 +814,11 @@ export function MarketplaceView({
   function handlePhotos(files: FileList | null) {
     if (!files?.length) return;
     const arr = Array.from(files);
+    const oversized = arr.filter((f) => f.size > 5 * 1024 * 1024);
+    if (oversized.length > 0) {
+      act("Photo too large", `Each photo must be under 5 MB. ${oversized.map((f) => f.name).join(", ")} exceeded the limit.`);
+      return;
+    }
     const max = photoPackUnlocked ? 5 : 2;
     if (arr.length > 2 && !photoPackUnlocked) {
       openPayment({

@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
   // client stops retrying immediately.
   if (response.status >= 400 && response.status < 500) {
     return noStoreJson(
-      { ok: false, error: "World payment lookup failed.", transaction },
+      { ok: false, error: "World payment lookup failed." },
       { status: 502 },
     );
   }
@@ -177,22 +177,14 @@ export async function POST(req: NextRequest) {
   // Dev Portal often omits it while a transaction is still being indexed.
   if (transactionReference && transactionReference !== reference) {
     return noStoreJson(
-      {
-        ok: false,
-        error: "World payment reference did not match HumanChain reference.",
-        transaction,
-      },
+      { ok: false, error: "World payment reference did not match HumanChain reference." },
       { status: 400 },
     );
   }
 
   if (transactionAppId && transactionAppId !== appId) {
     return noStoreJson(
-      {
-        ok: false,
-        error: "World payment app id did not match HumanChain app id.",
-        transaction,
-      },
+      { ok: false, error: "World payment app id did not match HumanChain app id." },
       { status: 400 },
     );
   }
@@ -241,6 +233,5 @@ export async function POST(req: NextRequest) {
     amount,
     token: normalizedToken,
     treasury,
-    transaction,
   });
 }

@@ -84,8 +84,16 @@ export async function isRateLimitedKV(
   return false;
 }
 
-export function isSafeMiniAppPath(path: string) {
-  return path.startsWith("/") && !path.startsWith("//") && path.length <= 120;
+const SAFE_PATH_RE = /^\/[a-zA-Z0-9\-_/?=&#%.]*$/;
+const ALLOWED_MINI_APP_PATHS = new Set(["/", "/ask", "/chains", "/stories", "/market", "/me", "/create", "/settings", "/culture"]);
+
+export function isSafeMiniAppPath(path: string): boolean {
+  if (!path || path.length > 200) return false;
+  if (!SAFE_PATH_RE.test(path)) return false;
+  if (path.includes("..")) return false;
+  // Validate base path against known app sections
+  const base = path.split("?")[0].split("#")[0];
+  return ALLOWED_MINI_APP_PATHS.has(base);
 }
 
 export function isWalletAddress(address: string) {

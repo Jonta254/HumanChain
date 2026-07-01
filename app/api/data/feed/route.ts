@@ -116,10 +116,9 @@ async function readFeedKindSafely(kind: FeedKind) {
       records: await readFeedKind(kind),
     };
   } catch (error) {
-    const detail = error instanceof Error ? error.message : "Unknown Blob read error";
-
+    console.error(`[feed] ${kind} read error:`, error instanceof Error ? error.message : error);
     return {
-      error: `${kind} feed temporarily unavailable: ${detail}`,
+      error: `${kind} feed temporarily unavailable.`,
       kind,
       records: [],
     };

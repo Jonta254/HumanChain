@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import {
+  getSessionWallet,
   isRateLimitedKV,
   isSafeMiniAppPath,
   isWalletAddress,
@@ -12,6 +13,10 @@ import { getWorldAppId } from "@/lib/worldConfig";
 export async function POST(req: NextRequest) {
   if (await isRateLimitedKV(req, "send-notification", 10)) {
     return rateLimitResponse();
+  }
+
+  if (!getSessionWallet(req)) {
+    return noStoreJson({ error: "Authentication required." }, { status: 401 });
   }
 
   const body = await readJsonBody<{
@@ -104,12 +109,9 @@ export async function POST(req: NextRequest) {
   const payload = await response.json();
 
   if (!response.ok) {
+    console.error("[send-notification] World API error:", response.status);
     return noStoreJson(
-      {
-        ok: false,
-        error: "World notification request failed.",
-        payload,
-      },
+      { ok: false, error: "World notification request failed." },
       { status: 502 },
     );
   }

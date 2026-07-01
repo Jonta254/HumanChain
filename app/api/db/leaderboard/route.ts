@@ -9,7 +9,7 @@ export async function GET() {
       .select("wallet, username, points, streak, tier")
       .order("points", { ascending: false })
       .limit(20);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: "Failed to load leaderboard." }, { status: 500 });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ranked = (data ?? []).map((u: any, i: number) => ({ ...u, rank: i + 1 }));

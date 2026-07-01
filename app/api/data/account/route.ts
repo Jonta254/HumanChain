@@ -64,6 +64,12 @@ export async function POST(req: NextRequest) {
 
   const pathname = accountPath(payload.wallet);
 
+  // Both load and save require the authenticated wallet to match.
+  const sessionWallet = getSessionWallet(req);
+  if (!sessionWallet || sessionWallet !== payload.wallet.toLowerCase()) {
+    return noStoreJson({ error: "Unauthorized." }, { status: 403 });
+  }
+
   if (payload.action === "load") {
     const result = await get(pathname, {
       access: "public",
@@ -86,12 +92,6 @@ export async function POST(req: NextRequest) {
       { error: "Send a snapshot to save." },
       { status: 400 },
     );
-  }
-
-  // Require the authenticated wallet to match the payload wallet on save.
-  const sessionWallet = getSessionWallet(req);
-  if (sessionWallet && sessionWallet !== payload.wallet.toLowerCase()) {
-    return noStoreJson({ error: "Unauthorized." }, { status: 403 });
   }
 
   const savedAt = new Date().toISOString();

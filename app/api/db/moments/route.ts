@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
+import { getSessionWallet, isRateLimited, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
 
 export async function GET() {
   try {
@@ -9,14 +10,21 @@ export async function GET() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(60);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ error: "Failed to load moments." }, { status: 500 });
     return NextResponse.json({ moments: data });
   } catch {
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error." }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
+  if (isRateLimited(req, "db-moments-post", 10)) return rateLimitResponse();
+
+  const sessionWallet = getSessionWallet(req);
+  if (!sessionWallet) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
   try {
     const { text, image_url, author_wallet, author_username, emoji } = await req.json() as {
       text: string;
@@ -25,19 +33,38 @@ export async function POST(req: NextRequest) {
       author_username: string;
       emoji?: string;
     };
-    if (!text || !author_wallet)
-      return NextResponse.json({ error: "text and author_wallet required" }, { status: 400 });
+
+    if (!text || !author_wallet || !isWalletAddress(author_wallet))
+      return NextResponse.json({ error: "text and valid author_wallet required." }, { status: 400 });
+
+    if (author_wallet.toLowerCase() !== sessionWallet)
+      return NextResponse.json({ error: "Wallet mismatch." }, { status: 403 });
+
+    if (text.length > 280)
+      return NextResponse.json({ error: "Moment text must be 280 characters or fewer." }, { status: 400 });
+
+    const safeImageUrl =
+      typeof image_url === "string" && image_url.startsWith("https://") ? image_url.slice(0, 512) : null;
 
     const db = createServiceClient();
     const { data, error } = await db
       .from("hc_moments")
-      .insert({ text, image_url: image_url ?? null, author_wallet, author_username, emoji: emoji ?? null })
+      .insert({
+        text: text.trim().slice(0, 280),
+        image_url: safeImageUrl,
+        author_wallet: sessionWallet,
+        author_username: String(author_username ?? "").slice(0, 64),
+        emoji: typeof emoji === "string" ? emoji.slice(0, 8) : null,
+      })
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[db/moments] insert error:", error.code);
+      return NextResponse.json({ error: "Failed to post moment." }, { status: 500 });
+    }
     return NextResponse.json({ moment: data });
   } catch {
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal error." }, { status: 500 });
   }
 }

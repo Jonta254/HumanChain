@@ -13,9 +13,9 @@ export async function POST(req: NextRequest) {
     };
     if (!wallet || !isWalletAddress(wallet)) return NextResponse.json({ error: "wallet required" }, { status: 400 });
 
-    // Verify the request comes from the authenticated wallet owner.
+    // Require auth and verify the request comes from the authenticated wallet owner.
     const sessionWallet = getSessionWallet(req);
-    if (sessionWallet && sessionWallet !== wallet.toLowerCase()) {
+    if (!sessionWallet || sessionWallet !== wallet.toLowerCase()) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
     }
 
@@ -37,7 +37,10 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[db/sync-user] upsert error:", error.code);
+      return NextResponse.json({ error: "Failed to sync user profile." }, { status: 500 });
+    }
     return NextResponse.json({ user: data });
   } catch {
     return NextResponse.json({ error: "Internal error" }, { status: 500 });

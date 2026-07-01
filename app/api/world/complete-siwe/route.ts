@@ -74,15 +74,15 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: "/",
       sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
     });
 
     return response;
-  } catch (error) {
+  } catch {
     const failRes = noStoreJson(
       {
         ok: false,
-        error: error instanceof Error ? error.message : "Wallet auth failed.",
+        error: "Wallet signature verification failed.",
       },
       { status: 400 },
     );

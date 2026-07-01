@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
       created_at: new Date().toISOString(),
     });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[db/reports] insert error:", error.code);
+      return NextResponse.json({ error: "Failed to submit report." }, { status: 500 });
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Internal error." }, { status: 500 });
