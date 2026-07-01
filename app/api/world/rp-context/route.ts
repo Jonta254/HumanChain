@@ -29,9 +29,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const rawKey = process.env.RP_SIGNING_KEY!;
+  const signingKeyHex = rawKey.startsWith("0x") ? rawKey.slice(2) : rawKey;
+
   const { createdAt, expiresAt, nonce, sig } = signRequest({
     action,
-    signingKeyHex: process.env.RP_SIGNING_KEY,
+    signingKeyHex,
   });
 
   return noStoreJson({
