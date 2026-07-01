@@ -32,15 +32,10 @@ export async function POST(req: NextRequest) {
   const rawKey = process.env.RP_SIGNING_KEY!;
   const signingKeyHex = rawKey.startsWith("0x") ? rawKey.slice(2) : rawKey;
 
-  let signResult: ReturnType<typeof signRequest>;
-  try {
-    signResult = signRequest({ action, signingKeyHex });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[rp-context] signRequest failed:", msg, "| keyLen:", signingKeyHex.length);
-    return noStoreJson({ ok: false, error: msg }, { status: 500 });
-  }
-  const { createdAt, expiresAt, nonce, sig } = signResult;
+  const { createdAt, expiresAt, nonce, sig } = signRequest({
+    action,
+    signingKeyHex,
+  });
 
   return noStoreJson({
     ok: true,
