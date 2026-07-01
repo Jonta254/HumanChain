@@ -4,9 +4,10 @@ import "./modernize.css";
 import { Providers } from "./providers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { getAppUrl } from "@/lib/worldConfig";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://human-chain-gamma.vercel.app"),
+  metadataBase: new URL(getAppUrl()),
   applicationName: "HumanChain",
   title: "HumanChain",
   description:

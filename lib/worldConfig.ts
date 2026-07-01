@@ -6,11 +6,20 @@ export const defaultHumanChainTreasury =
 export function getWorldAppId() {
   return (
     process.env.NEXT_PUBLIC_WORLD_APP_ID ||
-    // Common Vercel dashboard names
-    process.env.WORLD_APP_ID ||
+    // NEW_WORLD_APP_ID checked first — user's active updated app ID
     process.env.NEW_WORLD_APP_ID ||
+    process.env.WORLD_APP_ID ||
     process.env.APP_ID ||
     defaultWorldAppId
+  );
+}
+
+export function getAppUrl() {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ||
+    // VERCEL_URL is auto-injected by Vercel (no https:// prefix)
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+    "https://human-chain-gamma.vercel.app"
   );
 }
 
@@ -21,8 +30,8 @@ export function getWorldRpId() {
 export function getHumanChainTreasury() {
   return (
     process.env.NEXT_PUBLIC_HUMANCHAIN_TREASURY ||
-    // Common Vercel dashboard names
     process.env.HUMANCHAIN_TREASURY_WALLET ||
+    process.env.HUMANCHAIN_WALLET ||
     process.env.HUMANCHAIN_TREASURY ||
     process.env.TREASURY_WALLET ||
     defaultHumanChainTreasury
