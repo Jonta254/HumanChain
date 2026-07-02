@@ -22294,3 +22294,182 @@ button:not([disabled]) { cursor: pointer; }
   font-weight: 600;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   MISSING / SUPPLEMENTAL CLASSES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* HomeView — live network strip */
+.h9-network-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  background: rgba(19,122,87,0.06);
+  border-bottom: 1px solid rgba(19,122,87,0.1);
+  overflow: hidden;
+  min-height: 32px;
+}
+.h9-ns-dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(19,122,87,0.2);
+  animation: hc-pulse 2s ease-in-out infinite;
+}
+.h9-ns-text {
+  flex: 1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: hc-ticker-slide 0.35s ease;
+}
+@keyframes hc-ticker-slide {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.h9-ns-count {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+/* HomeView — notification badge */
+.h9-notif-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 99px;
+  background: #e05252;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+  border: 1.5px solid var(--paper);
+}
+
+/* HomeView — "See all →" link in section headers */
+.h9-section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--green);
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.h9-section-link:active { opacity: 0.7; }
+
+/* HomeView — profile completion card header */
+.hc-pc-header { display: flex; flex-direction: column; gap: 3px; }
+.hc-pc-header strong { font-size: 0.92rem; font-weight: 950; color: var(--ink); }
+.hc-pc-header span { font-size: 0.72rem; color: var(--muted); line-height: 1.35; }
+
+/* HomeView — hc-brief score column */
+.hc-brief-score-col { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.hc-brief-score-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 0.04em; text-transform: uppercase; }
+.hc-brief-progress-wrap { margin: 6px 0 2px; }
+.hc-brief-progress-label { font-size: 0.62rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-top: 3px; display: block; }
+.hc-brief-passport-link { font-size: 0.68rem; font-weight: 800; color: rgba(255,255,255,0.75); display: inline-flex; align-items: center; gap: 2px; }
+
+/* HomeView — hc-brief-sheen (holographic shimmer) */
+.hc-brief-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, transparent 60%, rgba(255,255,255,0.04) 100%);
+  pointer-events: none;
+}
+
+/* MeView — passport progress */
+.hcp-progress-wrap { margin: 0 0 4px; }
+.hcp-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.hcp-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffe9a8, #d8a93c);
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+.hcp-progress-label {
+  display: block;
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.65);
+  margin-top: 3px;
+  font-weight: 700;
+}
+
+/* MeView — tier, level, sync */
+.hcp-tier { font-size: 0.72rem; font-weight: 800; color: rgba(255,255,255,0.92); }
+.hcp-level { font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.6); }
+.hcp-sync  { font-size: 0.62rem; color: rgba(255,255,255,0.5); font-weight: 600; }
+.hcp-worldid-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 6px; border-radius: 99px;
+  background: rgba(47,111,237,0.25); color: rgba(255,255,255,0.9);
+  font-size: 0.6rem; font-weight: 800;
+}
+.hcp-id { font-size: 0.65rem; font-weight: 700; color: rgba(255,255,255,0.7); letter-spacing: 0.04em; }
+.hcp-name { font-size: 1rem; font-weight: 900; color: #fff; line-height: 1.2; }
+.hcp-score-num { display: block; font-size: 1.4rem; font-weight: 950; color: #fff; line-height: 1; }
+.hcp-score-label { display: block; font-size: 0.55rem; color: rgba(255,255,255,0.6); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+.hcp-metric { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.hcp-metric strong { font-size: 0.9rem; font-weight: 950; color: rgba(255,255,255,0.95); }
+.hcp-metric span { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* MeView — extra classes */
+.me-app-card { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.me-app-card:last-child { border-bottom: 0; }
+.me-app-title { font-size: 0.84rem; font-weight: 800; color: var(--ink); }
+.me-app-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+.me-app-status {
+  font-size: 0.65rem; font-weight: 800;
+  color: var(--green); background: rgba(19,122,87,0.1);
+  padding: 2px 7px; border-radius: 99px;
+}
+
+/* MeView — vault status badge */
+.vault-status-badge { font-weight: 800; }
+.vault-status-badge.sold { color: var(--green); }
+.vault-status-badge.payment-ready { color: #2f6fed; }
+
+/* SettingsView — settings-return-panel */
+.settings-return-panel { text-align: center; }
+.sv-home-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 22px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--card-edge);
+  font-size: 0.82rem; font-weight: 800; color: var(--ink);
+  cursor: pointer;
+}
+.sv-home-btn:active { background: rgba(19,122,87,0.06); }
+
+/* hc-brief-compact shimmer fix on home-v9 */
+.home-v9 .hc-brief-compact { position: relative; overflow: hidden; }
+
+/* Pulse animation (if not already defined) */
+@keyframes hc-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(19,122,87,0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(19,122,87,0); }
+}
