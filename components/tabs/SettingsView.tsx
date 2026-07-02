@@ -21,7 +21,6 @@ import {
 import { AppSettingsBar } from "@/components/layout/AppSettingsBar";
 import { LegalSheet } from "@/components/layout/LegalSheet";
 import { SafetyCenter } from "@/components/tabs/SafetyCenter";
-import { TopBar } from "@/components/layout/TopBar";
 import { humanHaptic } from "@/lib/world/haptics";
 import type { AppLanguage } from "@/lib/data/languages";
 import type { WorldMiniAppContext } from "@/lib/world/types";
@@ -60,8 +59,6 @@ export function SettingsView({
   return (
     <div className="screen settings-screen">
       {legalDoc && <LegalSheet doc={legalDoc} onClose={() => setLegalDoc(null)} />}
-      <TopBar title="Settings" subtitle="Controls, privacy, and World integration" />
-
       {/* ── App controls ──────────────────────────────────── */}
       <AppSettingsBar
         activeLanguage={activeLanguage}

@@ -9010,9 +9010,12 @@ html[data-world-mini-app="true"] .bottom-nav {
   top: calc(var(--world-safe-top, env(safe-area-inset-top, 0px)));
   left: 0;
   right: 0;
-  z-index: 10;
-  background: rgba(244, 248, 246, 0.94);
-  backdrop-filter: blur(18px);
+  z-index: 50;
+  background: rgba(244, 248, 246, 0.97);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-bottom: 1px solid rgba(19,122,87,0.1);
+  box-shadow: 0 2px 12px rgba(20,55,42,0.06);
 }
 
 /* ── Drawer overrides to match HumanChain palette ── */
@@ -15452,17 +15455,22 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   flex: 0 0 auto;
 }
 
-/* ── Screen base: compensate for v2 topbar ──────────────────────────
-   The sticky header sits at top:0 inside the .screen scroll
-   container. Reduce the screen's own top padding so content
-   isn't pushed down twice.                                         */
-.ask-screen,
+/* ── Bottom-nav tabs: sticky inner TopBar sits at top:0 so no extra padding needed */
 .chains-screen,
 .stories-screen,
-.market-screen,
-.me-screen,
-.settings-screen-v2 {
+.market-screen {
   padding-top: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% -5%, rgba(19,122,87,0.08), transparent 55%),
+    var(--paper);
+}
+
+/* ── Secondary tabs: fixed back-button TopBar (~56px) overlays the top.
+   Pad content down far enough that nothing hides under it.           */
+.ask-screen,
+.me-screen,
+.settings-screen {
+  padding-top: calc(56px + var(--world-safe-top, 0px));
   background:
     radial-gradient(ellipse 80% 40% at 50% -5%, rgba(19,122,87,0.08), transparent 55%),
     var(--paper);
@@ -16144,8 +16152,6 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 /* ═══════════════════════════════════════════════════════════════════════
    ME SCREEN — Human Passport premium polish
    ═══════════════════════════════════════════════════════════════════════ */
-.me-screen { padding-top: 0; }
-
 .me-screen .treasure-profile {
   background: linear-gradient(160deg, #0d3d2a 0%, #0f4d35 55%, #0d3060 100%);
   border-radius: 0 0 28px 28px;
@@ -21991,6 +21997,13 @@ button:not([disabled]) { cursor: pointer; }
 .hcm-svc-card strong {
   font-weight: 800 !important;
   color: var(--ink) !important;
+}
+.hcm-svc-bar {
+  display: block;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--cc, #2f6fed);
+  margin-bottom: 8px;
 }
 
 /* ── StoriesView: library cards clearer ────────────────────────────── */

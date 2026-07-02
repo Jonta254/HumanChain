@@ -28,7 +28,6 @@ import {
 } from "@/lib/humanchain/utils";
 import { starterAskThreads } from "@/lib/data/chains";
 import { Meter } from "@/components/ui/Meter";
-import { TopBar } from "@/components/layout/TopBar";
 import type { AskThread } from "@/types/chain";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HistoryRecord } from "@/types/reputation";
@@ -368,7 +367,6 @@ export function AskView({
 
   return (
     <div className="screen ask-screen">
-      <TopBar title="Ask The World" subtitle="Verified human answers" />
       <section className="ask-hero">
         <div>
           <span className="section-kicker">Verified answers</span>

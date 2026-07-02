@@ -45,7 +45,6 @@ import {
   isVerifiedWorldHuman,
 
 } from "@/lib/humanchain/utils";
-import { TopBar } from "@/components/layout/TopBar";
 import { Stat } from "@/components/ui/Stat";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 import type { MarketplaceListing, MarketLocationState } from "@/types/market";
@@ -310,8 +309,6 @@ export function MeView({
 
   return (
     <div className="screen me-screen">
-      <TopBar title="Human Passport" subtitle="Your verified digital identity" />
-
       {/* ── Digital Passport Card ──────────────────────── */}
       <section className="hc-passport-card" aria-label="Digital Human Card">
         {/* Holographic shimmer layers */}

@@ -74,6 +74,10 @@ export function HumanChainRoot(props: HumanChainAppState) {
     home: "Home", ask: "Ask", chains: "Chains", stories: "Stories",
     market: "Market", me: "Passport", create: "Create", settings: "Settings", culture: "Culture",
   };
+  const TAB_TITLES: Record<typeof tab, string> = {
+    home: "Home", ask: "Ask The World", chains: "Moments", stories: "Human Story",
+    market: "Marketplace", me: "Human Passport", create: "Create", settings: "Settings", culture: "Culture Rooms",
+  };
   const backLabel = TAB_LABELS[prevTab === tab ? "home" : prevTab] ?? "Home";
 
   function completeOnboarding() {
@@ -309,9 +313,10 @@ export function HumanChainRoot(props: HumanChainAppState) {
           />
         )}
         {/* Back button — shown only on secondary tabs not in the bottom nav */}
-        {verifiedHuman && !["home", "chains", "stories", "market"].includes(tab) ? (
+        {verifiedHuman && !["home", "chains", "stories", "market", "create", "culture"].includes(tab) ? (
           <TopBar
             className="hc-topbar-back"
+            title={TAB_TITLES[tab]}
             startAdornment={
               <Haptic variant="selection" asChild>
                 <button
