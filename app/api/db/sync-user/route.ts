@@ -1,26 +1,47 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
-import { getSessionWallet, isWalletAddress } from "@/lib/serverApi";
+import { isValidWalletAddress } from "@/lib/validation/schemas";
+import { createErrorResponse, createSuccessResponse, getClientIp, verifyWalletOwnership, ErrorCode } from "@/lib/api/responses";
+import { logger } from "@/lib/api/logging";
 
 export async function POST(req: NextRequest) {
-  try {
-    const { wallet, username, points, streak, tier } = await req.json() as {
-      wallet: string;
-      username?: string;
-      points?: number;
-      streak?: number;
-      tier?: string;
-    };
-    if (!wallet || !isWalletAddress(wallet)) return NextResponse.json({ error: "wallet required" }, { status: 400 });
+  const clientIp = getClientIp(req);
+  const route = "POST /api/db/sync-user";
 
-    // Require auth and verify the request comes from the authenticated wallet owner.
-    const sessionWallet = getSessionWallet(req);
-    if (!sessionWallet || sessionWallet !== wallet.toLowerCase()) {
-      return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
+  try {
+    const body = await req.json();
+    const { wallet, username, points, streak, tier } = body as {
+      wallet?: unknown;
+      username?: unknown;
+      points?: unknown;
+      streak?: unknown;
+      tier?: unknown;
+    };
+
+    // Validate wallet address format
+    if (!wallet || !isValidWalletAddress(wallet)) {
+      logger.warn("Invalid wallet address", { route, ip: clientIp, data: { wallet } });
+      return createErrorResponse(ErrorCode.INVALID_INPUT, "Invalid wallet address format.", { status: 400 });
+    }
+
+    // Verify authentication and wallet ownership
+    if (!verifyWalletOwnership(req, wallet)) {
+      logger.warn("Unauthorized wallet sync attempt", { route, ip: clientIp, data: { wallet } });
+      return createErrorResponse(ErrorCode.UNAUTHORIZED, "Wallet authentication required.", { status: 401 });
+    }
+
+    // Validate optional fields
+    if (username && typeof username !== "string") {
+      return createErrorResponse(ErrorCode.INVALID_INPUT, "Username must be a string.", { status: 400 });
+    }
+    if (points !== undefined && (!Number.isInteger(points) || (points as number) < 0)) {
+      return createErrorResponse(ErrorCode.INVALID_INPUT, "Points must be a positive integer.", { status: 400 });
+    }
+    if (streak !== undefined && (!Number.isInteger(streak) || (streak as number) < 0)) {
+      return createErrorResponse(ErrorCode.INVALID_INPUT, "Streak must be a positive integer.", { status: 400 });
     }
 
     const db = createServiceClient();
-
     const { data, error } = await db
       .from("hc_users")
       .upsert(
@@ -38,11 +59,22 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
-      console.error("[db/sync-user] upsert error:", error.code);
-      return NextResponse.json({ error: "Failed to sync user profile." }, { status: 500 });
+      logger.error("Supabase upsert error", { route, ip: clientIp, error });
+      return createErrorResponse(
+        ErrorCode.DATABASE_ERROR,
+        "Failed to sync user profile.",
+        { status: 500, retryable: true }
+      );
     }
-    return NextResponse.json({ user: data });
-  } catch {
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+
+    logger.info("User profile synced", { route, ip: clientIp, data: { wallet } });
+    return createSuccessResponse({ user: data });
+  } catch (error) {
+    logger.error("User sync error", { route, ip: clientIp, error });
+    return createErrorResponse(
+      ErrorCode.INTERNAL_ERROR,
+      "An unexpected error occurred.",
+      { status: 500, retryable: true }
+    );
   }
 }
