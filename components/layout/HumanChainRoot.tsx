@@ -308,8 +308,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
             worldContext={worldContext}
           />
         )}
-        {/* Back button — shown on tabs without their own header navigation */}
-        {verifiedHuman && tab !== "home" && tab !== "market" && tab !== "stories" ? (
+        {/* Back button — shown only on secondary tabs not in the bottom nav */}
+        {verifiedHuman && !["home", "chains", "stories", "market"].includes(tab) ? (
           <TopBar
             className="hc-topbar-back"
             startAdornment={

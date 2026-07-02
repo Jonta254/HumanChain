@@ -15,3 +15,4 @@ profile-repo/
 # Script artefacts with embedded secrets / temp outputs
 scripts/fix-localisations-graphql.js
 scripts/_compact_desc_final.txt
+.env*

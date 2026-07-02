@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOpen, Compass, Home, Plus, Store } from "lucide-react";
-import { BottomBar, Haptic, TabItem, Tabs } from "@worldcoin/mini-apps-ui-kit-react";
+import { Haptic, TabItem, Tabs } from "@worldcoin/mini-apps-ui-kit-react";
 import type { Tab } from "@/types/ui";
 
 type NavLanguage = {
@@ -23,8 +23,7 @@ export function BottomNavigation({
   onCreate: () => void;
 }) {
   return (
-    <div className="bottom-nav--hc">
-    <BottomBar aria-label="Primary navigation">
+    <nav className="bottom-nav--hc" aria-label="Primary navigation">
       <Tabs
         value={active}
         onValueChange={(v) => onChange(v as Tab)}
@@ -53,7 +52,6 @@ export function BottomNavigation({
         <TabItem value="stories" icon={<BookOpen size={22} />} label="Stories" />
         <TabItem value="market"  icon={<Store    size={22} />} label={appLanguage.nav.market} />
       </Tabs>
-    </BottomBar>
-    </div>
+    </nav>
   );
 }

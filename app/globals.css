@@ -8963,24 +8963,34 @@ html[data-world-mini-app="true"] .bottom-nav {
   }
 }
 
-/* ── World UI Kit BottomBar nav ── */
+/* ── HumanChain bottom navigation bar ── */
 .bottom-nav--hc {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0;
+  width: 100%;
+  background: rgba(244, 248, 246, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--card-line);
+  padding: 6px 8px 4px;
+  min-height: 60px;
 }
+
+/* Override the Tabs component's internal px-5 padding so tabs fill the space evenly */
 .bn-tabs-left,
 .bn-tabs-right {
   display: flex;
   flex: 1;
+  padding: 0 !important;
 }
+
 .bn-fab {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--brand-grad);
   color: #fff;
@@ -8990,9 +9000,9 @@ html[data-world-mini-app="true"] .bottom-nav {
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-.bn-fab:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(19, 122, 87, 0.25); }
-.bn-fab.active { background: linear-gradient(135deg, #137a57, #2f6fed); }
-.hc-nav-safe { position: fixed; bottom: 0; left: 0; right: 0; z-index: 5; }
+.bn-fab:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(19, 122, 87, 0.25); }
+.bn-fab.active { background: linear-gradient(135deg, #137a57, #2f6fed); box-shadow: 0 6px 18px rgba(19, 122, 87, 0.45); }
+.hc-nav-safe { position: fixed; bottom: 0; left: 0; right: 0; z-index: 5; line-height: 0; }
 
 /* ── TopBar back button ── */
 .hc-topbar-back {
@@ -15095,25 +15105,7 @@ html[data-world-mini-app="true"] .bottom-nav {
 /* ════════════════════════════════════════════════════════════════════
    BOTTOM NAV — Home | Discover | (+ Create) | Reputation | Market
    ════════════════════════════════════════════════════════════════════ */
-.bottom-nav--hc {
-  grid-template-columns: 1fr auto 1fr;
-  align-items: end;
-  gap: 6px;
-  overflow: visible;
-}
-.bottom-nav--hc .bn-slot { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-.bottom-nav--hc .bn-slot:last-child { grid-template-columns: 1fr 1fr; }
-.bottom-nav--hc .bn-create {
-  transform: translateY(-16px);
-  width: 58px; height: 58px;
-  border: 0; border-radius: 20px;
-  background: var(--brand-grad);
-  color: #fff;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  box-shadow: 0 12px 26px rgba(19,122,87,0.42);
-  font-size: 0.55rem; font-weight: 900; letter-spacing: 0.02em;
-}
-.bottom-nav--hc .bn-create span { margin-top: 1px; }
+/* (duplicate .bottom-nav--hc block removed — see canonical definition above) */
 
 /* ════════════════════════════════════════════════════════════════════
    CREATE HUB — premium action sheet
