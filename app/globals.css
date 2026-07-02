@@ -15435,6 +15435,7 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   display: grid;
   gap: 1px;
   min-width: 0;
+  padding-left: 50px; /* clears the fixed floating-profile-button in the top-left corner */
 }
 .top-bar-v2-kicker {
   font-size: 0.62rem;
@@ -15465,12 +15466,12 @@ html[data-world-mini-app="true"] .top-bar-v2 {
     var(--paper);
 }
 
-/* ── Secondary tabs: fixed back-button TopBar (~56px) overlays the top.
+/* ── Secondary tabs: fixed back-button TopBar (h=[4.5rem]=72px) overlays the top.
    Pad content down far enough that nothing hides under it.           */
 .ask-screen,
 .me-screen,
 .settings-screen {
-  padding-top: calc(56px + var(--world-safe-top, 0px));
+  padding-top: calc(76px + var(--world-safe-top, 0px));
   background:
     radial-gradient(ellipse 80% 40% at 50% -5%, rgba(19,122,87,0.08), transparent 55%),
     var(--paper);
@@ -18983,6 +18984,7 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  white-space: normal;
 }
 .create-hub-item--card .create-hub-badges {
   display: flex;
@@ -20067,35 +20069,30 @@ html[data-world-mini-app="true"] .bottom-nav {
 
 /* ════════════════════════════════════════════════════════════════════
    BACK BUTTON  (.hc-back-btn)
-   Floating pill shown on every non-home tab — replaces hardware back key.
-   Positioned top-left, above all tab content but below modals.
+   Pill rendered in the .hc-topbar-back TopBar's startAdornment slot.
+   Position flows normally inside the TopBar — no fixed positioning.
    ════════════════════════════════════════════════════════════════════ */
 
 .hc-back-btn {
-  position: fixed;
-  top: calc(10px + var(--world-safe-top, 0px));
-  left: max(12px, var(--world-safe-left, 12px));
-  z-index: 55;                           /* above content + nav (50), below guide (200) */
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 14px 8px 10px;
+  padding: 7px 12px 7px 8px;
   border-radius: 999px;
-  background: var(--paper);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1.5px solid rgba(19,122,87,0.22);
-  box-shadow:
-    0 4px 18px rgba(15, 45, 35, 0.18),
-    0 1px 0 rgba(255, 255, 255, 0.95) inset;
+  box-shadow: 0 2px 8px rgba(15,45,35,0.10);
   color: var(--ink);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.01em;
   white-space: nowrap;
   transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
-  min-height: 38px;
+  min-height: 34px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .hc-back-btn svg {
@@ -20103,21 +20100,10 @@ html[data-world-mini-app="true"] .bottom-nav {
   flex-shrink: 0;
 }
 
-/* Push TopBar text right so the back pill doesn't overlap the title */
-.top-bar-v2 {
-  padding-left: 104px !important; /* back-btn width (~88px) + 16px gap */
-}
-
 .hc-back-btn:active {
   transform: scale(0.92);
-  box-shadow: 0 2px 6px rgba(15, 45, 35, 0.08);
+  box-shadow: 0 1px 4px rgba(15,45,35,0.08);
   opacity: 0.88;
-}
-
-/* In World App the header has safe-area padding — nudge the button down
-   slightly so it clears the World chrome */
-html[data-world-mini-app="true"] .hc-back-btn {
-  top: calc(14px + var(--world-safe-top, 0px));
 }
 
 /* ════════════════════════════════════════════════════════════════════
