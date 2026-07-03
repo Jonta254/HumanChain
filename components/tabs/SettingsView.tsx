@@ -6,12 +6,15 @@ import {
   BadgeCheck,
   Bell,
   ChevronRight,
+  ExternalLink,
   Globe2,
   Home,
   Info,
   LockKeyhole,
+  Mail,
   MessageCircle,
   ScrollText,
+  Send,
   Shield,
   ShieldCheck,
   Sparkles,
@@ -276,10 +279,17 @@ export function SettingsView({
       {/* ── About ─────────────────────────────────────────── */}
       <section className="panel sv-panel">
         <div className="sv-section-head"><Info size={16} /><strong>About HumanChain</strong></div>
+        <div className="sv-about-brand">
+          <div className="sv-about-logo" aria-hidden="true">HC</div>
+          <div className="sv-about-copy">
+            <strong>HumanChain</strong>
+            <span>The first trust-first network built for verified humans — ask, post, trade, and build your Human Passport inside World App.</span>
+          </div>
+        </div>
         <div className="sv-rows">
           <div className="sv-row sv-info-row">
             <div className="sv-row-left">
-              <span className="sv-row-label">App version</span>
+              <span className="sv-row-label">Version</span>
               <span className="sv-row-sub">HumanChain v{APP_VERSION}</span>
             </div>
           </div>
@@ -291,10 +301,64 @@ export function SettingsView({
           </div>
           <div className="sv-row sv-info-row">
             <div className="sv-row-left">
-              <span className="sv-row-label">World App integration</span>
+              <span className="sv-row-label">World App</span>
               <span className="sv-row-sub">SIWE · World ID · WLD payments · Notifications</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Connect ───────────────────────────────────────── */}
+      <section className="panel sv-panel">
+        <div className="sv-section-head"><Globe2 size={16} /><strong>Connect with HumanChain</strong></div>
+        <div className="sv-rows">
+          <button
+            className="sv-row"
+            onClick={() => window.open("https://x.com/HumanChainWorld", "_blank", "noopener,noreferrer")}
+            type="button"
+            aria-label="Follow HumanChain on X"
+          >
+            <div className="sv-row-icon sv-icon-x" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.73-8.835L1.254 2.25H8.08l4.713 6.057zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </div>
+            <div className="sv-row-left">
+              <span className="sv-row-label">X (Twitter)</span>
+              <span className="sv-row-sub">@HumanChainWorld · news and updates</span>
+            </div>
+            <ExternalLink size={14} className="sv-chevron" />
+          </button>
+          <button
+            className="sv-row"
+            onClick={() => window.open("https://t.me/HumanChainApp", "_blank", "noopener,noreferrer")}
+            type="button"
+            aria-label="Join HumanChain Telegram"
+          >
+            <div className="sv-row-icon sv-icon-telegram" aria-hidden="true">
+              <Send size={14} />
+            </div>
+            <div className="sv-row-left">
+              <span className="sv-row-label">Telegram</span>
+              <span className="sv-row-sub">@HumanChainApp · community and support</span>
+            </div>
+            <ExternalLink size={14} className="sv-chevron" />
+          </button>
+          <button
+            className="sv-row"
+            onClick={() => window.open("mailto:humanchainworld@gmail.com", "_blank")}
+            type="button"
+            aria-label="Email HumanChain"
+          >
+            <div className="sv-row-icon sv-icon-email" aria-hidden="true">
+              <Mail size={14} />
+            </div>
+            <div className="sv-row-left">
+              <span className="sv-row-label">Email</span>
+              <span className="sv-row-sub">humanchainworld@gmail.com</span>
+            </div>
+            <ExternalLink size={14} className="sv-chevron" />
+          </button>
         </div>
       </section>
 
@@ -304,10 +368,7 @@ export function SettingsView({
         <div className="sv-rows">
           <button
             className="sv-row sv-danger-row"
-            onClick={() => {
-              act("History cleared", "Your activity history was reset. Chain score and HP are not affected.");
-              resetHistory();
-            }}
+            onClick={resetHistory}
             type="button"
           >
             <div className="sv-row-left">
@@ -318,10 +379,7 @@ export function SettingsView({
           </button>
           <button
             className="sv-row sv-danger-row"
-            onClick={() => {
-              act("Marketplace data cleared", "All your local market listings and bids were removed.");
-              clearMarketplaceData();
-            }}
+            onClick={clearMarketplaceData}
             type="button"
           >
             <div className="sv-row-left">

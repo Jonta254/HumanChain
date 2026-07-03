@@ -19334,6 +19334,19 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 .sv-danger-row .sv-row-label { color:#d63a4a; }
 .sv-home-btn { width:100%; min-height:46px; border-radius:14px; background:var(--brand-grad); color:#fff; font-size:0.88rem; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px; border:0; }
 
+/* About brand block */
+.sv-about-brand { display:flex; align-items:flex-start; gap:12px; padding:4px 0 16px; border-bottom:1px solid var(--line); margin-bottom:4px; }
+.sv-about-logo { width:40px; height:40px; border-radius:12px; background:var(--brand-grad); color:#fff; font-size:0.78rem; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; letter-spacing:0.04em; }
+.sv-about-copy { flex:1; display:flex; flex-direction:column; gap:4px; }
+.sv-about-copy strong { font-size:0.9rem; font-weight:900; color:var(--ink); }
+.sv-about-copy span { font-size:0.72rem; color:var(--muted); line-height:1.45; }
+
+/* Connect section — social platform icons */
+.sv-row-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.sv-icon-x { background:#000; color:#fff; }
+.sv-icon-telegram { background:#229ed9; color:#fff; }
+.sv-icon-email { background:#137a57; color:#fff; }
+
 /* HomeView streak nudge + profile completion */
 .hc-streak-nudge { display:flex; align-items:center; gap:12px; padding:14px 16px; background:linear-gradient(135deg,rgba(216,125,58,0.08),rgba(216,125,58,0.03)); border:1.5px solid rgba(216,125,58,0.25); border-radius:16px; }
 .hc-streak-nudge-body { flex:1; }
