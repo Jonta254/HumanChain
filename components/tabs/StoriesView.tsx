@@ -1757,10 +1757,16 @@ export function StoriesView({
   const [userStories, setUserStories] = useState<UserStory[]>(() =>
     loadJsonFromStorage<UserStory[]>(storageKeys.userStories, []),
   );
-  const [unlockedBonusStories, setUnlockedBonusStories] = useState<Set<string>>(new Set());
-  const [unlockedReflections, setUnlockedReflections] = useState<Set<string>>(new Set());
+  const [unlockedBonusStories, setUnlockedBonusStories] = useState<Set<string>>(
+    () => new Set(loadJsonFromStorage<string[]>(storageKeys.unlockedBonusStories, [])),
+  );
+  const [unlockedReflections, setUnlockedReflections] = useState<Set<string>>(
+    () => new Set(loadJsonFromStorage<string[]>(storageKeys.unlockedReflections, [])),
+  );
   const [reflectionTexts, setReflectionTexts] = useState<Record<string, { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } | "loading">>({});
-  const [bookmarkedStories, setBookmarkedStories] = useState<Set<string>>(new Set());
+  const [bookmarkedStories, setBookmarkedStories] = useState<Set<string>>(
+    () => new Set(loadJsonFromStorage<string[]>(storageKeys.bookmarkedStories, [])),
+  );
   const [tippedStories, setTippedStories] = useState<Set<string>>(new Set());
   const [storyRatings, setStoryRatings] = useState<Record<number, number>>({});
   const [savedStoryIds, setSavedStoryIds] = useState<Set<string>>(() =>
@@ -2153,7 +2159,11 @@ export function StoriesView({
                         feature: "story-bookmark",
                         points: 5,
                         onConfirmed: async () => {
-                          setBookmarkedStories((prev) => new Set([...prev, bmKey]));
+                          setBookmarkedStories((prev) => {
+                            const next = new Set([...prev, bmKey]);
+                            saveJsonToStorage(storageKeys.bookmarkedStories, [...next]);
+                            return next;
+                          });
                           setSavedItems((c) => c + 1);
                         },
                       });
@@ -2828,7 +2838,11 @@ export function StoriesView({
                 points: 6,
                 onConfirmed: () => {
                   if (activePublishedStory) {
-                    setUnlockedBonusStories((prev) => new Set([...prev, activePublishedStory]));
+                    setUnlockedBonusStories((prev) => {
+                      const next = new Set([...prev, activePublishedStory]);
+                      saveJsonToStorage(storageKeys.unlockedBonusStories, [...next]);
+                      return next;
+                    });
                   }
                   recordHistory({ title: "Bonus story pages unlocked", detail: `2 WLD confirmed. Author notes and reflections unlocked for ${activePublishedStory ?? "this story"}.`, kind: "story" });
                 },
@@ -2842,7 +2856,21 @@ export function StoriesView({
             className={unlockedReflections.has(activePublishedStory) ? "active" : ""}
             onClick={() => {
               if (activePublishedStory && unlockedReflections.has(activePublishedStory)) {
-                act("Reflection ready", "Your Deep Story Reflection is already saved.");
+                const existing = reflectionTexts[activePublishedStory];
+                if (existing && existing !== "loading") {
+                  act("Reflection ready", "Your Deep Story Reflection is already saved below.");
+                  return;
+                }
+                const storyKey = activePublishedStory;
+                const storyLabel = publishedStory?.shelfTitle ?? String(storyKey);
+                setReflectionTexts((prev) => ({ ...prev, [storyKey]: "loading" }));
+                fetch("/api/ai/verdict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: storyLabel, answers: [], feature: "deep-story-reflection", storyTitle: storyLabel }) })
+                  .then((r) => r.json() as Promise<{ ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } }>)
+                  .then((data) => {
+                    if (data.ok && data.verdict) { setReflectionTexts((prev) => ({ ...prev, [storyKey]: data.verdict! })); }
+                    else { setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; }); act("Retry failed", "AI unavailable — try again later."); }
+                  })
+                  .catch(() => { setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; }); act("Retry failed", "Connection issue."); });
                 return;
               }
               openPayment({
@@ -2855,7 +2883,11 @@ export function StoriesView({
                 onConfirmed: async () => {
                   const storyKey = activePublishedStory;
                   if (storyKey) {
-                    setUnlockedReflections((prev) => new Set([...prev, storyKey]));
+                    setUnlockedReflections((prev) => {
+                      const next = new Set([...prev, storyKey]);
+                      saveJsonToStorage(storageKeys.unlockedReflections, [...next]);
+                      return next;
+                    });
                     setReflectionTexts((prev) => ({ ...prev, [storyKey]: "loading" }));
                   }
                   act("Reflection saved", "Your private Deep Story Reflection is saved in your Human Vault.");
@@ -2873,9 +2905,11 @@ export function StoriesView({
                       setReflectionTexts((prev) => ({ ...prev, [storyKey]: data.verdict! }));
                     } else {
                       setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
+                      act("Reflection loading failed", "AI unavailable — your unlock is saved. Tap the button again to retry.");
                     }
                   } catch {
                     setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
+                    act("Reflection loading failed", "Connection issue — your unlock is saved. Tap the button again to retry.");
                   }
                 },
               });

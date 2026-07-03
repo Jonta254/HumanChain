@@ -94,7 +94,9 @@ export function AskView({
 
   const [boostedQuestions, setBoostedQuestions] = useState<Set<string>>(new Set());
   const [boostedAnswers, setBoostedAnswers] = useState<Set<string>>(new Set());
-  const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(new Set());
+  const [unlockedVerdicts, setUnlockedVerdicts] = useState<Set<string>>(
+    () => new Set(loadJsonFromStorage<string[]>(storageKeys.unlockedVerdicts, [])),
+  );
   const [verdictResults, setVerdictResults] = useState<Record<string, { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } | "loading">>({});
   const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
   const [reportingAnswer, setReportingAnswer] = useState<string | null>(null);
@@ -696,6 +698,21 @@ export function AskView({
                       <div className="ask-verdict-row"><strong>Answer count</strong><p>{visibleAnswers.length} verified human{visibleAnswers.length === 1 ? "" : "s"} responded</p></div>
                       <div className="ask-verdict-row"><strong>Hard truth</strong><p>Real answers from verified humans carry more weight than public opinion.</p></div>
                       <div className="ask-verdict-row"><strong>Final verdict</strong><p>Read all answers above — the truth is in the patterns, not one reply.</p></div>
+                      <button
+                        style={{ marginTop: 8, fontSize: "0.78rem", opacity: 0.7 }}
+                        onClick={async () => {
+                          const q = thread.question;
+                          const answersForVerdict = visibleAnswers.map((a) => ({ text: a.text, country: (a as { country?: string }).country }));
+                          setVerdictResults((prev) => ({ ...prev, [q]: "loading" }));
+                          try {
+                            const res = await fetch("/api/ai/verdict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q, answers: answersForVerdict, feature: "deep-verdict" }) });
+                            const data = await res.json() as { ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } };
+                            if (data.ok && data.verdict) { setVerdictResults((prev) => ({ ...prev, [q]: data.verdict! })); }
+                            else { setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; }); act("Retry failed", "AI unavailable — try again later."); }
+                          } catch { setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; }); act("Retry failed", "Connection issue."); }
+                        }}
+                        type="button"
+                      >↺ Reload AI verdict</button>
                     </>
                   );
                 })()}
@@ -912,9 +929,13 @@ export function AskView({
                     feature: "deep-verdict",
                     points: 12,
                     onConfirmed: async () => {
-                      setUnlockedVerdicts((prev) => new Set([...prev, thread.question]));
-                      recordHistory({ title: "Deep Verdict unlocked", detail: thread.question, kind: "post" });
                       const q = thread.question;
+                      setUnlockedVerdicts((prev) => {
+                        const next = new Set([...prev, q]);
+                        saveJsonToStorage(storageKeys.unlockedVerdicts, [...next]);
+                        return next;
+                      });
+                      recordHistory({ title: "Deep Verdict unlocked", detail: q, kind: "post" });
                       const answersForVerdict = visibleAnswers.map((a) => ({ text: a.text, country: (a as { country?: string }).country }));
                       setVerdictResults((prev) => ({ ...prev, [q]: "loading" }));
                       try {
@@ -928,13 +949,11 @@ export function AskView({
                           setVerdictResults((prev) => ({ ...prev, [q]: data.verdict! }));
                         } else {
                           setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
-                          setUnlockedVerdicts((prev) => { const next = new Set(prev); next.delete(q); return next; });
-                          act("Verdict unavailable", "The AI could not process this verdict. Your WLD has been noted — try again.");
+                          act("Verdict loading failed", "AI unavailable — your unlock is saved. Reopen this question to retry.");
                         }
                       } catch {
                         setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
-                        setUnlockedVerdicts((prev) => { const next = new Set(prev); next.delete(q); return next; });
-                        act("Verdict unavailable", "Connection issue. Your WLD has been noted — try again.");
+                        act("Verdict loading failed", "Connection issue — your unlock is saved. Reopen this question to retry.");
                       }
                     },
                   });

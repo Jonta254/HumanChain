@@ -40,6 +40,12 @@ export const storageKeys = {
   onboarded: "hc_onboarded",
   likedCulturePosts: "humanchain_liked_culture_posts",
   worldIdVerified: "hc_world_id_verified",
+  unlockedVerdicts: "humanchain_unlocked_verdicts",
+  unlockedBonusStories: "humanchain_unlocked_bonus_stories",
+  unlockedReflections: "humanchain_unlocked_reflections",
+  bookmarkedStories: "humanchain_bookmarked_stories",
+  boostedListings: "humanchain_boosted_listings",
+  adPosted: "humanchain_ad_posted",
 } as const;
 
 export function loadJsonFromStorage<T>(key: string, fallback: T): T {

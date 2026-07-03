@@ -505,8 +505,8 @@ export function MarketplaceView({
   // Listing wizard
   const [listingPhotos, setListingPhotos] = useState<Array<{ id: number; name: string; src: string }>>([]);
   const [photoPackUnlocked, setPhotoPackUnlocked] = useState(false);
-  const [boostedListings, setBoostedListings] = useState(false);
-  const [adPosted, setAdPosted] = useState(false);
+  const [boostedListings, setBoostedListings] = useState(() => loadJsonFromStorage<boolean>(storageKeys.boostedListings, false));
+  const [adPosted, setAdPosted] = useState(() => loadJsonFromStorage<boolean>(storageKeys.adPosted, false));
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [listingDraft, setListingDraft] = useState({
@@ -542,6 +542,8 @@ export function MarketplaceView({
   useEffect(() => { saveJsonToStorage(storageKeys.marketRatings, marketRatings); }, [marketRatings]);
   useEffect(() => { saveJsonToStorage(storageKeys.marketComments, marketComments); compactStorageArray(storageKeys.marketComments, 300); }, [marketComments]);
   useEffect(() => { saveJsonToStorage(storageKeys.marketHolds, marketHolds); }, [marketHolds]);
+  useEffect(() => { if (boostedListings) saveJsonToStorage(storageKeys.boostedListings, true); }, [boostedListings]);
+  useEffect(() => { if (adPosted) saveJsonToStorage(storageKeys.adPosted, true); }, [adPosted]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const handle = humanIdentity?.username ?? "@preview_human";
