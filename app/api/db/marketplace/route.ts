@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
-import { getSessionWallet, isRateLimited, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
+import { getSessionWallet, isRateLimitedKV, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "db-marketplace-post", 10)) return rateLimitResponse();
+  if (await isRateLimitedKV(req, "db-marketplace-post", 10)) return rateLimitResponse();
 
   const sessionWallet = getSessionWallet(req);
   if (!sessionWallet) {

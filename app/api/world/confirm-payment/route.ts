@@ -202,29 +202,31 @@ export async function POST(req: NextRequest) {
     return createErrorResponse(ErrorCode.INVALID_PAYMENT, "World payment app ID did not match HumanChain app ID.", { status: 400 });
   }
 
-  // Soft-check token symbol
+  // Hard-check token symbol if field is present
   if (transactionToken && transactionToken !== normalizedToken) {
-    logger.info("Token symbol mismatch (allowing)", { route, ip: clientIp, data: { expected: normalizedToken, got: transactionToken } });
+    logger.warn("Token symbol mismatch", { route, ip: clientIp, data: { expected: normalizedToken, got: transactionToken } });
+    return createErrorResponse(ErrorCode.INVALID_PAYMENT, "Payment token does not match the expected token.", { status: 400 });
   }
 
-  // Soft-check amount
+  // Soft-check amount (denominations vary by chain/SDK version — log only)
   if (transactionTokenAmount && !expectedTokenAmounts.has(transactionTokenAmount)) {
-    logger.info("Token amount mismatch (allowing)", { route, ip: clientIp, data: { expected: [...expectedTokenAmounts], got: transactionTokenAmount } });
+    logger.warn("Token amount mismatch (allowing — denomination variance)", { route, ip: clientIp, data: { expected: [...expectedTokenAmounts], got: transactionTokenAmount } });
   }
 
-  // Soft-check sender
+  // Soft-check sender (log only — sender field not always present in World API)
   if (payloadSender && transactionSender && transactionSender !== payloadSender) {
-    logger.info("Sender mismatch (allowing)", { route, ip: clientIp, data: { payloadSender, transactionSender } });
+    logger.warn("Sender mismatch (allowing)", { route, ip: clientIp, data: { payloadSender, transactionSender } });
   }
 
-  // Check recipient
+  // Hard-check recipient — payment must go to HumanChain treasury
   const recipientMismatch =
     transactionRecipients.length > 0 &&
     !transactionRecipients.includes(treasury) &&
     !transactionRecipients.some((r) => r.replace(/^0x/, "") === treasury.replace(/^0x/, ""));
 
   if (recipientMismatch) {
-    logger.info("Recipient mismatch (allowing)", { route, ip: clientIp, data: { treasury, transactionRecipients } });
+    logger.warn("Recipient mismatch — payment did not go to treasury", { route, ip: clientIp, data: { treasury, transactionRecipients } });
+    return createErrorResponse(ErrorCode.INVALID_PAYMENT, "Payment recipient does not match HumanChain treasury.", { status: 400 });
   }
 
   // Store confirmation

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
-import { getSessionWallet, isRateLimited, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
+import { getSessionWallet, isRateLimitedKV, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
 
 export async function GET() {
   try {
@@ -18,7 +18,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "db-moments-post", 10)) return rateLimitResponse();
+  if (await isRateLimitedKV(req, "db-moments-post", 10)) return rateLimitResponse();
 
   const sessionWallet = getSessionWallet(req);
   if (!sessionWallet) {
@@ -34,8 +34,11 @@ export async function POST(req: NextRequest) {
       emoji?: string;
     };
 
-    if (!text || !author_wallet || !isWalletAddress(author_wallet))
-      return NextResponse.json({ error: "text and valid author_wallet required." }, { status: 400 });
+    if (!text || typeof text !== "string" || text.trim().length < 2)
+      return NextResponse.json({ error: "Moment text must be at least 2 characters." }, { status: 400 });
+
+    if (!author_wallet || !isWalletAddress(author_wallet))
+      return NextResponse.json({ error: "Valid author_wallet required." }, { status: 400 });
 
     if (author_wallet.toLowerCase() !== sessionWallet)
       return NextResponse.json({ error: "Wallet mismatch." }, { status: 403 });
@@ -46,6 +49,10 @@ export async function POST(req: NextRequest) {
     const safeImageUrl =
       typeof image_url === "string" && image_url.startsWith("https://") ? image_url.slice(0, 512) : null;
 
+    const safeUsername = typeof author_username === "string"
+      ? author_username.replace(/[<>"']/g, "").slice(0, 64)
+      : "";
+
     const db = createServiceClient();
     const { data, error } = await db
       .from("hc_moments")
@@ -53,7 +60,7 @@ export async function POST(req: NextRequest) {
         text: text.trim().slice(0, 280),
         image_url: safeImageUrl,
         author_wallet: sessionWallet,
-        author_username: String(author_username ?? "").slice(0, 64),
+        author_username: safeUsername,
         emoji: typeof emoji === "string" ? emoji.slice(0, 8) : null,
       })
       .select()

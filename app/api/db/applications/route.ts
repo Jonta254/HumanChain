@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
-import { getSessionWallet, isRateLimited, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
+import { getSessionWallet, isRateLimitedKV, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "applications", 10)) return rateLimitResponse();
+  if (await isRateLimitedKV(req, "applications", 10)) return rateLimitResponse();
 
   const sessionWallet = getSessionWallet(req);
   if (!sessionWallet) {

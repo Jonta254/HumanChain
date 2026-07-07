@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
-import { isRateLimited, rateLimitResponse } from "@/lib/serverApi";
+import { isRateLimitedKV, rateLimitResponse } from "@/lib/serverApi";
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "reports", 5)) return rateLimitResponse();
+  if (await isRateLimitedKV(req, "reports", 5)) return rateLimitResponse();
 
   try {
     const { target_type, target_id, reason, reporter_wallet } = (await req.json()) as {

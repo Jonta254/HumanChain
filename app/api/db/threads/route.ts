@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/client";
-import { getSessionWallet, isRateLimited, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
+import { getSessionWallet, isRateLimitedKV, isWalletAddress, rateLimitResponse } from "@/lib/serverApi";
 
 export async function GET() {
   try {
@@ -18,7 +18,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "db-threads-post", 10)) return rateLimitResponse();
+  if (await isRateLimitedKV(req, "db-threads-post", 10)) return rateLimitResponse();
 
   const sessionWallet = getSessionWallet(req);
   if (!sessionWallet) {
@@ -32,8 +32,11 @@ export async function POST(req: NextRequest) {
       author_username: string;
     };
 
-    if (!question || !author_wallet || !isWalletAddress(author_wallet))
-      return NextResponse.json({ error: "question and valid author_wallet required." }, { status: 400 });
+    if (!question || typeof question !== "string" || question.trim().length < 5)
+      return NextResponse.json({ error: "Question must be at least 5 characters." }, { status: 400 });
+
+    if (!author_wallet || !isWalletAddress(author_wallet))
+      return NextResponse.json({ error: "Valid author_wallet required." }, { status: 400 });
 
     if (author_wallet.toLowerCase() !== sessionWallet)
       return NextResponse.json({ error: "Wallet mismatch." }, { status: 403 });
@@ -41,7 +44,9 @@ export async function POST(req: NextRequest) {
     if (question.length > 500)
       return NextResponse.json({ error: "Question must be 500 characters or fewer." }, { status: 400 });
 
-    const safeUsername = typeof author_username === "string" ? author_username.slice(0, 64) : "";
+    const safeUsername = typeof author_username === "string"
+      ? author_username.replace(/[<>"']/g, "").slice(0, 64)
+      : "";
 
     const db = createServiceClient();
     const { data, error } = await db

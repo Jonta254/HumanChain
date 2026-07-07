@@ -2113,58 +2113,174 @@ html[data-world-mini-app="true"] .floating-profile-button {
   font-size: 0.72rem;
 }
 
-.moment-create-prompt {
-  display: grid;
-  grid-template-columns: 1fr auto;
+/* ── Moments composer bar ──────────────────────────────── */
+.moments-composer-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 14px 16px 12px;
+  border: 1.5px solid rgba(19,122,87,0.18);
+  border-radius: 20px;
+  background: var(--paper-strong);
+  box-shadow: 0 4px 20px rgba(19,122,87,0.1);
+}
+
+.mcb-head {
+  display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid rgba(19, 122, 87, 0.2);
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(19,122,87,0.06), var(--paper-strong));
-  box-shadow: 0 4px 16px rgba(19,122,87,0.08);
+  gap: 10px;
+  padding-bottom: 12px;
 }
 
-.moment-create-prompt div,
-.composer-title-row div {
-  display: grid;
-  gap: 3px;
+.mcb-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--brand-grad);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 
-.moment-create-prompt span {
-  color: var(--green);
-  font-size: 0.74rem;
-  font-weight: 950;
-}
-
-.moment-create-prompt strong {
-  color: var(--ink);
-  font-size: 1rem;
-  line-height: 1.12;
-}
-
-.moment-create-prompt p {
-  margin: 0;
+.mcb-prompt-input {
+  flex: 1;
+  min-height: 40px;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: var(--paper);
   color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.34;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.moment-create-prompt button {
+.mcb-prompt-input:hover,
+.mcb-prompt-input:focus-visible {
+  border-color: rgba(19,122,87,0.45);
+  box-shadow: 0 0 0 3px rgba(19,122,87,0.08);
+  outline: none;
+}
+
+.mcb-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 0 -16px;
+}
+
+.mcb-action-row {
+  display: flex;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.mcb-action {
+  flex: 1;
   min-height: 42px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
+  font-size: 0.84rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.mcb-action:active { transform: scale(0.97); }
+
+.mcb-action--photo {
+  border: 1.5px solid rgba(19,122,87,0.25);
+  color: var(--green);
+  background: rgba(19,122,87,0.07);
+}
+
+.mcb-action--photo:hover { background: rgba(19,122,87,0.13); }
+
+.mcb-action--post {
   border: 0;
-  border-radius: 999px;
-  padding: 8px 14px;
   color: #fff;
   background: var(--brand-grad);
+  box-shadow: 0 4px 16px rgba(19,122,87,0.28);
+}
+
+.mcb-action--post:hover { opacity: 0.88; }
+
+/* ── Community rules compact ───────────────────────────── */
+.moment-rules-compact {
+  border: 1px solid rgba(36,107,85,0.13);
+  border-radius: 14px;
+  background: var(--paper-strong);
+  padding: 0;
+  overflow: hidden;
+}
+
+.moment-rules-compact summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 14px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 900;
+  user-select: none;
+}
+
+.moment-rules-compact summary::-webkit-details-marker { display: none; }
+
+.moment-rules-compact summary::after {
+  content: "▾";
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+
+.moment-rules-compact[open] summary::after { transform: rotate(180deg); }
+
+.moment-rules-compact summary small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.moment-rules-compact summary svg { color: var(--green); flex-shrink: 0; }
+
+.mrc-desc {
+  margin: 0;
+  padding: 0 14px 8px;
+  color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 950;
-  white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(19,122,87,0.22);
+  line-height: 1.4;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.mrc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 14px;
+}
+
+.mrc-chips span {
+  border: 1px solid rgba(36,107,85,0.14);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: var(--green);
+  background: rgba(36,107,85,0.07);
+  font-size: 0.7rem;
+  font-weight: 850;
 }
 
 .composer-title-row {

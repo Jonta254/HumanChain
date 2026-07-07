@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { NextRequest } from "next/server";
 import {
   getSessionWallet,
-  isRateLimited,
+  isRateLimitedKV,
   isWalletAddress,
   noStoreJson,
   rateLimitResponse,
@@ -40,7 +40,7 @@ async function readStream(stream: ReadableStream<Uint8Array>) {
 }
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "account-sync", 20)) {
+  if (await isRateLimitedKV(req, "account-sync", 20)) {
     return rateLimitResponse();
   }
 

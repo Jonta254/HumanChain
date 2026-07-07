@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HeartHandshake, PlusCircle, ShieldCheck, Star, Upload, Users } from "lucide-react";
+import { Camera, HeartHandshake, PlusCircle, ShieldCheck, Star, Upload, Users } from "lucide-react";
 import { Button, Haptic, Spinner, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import { getDailyQuestion } from "@/lib/data/dailyQuestions";
 import {
@@ -1414,30 +1414,59 @@ export function ChainsView({
       </div>
       {chainView === "images" ? (
         <section className="image-post-grid">
-          <section className="moment-safety-card" aria-label="Community rules before posting">
-            <div className="section-heading">
-              <span>Community Rules</span>
-              <ShieldCheck size={18} />
-            </div>
-            <p>Allowed: travel, projects, achievements, learning, community events, and daily life.</p>
-            <div>
-              {["Respect others", "No harassment", "No pornography", "No hate speech", "No violence", "No scams", "No illegal content", "No spam"].map((rule) => (
-                <span key={rule}>{rule}</span>
-              ))}
-            </div>
-            <small>Every image is checked before it appears. Blocked content never enters Moments.</small>
-          </section>
+          {/* ── Moment composer — always visible ────────────── */}
           {!showPostComposer && !postPreview ? (
-            <section className="moment-create-prompt">
-              <div>
-                <span>Moment composer</span>
-                <strong>Hidden until you need it</strong>
-                <p>Browse first. When you are ready, open the composer and add a recent real photo with a human caption.</p>
+            <section className="moments-composer-bar" aria-label="Share a moment">
+              <div className="mcb-head">
+                <div className="mcb-avatar" aria-hidden="true">
+                  {(humanIdentity?.username ?? "@you").replace(/^@/, "").charAt(0).toUpperCase()}
+                </div>
+                <button
+                  className="mcb-prompt-input"
+                  onClick={() => setShowPostComposer(true)}
+                  type="button"
+                >
+                  What&apos;s your real moment today?
+                </button>
               </div>
-              <button onClick={() => setShowPostComposer(true)} type="button">
-                <PlusCircle size={17} />
-                Post moment
-              </button>
+              <div className="mcb-divider" aria-hidden="true" />
+              <div className="mcb-action-row">
+                <label className="mcb-action mcb-action--photo">
+                  <Camera size={14} aria-hidden="true" />
+                  <span>Add Photo</span>
+                  <input
+                    accept="image/jpeg,image/png,image/webp"
+                    className="sr-only"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      if (!file.type.startsWith("image/")) {
+                        act("Photos only", "Select a JPEG, PNG, or WebP photo to post your verified moment.");
+                        return;
+                      }
+                      setShowPostComposer(true);
+                      const reader = new FileReader();
+                      reader.onload = async () => {
+                        const preparedFile = await prepareMomentImage(file);
+                        setPostPreview(String(reader.result));
+                        setPostFile(preparedFile);
+                        setPostMediaType("image");
+                        act("Photo ready", preparedFile.size < file.size ? "Image optimized. Add a caption and publish." : "Add a caption, then publish.");
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    type="file"
+                  />
+                </label>
+                <button
+                  className="mcb-action mcb-action--post"
+                  onClick={() => setShowPostComposer(true)}
+                  type="button"
+                >
+                  <PlusCircle size={14} aria-hidden="true" />
+                  <span>Post Moment</span>
+                </button>
+              </div>
             </section>
           ) : (
             <section className="image-chain-card">
@@ -1532,6 +1561,20 @@ export function ChainsView({
               </div>
             </section>
           )}
+          {/* ── Community standards — compact collapsible ── */}
+          <details className="moment-rules-compact">
+            <summary>
+              <ShieldCheck size={13} aria-hidden="true" />
+              <span>Community standards</span>
+              <small>every image is moderated before it appears</small>
+            </summary>
+            <p className="mrc-desc">Allowed: travel, projects, achievements, learning, community events, and daily life.</p>
+            <div className="mrc-chips">
+              {["Respect others", "No harassment", "No pornography", "No hate speech", "No violence", "No scams", "No illegal content", "No spam"].map((rule) => (
+                <span key={rule}>{rule}</span>
+              ))}
+            </div>
+          </details>
           <div className="chain-section-note">
             <span>Recent human moments</span>
             <p>Photo posts from verified humans. Every card begins with the human, the caption, and the real image they shared.</p>

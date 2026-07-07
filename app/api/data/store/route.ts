@@ -1,7 +1,7 @@
 import { put } from "@vercel/blob";
 import { NextRequest } from "next/server";
 import {
-  isRateLimited,
+  isRateLimitedKV,
   noStoreJson,
   rateLimitResponse,
   readJsonBody,
@@ -31,7 +31,7 @@ function safeSegment(value: string) {
 }
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "data-store", 45)) {
+  if (await isRateLimitedKV(req, "data-store", 45)) {
     return rateLimitResponse();
   }
 

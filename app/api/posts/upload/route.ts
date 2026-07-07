@@ -1,7 +1,8 @@
 import { put } from "@vercel/blob";
 import { NextRequest } from "next/server";
 import {
-  isRateLimited,
+  getSessionWallet,
+  isRateLimitedKV,
   noStoreJson,
   rateLimitResponse,
 } from "@/lib/serverApi";
@@ -27,8 +28,13 @@ function safeMediaName(fileName: string) {
 }
 
 export async function POST(req: NextRequest) {
-  if (isRateLimited(req, "post-upload", 12)) {
+  if (await isRateLimitedKV(req, "post-upload", 12)) {
     return rateLimitResponse();
+  }
+
+  const sessionWallet = getSessionWallet(req);
+  if (!sessionWallet) {
+    return noStoreJson({ error: "Authentication required." }, { status: 401 });
   }
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
