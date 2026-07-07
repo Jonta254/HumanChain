@@ -257,7 +257,29 @@ export function HomeView({
           </span>
         </button>
         <div className="h9-topbar-text">
-          <span className="h9-greeting">{greeting},</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+            {/* HumanChain logo mark — network node triangle */}
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 28 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              style={{ flexShrink: 0 }}
+            >
+              <rect width="28" height="28" rx="14" fill="#0A0A14" />
+              {/* Connecting lines forming a triangle */}
+              <line x1="14" y1="7" x2="6" y2="21" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" strokeLinecap="round" />
+              <line x1="14" y1="7" x2="22" y2="21" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" strokeLinecap="round" />
+              <line x1="6" y1="21" x2="22" y2="21" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" strokeLinecap="round" />
+              {/* Cyan network nodes */}
+              <circle cx="14" cy="7" r="2.5" fill="#00D4FF" />
+              <circle cx="6" cy="21" r="2.5" fill="#00D4FF" />
+              <circle cx="22" cy="21" r="2.5" fill="#00D4FF" />
+            </svg>
+            <span className="h9-greeting">{greeting},</span>
+          </span>
           <strong className="h9-handle">{worldHandle}</strong>
         </div>
         <div className="h9-topbar-actions">
