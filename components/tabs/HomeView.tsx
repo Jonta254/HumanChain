@@ -12,9 +12,12 @@ import {
   Clock,
   Compass,
   Flame,
+  ExternalLink,
   Globe2,
   Hexagon,
+  Mail,
   MessageCircleQuestion,
+  Send,
   Settings,
   Sparkles,
   TrendingUp,
@@ -607,8 +610,47 @@ export function HomeView({
         </button>
       </div>
 
+      {/* ── Connect with HumanChain ───────────────────── */}
+      <section className="home-social-strip">
+        <span className="home-social-label">Connect with HumanChain</span>
+        <div className="home-social-links">
+          <button
+            className="home-social-btn home-social-btn--x"
+            onClick={() => window.open("https://x.com/HumanChainWorld", "_blank", "noopener,noreferrer")}
+            type="button"
+            aria-label="Follow on X"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.73-8.835L1.254 2.25H8.08l4.713 6.057zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            <span>X</span>
+            <ExternalLink size={11} aria-hidden="true" />
+          </button>
+          <button
+            className="home-social-btn home-social-btn--tg"
+            onClick={() => window.open("https://t.me/HumanChainApp", "_blank", "noopener,noreferrer")}
+            type="button"
+            aria-label="Join Telegram"
+          >
+            <Send size={13} aria-hidden="true" />
+            <span>Telegram</span>
+            <ExternalLink size={11} aria-hidden="true" />
+          </button>
+          <button
+            className="home-social-btn home-social-btn--email"
+            onClick={() => window.open("mailto:humanchainworld@gmail.com")}
+            type="button"
+            aria-label="Email us"
+          >
+            <Mail size={13} aria-hidden="true" />
+            <span>Email</span>
+            <ExternalLink size={11} aria-hidden="true" />
+          </button>
+        </div>
+      </section>
+
       {/* Bottom padding for nav bar */}
-      <div style={{ height: 8 }} aria-hidden="true" />
+      <div style={{ height: 16 }} aria-hidden="true" />
 
     </div>
   );

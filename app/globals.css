@@ -17625,6 +17625,66 @@ html[data-world-mini-app="true"] .story-reader-screen .reader-actions,
 }
 .h9-chip-story > svg:last-child, .h9-chip-culture > svg:last-child { color: var(--muted); }
 
+/* ── Home: social strip ─────────────────────────────────────────────── */
+.home-social-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px 8px;
+}
+
+.home-social-label {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.home-social-links {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.home-social-btn {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  border: 1.5px solid transparent;
+}
+
+.home-social-btn:active { transform: scale(0.96); opacity: 0.85; }
+
+.home-social-btn > svg:last-child { opacity: 0.6; }
+
+.home-social-btn--x {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.home-social-btn--tg {
+  background: #229ed9;
+  color: #fff;
+  border-color: #229ed9;
+}
+
+.home-social-btn--email {
+  background: transparent;
+  color: var(--green);
+  border-color: rgba(19,122,87,0.3);
+}
+
 /* ── Market: remove left-padding compensation for back button ─────── */
 .hcm-root { padding-left: 0 !important; }
 
