@@ -2604,6 +2604,93 @@ button:active {
   font-size: 0.66rem;
 }
 
+/* ── PHASE 4 — COMPLETENESS PASS ────────────────────────────────────────── */
+
+/* Secondary quick row: 3 items now (Passport removed) */
+.home-v9 .hc-quick.hc-quick-secondary {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Daily card head: insight text + arrow (no separate label row) */
+.hc-daily-card-head {
+  align-items: flex-start;
+  gap: 10px;
+}
+.hc-daily-card-head .hc-daily-insight {
+  flex: 1;
+  margin: 0;
+}
+
+/* Section head (community voices, etc.) */
+.h9-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 10px;
+  gap: 8px;
+}
+.h9-section-head strong {
+  font-size: 0.82rem;
+  font-weight: 950;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+/* Ask thread: WLD premium toggle button */
+.thread-premium-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(184,138,31,0.2);
+  background: rgba(184,138,31,0.06);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  transition: background var(--dur) var(--ease);
+  white-space: nowrap;
+}
+.thread-premium-toggle.open,
+.thread-premium-toggle.has-active {
+  background: rgba(184,138,31,0.12);
+  border-color: rgba(184,138,31,0.32);
+}
+.thread-premium-toggle:active { opacity: 0.75; transform: scale(0.96) !important; }
+
+/* Ask thread: WLD action row (revealed by toggle) */
+.thread-wld-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  background: rgba(184,138,31,0.04);
+  border: 1px solid rgba(184,138,31,0.14);
+  border-radius: var(--radius-md);
+}
+.thread-wld-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(184,138,31,0.2);
+  background: var(--surface);
+  color: var(--gold);
+  font-size: 0.74rem;
+  font-weight: 900;
+  transition: background var(--dur) var(--ease);
+  white-space: nowrap;
+}
+.thread-wld-row button:active { background: rgba(184,138,31,0.1) !important; transform: scale(0.96) !important; opacity: 1; }
+.thread-wld-row button.active {
+  background: rgba(19,122,87,0.08);
+  border-color: rgba(19,122,87,0.22);
+  color: var(--green);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    END MODERNIZATION
    ═══════════════════════════════════════════════════════════════════════ */

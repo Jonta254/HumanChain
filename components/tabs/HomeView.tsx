@@ -498,11 +498,10 @@ export function HomeView({
         </section>
       )}
 
-      {/* ── 7 · Live Moments feed ──────────────────────── */}
-      <section className="h9-section" aria-label="Live moments from the community">
+      {/* ── 7 · Community voices ──────────────────────── */}
+      <section className="h9-section" aria-label="Community voices">
         <div className="h9-section-head">
-          <strong>Live Moments</strong>
-          <span className="h9-live-pill"><span className="h9-pulse" aria-hidden="true" />Live</span>
+          <strong>Community voices</strong>
         </div>
         <div className="hc-feed" role="feed">
           {seedMoments.slice(0, 3).map((m) => (
@@ -532,7 +531,7 @@ export function HomeView({
               onClick={() => { selection(); setTab("chains"); }}
               type="button"
             >
-              See all {seedMoments.length} moments <ArrowRight size={13} />
+              See all moments <ArrowRight size={13} />
             </Button>
           </Haptic>
         </div>

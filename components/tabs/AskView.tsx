@@ -2,14 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  MapPin,
   MessageCircleQuestion,
   Mic,
   PenLine,
   Radio,
   Search,
   Send,
-  ShieldCheck,
 } from "lucide-react";
 import { Button, Haptic, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import {
@@ -111,6 +109,7 @@ export function AskView({
   const [askFeedFilter, setAskFeedFilter] = useState("All");
   const [expandedAnswerQuestion, setExpandedAnswerQuestion] = useState<string | null>(null);
   const [showAskAdvanced, setShowAskAdvanced] = useState(false);
+  const [expandedWldThread, setExpandedWldThread] = useState<string | null>(null);
   // answer reactions: answerKey → Set of emoji the current user reacted with
   const [answerReactions, setAnswerReactions] = useState<Record<string, Record<string, number>>>(() =>
     loadJsonFromStorage(storageKeys.answerReactions, {}),
@@ -421,21 +420,6 @@ export function AskView({
             </small>
           </button>
         </div>
-        <div className="ask-benefit-row">
-          <span>
-            <ShieldCheck size={14} />
-            Free: all verified humans
-          </span>
-          <span>
-            <MapPin size={14} />
-            2 WLD: one country route
-          </span>
-          <span>
-            <Radio size={14} />
-            Estimate: first reply in 10 min
-          </span>
-        </div>
-
         {activeAskService === "country" ? (
           <div className="ask-route-panel">
             <div>
@@ -605,7 +589,7 @@ export function AskView({
 
       <section className="ask-board">
         <div className="section-heading">
-          <span>Live Human Questions</span>
+          <span>Questions</span>
           <MessageCircleQuestion size={18} />
         </div>
         <div className="ask-discovery-bar">
@@ -890,79 +874,90 @@ export function AskView({
                 </button>
               ) : null}
               <button
-                className={boostedQuestions.has(thread.question) ? "active" : ""}
-                onClick={() =>
-                  openPayment({
-                    title: "Boost question",
-                    amount: "2 WLD",
-                    detail: "Move this question to the top of the board so more verified humans answer it today.",
-                    success: "Question boosted to the top of the board for 24 hours.",
-                    feature: "boost-question",
-                    points: 8,
-                    onConfirmed: () => {
-                      setBoostedQuestions((prev) => new Set([...prev, thread.question]));
-                      setThreads((current) => {
-                        const target = current.find((t) => t.question === thread.question);
-                        if (!target) return current;
-                        return [target, ...current.filter((t) => t.question !== thread.question)];
-                      });
-                      recordHistory({ title: "Question boosted", detail: thread.question, kind: "post" });
-                    },
-                  })
-                }
+                className={`thread-premium-toggle${expandedWldThread === thread.question ? " open" : ""}${boostedQuestions.has(thread.question) || unlockedVerdicts.has(thread.question) ? " has-active" : ""}`}
+                onClick={() => setExpandedWldThread((v) => v === thread.question ? null : thread.question)}
                 type="button"
               >
-                {boostedQuestions.has(thread.question) ? "✓ Boosted" : "Boost reach"}
-              </button>
-              <button
-                className={unlockedVerdicts.has(thread.question) ? "active" : ""}
-                onClick={() => {
-                  if (unlockedVerdicts.has(thread.question)) {
-                    act("Verdict ready", "Your Deep Verdict is already unlocked for this question.");
-                    return;
-                  }
-                  openPayment({
-                    title: "Deep Verdict",
-                    amount: "6 WLD",
-                    detail: "Turn this question's answers into a structured human report: most said, best answer, country differences, hard truth, final verdict.",
-                    success: "Deep Verdict unlocked. Scroll up to see the full human report.",
-                    feature: "deep-verdict",
-                    points: 12,
-                    onConfirmed: async () => {
-                      const q = thread.question;
-                      setUnlockedVerdicts((prev) => {
-                        const next = new Set([...prev, q]);
-                        saveJsonToStorage(storageKeys.unlockedVerdicts, [...next]);
-                        return next;
-                      });
-                      recordHistory({ title: "Deep Verdict unlocked", detail: q, kind: "post" });
-                      const answersForVerdict = visibleAnswers.map((a) => ({ text: a.text, country: (a as { country?: string }).country }));
-                      setVerdictResults((prev) => ({ ...prev, [q]: "loading" }));
-                      try {
-                        const res = await fetch("/api/ai/verdict", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ question: q, answers: answersForVerdict, feature: "deep-verdict" }),
-                        });
-                        const data = await res.json() as { ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } };
-                        if (data.ok && data.verdict) {
-                          setVerdictResults((prev) => ({ ...prev, [q]: data.verdict! }));
-                        } else {
-                          setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
-                          act("Verdict loading failed", "AI unavailable — your unlock is saved. Reopen this question to retry.");
-                        }
-                      } catch {
-                        setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
-                        act("Verdict loading failed", "Connection issue — your unlock is saved. Reopen this question to retry.");
-                      }
-                    },
-                  });
-                }}
-                type="button"
-              >
-                {unlockedVerdicts.has(thread.question) ? "✓ Verdict live" : "Build verdict"}
+                {boostedQuestions.has(thread.question) || unlockedVerdicts.has(thread.question) ? "WLD ✓" : "WLD ⋯"}
               </button>
             </div>
+            {expandedWldThread === thread.question ? (
+              <div className="thread-wld-row">
+                <button
+                  className={boostedQuestions.has(thread.question) ? "active" : ""}
+                  onClick={() =>
+                    openPayment({
+                      title: "Boost question",
+                      amount: "2 WLD",
+                      detail: "Move this question to the top of the board so more verified humans answer it today.",
+                      success: "Question boosted to the top of the board for 24 hours.",
+                      feature: "boost-question",
+                      points: 8,
+                      onConfirmed: () => {
+                        setBoostedQuestions((prev) => new Set([...prev, thread.question]));
+                        setThreads((current) => {
+                          const target = current.find((t) => t.question === thread.question);
+                          if (!target) return current;
+                          return [target, ...current.filter((t) => t.question !== thread.question)];
+                        });
+                        recordHistory({ title: "Question boosted", detail: thread.question, kind: "post" });
+                      },
+                    })
+                  }
+                  type="button"
+                >
+                  {boostedQuestions.has(thread.question) ? "✓ Boosted" : "↑ Boost · 2 WLD"}
+                </button>
+                <button
+                  className={unlockedVerdicts.has(thread.question) ? "active" : ""}
+                  onClick={() => {
+                    if (unlockedVerdicts.has(thread.question)) {
+                      act("Verdict ready", "Your Deep Verdict is already unlocked for this question.");
+                      return;
+                    }
+                    openPayment({
+                      title: "Deep Verdict",
+                      amount: "6 WLD",
+                      detail: "Turn this question's answers into a structured human report: most said, best answer, country differences, hard truth, final verdict.",
+                      success: "Deep Verdict unlocked. Scroll up to see the full human report.",
+                      feature: "deep-verdict",
+                      points: 12,
+                      onConfirmed: async () => {
+                        const q = thread.question;
+                        setUnlockedVerdicts((prev) => {
+                          const next = new Set([...prev, q]);
+                          saveJsonToStorage(storageKeys.unlockedVerdicts, [...next]);
+                          return next;
+                        });
+                        recordHistory({ title: "Deep Verdict unlocked", detail: q, kind: "post" });
+                        const answersForVerdict = visibleAnswers.map((a) => ({ text: a.text, country: (a as { country?: string }).country }));
+                        setVerdictResults((prev) => ({ ...prev, [q]: "loading" }));
+                        try {
+                          const res = await fetch("/api/ai/verdict", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ question: q, answers: answersForVerdict, feature: "deep-verdict" }),
+                          });
+                          const data = await res.json() as { ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } };
+                          if (data.ok && data.verdict) {
+                            setVerdictResults((prev) => ({ ...prev, [q]: data.verdict! }));
+                          } else {
+                            setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
+                            act("Verdict loading failed", "AI unavailable — your unlock is saved. Reopen this question to retry.");
+                          }
+                        } catch {
+                          setVerdictResults((prev) => { const next = { ...prev }; delete next[q]; return next; });
+                          act("Verdict loading failed", "Connection issue — your unlock is saved. Reopen this question to retry.");
+                        }
+                      },
+                    });
+                  }}
+                  type="button"
+                >
+                  {unlockedVerdicts.has(thread.question) ? "✓ Verdict live" : "Verdict · 6 WLD"}
+                </button>
+              </div>
+            ) : null}
             </article>
           );
         }) : (
@@ -978,7 +973,7 @@ export function AskView({
           <span>People also asked</span>
           <PenLine size={18} />
         </div>
-        {answerQueue.slice(0, 5).map((prompt) => (
+        {answerQueue.slice(0, 3).map((prompt) => (
           <article className="question-row ask-paa-row" key={prompt}>
             <p>{prompt}</p>
             <button
