@@ -37,17 +37,11 @@ export function LoginGate({
             <strong>HumanChain</strong>
           </div>
         </div>
-        <div className="gate-orbit" aria-hidden="true">
-          <span />
-          <i />
-          <b />
-        </div>
         <h1>{gateCopy.headline}</h1>
         <p>{gateCopy.intro}</p>
         <div className="gate-context-strip">
-          <span>{gateCopy.openedFrom} {worldContext.launchLocation ?? "World App preview"}</span>
-          <span>{worldContext.deviceOS ?? gateCopy.deviceFallback} {gateCopy.deviceReady}</span>
-          <span>{appLanguage.name} {gateCopy.selected}</span>
+          <span>{gateCopy.openedFrom} {worldContext.launchLocation ?? "World App"}</span>
+          <span>{appLanguage.name}</span>
         </div>
         {notificationReady ? (
           <div className="gate-notification-prompt">

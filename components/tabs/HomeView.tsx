@@ -7,13 +7,10 @@ import {
   Bell,
   BookOpen,
   Briefcase,
-  Camera,
   ChevronRight,
-  Clock,
   Compass,
   Flame,
   ExternalLink,
-  Globe2,
   Hexagon,
   Mail,
   MessageCircleQuestion,
@@ -21,7 +18,6 @@ import {
   Settings,
   Sparkles,
   TrendingUp,
-  Users,
   Zap,
 } from "lucide-react";
 import { Button, Haptic, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
@@ -62,14 +58,6 @@ function getStrongestBadge(args: { isVerified: boolean; streak: number; posts: n
   return null;
 }
 
-const openOpportunities = [
-  { id: "opp-1", title: "Swahili–Portuguese Medical Translation", budget: "WLD 85",  niche: "Healthcare",    region: "Kenya → Brazil",         deadline: "5 days",  proposals: 3,  urgent: true,  color: "#2f6fed", skills: ["Medical terms", "Swahili"] },
-  { id: "opp-2", title: "South African Mining Regulation Consultant", budget: "WLD 220", niche: "Legal",    region: "South Africa",            deadline: "12 days", proposals: 7,  urgent: false, color: "#137a57", skills: ["SA mining law", "MPRDA"] },
-  { id: "opp-3", title: "Filipino–Arabic Early Childhood Curriculum", budget: "WLD 140", niche: "Education", region: "Philippines → UAE",       deadline: "3 days",  proposals: 2,  urgent: true,  color: "#7c3aed", skills: ["Arabic", "Child education"] },
-  { id: "opp-4", title: "UX Research for West African Fintech App",   budget: "WLD 175", niche: "Tech",      region: "India × Ghana",          deadline: "9 days",  proposals: 11, urgent: false, color: "#0f766e", skills: ["UX research", "Fintech"] },
-  { id: "opp-5", title: "Brazilian Street Food Business Strategy",    budget: "WLD 95",  niche: "Business",  region: "Brazil",                  deadline: "7 days",  proposals: 4,  urgent: false, color: "#b45309", skills: ["Business plan", "Food market"] },
-  { id: "opp-6", title: "Indonesian–Dutch Legal Document Review",     budget: "WLD 160", niche: "Legal",     region: "Indonesia → Netherlands", deadline: "2 days",  proposals: 1,  urgent: true,  color: "#be185d", skills: ["Legal translation", "Dutch"] },
-];
 
 const dailyHumanQuestion = getDailyQuestion();
 
@@ -170,7 +158,6 @@ export function HomeView({
   const { selection, impact } = useHaptics();
   const [dailyDraft, setDailyDraft] = useState("");
   const [tickerIdx, setTickerIdx] = useState(0);
-  const [activityCount, setActivityCount] = useState(() => 72 + (new Date().getMinutes() % 28));
   const [liveHumans] = useState(() => 4847 + (new Date().getMinutes() % 53));
 
   const [dailyCountdown, setDailyCountdown] = useState(() => {
@@ -190,10 +177,8 @@ export function HomeView({
     };
     const tickerId = setInterval(() => setTickerIdx((i) => i + 1), 4000);
     countdownRef.current = setInterval(tick, 60000);
-    const activityId = setInterval(() => setActivityCount((c) => c + (Math.random() < 0.35 ? 1 : 0)), 9000);
     return () => {
       clearInterval(tickerId);
-      clearInterval(activityId);
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, []);
@@ -370,46 +355,54 @@ export function HomeView({
 
       {/* ── 4 · Quick actions ──────────────────────────── */}
       <section className="h9-section" aria-label="Quick actions">
-        <div className="hc-quick">
+        {/* Primary pair — two core actions */}
+        <div className="hc-cta-pair">
           <button
-            onClick={() => { selection(); act("Ask Humanity", "Ask one honest question — verified humans answer."); setTab("ask"); }}
+            className="hc-cta-btn hc-cta-ask"
+            onClick={() => { selection(); setTab("ask"); }}
             type="button"
-            aria-label="Ask a question"
+            aria-label="Ask The World a question"
           >
-            <span className="hc-quick-icon" style={{ "--qa": "#2f6fed" } as React.CSSProperties}>
-              <MessageCircleQuestion size={18} />
+            <span className="hc-cta-icon-bg hc-cta-icon-ask">
+              <MessageCircleQuestion size={22} />
             </span>
-            <span>Ask</span>
+            <div className="hc-cta-label">
+              <strong>Ask The World</strong>
+              <span>Verified human answers</span>
+            </div>
           </button>
           <button
-            onClick={() => { selection(); act("Post Moment", "Share a real photo or reflection — every moment builds trust."); setTab("chains"); }}
+            className={`hc-cta-btn hc-cta-chain${dailyAnswered ? " is-done" : ""}`}
+            onClick={() => { selection(); setTab("chains"); }}
             type="button"
-            aria-label="Post a moment"
+            aria-label="Join today's chain"
           >
-            <span className="hc-quick-icon" style={{ "--qa": "#137a57" } as React.CSSProperties}>
-              <Camera size={18} />
+            <span className={`hc-cta-icon-bg hc-cta-icon-chain${dailyAnswered ? " done" : ""}`}>
+              <Flame size={22} />
             </span>
-            <span>Moment</span>
+            <div className="hc-cta-label">
+              <strong>Today&apos;s Chain</strong>
+              <span>{dailyAnswered ? "Chain joined ✓" : "Add your link · earn HP"}</span>
+            </div>
           </button>
-          <button
-            onClick={() => { selection(); act("Find Work", "Browse verified opportunities with escrow protection."); setTab("market"); }}
-            type="button"
-            aria-label="Find work"
-          >
-            <span className="hc-quick-icon" style={{ "--qa": "#b88a1f" } as React.CSSProperties}>
-              <Briefcase size={18} />
-            </span>
-            <span>Work</span>
+        </div>
+        {/* Secondary row */}
+        <div className="hc-quick hc-quick-secondary">
+          <button onClick={() => { selection(); setTab("market"); }} type="button" aria-label="Marketplace">
+            <span className="hc-quick-icon" style={{ "--qa": "#b88a1f" } as React.CSSProperties}><Briefcase size={16} /></span>
+            <span>Market</span>
           </button>
-          <button
-            onClick={() => { selection(); setTab("stories"); }}
-            type="button"
-            aria-label="Read stories"
-          >
-            <span className="hc-quick-icon" style={{ "--qa": "#7c3aed" } as React.CSSProperties}>
-              <BookOpen size={18} />
-            </span>
+          <button onClick={() => { selection(); setTab("stories"); }} type="button" aria-label="Human stories">
+            <span className="hc-quick-icon" style={{ "--qa": "#7c3aed" } as React.CSSProperties}><BookOpen size={16} /></span>
             <span>Stories</span>
+          </button>
+          <button onClick={() => { selection(); setTab("culture"); }} type="button" aria-label="Culture rooms">
+            <span className="hc-quick-icon" style={{ "--qa": "#0f766e" } as React.CSSProperties}><Compass size={16} /></span>
+            <span>Culture</span>
+          </button>
+          <button onClick={() => { selection(); setTab("me"); }} type="button" aria-label="Human Passport">
+            <span className="hc-quick-icon" style={{ "--qa": "#137a57" } as React.CSSProperties}><BadgeCheck size={16} /></span>
+            <span>Passport</span>
           </button>
         </div>
       </section>
@@ -517,62 +510,7 @@ export function HomeView({
         </section>
       )}
 
-      {/* ── 7 · Open Opportunities ─────────────────────── */}
-      <section className="h9-section" aria-label="Open opportunities">
-        <div className="h9-section-head">
-          <div>
-            <strong>Open Opportunities</strong>
-            <p className="h9-section-sub">WLD-protected work for verified humans</p>
-          </div>
-          <button
-            className="h9-section-link"
-            onClick={() => { selection(); setTab("market"); }}
-            type="button"
-            aria-label="See all opportunities"
-          >
-            See all <ChevronRight size={13} />
-          </button>
-        </div>
-        <div className="h9-opps-scroll" role="list">
-          {openOpportunities.map((opp) => (
-            <button
-              key={opp.id}
-              className="h9-opp"
-              role="listitem"
-              style={{ "--opp-color": opp.color } as React.CSSProperties}
-              onClick={() => { selection(); act(opp.title, `${opp.niche} in ${opp.region}. Budget: ${opp.budget}.`); setTab("market"); }}
-              type="button"
-              aria-label={`${opp.title}, ${opp.budget}`}
-            >
-              <span className="h9-opp-bar" style={{ background: opp.color }} aria-hidden="true" />
-              <div className="h9-opp-top">
-                <span className="h9-opp-tag" style={{ color: opp.color, background: `${opp.color}18` }}>{opp.niche}</span>
-                {opp.urgent && <span className="h9-opp-urgent">Urgent</span>}
-                <span className="h9-opp-deadline"><Clock size={10} />{opp.deadline}</span>
-              </div>
-              <strong className="h9-opp-title">{opp.title}</strong>
-              <div className="h9-opp-meta">
-                <span><Globe2 size={11} />{opp.region}</span>
-                <span><Users size={11} />{opp.proposals}</span>
-              </div>
-              <div className="h9-opp-footer">
-                <strong>{opp.budget}</strong>
-                <span className="h9-opp-apply">Apply <ArrowRight size={11} /></span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 8 · Live activity ticker ───────────────────── */}
-      <div className="hc-ticker" aria-live="polite" aria-label="Live activity">
-        <span className="hc-ticker-dot" aria-hidden="true" />
-        <span className="hc-ticker-text" key={tickerIdx}>{tickerMsg}</span>
-        <span className="hc-ticker-sep" aria-hidden="true" />
-        <span className="hc-ticker-stat">{activityCount} answered today</span>
-      </div>
-
-      {/* ── 9 · Live Moments feed ──────────────────────── */}
+      {/* ── 7 · Live Moments feed ──────────────────────── */}
       <section className="h9-section" aria-label="Live moments from the community">
         <div className="h9-section-head">
           <strong>Live Moments</strong>
@@ -611,26 +549,6 @@ export function HomeView({
           </Haptic>
         </div>
       </section>
-
-      {/* ── 10 · Quick-access chips ────────────────────── */}
-      <div className="h9-bottom-chips">
-        <button className="h9-chip-story" onClick={() => { selection(); setTab("stories"); }} type="button" aria-label="Story of the Day">
-          <BookOpen size={14} aria-hidden="true" />
-          <div>
-            <strong>Story of the Day</strong>
-            <span>The Door That Waited</span>
-          </div>
-          <ChevronRight size={13} aria-hidden="true" />
-        </button>
-        <button className="h9-chip-culture" onClick={() => { selection(); setTab("culture"); }} type="button" aria-label="Culture Rooms">
-          <Compass size={14} aria-hidden="true" />
-          <div>
-            <strong>Culture Rooms</strong>
-            <span>8 cultures live</span>
-          </div>
-          <ChevronRight size={13} aria-hidden="true" />
-        </button>
-      </div>
 
       {/* ── Connect with HumanChain ───────────────────── */}
       <section className="home-social-strip">

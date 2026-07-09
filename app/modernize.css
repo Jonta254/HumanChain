@@ -458,6 +458,70 @@ button:active {
   50% { opacity:0.5; transform:scale(1.5); }
 }
 
+/* 3.5a Primary CTA pair (Ask + Chain) */
+.hc-cta-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.hc-cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px 12px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid transparent;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  overflow: hidden;
+  min-height: 68px;
+}
+.hc-cta-btn:active { transform: scale(0.95) !important; box-shadow: none !important; opacity: 1; }
+.hc-cta-ask { border-color: rgba(47,111,237,0.2); background: linear-gradient(135deg, #ffffff 0%, #f0f5ff 100%); }
+.hc-cta-chain { border-color: rgba(212,94,42,0.2); background: linear-gradient(135deg, #ffffff 0%, #fff5f0 100%); }
+.hc-cta-chain.is-done { border-color: rgba(19,122,87,0.24); background: linear-gradient(135deg, #f0faf5 0%, #e6f5ef 100%); }
+.hc-cta-icon-bg {
+  width: 44px; height: 44px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.16);
+}
+.hc-cta-icon-ask { background: linear-gradient(135deg, #2f6fed, #1a4fc2); }
+.hc-cta-icon-chain { background: linear-gradient(135deg, #d45e2a, #c04010); }
+.hc-cta-icon-chain.done { background: linear-gradient(135deg, #137a57, #0a5a3d); }
+.hc-cta-label {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.hc-cta-label strong {
+  font-size: 0.8rem;
+  font-weight: 950;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hc-cta-label span {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 3.5b Secondary quick-action row */
+.hc-quick-secondary { margin-top: 0; }
+
 /* 3.5 Quick actions */
 .home-v9 .hc-quick {
   display: grid;
@@ -2423,6 +2487,138 @@ button:active {
 .top-bar-v2-action { flex-shrink: 0; }
 
 /* ─── END PHASE 2 MODERNIZATION ────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHASE 3 — LAUNCH POLISH
+   Premium toggle, gate improvements, empty states, focus rings
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Chain premium toggle (collapsed by default) ──────────────────────── */
+.chain-premium-toggle {
+  padding: 8px 14px 0;
+  display: flex;
+}
+.chain-premium-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(184,138,31,0.22);
+  background: rgba(184,138,31,0.06);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  transition: background var(--dur) var(--ease);
+}
+.chain-premium-toggle-btn.open {
+  background: rgba(184,138,31,0.12);
+  border-color: rgba(184,138,31,0.32);
+}
+.chain-premium-toggle-btn:active { opacity: 0.75; transform: scale(0.96) !important; }
+.chain-premium-toggle-caret { font-size: 0.6rem; margin-left: 2px; }
+
+.chain-premium-tool-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px 0;
+  flex-wrap: wrap;
+}
+.chain-premium-tool-row button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 900;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.chain-premium-tool-row button small {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--gold);
+  padding: 2px 5px;
+  background: rgba(184,138,31,0.1);
+  border-radius: 4px;
+  margin-left: 2px;
+}
+.chain-premium-tool-row button.active {
+  background: rgba(19,122,87,0.08);
+  border-color: rgba(19,122,87,0.26);
+  color: var(--green);
+}
+.chain-premium-tool-row button:active { opacity: 0.7; transform: scale(0.95) !important; }
+
+/* ── LoginGate improvements ────────────────────────────────────────────── */
+.gate-context-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(19,122,87,0.04);
+  border: 1px solid rgba(19,122,87,0.1);
+}
+.gate-context-strip span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* ── Better focus rings (accessibility) ────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+/* ── Improved empty states ─────────────────────────────────────────────── */
+.chains-empty-state,
+.empty-feed-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 36px 20px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border);
+  margin: 0 14px;
+}
+.chains-empty-state > span:first-child { font-size: 2rem; }
+.chains-empty-state strong,
+.empty-feed-state strong {
+  font-size: 0.9rem;
+  font-weight: 950;
+  color: var(--ink);
+}
+.chains-empty-state p,
+.empty-feed-state span:last-child {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0;
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+/* ── Compact secondary quick-actions ───────────────────────────────────── */
+.home-v9 .hc-quick.hc-quick-secondary button {
+  min-height: 64px;
+  padding: 10px 4px 9px;
+}
+.home-v9 .hc-quick.hc-quick-secondary .hc-quick-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+}
+.home-v9 .hc-quick.hc-quick-secondary button span:last-child {
+  font-size: 0.66rem;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    END MODERNIZATION

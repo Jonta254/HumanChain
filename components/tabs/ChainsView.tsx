@@ -701,6 +701,7 @@ export function ChainsView({
   const [activeChainTool, setActiveChainTool] = useState<
     "circle" | "pulse" | "pin" | null
   >(null);
+  const [showPremiumPanel, setShowPremiumPanel] = useState(false);
   const [chainPremium, setChainPremium] = useState(loadStoredChainPremium);
 
   const visiblePosts = humanPosts.filter((post) => Boolean(post.image)).sort((a, b) => {
@@ -1264,38 +1265,32 @@ export function ChainsView({
   return (
     <div className="screen chains-screen">
       <TopBar title="Moments" subtitle="Proof-of-life posts from verified humans." />
-      <section className="chain-tools">
+      {/* Premium tools — collapsed by default, contextual WLD upsell */}
+      <div className="chain-premium-toggle">
         <button
-          onClick={() => {
-            setActiveChainTool((current) => current === "circle" ? null : "circle");
-            act("Circle guide opened", "Create a 12-human premium group after the 3 WLD payment.");
-          }}
+          className={`chain-premium-toggle-btn${showPremiumPanel ? " open" : ""}`}
+          onClick={() => setShowPremiumPanel((v) => !v)}
           type="button"
+          aria-expanded={showPremiumPanel}
         >
-          <Users size={17} />
-          Circle
+          <Star size={14} />
+          WLD Premium tools
+          <span className="chain-premium-toggle-caret" aria-hidden="true">{showPremiumPanel ? "▲" : "▼"}</span>
         </button>
-        <button
-          onClick={() => {
-            setActiveChainTool((current) => current === "pulse" ? null : "pulse");
-            act("Pulse guide opened", "Unlock the unique World Pulse after the 1 WLD payment.");
-          }}
-          type="button"
-        >
-          <HeartHandshake size={17} />
-          Pulse
-        </button>
-        <button
-          onClick={() => {
-            setActiveChainTool((current) => current === "pin" ? null : "pin");
-            act("Pin guide opened", "Choose a link or post, pay 4 WLD, and it moves to the top.");
-          }}
-          type="button"
-        >
-          <Star size={17} />
-          Pin
-        </button>
-      </section>
+      </div>
+      {showPremiumPanel ? (
+        <div className="chain-premium-tool-row">
+          <button onClick={() => { setActiveChainTool((c) => c === "circle" ? null : "circle"); }} type="button" className={activeChainTool === "circle" ? "active" : ""}>
+            <Users size={16} /> Circle <small>3 WLD</small>
+          </button>
+          <button onClick={() => { setActiveChainTool((c) => c === "pulse" ? null : "pulse"); }} type="button" className={activeChainTool === "pulse" ? "active" : ""}>
+            <HeartHandshake size={16} /> Pulse <small>1 WLD</small>
+          </button>
+          <button onClick={() => { setActiveChainTool((c) => c === "pin" ? null : "pin"); }} type="button" className={activeChainTool === "pin" ? "active" : ""}>
+            <Star size={16} /> Pin <small>4 WLD</small>
+          </button>
+        </div>
+      ) : null}
       {activeChainTool ? (
         <section className={`chain-premium-panel ${activeChainTool}`}>
           {activeChainTool === "circle" ? (
