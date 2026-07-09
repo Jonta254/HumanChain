@@ -14,22 +14,22 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#137a57",
     icons: [
       {
-        src: "/images/humanchain-logo.png",
-        sizes: "192x192",
+        src: "/world-assets/humanchain-profile-icon-1024.png",
+        sizes: "1024x1024",
         type: "image/png",
         purpose: "any",
+      },
+      {
+        src: "/world-assets/humanchain-profile-icon-1024.png",
+        sizes: "1024x1024",
+        type: "image/png",
+        purpose: "maskable",
       },
       {
         src: "/images/humanchain-logo.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
-      },
-      {
-        src: "/images/humanchain-logo.png",
-        sizes: "1024x1024",
-        type: "image/png",
-        purpose: "maskable",
       },
     ],
   };
