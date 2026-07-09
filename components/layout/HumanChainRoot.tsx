@@ -47,10 +47,18 @@ export function HumanChainRoot(props: HumanChainAppState) {
 
   const { selection, notification } = useHaptics();
 
-  const [onboardingDone, setOnboardingDone] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return Boolean(localStorage.getItem(storageKeys.onboarded));
-  });
+  // Start assuming onboarding is done so server and client agree on the
+  // first render; the real value is read from localStorage after mount to
+  // avoid a hydration mismatch for first-time visitors.
+  const [onboardingDone, setOnboardingDone] = useState(true);
+
+  useEffect(() => {
+    // One-time post-mount sync from localStorage — not a state cascade,
+    // this is the standard hydration-safe pattern for reading storage
+    // that isn't available during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOnboardingDone(Boolean(localStorage.getItem(storageKeys.onboarded)));
+  }, []);
 
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
 
@@ -294,7 +302,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
 
   return (
     <main className="app-shell">
-      {!onboardingDone && <OnboardingModal onComplete={completeOnboarding} />}
+      {verifiedHuman && !onboardingDone && <OnboardingModal onComplete={completeOnboarding} />}
       <section className="phone-frame">
         {verifiedHuman ? (
           <div key={tab} className="screen-transition-wrapper">
@@ -392,7 +400,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             onMarkAllRead={() => setNotifications((cur) => cur.map((n) => ({ ...n, read: true })))}
           />
         ) : null}
-        {verifiedHuman && points > 0 && !notificationReady && !notificationPromptDismissed ? (
+        {verifiedHuman && onboardingDone && points > 0 && !notificationReady && !notificationPromptDismissed ? (
           <NotificationPermissionPrompt
             onClose={() => setNotificationPromptDismissed(true)}
             onEnable={() => enableHumanChainNotifications("prompt")}

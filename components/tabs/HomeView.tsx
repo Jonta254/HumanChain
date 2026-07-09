@@ -11,7 +11,6 @@ import {
   Compass,
   Flame,
   ExternalLink,
-  Hexagon,
   Mail,
   MessageCircleQuestion,
   Send,
@@ -267,14 +266,6 @@ export function HomeView({
           <strong className="h9-handle">{worldHandle}</strong>
         </div>
         <div className="h9-topbar-actions">
-          {streak > 0 && (
-            <button className="h9-streak-chip" onClick={() => setTab("me")} type="button" aria-label={`${streak} day streak`}>
-              <Flame size={12} />{streak}d
-            </button>
-          )}
-          <button className="h9-hp-chip" onClick={() => setTab("me")} type="button" aria-label={`${points} HP`}>
-            <Hexagon size={11} />{points}
-          </button>
           <button
             className={`h9-icon-btn${notificationUnreadCount > 0 ? " has-dot" : ""}`}
             onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
@@ -365,7 +356,7 @@ export function HomeView({
             </span>
             <div className="hc-cta-label">
               <strong>Ask The World</strong>
-              <span>Verified human answers</span>
+              <span>Verified answers</span>
             </div>
           </button>
           <button
@@ -379,7 +370,7 @@ export function HomeView({
             </span>
             <div className="hc-cta-label">
               <strong>Today&apos;s Chain</strong>
-              <span>{dailyAnswered ? "Chain joined ✓" : "Add your link · earn HP"}</span>
+              <span>{dailyAnswered ? "Chain joined ✓" : "Add today's link"}</span>
             </div>
           </button>
         </div>

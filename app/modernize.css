@@ -468,8 +468,8 @@ button:active {
 .hc-cta-btn {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 14px 12px;
+  gap: 9px;
+  padding: 14px 10px;
   border-radius: var(--radius-lg);
   border: 1.5px solid transparent;
   background: var(--surface);
@@ -484,8 +484,8 @@ button:active {
 .hc-cta-chain { border-color: rgba(212,94,42,0.2); background: linear-gradient(135deg, #ffffff 0%, #fff5f0 100%); }
 .hc-cta-chain.is-done { border-color: rgba(19,122,87,0.24); background: linear-gradient(135deg, #f0faf5 0%, #e6f5ef 100%); }
 .hc-cta-icon-bg {
-  width: 44px; height: 44px;
-  border-radius: 13px;
+  width: 40px; height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -996,6 +996,7 @@ button:active {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(19,122,87,0.08);
+  box-shadow: 0 -8px 24px rgba(15,40,30,0.06);
   padding: 0 4px;
 }
 
@@ -1692,7 +1693,7 @@ button:active {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: calc(10px + var(--world-safe-top)) 14px 10px;
+  padding: calc(10px + var(--world-safe-top)) 14px 10px 60px;
   background: rgba(248,252,250,0.97);
   border-bottom: 1px solid rgba(19,122,87,0.08);
   backdrop-filter: blur(24px);
