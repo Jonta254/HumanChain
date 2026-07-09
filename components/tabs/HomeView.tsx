@@ -80,7 +80,7 @@ const tickerMessages = [
   "A builder from Brazil posted a proof-of-work moment",
   "7 humans reached Gold tier this week",
   "214k verified humans active in 38 countries",
-  "AI Guide helped 128 humans today",
+  "A Chain thread on family in Ghana grew to 28 links",
   "A verified trade completed in Nairobi 2 minutes ago",
   "New story submitted from the Philippines",
   "Lagos-routed question received 12 answers in one hour",
@@ -158,7 +158,6 @@ export function HomeView({
   const { selection, impact } = useHaptics();
   const [dailyDraft, setDailyDraft] = useState("");
   const [tickerIdx, setTickerIdx] = useState(0);
-  const [liveHumans] = useState(() => 4847 + (new Date().getMinutes() % 53));
 
   const [dailyCountdown, setDailyCountdown] = useState(() => {
     const now = new Date();
@@ -299,12 +298,11 @@ export function HomeView({
       <div className="h9-network-strip" aria-live="polite">
         <span className="h9-ns-dot" aria-hidden="true" />
         <span className="h9-ns-text">{tickerMsg}</span>
-        <span className="h9-ns-count">{liveHumans.toLocaleString()} live</span>
       </div>
 
       {/* ── 3 · Identity card ──────────────────────────── */}
       <section className="h9-hero" aria-label="Your HumanChain passport">
-        <button className="hc-brief-compact" onClick={() => { selection(); setTab("me"); }} type="button" aria-label="View your Human Passport">
+        <button className="hc-brief-compact" onClick={() => { selection(); setTab("me"); }} type="button" aria-label={`View Human Passport · ${humanChainId}`}>
           <span className="hc-brief-sheen" aria-hidden="true" />
 
           {/* Score + tier + verification */}
@@ -347,7 +345,6 @@ export function HomeView({
 
           {/* Footer */}
           <div className="hc-brief-compact-footer">
-            <span className="hc-brief-code">{humanChainId}</span>
             <span className="hc-brief-passport-link">View Passport <ChevronRight size={12} /></span>
           </div>
         </button>
@@ -400,10 +397,6 @@ export function HomeView({
             <span className="hc-quick-icon" style={{ "--qa": "#0f766e" } as React.CSSProperties}><Compass size={16} /></span>
             <span>Culture</span>
           </button>
-          <button onClick={() => { selection(); setTab("me"); }} type="button" aria-label="Human Passport">
-            <span className="hc-quick-icon" style={{ "--qa": "#137a57" } as React.CSSProperties}><BadgeCheck size={16} /></span>
-            <span>Passport</span>
-          </button>
         </div>
       </section>
 
@@ -411,21 +404,16 @@ export function HomeView({
       <section className="h9-section" aria-label="Daily question and AI guide">
         <div className="hc-daily-card">
           <div className="hc-daily-card-head">
-            <div className="hc-daily-card-label">
-              <Sparkles size={13} />
-              <span>AI Guide · Your Next Move</span>
-            </div>
+            <p className="hc-daily-insight">{aiInsight}</p>
             <button
               className="hc-daily-card-open"
               onClick={() => { selection(); onOpenGuide(); }}
-              aria-label="Open AI guide"
+              aria-label="Open guide"
               type="button"
             >
               <ArrowRight size={14} />
             </button>
           </div>
-
-          <p className="hc-daily-insight">{aiInsight}</p>
 
           {!dailyAnswered && isVerified && (
             <div className="hc-daily-q-block">

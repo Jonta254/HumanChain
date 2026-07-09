@@ -45,7 +45,6 @@ import {
   isVerifiedWorldHuman,
 
 } from "@/lib/humanchain/utils";
-import { Stat } from "@/components/ui/Stat";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 import type { MarketplaceListing, MarketLocationState } from "@/types/market";
 import type { HumanPost } from "@/types/content";
@@ -435,13 +434,6 @@ export function MeView({
       </nav>
       {profileView === "overview" ? (
         <>
-      <section className="profile-kpi-grid" aria-label="Profile metrics">
-        <Stat label="Score" value={String(chainScore)} />
-        <Stat label="Points" value={String(points)} />
-        <Stat label="Streak" value={`${streak}d`} />
-        <Stat label="Posts" value={String(ownedPosts.length)} />
-        <Stat label="Saved" value={String(savedItems)} />
-      </section>
       <section className={`passport-level-panel ${passportLevel.toLowerCase().replace(/\s+/g, "-")}`}>
         <div>
           <span>Passport level</span>
@@ -498,17 +490,6 @@ export function MeView({
         verifiedHuman={verifiedHuman}
       />
 
-      <section className="chain-id-card">
-        <div>
-          <span>World username</span>
-          <strong>{displayUsername}</strong>
-        </div>
-        <ShieldCheck size={28} />
-        <p>
-          This profile represents one real verified human. Username becomes the
-          public chain handle across questions, stories, tips, and fields.
-        </p>
-      </section>
       {/* ── World ID Verification ─────────────────────── */}
       <section className="panel world-id-verify-panel" aria-label="World ID verification">
         <div className="section-heading">
