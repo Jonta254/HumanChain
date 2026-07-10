@@ -21,14 +21,8 @@ export const metadata: Metadata = {
     title: "HumanChain",
     description:
       "A verified human network for wisdom, stories, marketplace listings, and nearby commerce inside World App.",
-    images: [
-      {
-        url: "/world-assets/humanchain-meta-image-1200x600.png",
-        width: 1200,
-        height: 600,
-        alt: "HumanChain — the verified-human network inside World App",
-      },
-    ],
+    // images intentionally omitted — app/opengraph-image.tsx generates this
+    // automatically via Next.js's file-convention OG image route.
   },
 };
 
