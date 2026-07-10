@@ -392,6 +392,9 @@ export function HomeView({
       {/* ── 5 · AI Guide + Daily Question ──────────────── */}
       <section className="h9-section" aria-label="Daily question and AI guide">
         <div className="hc-daily-card">
+          <div className="hc-daily-card-head">
+            <span className="hc-daily-card-label"><Sparkles size={13} />AI Insight</span>
+          </div>
           <p className="hc-daily-insight">{aiInsight}</p>
 
           {!dailyAnswered && isVerified && (

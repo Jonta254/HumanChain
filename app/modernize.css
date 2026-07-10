@@ -655,16 +655,18 @@ button:active {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px;
-  border: 1px solid var(--border);
+  padding: 11px;
+  border: 1.5px solid rgba(19,122,87,0.22);
   border-radius: var(--radius-md);
-  background: var(--surface-alt);
-  color: var(--muted);
-  font-size: 0.72rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.74rem;
   font-weight: 800;
-  transition: background var(--dur) var(--ease);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
-.hc-more-links button:active { transform: scale(0.96); opacity: 1; }
+.hc-more-links button svg { color: var(--green); flex-shrink: 0; }
+.hc-more-links button:active { transform: scale(0.96); opacity: 1; background: var(--surface-alt); border-color: rgba(19,122,87,0.4); }
 
 /* 3.6 Daily card */
 .hc-daily-card {
