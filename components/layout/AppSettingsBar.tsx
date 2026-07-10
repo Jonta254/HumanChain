@@ -65,10 +65,7 @@ export function AppSettingsBar({
                 <button
                   className={activeLanguage.code === language.code ? "active" : ""}
                   key={language.code}
-                  onClick={() => {
-                    onChange(language);
-                    setOpen(false);
-                  }}
+                  onClick={() => onChange(language)}
                   type="button"
                 >
                   {language.name}

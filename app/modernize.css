@@ -1421,9 +1421,11 @@ button:active {
 .wiv-verified-row span { font-size: 0.78rem; color: var(--muted); }
 
 /* ── 13 · SETTINGS VIEW ─────────────────────────────────────────────────── */
+/* Fixed back-button TopBar overlays the top here — pad content down
+   so nothing hides under it (matches .ask-screen / .me-screen). */
 .settings-screen {
   background: var(--surface-alt);
-  padding-top: 0;
+  padding-top: calc(76px + var(--world-safe-top, 0px)) !important;
 }
 .panel.sv-panel {
   margin: 0 12px 10px;
@@ -2450,8 +2452,10 @@ button:active {
 }
 
 /* ── 21 · ME VIEW PASSPORT REFINEMENTS ─────────────────────────────────── */
+/* Fixed back-button TopBar overlays the top here — pad content down
+   so nothing hides under it (matches .ask-screen / .settings-screen). */
 .me-screen {
-  padding-top: 0 !important;
+  padding-top: calc(76px + var(--world-safe-top, 0px)) !important;
   background: var(--surface-alt);
 }
 .hc-passport-card {
@@ -2520,9 +2524,10 @@ button:active {
   padding-top: 0 !important;
   background: var(--surface-alt);
 }
-/* Ask screen spacing */
+/* Ask screen spacing — fixed back-button TopBar overlays the top,
+   so pad content down so nothing hides under it (matches .me-screen / .settings-screen). */
 .ask-screen {
-  padding-top: 0 !important;
+  padding-top: calc(76px + var(--world-safe-top, 0px)) !important;
   background: var(--surface-alt);
 }
 /* Ask search bar */

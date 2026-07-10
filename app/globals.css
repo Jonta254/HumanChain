@@ -20960,10 +20960,11 @@ html[data-world-mini-app="true"] .bottom-nav {
   font-weight: 900;
 }
 
-/* ── 12. Screens: consistent top-safe padding ────────────────────── */
+/* ── 12. Screens: consistent top-safe padding ──────────────────────
+   ask-screen/me-screen are excluded here — they carry a fixed
+   back-button TopBar and need the larger 76px padding defined above
+   to clear it (see "Secondary tabs: fixed back-button TopBar"). ── */
 .chains-screen,
-.ask-screen,
-.me-screen,
 .market-screen,
 .stories-screen {
   padding-top: calc(16px + var(--world-safe-top, 0px));
