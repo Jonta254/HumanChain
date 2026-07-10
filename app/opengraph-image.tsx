@@ -1,10 +1,17 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export const alt = "HumanChain — the verified-human network inside World App";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const logoBuffer = await readFile(
+    join(process.cwd(), "public/world-assets/humanchain-profile-icon-1024.png")
+  );
+  const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -66,26 +73,17 @@ export default function OpengraphImage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                overflow: "hidden",
+                boxShadow: "0 0 40px rgba(19,122,87,0.55)",
               }}
             >
-              <div
-                style={{
-                  width: 116,
-                  height: 116,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background:
-                    "linear-gradient(135deg, #137a57 0%, #0c5b41 55%, #2f6fed 130%)",
-                  color: "#ffffff",
-                  fontSize: 58,
-                  fontWeight: 800,
-                  boxShadow: "0 0 40px rgba(19,122,87,0.55)",
-                }}
-              >
-                H
-              </div>
+              <img
+                src={logoSrc}
+                width={156}
+                height={156}
+                style={{ borderRadius: "50%" }}
+                alt=""
+              />
             </div>
           </div>
           <div
