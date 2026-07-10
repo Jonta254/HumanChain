@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  LockKeyhole,
   MessageCircleQuestion,
   Mic,
   PenLine,
@@ -390,7 +391,7 @@ export function AskView({
         <div className="ask-service-switch" aria-label="Ask service path">
           <button
             aria-pressed={activeAskService === "world"}
-            className={activeAskService === "world" ? "active" : ""}
+            className={`ask-service-primary${activeAskService === "world" ? " active" : ""}`}
             onClick={() => {
               setActiveAskService("world");
               setSelectedCountryRoute("World");
@@ -400,24 +401,24 @@ export function AskView({
           >
             <span>Free</span>
             <strong>Public</strong>
-            <small>Open to all verified humans</small>
+            <small>Open to all verified humans — no bot answers</small>
           </button>
           <button
             aria-pressed={activeAskService === "country"}
-            className={activeAskService === "country" ? "active" : ""}
+            className={`ask-route-chip${activeAskService === "country" ? " active" : ""}`}
             onClick={() => {
               setActiveAskService("country");
               act("Country route", "Enter one country and unlock exact country tracking for 2 WLD.");
             }}
             type="button"
           >
-            <span>2 WLD</span>
-            <strong>Country Route</strong>
-            <small>
+            <Radio size={12} />
+            <span>
               {selectedCountryRoute === "World"
-                ? "Ask one selected country"
+                ? "Country Route — ask one country"
                 : `Tracking ${selectedCountryRoute}`}
-            </small>
+            </span>
+            <small>2 WLD</small>
           </button>
         </div>
         {activeAskService === "country" ? (
@@ -468,12 +469,7 @@ export function AskView({
               Tracking: {selectedCountryRoute === "World" ? "country route not unlocked" : `${selectedCountryRoute} only`}
             </small>
           </div>
-        ) : (
-          <div className="ask-world-note">
-            <strong>World free path</strong>
-            <span>Publishes to all verified humans. No bot answer is inserted.</span>
-          </div>
-        )}
+        ) : null}
 
         <label htmlFor="question">What do you want to ask humanity?</label>
         <textarea
@@ -542,6 +538,7 @@ export function AskView({
               >
                 <strong>{mode}</strong>
                 <span>{label}</span>
+                {amount !== "Free" && <small className="ask-mode-price"><LockKeyhole size={10} />{amount}</small>}
               </button>
             ))}
           </div>
@@ -954,7 +951,7 @@ export function AskView({
                   }}
                   type="button"
                 >
-                  {unlockedVerdicts.has(thread.question) ? "✓ Verdict live" : "Verdict · 6 WLD"}
+                  {unlockedVerdicts.has(thread.question) ? "✓ Verdict live" : <><LockKeyhole size={11} /> Verdict · 6 WLD</>}
                 </button>
               </div>
             ) : null}

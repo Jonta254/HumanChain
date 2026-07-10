@@ -62,7 +62,7 @@ export const appLanguages = [
     },
     gate: {
       appLabel: "World Mini App",
-      headline: "Ask real humans. Get the world's verdict.",
+      headline: "Real humans. Real answers.",
       intro:
         "Verified by World ID. Ask questions, join daily chains, earn Human Points, and build your Human Passport inside World App.",
       openedFrom: "Via",

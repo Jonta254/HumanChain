@@ -5,7 +5,6 @@ import type { Dispatch, SetStateAction } from "react";
 import {
   BadgeCheck,
   BookOpen,
-  Briefcase,
   CalendarCheck,
   ChevronRight,
   Compass,
@@ -23,7 +22,6 @@ import {
 } from "lucide-react";
 import {
   getNextMilestone,
-  getReachedMilestones,
   getReferralLink,
   getTotalReferralHp,
   REFERRAL_BONUS_FOR_REFERRED,
@@ -194,6 +192,7 @@ export function MeView({
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
   const [showAllLedger, setShowAllLedger] = useState(false);
+  const [activityVaultTab, setActivityVaultTab] = useState<"posts" | "market" | "applications">("posts");
   const [worldIdVerified, setWorldIdVerified] = useState(() => {
     if (typeof window === "undefined") return false;
     return Boolean(localStorage.getItem(storageKeys.worldIdVerified));
@@ -558,12 +557,41 @@ export function MeView({
       </section>
       <section className="panel human-history-panel">
         <div className="section-heading">
-          <span>My post history</span>
+          <span>My Activity</span>
           <Library size={18} />
         </div>
-        {ownedPosts.length ? (
-          ownedPosts
-            .map((post) => (
+        <div className="me-activity-tabs" role="tablist" aria-label="Activity vault">
+          <button
+            aria-pressed={activityVaultTab === "posts"}
+            className={activityVaultTab === "posts" ? "active" : ""}
+            onClick={() => setActivityVaultTab("posts")}
+            type="button"
+          >
+            Posts{ownedPosts.length > 0 && <small>{ownedPosts.length}</small>}
+          </button>
+          <button
+            aria-pressed={activityVaultTab === "market"}
+            className={activityVaultTab === "market" ? "active" : ""}
+            onClick={() => setActivityVaultTab("market")}
+            type="button"
+          >
+            Market{marketplaceListings.length > 0 && <small>{marketplaceListings.length}</small>}
+          </button>
+          {jobApplications.length > 0 && (
+            <button
+              aria-pressed={activityVaultTab === "applications"}
+              className={activityVaultTab === "applications" ? "active" : ""}
+              onClick={() => setActivityVaultTab("applications")}
+              type="button"
+            >
+              Applications<small>{jobApplications.length}</small>
+            </button>
+          )}
+        </div>
+
+        {activityVaultTab === "posts" ? (
+          ownedPosts.length ? (
+            ownedPosts.map((post) => (
               <article className="history-post-card" key={post.id}>
                 {post.image ? (
                   <img alt={post.caption} src={post.image} />
@@ -578,73 +606,78 @@ export function MeView({
                 </div>
               </article>
             ))
-        ) : (
-          <p>Your published image posts will appear here and stay until you delete them.</p>
-        )}
-      </section>
-      <section className="panel human-history-panel">
-        <div className="section-heading">
-          <span>Marketplace vault</span>
-          <Store size={18} />
-        </div>
-        <article className="market-vault-row">
-          <div>
-            <strong>Nearby market location</strong>
-            <span>{marketLocation.label}</span>
-            <small>
-              {marketLocation.status === "ready"
-                ? `Active by ${marketLocation.source === "browser-gps" ? "GPS consent" : "manual area"}`
-                : "Not active yet. Open Market and tap GPS or use area."}
-            </small>
-          </div>
-          <button onClick={() => setTab("market")} type="button">
-            Open Market
-          </button>
-        </article>
-        {marketplaceListings.length ? (
-          marketplaceListings.filter((l) => l.status !== "archived").slice(0, 5).map((listing) => (
-            <article className="market-vault-row" key={listing.id}>
+          ) : (
+            <div className="ledger-empty-state">
+              <BookOpen size={22} />
+              <strong>No posts yet</strong>
+              <p>Your published image posts will appear here and stay until you delete them.</p>
+            </div>
+          )
+        ) : null}
+
+        {activityVaultTab === "market" ? (
+          <>
+            <article className="market-vault-row">
               <div>
-                <strong>{listing.title}</strong>
-                <span>{listing.price} · {listing.condition} · {listing.photos.length} photo{listing.photos.length !== 1 ? "s" : ""}</span>
+                <strong>Nearby market location</strong>
+                <span>{marketLocation.label}</span>
                 <small>
-                  {listing.area} ·
-                  <span className={`vault-status-badge ${listing.status}`}> {listing.status === "sold" ? "✓ Sold" : listing.status === "payment-ready" ? "Listed" : listing.status}</span>
+                  {marketLocation.status === "ready"
+                    ? `Active by ${marketLocation.source === "browser-gps" ? "GPS consent" : "manual area"}`
+                    : "Not active yet. Open Market and tap GPS or use area."}
                 </small>
-                <small>{listing.saleMode === "bidding" ? `Bidding · floor ${listing.bidFloor || "not set"}` : "Direct sale"} · {listing.dataStorageStatus === "cloud-safe" ? "☁ safe receipt" : "local safe"}</small>
               </div>
               <button onClick={() => setTab("market")} type="button">
-                View
+                Open Market
               </button>
             </article>
-          ))
-        ) : (
-          <p>Your marketplace listings will appear here once you post an item.</p>
-        )}
-      </section>
-      {jobApplications.length > 0 && (
-        <section className="panel human-history-panel">
-          <div className="section-heading">
-            <span>My Applications</span>
-            <Briefcase size={18} />
-          </div>
-          <div className="me-applications">
-            {jobApplications.map((app) => (
-              <div key={app.id} className="me-app-card">
-                <div className="me-app-title">{app.title}</div>
-                <div className="me-app-meta">
-                  <span>{app.budget}</span>
-                  <span>via {app.poster}</span>
-                  <span className="me-app-status">Applied</span>
-                </div>
+            {marketplaceListings.length ? (
+              marketplaceListings.filter((l) => l.status !== "archived").slice(0, 5).map((listing) => (
+                <article className="market-vault-row" key={listing.id}>
+                  <div>
+                    <strong>{listing.title}</strong>
+                    <span>{listing.price} · {listing.condition} · {listing.photos.length} photo{listing.photos.length !== 1 ? "s" : ""}</span>
+                    <small>
+                      {listing.area} ·
+                      <span className={`vault-status-badge ${listing.status}`}> {listing.status === "sold" ? "✓ Sold" : listing.status === "payment-ready" ? "Listed" : listing.status}</span>
+                    </small>
+                    <small>{listing.saleMode === "bidding" ? `Bidding · floor ${listing.bidFloor || "not set"}` : "Direct sale"} · {listing.dataStorageStatus === "cloud-safe" ? "☁ safe receipt" : "local safe"}</small>
+                  </div>
+                  <button onClick={() => setTab("market")} type="button">
+                    View
+                  </button>
+                </article>
+              ))
+            ) : (
+              <div className="ledger-empty-state">
+                <Store size={22} />
+                <strong>No listings yet</strong>
+                <p>Your marketplace listings will appear here once you post an item.</p>
               </div>
-            ))}
-          </div>
-          <button className="hp-ledger-toggle" onClick={() => setTab("market")} type="button">
-            Browse more opportunities →
-          </button>
-        </section>
-      )}
+            )}
+          </>
+        ) : null}
+
+        {activityVaultTab === "applications" && jobApplications.length > 0 ? (
+          <>
+            <div className="me-applications">
+              {jobApplications.map((app) => (
+                <div key={app.id} className="me-app-card">
+                  <div className="me-app-title">{app.title}</div>
+                  <div className="me-app-meta">
+                    <span>{app.budget}</span>
+                    <span>via {app.poster}</span>
+                    <span className="me-app-status">Applied</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button className="hp-ledger-toggle" onClick={() => setTab("market")} type="button">
+              Browse more opportunities →
+            </button>
+          </>
+        ) : null}
+      </section>
 
       <section className="badge-cloud">
         {profileBadges.map((badge) => (
@@ -860,7 +893,6 @@ function ReferralCard({
 }) {
   const referralLink = getReferralLink(displayUsername);
   const nextMilestone = getNextMilestone(referralShareCount);
-  const reachedMilestones = getReachedMilestones(referralShareCount);
   const totalHpEstimate = getTotalReferralHp(referralShareCount);
   const progressPct = nextMilestone
     ? Math.round((referralShareCount / nextMilestone.count) * 100)
@@ -937,21 +969,16 @@ function ReferralCard({
         </div>
       )}
 
-      <div className="referral-milestones">
-        {referralMilestones.map((m) => {
-          const reached = reachedMilestones.some((r) => r.count === m.count);
-          return (
-            <div
-              className={`referral-milestone ${reached ? "reached" : ""}`}
-              key={m.count}
-            >
+      {referralShareCount === 0 && (
+        <div className="referral-milestones">
+          {referralMilestones.map((m) => (
+            <div className="referral-milestone" key={m.count}>
               <strong>{m.badge}</strong>
               <span>{m.count} share{m.count > 1 ? "s" : ""} · +{m.hpBonus} HP</span>
-              {reached && <i>✓</i>}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       {referralShareCount > 0 && (
         <div className="referral-stats-row">

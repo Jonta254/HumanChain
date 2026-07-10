@@ -14,14 +14,21 @@ export const metadata: Metadata = {
     "Ask real humans, post moments, trade nearby, and read stories — verified by World ID.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/images/humanchain-logo.png",
-    apple: "/images/humanchain-logo.png",
+    icon: "/world-assets/humanchain-profile-icon-1024.png",
+    apple: "/world-assets/humanchain-profile-icon-1024.png",
   },
   openGraph: {
     title: "HumanChain",
     description:
       "A verified human network for wisdom, stories, marketplace listings, and nearby commerce inside World App.",
-    images: ["/images/story-cover-door-color.png"],
+    images: [
+      {
+        url: "/world-assets/humanchain-meta-image-1200x600.png",
+        width: 1200,
+        height: 600,
+        alt: "HumanChain — the verified-human network inside World App",
+      },
+    ],
   },
 };
 

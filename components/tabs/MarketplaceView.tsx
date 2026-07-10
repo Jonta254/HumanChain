@@ -482,6 +482,8 @@ export function MarketplaceView({
   const [activeItem, setActiveItem]   = useState<SeedItem | MarketplaceListing | null>(null);
   const [showSell, setShowSell]       = useState(false);
   const [galleryIdx, setGalleryIdx]   = useState(0);
+  const [showAllJobs, setShowAllJobs] = useState(false);
+  const [showAllProviders, setShowAllProviders] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   // Bids
@@ -1268,7 +1270,7 @@ export function MarketplaceView({
             <label className="hcm-photo-upload">
               <Upload size={22} />
               <strong>Add Item Photos</strong>
-              <span>2 free · 3-5 need 1.5 WLD photo pack</span>
+              <span>2 free · <LockKeyhole size={11} />3-5 need 1.5 WLD photo pack</span>
               <input ref={photoInputRef} type="file" accept="image/*" multiple onChange={(e) => handlePhotos(e.target.files)} />
             </label>
             <div className="hcm-photo-grid">
@@ -1770,12 +1772,12 @@ export function MarketplaceView({
                         <strong>{item.title}</strong>
                         <span className="hcm-item-price">{item.price}</span>
                       </div>
+                      <span className="hcm-item-trust"><BadgeCheck size={11} />{item.trust}</span>
                       <p className="hcm-item-sub">{item.condition} · {item.seller} · {item.location}</p>
                       <div className="hcm-item-meta-row">
                         <span><MapPin size={10} />{item.distance}</span>
                         <span>{item.tag}</span>
                         <span><Camera size={10} />{item.photos}</span>
-                        <span>{item.trust}</span>
                       </div>
                       <div className="hcm-item-social">
                         <span>{social.rating} votes</span>
@@ -1979,7 +1981,7 @@ export function MarketplaceView({
             <section className="hcm-section">
               <div className="hcm-section-head"><strong>Open Jobs</strong><span className="hcm-count">{svcJobs.length}</span></div>
               <div className="hcm-svc-list">
-                {svcJobs.map((job) => (
+                {(showAllJobs ? svcJobs : svcJobs.slice(0, 4)).map((job) => (
                   <button key={job.id} className={`hcm-svc-card${appliedJobs.has(job.id) ? " applied" : ""}`} style={{ "--cc": job.color } as React.CSSProperties} onClick={() => setActiveSvc(job)} type="button">
                     <span className="hcm-svc-bar" />
                     <div className="hcm-svc-top">
@@ -2003,6 +2005,11 @@ export function MarketplaceView({
                   </button>
                 ))}
               </div>
+              {svcJobs.length > 4 && (
+                <button className="hp-ledger-toggle" onClick={() => setShowAllJobs((v) => !v)} type="button">
+                  {showAllJobs ? "Show less" : `Show all ${svcJobs.length} jobs`}
+                </button>
+              )}
             </section>
           )}
 
@@ -2011,7 +2018,7 @@ export function MarketplaceView({
             <section className="hcm-section">
               <div className="hcm-section-head"><strong>Service Providers</strong><span className="hcm-count">{svcServices.length}</span></div>
               <div className="hcm-svc-list">
-                {svcServices.map((svc) => (
+                {(showAllProviders ? svcServices : svcServices.slice(0, 4)).map((svc) => (
                   <button key={svc.id} className="hcm-svc-card" style={{ "--cc": svc.color } as React.CSSProperties} onClick={() => setActiveSvc(svc)} type="button">
                     <span className="hcm-svc-bar" />
                     <div className="hcm-svc-top">
@@ -2024,6 +2031,11 @@ export function MarketplaceView({
                   </button>
                 ))}
               </div>
+              {svcServices.length > 4 && (
+                <button className="hp-ledger-toggle" onClick={() => setShowAllProviders((v) => !v)} type="button">
+                  {showAllProviders ? "Show less" : `Show all ${svcServices.length} providers`}
+                </button>
+              )}
             </section>
           )}
 

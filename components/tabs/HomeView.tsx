@@ -10,11 +10,11 @@ import {
   ChevronRight,
   Compass,
   Flame,
-  ExternalLink,
   Mail,
   MessageCircleQuestion,
   Send,
   Settings,
+  ShoppingBag,
   Sparkles,
   TrendingUp,
   Zap,
@@ -69,29 +69,6 @@ const seedMoments = [
   { id: "m6", initials: "JB", bg: "#7c3aed", handle: "@jayden_builds", loc: "Accra, Ghana",        verified: false, time: "1h",  text: "Six months of daily questions. My answers in January sound like they came from a different person.", likes: 112, replies: 34 },
   { id: "m7", initials: "NP", bg: "#be185d", handle: "@nadia_ph",      loc: "Cebu, Philippines",   verified: true,  time: "2h",  text: "My grandmother answered today's question by voice. I transcribed it word for word. It was the best answer I've seen.", likes: 201, replies: 48 },
   { id: "m8", initials: "TK", bg: "#1d4ed8", handle: "@taro_k",        loc: "Osaka, Japan",        verified: true,  time: "3h",  text: "Opened a Culture Room for Japanese diaspora. 47 people joined in one hour.", likes: 74, replies: 19 },
-];
-
-const tickerMessages = [
-  "A human from South Africa answered today's question",
-  "4.9k verified humans online right now",
-  "New verdict forming in Health & Healing",
-  "6 new opportunities posted in the last hour",
-  "A builder from Brazil posted a proof-of-work moment",
-  "7 humans reached Gold tier this week",
-  "214k verified humans active in 38 countries",
-  "A Chain thread on family in Ghana grew to 28 links",
-  "A verified trade completed in Nairobi 2 minutes ago",
-  "New story submitted from the Philippines",
-  "Lagos-routed question received 12 answers in one hour",
-  "Faith & Prayer gained 47 new chain links today",
-  "A healthcare translator from Uganda just got hired",
-  "WLD escrow protected a Swahili–Portuguese job today",
-  "A Japanese diaspora Culture Room opened — 47 joined",
-  "A verified human made their first marketplace sale",
-  "Streak builder from Ghana hit 90 days in a row",
-  "New ask thread: what does your culture say about rest?",
-  "A migration worker unlocked their first Passport tier",
-  "Someone's grandmother gave today's best daily answer",
 ];
 
 function getGreeting() {
@@ -156,7 +133,6 @@ export function HomeView({
 }) {
   const { selection, impact } = useHaptics();
   const [dailyDraft, setDailyDraft] = useState("");
-  const [tickerIdx, setTickerIdx] = useState(0);
 
   const [dailyCountdown, setDailyCountdown] = useState(() => {
     const now = new Date();
@@ -173,15 +149,11 @@ export function HomeView({
       midnight.setHours(24, 0, 0, 0);
       setDailyCountdown(Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000)));
     };
-    const tickerId = setInterval(() => setTickerIdx((i) => i + 1), 4000);
     countdownRef.current = setInterval(tick, 60000);
     return () => {
-      clearInterval(tickerId);
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, []);
-
-  const tickerMsg = tickerMessages[tickerIdx % tickerMessages.length];
 
   function formatCountdown(secs: number) {
     const h = Math.floor(secs / 3600);
@@ -267,6 +239,14 @@ export function HomeView({
         </div>
         <div className="h9-topbar-actions">
           <button
+            className="h9-icon-btn h9-icon-btn-guide"
+            onClick={() => { selection(); onOpenGuide(); }}
+            aria-label="Open HumanChain Guide — full assist for every area"
+            type="button"
+          >
+            <Sparkles size={17} />
+          </button>
+          <button
             className={`h9-icon-btn${notificationUnreadCount > 0 ? " has-dot" : ""}`}
             onClick={notificationReady ? onOpenNotifications : onEnableNotifications}
             aria-label={notificationUnreadCount > 0 ? `${notificationUnreadCount} unread notifications` : "Notifications"}
@@ -285,11 +265,17 @@ export function HomeView({
         </div>
       </header>
 
-      {/* ── 2 · Live network strip ──────────────────────── */}
-      <div className="h9-network-strip" aria-live="polite">
-        <span className="h9-ns-dot" aria-hidden="true" />
-        <span className="h9-ns-text">{tickerMsg}</span>
-      </div>
+      {/* ── 2 · What HumanChain is (unverified/preview users only) ── */}
+      {!isVerified && (
+        <div className="h9-intro-card">
+          <span className="h9-intro-icon" aria-hidden="true"><Sparkles size={17} /></span>
+          <p className="h9-intro-text">
+            <strong>HumanChain</strong> is the verified-human network inside World App.
+            Ask real questions, get real answers, and build a trust record backed
+            by your World ID.
+          </p>
+        </div>
+      )}
 
       {/* ── 3 · Identity card ──────────────────────────── */}
       <section className="h9-hero" aria-label="Your HumanChain passport">
@@ -341,12 +327,11 @@ export function HomeView({
         </button>
       </section>
 
-      {/* ── 4 · Quick actions ──────────────────────────── */}
-      <section className="h9-section" aria-label="Quick actions">
-        {/* Primary pair — two core actions */}
-        <div className="hc-cta-pair">
+      {/* ── 4 · Primary action ──────────────────────────── */}
+      <section className="h9-section" aria-label="Ask The World">
+        <div className="hc-cta-primary">
           <button
-            className="hc-cta-btn hc-cta-ask"
+            className="hc-cta-btn hc-cta-ask hc-cta-ask-solo"
             onClick={() => { selection(); setTab("ask"); }}
             type="button"
             aria-label="Ask The World a question"
@@ -356,37 +341,50 @@ export function HomeView({
             </span>
             <div className="hc-cta-label">
               <strong>Ask The World</strong>
-              <span>Verified answers</span>
+              <span>Verified answers from real humans</span>
             </div>
+            <ChevronRight size={16} className="hc-cta-chevron" aria-hidden="true" />
           </button>
           <button
-            className={`hc-cta-btn hc-cta-chain${dailyAnswered ? " is-done" : ""}`}
+            className={`hc-chain-pill${dailyAnswered ? " done" : ""}`}
             onClick={() => { selection(); setTab("chains"); }}
             type="button"
             aria-label="Join today's chain"
           >
-            <span className={`hc-cta-icon-bg hc-cta-icon-chain${dailyAnswered ? " done" : ""}`}>
-              <Flame size={22} />
-            </span>
-            <div className="hc-cta-label">
-              <strong>Today&apos;s Chain</strong>
-              <span>{dailyAnswered ? "Chain joined ✓" : "Add today's link"}</span>
-            </div>
+            <Flame size={14} />
+            <span>{dailyAnswered ? "Today's Chain — joined ✓" : "Today's Chain — add your link"}</span>
+            <ChevronRight size={13} aria-hidden="true" />
           </button>
         </div>
-        {/* Secondary row */}
-        <div className="hc-quick hc-quick-secondary">
-          <button onClick={() => { selection(); setTab("market"); }} type="button" aria-label="Marketplace">
-            <span className="hc-quick-icon" style={{ "--qa": "#b88a1f" } as React.CSSProperties}><Briefcase size={16} /></span>
-            <span>Market</span>
-          </button>
+      </section>
+
+      {/* ── Market preview ───────────────────────────────── */}
+      <section className="h9-section" aria-label="Market preview">
+        <button className="hc-market-preview" onClick={() => { selection(); setTab("market"); }} type="button">
+          <div className="hc-mp-head">
+            <span className="hc-mp-head-label"><ShoppingBag size={14} />Nearby Market</span>
+            <span className="hc-mp-live"><span aria-hidden="true" />Live</span>
+          </div>
+          {marketplaceListings.length ? (
+            <div className="hc-mp-rows">
+              {marketplaceListings.slice(0, 2).map((l) => (
+                <div className="hc-mp-row" key={l.id}>
+                  <span className="hc-mp-row-title">{l.title || "Untitled item"}</span>
+                  <span className="hc-mp-row-price">{l.price || "Price not set"}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="hc-mp-empty">World ID sellers, WLD escrow. Be the first to list something nearby.</p>
+          )}
+          <span className="hc-mp-cta">See Market <ChevronRight size={13} /></span>
+        </button>
+        <div className="hc-more-links">
           <button onClick={() => { selection(); setTab("stories"); }} type="button" aria-label="Human stories">
-            <span className="hc-quick-icon" style={{ "--qa": "#7c3aed" } as React.CSSProperties}><BookOpen size={16} /></span>
-            <span>Stories</span>
+            <BookOpen size={14} /><span>Stories</span>
           </button>
           <button onClick={() => { selection(); setTab("culture"); }} type="button" aria-label="Culture rooms">
-            <span className="hc-quick-icon" style={{ "--qa": "#0f766e" } as React.CSSProperties}><Compass size={16} /></span>
-            <span>Culture</span>
+            <Compass size={14} /><span>Culture</span>
           </button>
         </div>
       </section>
@@ -394,17 +392,7 @@ export function HomeView({
       {/* ── 5 · AI Guide + Daily Question ──────────────── */}
       <section className="h9-section" aria-label="Daily question and AI guide">
         <div className="hc-daily-card">
-          <div className="hc-daily-card-head">
-            <p className="hc-daily-insight">{aiInsight}</p>
-            <button
-              className="hc-daily-card-open"
-              onClick={() => { selection(); onOpenGuide(); }}
-              aria-label="Open guide"
-              type="button"
-            >
-              <ArrowRight size={14} />
-            </button>
-          </div>
+          <p className="hc-daily-insight">{aiInsight}</p>
 
           {!dailyAnswered && isVerified && (
             <div className="hc-daily-q-block">
@@ -442,13 +430,6 @@ export function HomeView({
                 <span>Next question in {formatCountdown(dailyCountdown)}</span>
               </div>
               <TrendingUp size={16} />
-            </div>
-          )}
-
-          {!isVerified && (
-            <div className="hc-daily-unverified">
-              <BadgeCheck size={14} />
-              <span>Verify with World ID to answer daily questions and earn HP.</span>
             </div>
           )}
 
@@ -493,76 +474,62 @@ export function HomeView({
       <section className="h9-section" aria-label="Community voices">
         <div className="h9-section-head">
           <strong>Community voices</strong>
+          <button className="h9-section-link" onClick={() => { selection(); setTab("chains"); }} type="button">
+            See all <ArrowRight size={12} />
+          </button>
         </div>
-        <div className="hc-feed" role="feed">
-          {seedMoments.slice(0, 3).map((m) => (
-            <article key={m.id} className="hc-moment">
-              <div className="hc-moment-av" style={{ background: m.bg }} aria-hidden="true">
-                {m.initials}
-                {m.verified && <span className="hc-moment-pip"><BadgeCheck size={7} /></span>}
-              </div>
-              <div className="hc-moment-body">
-                <div className="hc-moment-meta">
+        <div className="hc-feed-scroll" role="feed">
+          {seedMoments.slice(0, 5).map((m) => (
+            <article key={m.id} className="hc-moment-compact">
+              <div className="hc-moment-compact-head">
+                <div className="hc-moment-av" style={{ background: m.bg }} aria-hidden="true">
+                  {m.initials}
+                  {m.verified && <span className="hc-moment-pip"><BadgeCheck size={7} /></span>}
+                </div>
+                <div>
                   <span className="hc-moment-handle">{m.handle}</span>
                   <span className="hc-moment-loc">{m.loc}</span>
-                  <span className="hc-moment-time">{m.time} ago</span>
                 </div>
-                <p className="hc-moment-text">{m.text}</p>
-                <div className="hc-moment-actions" aria-label={`${m.likes} likes, ${m.replies} replies`}>
-                  <span className="hc-moment-act"><Zap size={11} />{m.likes}</span>
-                  <span className="hc-moment-act"><MessageCircleQuestion size={11} />{m.replies}</span>
-                </div>
+              </div>
+              <p className="hc-moment-text">{m.text}</p>
+              <div className="hc-moment-actions" aria-label={`${m.likes} likes, ${m.replies} replies`}>
+                <span className="hc-moment-act"><Zap size={11} />{m.likes}</span>
+                <span className="hc-moment-act"><MessageCircleQuestion size={11} />{m.replies}</span>
               </div>
             </article>
           ))}
-          <Haptic variant="selection" asChild>
-            <Button
-              variant="tertiary"
-              fullWidth
-              onClick={() => { selection(); setTab("chains"); }}
-              type="button"
-            >
-              See all moments <ArrowRight size={13} />
-            </Button>
-          </Haptic>
         </div>
       </section>
 
       {/* ── Connect with HumanChain ───────────────────── */}
       <section className="home-social-strip">
         <span className="home-social-label">Connect with HumanChain</span>
-        <div className="home-social-links">
+        <div className="home-social-icons">
           <button
-            className="home-social-btn home-social-btn--x"
+            className="home-social-icon home-social-icon--x"
             onClick={() => window.open("https://x.com/HumanChainWorld", "_blank", "noopener,noreferrer")}
             type="button"
-            aria-label="Follow on X"
+            aria-label="Follow HumanChain on X"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.73-8.835L1.254 2.25H8.08l4.713 6.057zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
-            <span>X</span>
-            <ExternalLink size={11} aria-hidden="true" />
           </button>
           <button
-            className="home-social-btn home-social-btn--tg"
+            className="home-social-icon home-social-icon--tg"
             onClick={() => window.open("https://t.me/HumanChainApp", "_blank", "noopener,noreferrer")}
             type="button"
-            aria-label="Join Telegram"
+            aria-label="Join HumanChain on Telegram"
           >
-            <Send size={13} aria-hidden="true" />
-            <span>Telegram</span>
-            <ExternalLink size={11} aria-hidden="true" />
+            <Send size={18} aria-hidden="true" />
           </button>
           <button
-            className="home-social-btn home-social-btn--email"
+            className="home-social-icon home-social-icon--email"
             onClick={() => window.open("mailto:humanchainworld@gmail.com")}
             type="button"
-            aria-label="Email us"
+            aria-label="Email HumanChain"
           >
-            <Mail size={13} aria-hidden="true" />
-            <span>Email</span>
-            <ExternalLink size={11} aria-hidden="true" />
+            <Mail size={18} aria-hidden="true" />
           </button>
         </div>
       </section>

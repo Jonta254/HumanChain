@@ -1375,15 +1375,6 @@ export function ChainsView({
           ) : null}
         </section>
       ) : null}
-      <section className="chain-map">
-        <span className="section-kicker">World field</span>
-        <h2>Moments, links, and quote rooms from real humans.</h2>
-        <div className="chain-orbit" aria-hidden="true">
-          <span />
-          <i />
-          <b />
-        </div>
-      </section>
       <div className="chain-tabs">
         <button
           className={chainView === "images" ? "active" : ""}

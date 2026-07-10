@@ -73,6 +73,7 @@ export function LoginGate({
           <Haptic variant="selection" asChild>
             <Button
               variant="secondary"
+              size="sm"
               fullWidth
               onClick={() => { selection(); onPreview(); }}
               type="button"
