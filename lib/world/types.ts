@@ -9,14 +9,21 @@ export type WorldPaymentInput = {
   token?: HumanChainPaymentToken;
 };
 
+// Matches the actual shape returned by createSuccessResponse/createErrorResponse
+// (lib/api/responses.ts) — NOT a flat { ok, error } shape. Error text is in
+// `message`, not `error`; success payloads are nested under `data`, and
+// "setup incomplete" is signalled via `code`, not a boolean `pendingSetup`.
 export type WorldPaymentConfirmation = {
-  error?: string;
+  code?: string;
+  message?: string;
   ok?: boolean;
-  pending?: boolean;
-  pendingSetup?: boolean;
-  transaction?: {
-    transaction_status?: string;
-    status?: string;
+  retryable?: boolean;
+  data?: {
+    reference?: string;
+    feature?: string;
+    amount?: number;
+    token?: string;
+    treasury?: string;
   };
 };
 

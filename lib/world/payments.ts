@@ -52,7 +52,7 @@ async function confirmWorldPayment(input: {
       confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
     } catch (error) {
       lastConfirmation = {
-        error: error instanceof Error ? error.message : "World payment confirmation request failed.",
+        message: error instanceof Error ? error.message : "World payment confirmation request failed.",
         ok: false,
       };
       continue;
@@ -65,7 +65,7 @@ async function confirmWorldPayment(input: {
     if (!confirmationResponse.ok && confirmationResponse.status < 500) {
       return {
         confirmation,
-        error: confirmation.error ?? "World payment could not be confirmed.",
+        error: confirmation.message ?? "World payment could not be confirmed.",
         ok: false,
       };
     }
@@ -74,10 +74,10 @@ async function confirmWorldPayment(input: {
     if (!confirmationResponse.ok) continue;
 
     // Setup not complete — no point polling.
-    if (confirmation.pendingSetup) {
+    if (confirmation.code === "SETUP_INCOMPLETE") {
       return {
         confirmation,
-        error: confirmation.error ?? "World payment confirmation is not configured.",
+        error: confirmation.message ?? "World payment confirmation is not configured.",
         ok: false,
       };
     }
@@ -93,7 +93,7 @@ async function confirmWorldPayment(input: {
   return {
     confirmation: lastConfirmation,
     error:
-      lastConfirmation?.error ??
+      lastConfirmation?.message ??
       "World payment is still pending on WorldChain. Your WLD has been sent — do not pay again.",
     ok: false,
   };
@@ -132,14 +132,18 @@ export async function payWithWorld({
       body: JSON.stringify({ amount, feature, token }),
       timeoutMs: 8_000,
     });
-    const referencePayload = (await referenceResponse.json()) as { reference?: string; error?: string };
-    if (!referenceResponse.ok || !referencePayload.reference) {
+    const referencePayload = (await referenceResponse.json()) as {
+      data?: { reference?: string };
+      message?: string;
+    };
+    const generatedReference = referencePayload.data?.reference;
+    if (!referenceResponse.ok || !generatedReference) {
       return {
         ok: false,
-        error: referencePayload.error ?? "Could not prepare payment reference.",
+        error: referencePayload.message ?? "Could not prepare payment reference.",
       };
     }
-    referenceStr = referencePayload.reference;
+    referenceStr = generatedReference;
   } catch (error) {
     return {
       ok: false,
