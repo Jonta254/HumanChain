@@ -1413,6 +1413,12 @@ html[data-world-mini-app="true"] .floating-profile-button {
   left: max(14px, calc(14px + var(--world-safe-left)));
 }
 
+/* Story reader has its own back button in the exact same top-left corner —
+   hide the floating profile shortcut while reading so the two don't collide. */
+.phone-frame:has(.story-reader-screen) .floating-profile-button {
+  display: none;
+}
+
 .next-best-action-card {
   grid-template-columns: 1fr;
   border-color: rgba(36, 107, 85, 0.2);
@@ -2595,8 +2601,9 @@ html[data-world-mini-app="true"] .floating-profile-button {
   min-height: var(--app-height);
   overflow-x: hidden;
   overflow-y: auto;
-  /* Contain overscroll so bounce stays inside this element, never hits WebView root */
-  overscroll-behavior-y: contain;
+  /* "none" (not "contain") — kills the iOS rubber-band bounce itself,
+     not just its propagation to the WebView root. World App requirement. */
+  overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
   padding:
     calc(18px + var(--world-safe-top))
@@ -9365,7 +9372,7 @@ html[data-world-mini-app="true"] .screen {
   min-height: unset;
   overflow-x: hidden;
   overflow-y: auto;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
 }
 

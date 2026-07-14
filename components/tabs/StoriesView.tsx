@@ -1772,7 +1772,7 @@ export function StoriesView({
   const [savedStoryIds, setSavedStoryIds] = useState<Set<string>>(() =>
     new Set(loadJsonFromStorage<string[]>(storageKeys.savedStoryIds, [])),
   );
-  const [storiesTab, setStoriesTab] = useState<"browse" | "library">("browse");
+  const [storiesTab, setStoriesTab] = useState<"browse" | "voices" | "create" | "library">("browse");
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const [fileDraft, setFileDraft] = useState<{
     dataUrl?: string;
@@ -2213,6 +2213,8 @@ export function StoriesView({
         <TopBar title="My Library" subtitle="Stories you saved for later reading." />
         <nav className="stories-tab-nav">
           <button onClick={() => setStoriesTab("browse")} type="button">Browse</button>
+          <button onClick={() => setStoriesTab("voices")} type="button">Voices</button>
+          <button onClick={() => setStoriesTab("create")} type="button">Create</button>
           <button className="active" onClick={() => setStoriesTab("library")} type="button">Library {savedKeys.length > 0 ? `(${savedKeys.length})` : ""}</button>
         </nav>
         {savedKeys.length === 0 ? (
@@ -2261,11 +2263,377 @@ export function StoriesView({
     );
   }
 
+  if (storiesTab === "voices") {
+    return (
+      <div className="screen stories-screen">
+        <TopBar title="Community Voices" subtitle="Short true stories from verified humans worldwide." />
+        <nav className="stories-tab-nav">
+          <button onClick={() => setStoriesTab("browse")} type="button">Browse</button>
+          <button className="active" onClick={() => setStoriesTab("voices")} type="button">Voices</button>
+          <button onClick={() => setStoriesTab("create")} type="button">Create</button>
+          <button onClick={() => setStoriesTab("library")} type="button">Library {savedStoryIds.size > 0 ? `(${savedStoryIds.size})` : ""}</button>
+        </nav>
+        <section className="community-voices-section">
+          {communityVoices.map((voice) => (
+            <article className="cv-voice-card" key={voice.id}>
+              <div className="cv-voice-top">
+                <span className="cv-voice-flag">{voice.flag}</span>
+                <div className="cv-voice-author">
+                  <strong>{voice.author}</strong>
+                  <span>{voice.country} · {voice.time}</span>
+                </div>
+                <span className="cv-voice-cat">{voice.category}</span>
+              </div>
+              <p className="cv-voice-text">&quot;{voice.text}&quot;</p>
+              <div className="cv-voice-actions">
+                <button
+                  className={likedVoices.has(voice.id) ? "cv-voice-liked" : ""}
+                  onClick={() => {
+                    setLikedVoices((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(voice.id)) { next.delete(voice.id); } else {
+                        next.add(voice.id);
+                        earnPoints(2, "You appreciated a human voice.");
+                      }
+                      return next;
+                    });
+                  }}
+                  type="button"
+                >
+                  {likedVoices.has(voice.id) ? "♥" : "♡"} {voice.likes + (likedVoices.has(voice.id) ? 1 : 0)}
+                </button>
+                <span>🔖 {voice.saves}</span>
+                <button
+                  onClick={() => openPayment({
+                    title: `Tip ${voice.author}`,
+                    amount: "1 WLD",
+                    detail: `Send 1 WLD to support ${voice.author}'s writing. Your tip goes to HumanChain treasury and is credited to the creator.`,
+                    success: "Tip sent! The creator is notified.",
+                    feature: "storyteller-tip",
+                    allowCustomAmount: true,
+                    minAmount: 0.1,
+                    maxAmount: 10,
+                    points: 4,
+                    context: { tippedAuthor: voice.author },
+                    onConfirmed: async () => {
+                      earnPoints(4, `You tipped ${voice.author}.`);
+                      recordHistory({ title: `Tip · ${voice.author}`, detail: "Story tip confirmed.", kind: "tip" });
+                    },
+                  })}
+                  type="button"
+                >
+                  ⚡ Tip
+                </button>
+              </div>
+            </article>
+          ))}
+        </section>
+      </div>
+    );
+  }
+
+  if (storiesTab === "create") {
+    return (
+      <div className="screen stories-screen">
+        <TopBar title="Create" subtitle="Publish your own reflection or story to verified humans." />
+        <nav className="stories-tab-nav">
+          <button onClick={() => setStoriesTab("browse")} type="button">Browse</button>
+          <button onClick={() => setStoriesTab("voices")} type="button">Voices</button>
+          <button className="active" onClick={() => setStoriesTab("create")} type="button">Create</button>
+          <button onClick={() => setStoriesTab("library")} type="button">Library {savedStoryIds.size > 0 ? `(${savedStoryIds.size})` : ""}</button>
+        </nav>
+        {userStories.length ? (
+          <section className="panel story-market">
+            <div className="section-heading">
+              <span>Your published stories</span>
+              <BookOpen size={18} />
+            </div>
+            {userStories.map((story) => (
+              <article className="shelf-row user-story-row" key={story.id}>
+                {story.coverImage ? (
+                  <img alt={`${story.title} cover`} className="story-thumb-image" src={story.coverImage} />
+                ) : (
+                  <div className="story-file-thumb">
+                    <Library size={19} />
+                  </div>
+                )}
+                <div className="user-story-info">
+                  <div className="user-story-badges">
+                    <span className="story-kind-tag">{story.kind === "file" ? "File Story" : "200-char"}</span>
+                    <span className={`story-safe-tag ${story.storageStatus === "cloud-safe" ? "cloud" : "local"}`}>
+                      {story.storageStatus === "cloud-safe" ? "☁ Cloud safe" : "📱 Local safe"}
+                    </span>
+                  </div>
+                  <h3>{story.title}</h3>
+                  <small>{story.author} · {story.createdAt}</small>
+                  <p>{story.kind === "file" ? story.fileName ?? "Uploaded story file" : story.text}</p>
+                </div>
+                <div className="story-row-actions">
+                  <button onClick={() => setActiveUserStory(story)} type="button">
+                    Read
+                  </button>
+                  <button
+                    className={`story-bookmark-btn${bookmarkedStories.has(String(story.id)) ? " active" : ""}`}
+                    onClick={() => {
+                      const key = String(story.id);
+                      setBookmarkedStories((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(key)) { next.delete(key); } else { next.add(key); }
+                        return next;
+                      });
+                    }}
+                    title={bookmarkedStories.has(String(story.id)) ? "Remove bookmark" : "Bookmark"}
+                    type="button"
+                  >
+                    {bookmarkedStories.has(String(story.id)) ? "★" : "☆"}
+                  </button>
+                  <button onClick={() => {
+                    if (navigator.share) {
+                      void navigator.share({ title: story.title, text: `"${story.title}" by ${story.author} on HumanChain` })
+                        .catch(() => {});
+                    } else {
+                      void navigator.clipboard?.writeText(`"${story.title}" by ${story.author} on HumanChain`)
+                        .then(() => act("Copied!", "Story info copied to clipboard."))
+                        .catch(() => act("Share", "Open in World App to share this story."));
+                    }
+                  }} type="button">Share</button>
+                  {story.owner ? (
+                    deleteConfirmId === story.id ? (
+                      <div className="story-delete-confirm">
+                        <span>Remove?</span>
+                        <button className="danger" onClick={() => { deleteUserStory(story.id); setDeleteConfirmId(null); }} type="button">Yes</button>
+                        <button onClick={() => setDeleteConfirmId(null)} type="button">No</button>
+                      </div>
+                    ) : (
+                      <button className="danger" onClick={() => setDeleteConfirmId(story.id)} type="button">
+                        Delete
+                      </button>
+                    )
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </section>
+        ) : null}
+        <section className="publish-card">
+          <div>
+            <span className="section-kicker">Publish to humans</span>
+            <h2>Publish to Humans</h2>
+            <p>
+              Publish a free short reflection or a paid file story. Stories may be reviewed before appearing publicly.
+            </p>
+            <div className="story-quality-list">
+              {[
+                "Clear title",
+                "Human-written",
+                "No private information",
+                "No harmful or fake claims",
+                "Cover image added",
+                "Category selected",
+              ].map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
+          </div>
+          <div className="story-publish-grid">
+            <div className="story-publish-panel">
+              <strong>File Story - 4 WLD</strong>
+              <input
+                aria-label="Story file title"
+                onChange={(event) =>
+                  setFileDraft((current) => ({ ...current, title: event.target.value }))
+                }
+                placeholder="Story title"
+                value={fileDraft.title}
+              />
+              <label className="upload-drop">
+                <Upload size={20} />
+                {fileDraft.fileName ?? "Upload PDF or text"}
+                <input
+                  accept=".pdf,.txt,text/plain,application/pdf"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+
+                    if (!file) {
+                      return;
+                    }
+
+                    const validation = validateStoryFile({
+                      size: file.size,
+                      type: file.type || (file.name.toLowerCase().endsWith(".txt") ? "text/plain" : "application/pdf"),
+                    });
+
+                    if (!validation.ok) {
+                      act("Story upload blocked", validation.issues[0] ?? humanChainErrorStates.upload_type_not_allowed);
+                      return;
+                    }
+
+                    if (file.type === "text/plain" || file.name.toLowerCase().endsWith(".txt")) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setFileDraft((current) => ({
+                          ...current,
+                          dataUrl: undefined,
+                          fileName: file.name,
+                          fileText: String(reader.result).slice(0, 12000),
+                          fileType: "text/plain",
+                        }));
+                        act("Story file selected", "Text story preview is ready.");
+                      };
+                      reader.readAsText(file);
+                      return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setFileDraft((current) => ({
+                        ...current,
+                        dataUrl: String(reader.result),
+                        fileName: file.name,
+                        fileText: undefined,
+                        fileType: file.type || "application/pdf",
+                      }));
+                      act("Story file selected", "PDF story preview is ready.");
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  type="file"
+                />
+              </label>
+              {fileDraft.fileType === "application/pdf" && fileDraft.dataUrl ? (
+                <object aria-label="PDF story preview" className="draft-pdf-preview" data={fileDraft.dataUrl} type="application/pdf">
+                  PDF preview ready.
+                </object>
+              ) : fileDraft.fileText ? (
+                <pre className="draft-text-preview">{fileDraft.fileText}</pre>
+              ) : null}
+              <Haptic variant="impact" type="medium" asChild>
+                <Button variant="primary" fullWidth onClick={() => { impact("medium"); publishFileStory(); }} type="button">
+                  Publish file - 4 WLD
+                </Button>
+              </Haptic>
+            </div>
+            <div className="story-publish-panel">
+              <strong>Free Short Story</strong>
+              <input
+                aria-label="Short story title"
+                onChange={(event) =>
+                  setMicroDraft((current) => ({ ...current, title: event.target.value }))
+                }
+                placeholder="Story title"
+                value={microDraft.title}
+              />
+              <label className="upload-drop cover-drop">
+                {microDraft.coverImage ? (
+                  <img alt="Short story cover preview" src={microDraft.coverImage} />
+                ) : (
+                  <>
+                    <Upload size={20} />
+                    Add cover image
+                  </>
+                )}
+                <input
+                  accept="image/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+
+                    if (!file) {
+                      return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setMicroDraft((current) => ({
+                        ...current,
+                        coverImage: String(reader.result),
+                      }));
+                      act("Cover image uploaded", "Short story cover is ready.");
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  type="file"
+                />
+              </label>
+              <textarea
+                aria-label="Exact 200 character story"
+                maxLength={200}
+                onChange={(event) =>
+                  setMicroDraft((current) => ({ ...current, text: event.target.value }))
+                }
+                placeholder="Write exactly 200 characters..."
+                value={microDraft.text}
+              />
+              <small className={microCharacters === 200 ? "exact-count ready" : "exact-count"}>
+                {microCharacters}/200 characters
+              </small>
+              <Haptic variant="impact" type="medium" asChild>
+                <Button
+                  variant="primary"
+                  fullWidth
+                  disabled={microCharacters !== 200 || !microDraft.coverImage}
+                  onClick={() => { impact("medium"); publishMicroStory(); }}
+                  type="button"
+                >
+                  {microCharacters === 200 && microDraft.coverImage
+                    ? "Publish free story"
+                    : microCharacters < 200
+                      ? `${200 - microCharacters} chars left`
+                      : !microDraft.coverImage
+                        ? "Add cover image first"
+                        : "Publish free story"}
+                </Button>
+              </Haptic>
+            </div>
+          </div>
+        </section>
+        <section className="panel creator-card">
+          <div className="section-heading">
+            <span>WLD creator economy</span>
+            <Wallet size={18} />
+          </div>
+          {creatorEconomy.map(([title, detail]) => (
+            <button
+              className="creator-row"
+              key={title}
+              onClick={() => act(title, detail)}
+              type="button"
+            >
+              <strong>{title}</strong>
+              <span>{detail}</span>
+            </button>
+          ))}
+        </section>
+        <section className="panel trust-card">
+          <div className="section-heading">
+            <span>Moderation and trust</span>
+            <ShieldCheck size={18} />
+          </div>
+          <div className="trust-grid">
+            {trustTools.map((tool) => (
+              <button
+                key={tool}
+                onClick={() => {
+                  earnPoints(10, "Trusted reports protect HumanChain quality.");
+                  act(tool, "Trust action queued for review.");
+                }}
+                type="button"
+              >
+                {tool}
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="screen stories-screen">
       <TopBar title="Human Story" subtitle="Monthly stories and published reflections from verified humans." />
       <nav className="stories-tab-nav">
         <button className="active" onClick={() => setStoriesTab("browse")} type="button">Browse</button>
+        <button onClick={() => setStoriesTab("voices")} type="button">Voices</button>
+        <button onClick={() => setStoriesTab("create")} type="button">Create</button>
         <button onClick={() => setStoriesTab("library")} type="button">Library {savedStoryIds.size > 0 ? `(${savedStoryIds.size})` : ""}</button>
       </nav>
       <section className="story-cover">
@@ -2404,349 +2772,6 @@ export function StoriesView({
         })}
       </section>
 
-      {/* ── Community Voices ──────────────────────────────────── */}
-      <section className="community-voices-section">
-        <div className="section-heading">
-          <span>Community Voices</span>
-          <BookOpen size={18} />
-        </div>
-        <p className="section-sub">Short true stories from verified humans worldwide.</p>
-        {communityVoices.map((voice) => (
-          <article className="cv-voice-card" key={voice.id}>
-            <div className="cv-voice-top">
-              <span className="cv-voice-flag">{voice.flag}</span>
-              <div className="cv-voice-author">
-                <strong>{voice.author}</strong>
-                <span>{voice.country} · {voice.time}</span>
-              </div>
-              <span className="cv-voice-cat">{voice.category}</span>
-            </div>
-            <p className="cv-voice-text">&quot;{voice.text}&quot;</p>
-            <div className="cv-voice-actions">
-              <button
-                className={likedVoices.has(voice.id) ? "cv-voice-liked" : ""}
-                onClick={() => {
-                  setLikedVoices((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(voice.id)) { next.delete(voice.id); } else {
-                      next.add(voice.id);
-                      earnPoints(2, "You appreciated a human voice.");
-                    }
-                    return next;
-                  });
-                }}
-                type="button"
-              >
-                {likedVoices.has(voice.id) ? "♥" : "♡"} {voice.likes + (likedVoices.has(voice.id) ? 1 : 0)}
-              </button>
-              <span>🔖 {voice.saves}</span>
-              <button
-                onClick={() => openPayment({
-                  title: `Tip ${voice.author}`,
-                  amount: "1 WLD",
-                  detail: `Send 1 WLD to support ${voice.author}'s writing. Your tip goes to HumanChain treasury and is credited to the creator.`,
-                  success: "Tip sent! The creator is notified.",
-                  feature: "storyteller-tip",
-                  allowCustomAmount: true,
-                  minAmount: 0.1,
-                  maxAmount: 10,
-                  points: 4,
-                  context: { tippedAuthor: voice.author },
-                  onConfirmed: async () => {
-                    earnPoints(4, `You tipped ${voice.author}.`);
-                    recordHistory({ title: `Tip · ${voice.author}`, detail: "Story tip confirmed.", kind: "tip" });
-                  },
-                })}
-                type="button"
-              >
-                ⚡ Tip
-              </button>
-            </div>
-          </article>
-        ))}
-      </section>
-      {/* ── User published stories ──────────────────────────────── */}
-      {userStories.length ? (
-        <section className="panel story-market">
-          <div className="section-heading">
-            <span>Your published stories</span>
-            <BookOpen size={18} />
-          </div>
-          {userStories.map((story) => (
-            <article className="shelf-row user-story-row" key={story.id}>
-              {story.coverImage ? (
-                <img alt={`${story.title} cover`} className="story-thumb-image" src={story.coverImage} />
-              ) : (
-                <div className="story-file-thumb">
-                  <Library size={19} />
-                </div>
-              )}
-              <div className="user-story-info">
-                <div className="user-story-badges">
-                  <span className="story-kind-tag">{story.kind === "file" ? "File Story" : "200-char"}</span>
-                  <span className={`story-safe-tag ${story.storageStatus === "cloud-safe" ? "cloud" : "local"}`}>
-                    {story.storageStatus === "cloud-safe" ? "☁ Cloud safe" : "📱 Local safe"}
-                  </span>
-                </div>
-                <h3>{story.title}</h3>
-                <small>{story.author} · {story.createdAt}</small>
-                <p>{story.kind === "file" ? story.fileName ?? "Uploaded story file" : story.text}</p>
-              </div>
-              <div className="story-row-actions">
-                <button onClick={() => setActiveUserStory(story)} type="button">
-                  Read
-                </button>
-                <button
-                  className={`story-bookmark-btn${bookmarkedStories.has(String(story.id)) ? " active" : ""}`}
-                  onClick={() => {
-                    const key = String(story.id);
-                    setBookmarkedStories((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(key)) { next.delete(key); } else { next.add(key); }
-                      return next;
-                    });
-                  }}
-                  title={bookmarkedStories.has(String(story.id)) ? "Remove bookmark" : "Bookmark"}
-                  type="button"
-                >
-                  {bookmarkedStories.has(String(story.id)) ? "★" : "☆"}
-                </button>
-                <button onClick={() => {
-                  if (navigator.share) {
-                    void navigator.share({ title: story.title, text: `"${story.title}" by ${story.author} on HumanChain` })
-                      .catch(() => {});
-                  } else {
-                    void navigator.clipboard?.writeText(`"${story.title}" by ${story.author} on HumanChain`)
-                      .then(() => act("Copied!", "Story info copied to clipboard."))
-                      .catch(() => act("Share", "Open in World App to share this story."));
-                  }
-                }} type="button">Share</button>
-                {story.owner ? (
-                  deleteConfirmId === story.id ? (
-                    <div className="story-delete-confirm">
-                      <span>Remove?</span>
-                      <button className="danger" onClick={() => { deleteUserStory(story.id); setDeleteConfirmId(null); }} type="button">Yes</button>
-                      <button onClick={() => setDeleteConfirmId(null)} type="button">No</button>
-                    </div>
-                  ) : (
-                    <button className="danger" onClick={() => setDeleteConfirmId(story.id)} type="button">
-                      Delete
-                    </button>
-                  )
-                ) : null}
-              </div>
-            </article>
-          ))}
-        </section>
-      ) : null}
-      <section className="publish-card">
-        <div>
-          <span className="section-kicker">Publish to humans</span>
-          <h2>Publish to Humans</h2>
-          <p>
-            Publish a free short reflection or a paid file story. Stories may be reviewed before appearing publicly.
-          </p>
-          <div className="story-quality-list">
-            {[
-              "Clear title",
-              "Human-written",
-              "No private information",
-              "No harmful or fake claims",
-              "Cover image added",
-              "Category selected",
-            ].map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-        </div>
-        <div className="story-publish-grid">
-          <div className="story-publish-panel">
-            <strong>File Story - 4 WLD</strong>
-            <input
-              aria-label="Story file title"
-              onChange={(event) =>
-                setFileDraft((current) => ({ ...current, title: event.target.value }))
-              }
-              placeholder="Story title"
-              value={fileDraft.title}
-            />
-            <label className="upload-drop">
-              <Upload size={20} />
-              {fileDraft.fileName ?? "Upload PDF or text"}
-              <input
-                accept=".pdf,.txt,text/plain,application/pdf"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-
-                  if (!file) {
-                    return;
-                  }
-
-                  const validation = validateStoryFile({
-                    size: file.size,
-                    type: file.type || (file.name.toLowerCase().endsWith(".txt") ? "text/plain" : "application/pdf"),
-                  });
-
-                  if (!validation.ok) {
-                    act("Story upload blocked", validation.issues[0] ?? humanChainErrorStates.upload_type_not_allowed);
-                    return;
-                  }
-
-                  if (file.type === "text/plain" || file.name.toLowerCase().endsWith(".txt")) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setFileDraft((current) => ({
-                        ...current,
-                        dataUrl: undefined,
-                        fileName: file.name,
-                        fileText: String(reader.result).slice(0, 12000),
-                        fileType: "text/plain",
-                      }));
-                      act("Story file selected", "Text story preview is ready.");
-                    };
-                    reader.readAsText(file);
-                    return;
-                  }
-
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setFileDraft((current) => ({
-                      ...current,
-                      dataUrl: String(reader.result),
-                      fileName: file.name,
-                      fileText: undefined,
-                      fileType: file.type || "application/pdf",
-                    }));
-                    act("Story file selected", "PDF story preview is ready.");
-                  };
-                  reader.readAsDataURL(file);
-                }}
-                type="file"
-              />
-            </label>
-            {fileDraft.fileType === "application/pdf" && fileDraft.dataUrl ? (
-              <object aria-label="PDF story preview" className="draft-pdf-preview" data={fileDraft.dataUrl} type="application/pdf">
-                PDF preview ready.
-              </object>
-            ) : fileDraft.fileText ? (
-              <pre className="draft-text-preview">{fileDraft.fileText}</pre>
-            ) : null}
-            <Haptic variant="impact" type="medium" asChild>
-              <Button variant="primary" fullWidth onClick={() => { impact("medium"); publishFileStory(); }} type="button">
-                Publish file - 4 WLD
-              </Button>
-            </Haptic>
-          </div>
-          <div className="story-publish-panel">
-            <strong>Free Short Story</strong>
-            <input
-              aria-label="Short story title"
-              onChange={(event) =>
-                setMicroDraft((current) => ({ ...current, title: event.target.value }))
-              }
-              placeholder="Story title"
-              value={microDraft.title}
-            />
-            <label className="upload-drop cover-drop">
-              {microDraft.coverImage ? (
-                <img alt="Short story cover preview" src={microDraft.coverImage} />
-              ) : (
-                <>
-                  <Upload size={20} />
-                  Add cover image
-                </>
-              )}
-              <input
-                accept="image/*"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-
-                  if (!file) {
-                    return;
-                  }
-
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setMicroDraft((current) => ({
-                      ...current,
-                      coverImage: String(reader.result),
-                    }));
-                    act("Cover image uploaded", "Short story cover is ready.");
-                  };
-                  reader.readAsDataURL(file);
-                }}
-                type="file"
-              />
-            </label>
-            <textarea
-              aria-label="Exact 200 character story"
-              maxLength={200}
-              onChange={(event) =>
-                setMicroDraft((current) => ({ ...current, text: event.target.value }))
-              }
-              placeholder="Write exactly 200 characters..."
-              value={microDraft.text}
-            />
-            <small className={microCharacters === 200 ? "exact-count ready" : "exact-count"}>
-              {microCharacters}/200 characters
-            </small>
-            <Haptic variant="impact" type="medium" asChild>
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={microCharacters !== 200 || !microDraft.coverImage}
-                onClick={() => { impact("medium"); publishMicroStory(); }}
-                type="button"
-              >
-                {microCharacters === 200 && microDraft.coverImage
-                  ? "Publish free story"
-                  : microCharacters < 200
-                    ? `${200 - microCharacters} chars left`
-                    : !microDraft.coverImage
-                      ? "Add cover image first"
-                      : "Publish free story"}
-              </Button>
-            </Haptic>
-          </div>
-        </div>
-      </section>
-      <section className="panel creator-card">
-        <div className="section-heading">
-          <span>WLD creator economy</span>
-          <Wallet size={18} />
-        </div>
-        {creatorEconomy.map(([title, detail]) => (
-          <button
-            className="creator-row"
-            key={title}
-            onClick={() => act(title, detail)}
-            type="button"
-          >
-            <strong>{title}</strong>
-            <span>{detail}</span>
-          </button>
-        ))}
-      </section>
-      <section className="panel trust-card">
-        <div className="section-heading">
-          <span>Moderation and trust</span>
-          <ShieldCheck size={18} />
-        </div>
-        <div className="trust-grid">
-          {trustTools.map((tool) => (
-            <button
-              key={tool}
-              onClick={() => {
-                earnPoints(10, "Trusted reports protect HumanChain quality.");
-                act(tool, "Trust action queued for review.");
-              }}
-              type="button"
-            >
-              {tool}
-            </button>
-          ))}
-        </div>
-      </section>
       <section className="story-rating-card">
         <span className="section-kicker">Reader response</span>
         <h3>Rate this monthly story</h3>
