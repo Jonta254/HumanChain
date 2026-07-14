@@ -801,7 +801,7 @@ export function useHumanChainApp() {
       const worldUsername = normalizeWorldUsername(resolved.username ?? freshCtx.username ?? worldContext.username);
       const worldPic = resolved.profilePictureUrl ?? freshCtx.profilePictureUrl;
       setWorldContext({ ...freshCtx, ...nextCtx, profilePictureUrl: worldPic, username: worldUsername, walletAddress: address });
-      setVerifiedHuman({ deviceOS: nextCtx.deviceOS ?? freshCtx.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: nextCtx.launchLocation ?? freshCtx.launchLocation, profilePictureUrl: worldPic, username: worldUsername ?? "Resolving World username", wallet: address, mode: "world" });
+      setVerifiedHuman({ deviceOS: nextCtx.deviceOS ?? freshCtx.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: nextCtx.launchLocation ?? freshCtx.launchLocation, profilePictureUrl: worldPic, username: worldUsername ?? "Resolving World username", wallet: address, mode: "world", worldIdTier: auth.worldIdTier });
       const isFirstJoin = !joinedAt;
       if (isFirstJoin) {
         const now = new Date().toISOString();
@@ -871,7 +871,7 @@ export function useHumanChainApp() {
   }
 
   function enterPreview() {
-    setVerifiedHuman({ deviceOS: worldContext.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: worldContext.launchLocation, profilePictureUrl: worldContext.profilePictureUrl, username: "@preview_human", mode: "preview" });
+    setVerifiedHuman({ deviceOS: worldContext.deviceOS, lastSeenAt: new Date().toISOString(), launchLocation: worldContext.launchLocation, profilePictureUrl: worldContext.profilePictureUrl, username: "@preview_human", mode: "preview", worldIdTier: "none" });
     setToast({ title: "Preview opened", detail: "World wallet, payments, and permissions remain ready for the real Mini App." });
   }
 

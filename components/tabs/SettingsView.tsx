@@ -28,9 +28,16 @@ import { humanHaptic } from "@/lib/world/haptics";
 import type { AppLanguage } from "@/lib/data/languages";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 import type { Tab } from "@/types/ui";
+import type { VerifiedHuman } from "@/types/user";
 
 const APP_VERSION = "1.0.0";
 const WORLD_MINIKIT_VERSION = "2.0.3";
+
+const worldIdTierCopy = {
+  orb: { label: "Orb verified · proof-of-personhood", detail: "Your World ID was verified at an Orb — the strongest uniqueness guarantee World ID offers. No personal data leaves World App." },
+  document: { label: "Document verified", detail: "Your World ID was verified by document scan. This confirms identity but not biometric uniqueness the way Orb verification does." },
+  none: { label: "Wallet sign-in only · not yet World ID verified", detail: "You're signed in with your World App wallet, which proves wallet ownership but is not a World ID proof-of-personhood. Complete Orb or Document verification in World App for the strongest trust tier." },
+} as const;
 
 export function SettingsView({
   act,
@@ -43,6 +50,7 @@ export function SettingsView({
   onEnableNotifications,
   resetHistory,
   setTab,
+  verifiedHuman,
   worldContext,
 }: {
   act: (title: string, detail: string) => void;
@@ -55,6 +63,7 @@ export function SettingsView({
   onEnableNotifications: () => void | Promise<void>;
   resetHistory: () => void;
   setTab: Dispatch<SetStateAction<Tab>>;
+  verifiedHuman: VerifiedHuman | null;
   worldContext: WorldMiniAppContext;
 }) {
   const [legalDoc, setLegalDoc] = useState<"terms" | "privacy" | null>(null);
@@ -340,14 +349,17 @@ export function SettingsView({
         <div className="sv-rows">
           <button
             className="sv-row"
-            onClick={() => act("World ID verification", "Your World ID proof is verified on-chain. No personal data leaves World App.")}
+            onClick={() => act(
+              worldIdTierCopy[verifiedHuman?.worldIdTier ?? "none"].label,
+              worldIdTierCopy[verifiedHuman?.worldIdTier ?? "none"].detail,
+            )}
             type="button"
           >
             <div className="sv-row-left">
               <span className="sv-row-label">World ID Verification</span>
-              <span className="sv-row-sub">Proof-of-personhood · on-chain</span>
+              <span className="sv-row-sub">{worldIdTierCopy[verifiedHuman?.worldIdTier ?? "none"].label}</span>
             </div>
-            <BadgeCheck size={16} color="#2f6fed" />
+            <BadgeCheck size={16} color={verifiedHuman?.worldIdTier === "orb" ? "#2f6fed" : "#8a94a0"} />
           </button>
           <button
             className="sv-row"

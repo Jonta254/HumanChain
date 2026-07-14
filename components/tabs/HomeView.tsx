@@ -297,7 +297,7 @@ export function HomeView({
                 </span>
               )}
             </div>
-            <span className={`hc-brief-verify${isVerified ? " on" : ""}`} aria-label={isVerified ? "World ID verified" : "Preview mode"}>
+            <span className={`hc-brief-verify${isVerified ? " on" : ""}`} aria-label={isVerified ? (verifiedHuman?.worldIdTier === "orb" ? "World ID Orb verified" : "Signed in with World App") : "Preview mode"}>
               <BadgeCheck size={11} />{isVerified ? "Verified" : "Preview"}
             </span>
           </div>

@@ -266,6 +266,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             resetHistory={resetHistory}
             setTab={setTab}
+            verifiedHuman={verifiedHuman}
             worldContext={worldContext}
           />
         );

@@ -64,8 +64,22 @@ export async function authenticateHumanWallet() {
     };
   }
 
+  const verification = await verifyResponse.json();
+
+  // World's own docs: "Do not use World ID verification as a login substitute."
+  // Wallet auth (SIWE) only proves wallet ownership — read the real
+  // proof-of-personhood tier from MiniKit.user, populated by the SDK after
+  // wallet auth resolves, so the app never claims more than it can prove.
+  const status = MiniKit.user?.verificationStatus;
+  const worldIdTier: "orb" | "document" | "none" = status?.isOrbVerified
+    ? "orb"
+    : status?.isDocumentVerified || status?.isSecureDocumentVerified
+      ? "document"
+      : "none";
+
   return {
     result,
-    verification: await verifyResponse.json(),
+    verification,
+    worldIdTier,
   };
 }

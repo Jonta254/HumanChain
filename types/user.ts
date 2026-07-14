@@ -4,6 +4,15 @@ import type { HumanPost, UserStory } from "./content";
 import type { MarketBid, MarketHold, MarketLocationState, MarketplaceListing } from "./market";
 import type { NotificationItem } from "./ui";
 
+/**
+ * World ID proof-of-personhood tier for the connected wallet, read from
+ * MiniKit.user.verificationStatus after wallet auth. Wallet auth (SIWE) alone
+ * only proves wallet ownership — World's own docs warn against treating it
+ * as a World ID substitute. "orb" is the only tier with a real biometric
+ * uniqueness guarantee; "document"/"none" must not claim "no bots ever."
+ */
+export type WorldIdVerificationTier = "orb" | "document" | "none";
+
 export type VerifiedHuman = {
   deviceOS?: string;
   lastSeenAt?: string;
@@ -12,6 +21,7 @@ export type VerifiedHuman = {
   username: string;
   wallet?: string;
   mode: "world" | "preview";
+  worldIdTier?: WorldIdVerificationTier;
 };
 
 export type HumanIdentity = {
