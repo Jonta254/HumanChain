@@ -959,6 +959,41 @@ const publishedStoryCollection = {
 
 type PublishedStoryKey = keyof typeof publishedStoryCollection;
 
+type BonusStoryNote = { authorNote: string; writingReflection: string; readerInsight: string };
+
+const bonusStoryNotes: Partial<Record<string, BonusStoryNote>> = {
+  monthly: {
+    authorNote: "The blue door is a real door. I changed the city and the child's age, but I kept the note under the door word for word: 'I watered your plant because it looked lonely too.' Grief stories usually reach for a funeral scene — this one reaches for a doorknob instead.",
+    writingReflection: "Early drafts had Mara open the blue door by the end of the first week. It read as too easy. The window-before-the-door structure — a smaller, more honest opening — only appeared after a reader told me their own return from depression happened in exactly that order: something small, then something smaller, long before the big gesture.",
+    readerInsight: "The cracked cup outlasts every other detail in reader replies — people keep telling us what their own 'cracked cup' was: a plant, a bike, a phone number they finally called.",
+  },
+  bitcoin: {
+    authorNote: "I wrote this for readers who only know Bitcoin as a price chart. The goal was to separate the idea — trust without a middleman — from the noise around it, then show why World's proof-of-personhood problem is a natural next chapter, not a marketing tie-in.",
+    writingReflection: "The hardest line to write was the one about bots: 'money can travel globally while humanity still remains hidden.' Early drafts made Bitcoin the hero and World the sequel. The final version treats them as two answers to two different, unfinished questions.",
+    readerInsight: "Readers in Lagos, Manila, and Nairobi save this story most often — usually alongside a note about remittances or cross-border freelance work, not speculation.",
+  },
+  orb: {
+    authorNote: "Nia's suspicion of the Orb was not invented for drama. Every early reader from a community with a history of extractive tech asked the same question first: what does it take from me? The story only works if that doubt is respected, not rushed past.",
+    writingReflection: "I cut three versions of the verification-center scene that described the Orb in technical detail. The story got stronger when it stopped explaining the machine and started describing what Nia felt: smaller promises, met.",
+    readerInsight: "The line 'unique did not mean rich, it meant one Nia' is the single most saved line across every HumanChain story to date.",
+  },
+  father: {
+    authorNote: "This is close to a real story, softened only where privacy required it. The box with dovetail joints is a real object. The six words of repair are real words, remembered exactly.",
+    writingReflection: "I resisted giving the father a redemption speech. Men like him rarely get one, and giving him one would have made the story about forgiveness instead of about translation — learning to read a language of care that never used sentences.",
+    readerInsight: "Readers most often reply with their own version of 'learn to read wood' — a parent's specific, non-verbal way of showing love that took years to recognize.",
+  },
+  money: {
+    authorNote: "I wanted a story about scarcity that never turns poverty into a lesson delivered to someone comfortable. The eleven configurations of eggs are not a metaphor. They happened, in that order, because that is how long eggs lasted.",
+    writingReflection: "The temptation was to end on the return to Lagos as triumph. The honest ending is smaller: not that the character won, but that the lean months left a permanent, useful residue — habits that outlasted the hardship that built them.",
+    readerInsight: "This story gets the most cross-country replies of any in the library — readers comparing what 'the lean months' looked like in their own currency and city.",
+  },
+  onePage: {
+    authorNote: "This was submitted, not commissioned — one of the first reader-written pieces HumanChain published. It is kept almost unedited because the plainness of the last page is the entire point.",
+    writingReflection: "The instinct as an editor was to expand it — more scene, more names, more resolution. It stayed short because the writer's original instinct was correct: some truths only carry weight in one sentence, not ten.",
+    readerInsight: "Most readers finish this one and immediately open the composer to write their own 200-character story — it's the most common entry point into HumanChain's Create tab.",
+  },
+};
+
 type PublishedStoryPage = {
   page: number;
   text: string;
@@ -2822,146 +2857,158 @@ export function StoriesView({
           <span>Story WLD actions</span>
           <Library size={18} />
         </div>
-        <div className="compact-actions">
-          <button
-            onClick={() =>
-              openPayment({
-                title: "Tip storyteller",
-                amount: "1 WLD",
-                allowCustomAmount: true,
-                context: {
-                  payerWallet: humanIdentity?.wallet,
-                  tippedAuthor: "storyteller",
-                },
-                detail: "Support the writer behind this story.",
-                success: "Storyteller tip is prepared for World App.",
-                feature: "storyteller-tip",
-                points: 4,
-                onConfirmed: async () => {
-                  const storyKey = `act:${activePublishedStory}`;
-                  setTippedStories((prev) => new Set([...prev, storyKey]));
-                },
-              })
-            }
-            type="button"
-          >
-            Tip Storyteller
-          </button>
-          {activePublishedStory && <button
-            className={unlockedBonusStories.has(activePublishedStory) ? "active" : ""}
-            onClick={() => {
-              if (activePublishedStory && unlockedBonusStories.has(activePublishedStory)) {
-                act("Bonus pages unlocked", "Author notes and reader reflections are already visible below.");
-                return;
-              }
-              openPayment({
-                title: "Bonus story pages",
-                amount: "2 WLD",
-                detail: "Unlock author notes, writing reflections, and reader insights for this story.",
-                success: "Bonus pages unlocked. Author notes and reader reflections are now visible.",
-                feature: "bonus-story-pages",
-                points: 6,
-                onConfirmed: () => {
-                  if (activePublishedStory) {
-                    setUnlockedBonusStories((prev) => {
-                      const next = new Set([...prev, activePublishedStory]);
-                      saveJsonToStorage(storageKeys.unlockedBonusStories, [...next]);
-                      return next;
-                    });
+        {(() => {
+          const storyKey = activePublishedStory ?? "monthly";
+          const storyLabel = publishedStory?.shelfTitle ?? "The Door That Waited";
+          return (
+            <>
+              <div className="compact-actions">
+                <button
+                  onClick={() =>
+                    openPayment({
+                      title: "Tip storyteller",
+                      amount: "1 WLD",
+                      allowCustomAmount: true,
+                      context: {
+                        payerWallet: humanIdentity?.wallet,
+                        tippedAuthor: "storyteller",
+                      },
+                      detail: "Support the writer behind this story.",
+                      success: "Storyteller tip is prepared for World App.",
+                      feature: "storyteller-tip",
+                      points: 4,
+                      onConfirmed: async () => {
+                        setTippedStories((prev) => new Set([...prev, `act:${storyKey}`]));
+                      },
+                    })
                   }
-                  recordHistory({ title: "Bonus story pages unlocked", detail: `2 WLD confirmed. Author notes and reflections unlocked for ${activePublishedStory ?? "this story"}.`, kind: "story" });
-                },
-              });
-            }}
-            type="button"
-          >
-            {unlockedBonusStories.has(activePublishedStory) ? "✓ Bonus unlocked" : "Unlock Bonus Pages · 2 WLD"}
-          </button>}
-          {activePublishedStory && <button
-            className={unlockedReflections.has(activePublishedStory) ? "active" : ""}
-            onClick={() => {
-              if (activePublishedStory && unlockedReflections.has(activePublishedStory)) {
-                const existing = reflectionTexts[activePublishedStory];
-                if (existing && existing !== "loading") {
-                  act("Reflection ready", "Your Deep Story Reflection is already saved below.");
-                  return;
-                }
-                const storyKey = activePublishedStory;
-                const storyLabel = publishedStory?.shelfTitle ?? String(storyKey);
-                setReflectionTexts((prev) => ({ ...prev, [storyKey]: "loading" }));
-                fetch("/api/ai/verdict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: storyLabel, answers: [], feature: "deep-story-reflection", storyTitle: storyLabel }) })
-                  .then((r) => r.json() as Promise<{ ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } }>)
-                  .then((data) => {
-                    if (data.ok && data.verdict) { setReflectionTexts((prev) => ({ ...prev, [storyKey]: data.verdict! })); }
-                    else { setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; }); act("Retry failed", "AI unavailable — try again later."); }
-                  })
-                  .catch(() => { setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; }); act("Retry failed", "Connection issue."); });
-                return;
-              }
-              openPayment({
-                title: "Deep Story Reflection",
-                amount: "6 WLD",
-                detail: "Create a private deep reflection from this story — your notes, questions it raised, and what it means for your life.",
-                success: "Deep Story Reflection saved to your Human Vault.",
-                feature: "deep-story-reflection",
-                points: 12,
-                onConfirmed: async () => {
-                  const storyKey = activePublishedStory;
-                  if (storyKey) {
-                    setUnlockedReflections((prev) => {
-                      const next = new Set([...prev, storyKey]);
-                      saveJsonToStorage(storageKeys.unlockedReflections, [...next]);
-                      return next;
-                    });
-                    setReflectionTexts((prev) => ({ ...prev, [storyKey]: "loading" }));
-                  }
-                  act("Reflection saved", "Your private Deep Story Reflection is saved in your Human Vault.");
-                  recordHistory({ title: "Deep Story Reflection created", detail: `6 WLD confirmed. Private reflection created for ${storyKey ?? "this story"}.`, kind: "story" });
-                  if (!storyKey) return;
-                  try {
-                    const storyLabel = publishedStory?.shelfTitle ?? String(storyKey);
-                    const res = await fetch("/api/ai/verdict", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ question: storyLabel, answers: [], feature: "deep-story-reflection", storyTitle: storyLabel }),
-                    });
-                    const data = await res.json() as { ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } };
-                    if (data.ok && data.verdict) {
-                      setReflectionTexts((prev) => ({ ...prev, [storyKey]: data.verdict! }));
-                    } else {
-                      setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
-                      act("Reflection loading failed", "AI unavailable — your unlock is saved. Tap the button again to retry.");
+                  type="button"
+                >
+                  Tip Storyteller
+                </button>
+                <button
+                  className={unlockedBonusStories.has(storyKey) ? "active" : ""}
+                  onClick={() => {
+                    if (unlockedBonusStories.has(storyKey)) {
+                      act("Bonus pages unlocked", "Author notes and reader reflections are already visible below.");
+                      return;
                     }
-                  } catch {
-                    setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
-                    act("Reflection loading failed", "Connection issue — your unlock is saved. Tap the button again to retry.");
-                  }
-                },
-              });
-            }}
-            type="button"
-          >
-            {unlockedReflections.has(activePublishedStory) ? "✓ Reflection saved" : "Create Deep Reflection · 6 WLD"}
-          </button>}
-        </div>
-        {activePublishedStory && unlockedReflections.has(activePublishedStory) ? (() => {
-          const rt = reflectionTexts[activePublishedStory];
-          if (rt === "loading") {
-            return <p style={{ opacity: 0.55, fontSize: "0.82rem", padding: "12px 0 0" }}>Generating your reflection…</p>;
-          }
-          if (rt && typeof rt === "object") {
-            return (
-              <div className="ask-verdict-panel" style={{ marginTop: 16 }}>
-                <span className="section-kicker">Your Deep Reflection</span>
-                <div className="ask-verdict-row"><strong>Core theme</strong><p>{rt.mostSaid}</p></div>
-                <div className="ask-verdict-row"><strong>Key insight</strong><p>{rt.bestAnswer}</p></div>
-                <div className="ask-verdict-row"><strong>What it challenges</strong><p>{rt.hardTruth}</p></div>
-                <div className="ask-verdict-row"><strong>Reflect on this</strong><p>{rt.finalVerdict}</p></div>
+                    openPayment({
+                      title: "Bonus story pages",
+                      amount: "2 WLD",
+                      detail: "Unlock author notes, writing reflections, and reader insights for this story.",
+                      success: "Bonus pages unlocked. Author notes and reader reflections are now visible.",
+                      feature: "bonus-story-pages",
+                      points: 6,
+                      onConfirmed: () => {
+                        setUnlockedBonusStories((prev) => {
+                          const next = new Set([...prev, storyKey]);
+                          saveJsonToStorage(storageKeys.unlockedBonusStories, [...next]);
+                          return next;
+                        });
+                        recordHistory({ title: "Bonus story pages unlocked", detail: `2 WLD confirmed. Author notes and reflections unlocked for ${storyLabel}.`, kind: "story" });
+                      },
+                    });
+                  }}
+                  type="button"
+                >
+                  {unlockedBonusStories.has(storyKey) ? "✓ Bonus unlocked" : "Unlock Bonus Pages · 2 WLD"}
+                </button>
               </div>
-            );
-          }
-          return null;
-        })() : null}
+              {unlockedBonusStories.has(storyKey) ? (() => {
+                const notes: BonusStoryNote | undefined = bonusStoryNotes[storyKey];
+                if (!notes) return null;
+                return (
+                  <div className="ask-verdict-panel" style={{ marginTop: 16 }}>
+                    <span className="section-kicker">Bonus Pages</span>
+                    <div className="ask-verdict-row"><strong>Author&apos;s note</strong><p>{notes.authorNote}</p></div>
+                    <div className="ask-verdict-row"><strong>Writing reflection</strong><p>{notes.writingReflection}</p></div>
+                    <div className="ask-verdict-row"><strong>Reader insight</strong><p>{notes.readerInsight}</p></div>
+                  </div>
+                );
+              })() : null}
+              <div className="compact-actions" style={{ marginTop: 12 }}>
+                <button
+                  className={unlockedReflections.has(storyKey) ? "active" : ""}
+                  onClick={() => {
+                    if (unlockedReflections.has(storyKey)) {
+                      const existing = reflectionTexts[storyKey];
+                      if (existing && existing !== "loading") {
+                        act("Reflection ready", "Your Deep Story Reflection is already saved below.");
+                        return;
+                      }
+                      setReflectionTexts((prev) => ({ ...prev, [storyKey]: "loading" }));
+                      fetch("/api/ai/verdict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: storyLabel, answers: [], feature: "deep-story-reflection", storyTitle: storyLabel }) })
+                        .then((r) => r.json() as Promise<{ ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } }>)
+                        .then((data) => {
+                          if (data.ok && data.verdict) { setReflectionTexts((prev) => ({ ...prev, [storyKey]: data.verdict! })); }
+                          else { setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; }); act("Retry failed", "AI unavailable — try again later."); }
+                        })
+                        .catch(() => { setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; }); act("Retry failed", "Connection issue."); });
+                      return;
+                    }
+                    openPayment({
+                      title: "Deep Story Reflection",
+                      amount: "6 WLD",
+                      detail: "Create a private deep reflection from this story — your notes, questions it raised, and what it means for your life.",
+                      success: "Deep Story Reflection saved to your Human Vault.",
+                      feature: "deep-story-reflection",
+                      points: 12,
+                      onConfirmed: async () => {
+                        setUnlockedReflections((prev) => {
+                          const next = new Set([...prev, storyKey]);
+                          saveJsonToStorage(storageKeys.unlockedReflections, [...next]);
+                          return next;
+                        });
+                        setReflectionTexts((prev) => ({ ...prev, [storyKey]: "loading" }));
+                        act("Reflection saved", "Your private Deep Story Reflection is saved in your Human Vault.");
+                        recordHistory({ title: "Deep Story Reflection created", detail: `6 WLD confirmed. Private reflection created for ${storyLabel}.`, kind: "story" });
+                        try {
+                          const res = await fetch("/api/ai/verdict", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ question: storyLabel, answers: [], feature: "deep-story-reflection", storyTitle: storyLabel }),
+                          });
+                          const data = await res.json() as { ok?: boolean; verdict?: { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } };
+                          if (data.ok && data.verdict) {
+                            setReflectionTexts((prev) => ({ ...prev, [storyKey]: data.verdict! }));
+                          } else {
+                            setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
+                            act("Reflection loading failed", "AI unavailable — your unlock is saved. Tap the button again to retry.");
+                          }
+                        } catch {
+                          setReflectionTexts((prev) => { const next = { ...prev }; delete next[storyKey]; return next; });
+                          act("Reflection loading failed", "Connection issue — your unlock is saved. Tap the button again to retry.");
+                        }
+                      },
+                    });
+                  }}
+                  type="button"
+                >
+                  {unlockedReflections.has(storyKey) ? "✓ Reflection saved" : "Create Deep Reflection · 6 WLD"}
+                </button>
+              </div>
+              {unlockedReflections.has(storyKey) ? (() => {
+                const rt = reflectionTexts[storyKey];
+                if (rt === "loading") {
+                  return <p style={{ opacity: 0.55, fontSize: "0.82rem", padding: "12px 0 0" }}>Generating your reflection…</p>;
+                }
+                if (rt && typeof rt === "object") {
+                  return (
+                    <div className="ask-verdict-panel" style={{ marginTop: 16 }}>
+                      <span className="section-kicker">Your Deep Reflection</span>
+                      <div className="ask-verdict-row"><strong>Core theme</strong><p>{rt.mostSaid}</p></div>
+                      <div className="ask-verdict-row"><strong>Key insight</strong><p>{rt.bestAnswer}</p></div>
+                      <div className="ask-verdict-row"><strong>What it challenges</strong><p>{rt.hardTruth}</p></div>
+                      <div className="ask-verdict-row"><strong>Reflect on this</strong><p>{rt.finalVerdict}</p></div>
+                    </div>
+                  );
+                }
+                return null;
+              })() : null}
+            </>
+          );
+        })()}
       </section>
     </div>
   );
