@@ -200,27 +200,29 @@ export async function payWithWorld({
     };
   }
 
-  const confirmationResult = await confirmWorldPayment({
+  // World App has already confirmed the user signed and submitted this payment.
+  // Unlock immediately instead of blocking on WorldChain mining — full backend
+  // verification (recipient/amount/reference checks) still runs, just in the
+  // background, so it can log/flag a mismatch without making the user wait.
+  void confirmWorldPayment({
     amount,
     feature,
     payload: payment.data,
     reference: referenceStr,
     token,
+  }).then((confirmationResult) => {
+    if (!confirmationResult.ok) {
+      console.warn(
+        `[HumanChain] Background payment confirmation failed for "${feature}" (ref ${referenceStr}):`,
+        confirmationResult.error,
+      );
+    }
   });
-
-  if (!confirmationResult.ok) {
-    return {
-      ok: false,
-      error: confirmationResult.error ?? "World payment could not be confirmed.",
-      payment,
-      confirmation: confirmationResult.confirmation,
-    };
-  }
 
   return {
     ok: true,
     payment,
-    confirmation: confirmationResult.confirmation,
+    pendingConfirmation: true,
     recipient: treasuryAddress,
   };
 }

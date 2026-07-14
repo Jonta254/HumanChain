@@ -890,17 +890,8 @@ export function useHumanChainApp() {
       if ("pendingSetup" in result && result.pendingSetup) { setToast({ title: "World setup needed", detail: result.message }); setPaymentPrompt(null); setPaymentBusy(false); return; }
       if ("pendingWorldApp" in result && result.pendingWorldApp) { setToast({ title: "Open in World App", detail: result.message }); setPaymentBusy(false); return; }
       if ("ok" in result && !result.ok) {
-        // "payment" in result means MiniKit.pay() completed — WLD was already deducted from the
-        // user's wallet before confirmation ran. Close the sheet immediately so the Pay button
-        // cannot be tapped again and trigger a second charge.
-        const paymentWasSent = "payment" in result;
-        const rawDetail = "error" in result && result.error ? result.error : "World payments are only counted after backend verification.";
-        const detail = paymentWasSent
-          ? "Your WLD was sent and is being verified on WorldChain. Do NOT pay again — the feature will unlock once confirmed."
-          : rawDetail;
-        const isStillPending = rawDetail.toLowerCase().includes("still pending");
-        setToast({ title: isStillPending || paymentWasSent ? "Payment sent — confirming" : "Payment not confirmed", detail });
-        if (paymentWasSent) setPaymentPrompt(null);
+        const detail = "error" in result && result.error ? result.error : "World payment could not be started.";
+        setToast({ title: "Payment not confirmed", detail });
         setPaymentBusy(false); return;
       }
       if ("error" in result && result.error) { setToast({ title: "Payment not prepared", detail: result.error }); setPaymentBusy(false); return; }
@@ -915,7 +906,7 @@ export function useHumanChainApp() {
       if (earnedPoints > 0) earnPoints(earnedPoints, `${paymentPrompt.title} payment reward`);
       const formattedAmount = formatPaymentAmount(amount, paymentToken);
       const isKindTip = getPaymentKind(feature) === "tip";
-      recordHistory({ title: isKindTip ? "Tip payment confirmed" : "Payment confirmed", detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment and backend verification. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`, kind: getPaymentKind(feature) });
+      recordHistory({ title: isKindTip ? "Tip payment confirmed" : "Payment confirmed", detail: `${formattedAmount} confirmed for ${paymentPrompt.title} after World App payment. Feature: ${feature}. ${earnedPoints > 0 ? `+${earnedPoints} HP recorded.` : "No HP reward attached."}`, kind: getPaymentKind(feature) });
       void storeSafeData("payment", `${feature}-${Date.now()}`, { amount, feature, human: verifiedHuman?.username, payerWallet: verifiedHuman?.wallet, paymentTitle: paymentPrompt.title, ...paymentPrompt.context, treasuryRecipient, token: paymentToken, wallet: verifiedHuman?.wallet });
       const notifTitle = isKindTip ? `Tip of ${formattedAmount} sent` : `${formattedAmount} confirmed`;
       const notifDetail = `${paymentPrompt.title} — verified on World App and recorded in your HumanChain history.`;

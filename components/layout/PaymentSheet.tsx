@@ -160,7 +160,7 @@ export function PaymentSheet({
           )}
 
           <Typography variant="body" level={2} className="ps-note">
-            World App opens for confirmation. HumanChain unlocks this only after backend verification.
+            World App opens for confirmation. HumanChain unlocks as soon as you confirm — backend verification keeps running quietly after that.
           </Typography>
         </div>
 
