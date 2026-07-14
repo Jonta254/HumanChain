@@ -10914,8 +10914,10 @@ button,
   border-radius: 4px;
 }
 
-/* Ensure every scrollable list/panel respects overscroll containment */
-.screen,
+/* Ensure every scrollable list/panel respects overscroll containment.
+   .screen is excluded — it's the real touch-scroll surface in World App
+   and needs overscroll-behavior-y: none (declared earlier) to actually
+   kill the iOS bounce, not just "contain" it at its own boundary. */
 .phone-frame {
   overscroll-behavior: contain;
 }
@@ -14619,7 +14621,7 @@ button,
    HUMANCHAIN MARKETPLACE v5 â€” hcm- namespace
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-.hcm-root { display:flex; flex-direction:column; padding-bottom:120px; overscroll-behavior-y:contain; }
+.hcm-root { display:flex; flex-direction:column; padding-bottom:120px; }
 
 .hcm-topbar { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px 0 60px; position:sticky; top:0; z-index:20; background:var(--paper); }
 .hcm-tabs { display:flex; gap:3px; background:var(--line); border-radius:14px; padding:3px; }
