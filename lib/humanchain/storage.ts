@@ -46,6 +46,7 @@ export const storageKeys = {
   bookmarkedStories: "humanchain_bookmarked_stories",
   boostedListings: "humanchain_boosted_listings",
   adPosted: "humanchain_ad_posted",
+  userBusinessAds: "humanchain_user_business_ads",
 } as const;
 
 export function loadJsonFromStorage<T>(key: string, fallback: T): T {

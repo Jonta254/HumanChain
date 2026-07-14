@@ -18,6 +18,7 @@ export type MarketplaceListing = {
   tips: number;
   status: "draft" | "payment-ready" | "active" | "sold" | "archived";
   createdAt: string;
+  boosted?: boolean;
 };
 
 export type MarketBid = {

@@ -204,6 +204,7 @@ export function loadStoredMarketplaceListings(): MarketplaceListing[] {
       createdAt: listing.createdAt ?? "Stored locally",
       dataReceiptUrl: listing.dataReceiptUrl,
       dataStorageStatus: listing.dataStorageStatus ?? "local-safe",
+      boosted: listing.boosted ?? false,
     }),
   );
 }

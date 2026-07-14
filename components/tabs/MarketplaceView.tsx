@@ -231,6 +231,15 @@ const MARKET_ITEMS = [
 
 type SeedItem = typeof MARKET_ITEMS[number];
 
+type UserBusinessAd = {
+  id: number;
+  title: string;
+  offer: string;
+  area: string;
+  owner: string;
+  postedAt: string;
+};
+
 const BUSINESS_ADS = [
   {
     title: "Taste 254 Lunch Launch",
@@ -509,6 +518,11 @@ export function MarketplaceView({
   const [photoPackUnlocked, setPhotoPackUnlocked] = useState(false);
   const [boostedListings, setBoostedListings] = useState(() => loadJsonFromStorage<boolean>(storageKeys.boostedListings, false));
   const [adPosted, setAdPosted] = useState(() => loadJsonFromStorage<boolean>(storageKeys.adPosted, false));
+  const [userBusinessAds, setUserBusinessAds] = useState<UserBusinessAd[]>(() =>
+    loadJsonFromStorage<UserBusinessAd[]>(storageKeys.userBusinessAds, []),
+  );
+  const [showAdForm, setShowAdForm] = useState(false);
+  const [adForm, setAdForm] = useState({ title: "", offer: "", area: "" });
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [listingDraft, setListingDraft] = useState({
@@ -546,6 +560,7 @@ export function MarketplaceView({
   useEffect(() => { saveJsonToStorage(storageKeys.marketHolds, marketHolds); }, [marketHolds]);
   useEffect(() => { if (boostedListings) saveJsonToStorage(storageKeys.boostedListings, true); }, [boostedListings]);
   useEffect(() => { if (adPosted) saveJsonToStorage(storageKeys.adPosted, true); }, [adPosted]);
+  useEffect(() => { saveJsonToStorage(storageKeys.userBusinessAds, userBusinessAds); }, [userBusinessAds]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const handle = humanIdentity?.username ?? "@preview_human";
@@ -712,6 +727,45 @@ export function MarketplaceView({
         setMarketComments((c) => ({ ...c, [k]: [saved, ...(c[k] ?? [])] }));
         setCommentDrafts((c) => ({ ...c, [k]: "" }));
         recordHistory({ title: "Comment posted", detail: `0.5 WLD comment on ${item.title}.`, kind: "market" });
+      },
+    });
+  }
+
+  // ── Business ad ───────────────────────────────────────────────────────────
+  function openAdComposer() {
+    if (adPosted) {
+      act("Ad already live", "Your business ad is already posted below in Business Ads.");
+      return;
+    }
+    setShowAdForm(true);
+  }
+
+  function confirmBusinessAd() {
+    if (!adForm.title.trim() || !adForm.offer.trim()) {
+      act("Missing details", "Add a business name and offer before publishing.");
+      return;
+    }
+    openPayment({
+      title: "Business Ad — 4 WLD",
+      amount: "4 WLD",
+      detail: "Promote your shop, service, event, or link.",
+      success: "Business ad live!",
+      feature: "marketplace-business-ad",
+      points: 20,
+      onConfirmed: async () => {
+        const ad: UserBusinessAd = {
+          id: Date.now(),
+          title: adForm.title.trim(),
+          offer: adForm.offer.trim(),
+          area: adForm.area.trim() || marketLocation.label,
+          owner: handle,
+          postedAt: formatShortTime(),
+        };
+        setUserBusinessAds((c) => [ad, ...c]);
+        setAdPosted(true);
+        setShowAdForm(false);
+        setAdForm({ title: "", offer: "", area: "" });
+        recordHistory({ title: "Business ad live", detail: `${ad.title} · 4 WLD confirmed.`, kind: "market" });
       },
     });
   }
@@ -1685,10 +1739,10 @@ export function MarketplaceView({
             <button onClick={() => setShowSell(true)} type="button">
               <PlusCircle size={17} /><span>Sell Item</span><strong>Start</strong>
             </button>
-            <button disabled={boostedListings} onClick={() => { if (boostedListings) return; openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your listing higher in nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: async () => { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); recordHistory({ title: "Boosted", detail: "2 WLD boost.", kind: "market" }); } }); }} type="button">
+            <button disabled={boostedListings || marketplaceListings.length === 0} onClick={() => { if (boostedListings || marketplaceListings.length === 0) return; openPayment({ title: "Boost Listing — 2 WLD", amount: "2 WLD", detail: "Push your most recent listing to the top of nearby discovery.", success: "Listing boosted!", feature: "marketplace-local-boost", points: 5, onConfirmed: async () => { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); recordHistory({ title: "Boosted", detail: "2 WLD boost.", kind: "market" }); } }); }} type="button">
               <Flame size={17} /><span>Boost</span><strong>2 WLD</strong>
             </button>
-            <button disabled={adPosted} onClick={() => { if (adPosted) return; openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Market a verified shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: async () => { setAdPosted(true); recordHistory({ title: "Business ad live", detail: "4 WLD ad confirmed.", kind: "market" }); } }); }} type="button">
+            <button disabled={adPosted} onClick={openAdComposer} type="button">
               <HandCoins size={17} /><span>{adPosted ? "✓ Ad live" : "Ad"}</span><strong>4 WLD</strong>
             </button>
           </div>
@@ -1701,14 +1755,18 @@ export function MarketplaceView({
                 <span className="hcm-listings-count">{marketplaceListings.filter((l) => l.status !== "archived").length} active</span>
               </div>
               <div className="hcm-stored-list">
-                {marketplaceListings.filter((l) => l.status !== "archived").map((listing) => (
+                {marketplaceListings
+                  .filter((l) => l.status !== "archived")
+                  .slice()
+                  .sort((a, b) => (b.boosted ? 1 : 0) - (a.boosted ? 1 : 0))
+                  .map((listing) => (
                   <div key={listing.id} className={`hcm-stored-row${listing.status === "sold" ? " sold" : ""}`}>
                     <button className="hcm-stored-thumb" onClick={() => setActiveItem(listing)} type="button">
                       {listing.photos[0] ? <img src={listing.photos[0].src} alt={listing.photos[0].name} /> : <Tag size={18} />}
                       {listing.status === "sold" && <span className="hcm-thumb-sold">SOLD</span>}
                     </button>
                     <div className="hcm-stored-info">
-                      <strong>{listing.title || "Untitled item"}</strong>
+                      <strong>{listing.title || "Untitled item"}{listing.boosted ? <span style={{ color: "#c8860a", fontWeight: 700 }}> ⚡ Boosted</span> : null}</strong>
                       <span>{listing.price || "Price not set"} · {listing.condition || "Condition not set"} · {listing.area || "Area not set"}</span>
                       <small>{listing.saleMode === "bidding" ? `Bidding, floor ${listing.bidFloor}` : "Direct"} · {listing.ratings ?? 0} ratings · {listing.tips ?? 0} tips</small>
                     </div>
@@ -1832,6 +1890,16 @@ export function MarketplaceView({
           <section className="hcm-section">
             <div className="hcm-section-head"><Send size={14} /><strong>Business Ads</strong><small>4 WLD to promote</small></div>
             <div className="hcm-ads-grid">
+              {userBusinessAds.map((ad) => (
+                <article key={ad.id} className="hcm-ad-card">
+                  <div className="hcm-ad-body">
+                    <span className="hcm-ad-tag">Your Ad · {ad.area}</span>
+                    <strong>{ad.title}</strong>
+                    <p>{ad.offer}</p>
+                    <small>{ad.owner} · Posted {ad.postedAt}</small>
+                  </div>
+                </article>
+              ))}
               {BUSINESS_ADS.map((ad) => (
                 <article key={ad.title} className="hcm-ad-card">
                   <img src={ad.image} alt={ad.title} className="hcm-ad-img" />
@@ -1845,9 +1913,21 @@ export function MarketplaceView({
                 </article>
               ))}
             </div>
-            <button className={`hcm-ad-post-btn${adPosted ? " active" : ""}`} disabled={adPosted} onClick={() => { if (adPosted) return; openPayment({ title: "Business Ad — 4 WLD", amount: "4 WLD", detail: "Promote your shop, service, event, or link.", success: "Business ad live!", feature: "marketplace-business-ad", points: 20, onConfirmed: async () => { setAdPosted(true); recordHistory({ title: "Business ad live", detail: "4 WLD.", kind: "market" }); } }); }} type="button">
-              <Send size={14} /> {adPosted ? "✓ Business Ad Live" : "Post Your Business Ad — 4 WLD"}
-            </button>
+            {showAdForm && !adPosted ? (
+              <div className="hcm-review-card" style={{ marginTop: 12 }}>
+                <div className="hcm-field-label" style={{ margin: 0 }}>Your business ad</div>
+                <input className="hcm-input" placeholder="Business name" value={adForm.title} onChange={(e) => setAdForm((c) => ({ ...c, title: e.target.value }))} />
+                <textarea className="hcm-textarea" placeholder="What are you offering?" rows={2} value={adForm.offer} onChange={(e) => setAdForm((c) => ({ ...c, offer: e.target.value }))} />
+                <input className="hcm-input" placeholder="Area (optional)" value={adForm.area} onChange={(e) => setAdForm((c) => ({ ...c, area: e.target.value }))} />
+                <button className="hcm-ad-post-btn" onClick={confirmBusinessAd} type="button">
+                  <Send size={14} /> Publish Ad — 4 WLD
+                </button>
+              </div>
+            ) : (
+              <button className={`hcm-ad-post-btn${adPosted ? " active" : ""}`} disabled={adPosted} onClick={openAdComposer} type="button">
+                <Send size={14} /> {adPosted ? "✓ Business Ad Live" : "Post Your Business Ad — 4 WLD"}
+              </button>
+            )}
           </section>
 
           {/* Pricing plans */}
@@ -1864,6 +1944,11 @@ export function MarketplaceView({
                 return (
                   <button key={planKey} className={`hcm-plan-row${alreadyActive ? " active" : ""}`} disabled={alreadyActive} onClick={() => {
                     if (alreadyActive) return;
+                    if (planKey === "Business ad") { openAdComposer(); return; }
+                    if (planKey === "Local boost" && marketplaceListings.length === 0) {
+                      act("No listing to boost", "Publish a listing first, then boost it.");
+                      return;
+                    }
                     openPayment({
                       title: `${planKey} — ${plan[1]}`, amount: plan[1], detail: plan[2],
                       success: `${planKey} unlocked!`,
@@ -1872,7 +1957,6 @@ export function MarketplaceView({
                         if (planKey === "Quick listing") setShowSell(true);
                         else if (planKey === "Extra photo pack") setPhotoPackUnlocked(true);
                         else if (planKey === "Local boost") { setBoostedListings(true); setMarketplaceListings((c) => c.map((l, i) => i === 0 ? { ...l, boosted: true } : l)); }
-                        else if (planKey === "Business ad") setAdPosted(true);
                         recordHistory({ title: `${planKey} payment`, detail: `${plan[1]} confirmed.`, kind: "market" });
                       },
                     });
