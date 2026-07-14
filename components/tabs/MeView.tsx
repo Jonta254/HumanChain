@@ -33,7 +33,7 @@ import {
   Permission,
   requestWorldPermission,
 } from "@/lib/world";
-import { loadJsonFromStorage, storageKeys } from "@/lib/humanchain/storage";
+import { loadJsonFromStorage, saveJsonToStorage, storageKeys } from "@/lib/humanchain/storage";
 import {
   getChainScore,
   getLocalDateKey,
@@ -191,6 +191,9 @@ export function MeView({
 }) {
   const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
   const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
+  const [deepMirrorUnlocked, setDeepMirrorUnlocked] = useState(() =>
+    loadJsonFromStorage<boolean>(storageKeys.deepMirrorUnlocked, false),
+  );
   const [showAllLedger, setShowAllLedger] = useState(false);
   const [activityVaultTab, setActivityVaultTab] = useState<"posts" | "market" | "applications">("posts");
   const [worldIdVerified, setWorldIdVerified] = useState(() => {
@@ -276,6 +279,10 @@ export function MeView({
   }
 
   function openDeepHumanMirror() {
+    if (deepMirrorUnlocked) {
+      setQuickToolPanel("mirror");
+      return;
+    }
     openPayment({
       title: "Deep Human Mirror",
       amount: "6 WLD",
@@ -284,6 +291,8 @@ export function MeView({
       feature: "deep-world-verdict",
       points: 30,
       onConfirmed: async () => {
+        setDeepMirrorUnlocked(true);
+        saveJsonToStorage(storageKeys.deepMirrorUnlocked, true);
         setQuickToolPanel("mirror");
         recordHistory({
           title: "Deep Human Mirror unlocked",
@@ -738,7 +747,7 @@ export function MeView({
           </button>
           <button onClick={openDeepHumanMirror} type="button">
             <LockKeyhole size={17} />
-            Open Deep Human Mirror
+            {deepMirrorUnlocked ? "View Deep Human Mirror" : "Open Deep Human Mirror — 6 WLD"}
           </button>
           <button
             onClick={async () => {

@@ -47,6 +47,7 @@ export const storageKeys = {
   boostedListings: "humanchain_boosted_listings",
   adPosted: "humanchain_ad_posted",
   userBusinessAds: "humanchain_user_business_ads",
+  deepMirrorUnlocked: "humanchain_deep_mirror_unlocked",
 } as const;
 
 export function loadJsonFromStorage<T>(key: string, fallback: T): T {
