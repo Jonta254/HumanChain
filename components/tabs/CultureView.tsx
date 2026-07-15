@@ -33,6 +33,8 @@ type CultureRoom = {
   creator: string;
   creatorWallet?: string;
   featured: boolean;
+  coverImage?: string;
+  coverAlt?: string;
 };
 
 type CulturePost = {
@@ -64,6 +66,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#1a6b40",
     creator: "@adaeze_ng",
     featured: true,
+    coverImage: "https://images.unsplash.com/photo-1596422405536-a2e11c31b2a5?w=800&h=500&fit=crop&q=80",
+    coverAlt: "Yoruba elder woman in traditional aso-oke fabric at a ceremony",
   },
   {
     id: "swahili",
@@ -79,6 +83,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#1a4a6b",
     creator: "@mwangi_k",
     featured: true,
+    coverImage: "https://images.unsplash.com/photo-1591111269990-a3942aaae218?w=800&h=500&fit=crop&q=80",
+    coverAlt: "Carved wooden doors of Stone Town at dawn — centuries of Swahili craftsmanship in coral and timber",
   },
   {
     id: "andean",
@@ -94,6 +100,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#6b2a18",
     creator: "@inti_quispe",
     featured: false,
+    coverImage: "https://images.unsplash.com/photo-1531065208531-4036c933eb6f?w=800&h=500&fit=crop&q=80",
+    coverAlt: "Terraced Andean mountainside at Machu Picchu — ancient agricultural engineering that fed millions",
   },
   {
     id: "cantonese",
@@ -109,6 +117,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#6b1a1a",
     creator: "@wing_hk",
     featured: true,
+    coverImage: "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&h=500&fit=crop&q=80",
+    coverAlt: "Bamboo steamers stacked high with har gow and siu mai, tea poured to the side",
   },
   {
     id: "caribbean",
@@ -124,6 +134,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#1a4a1e",
     creator: "@rasta_t",
     featured: true,
+    coverImage: "https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=800&h=500&fit=crop&q=80",
+    coverAlt: "Carnival performer in full feathered regalia of red, gold and purple — pure Caribbean energy",
   },
   {
     id: "sahelian",
@@ -139,6 +151,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#5a3a12",
     creator: "@moussa_dakar",
     featured: false,
+    coverImage: "https://images.unsplash.com/photo-1551887196-72e32bfc7bf3?w=800&h=500&fit=crop&q=80",
+    coverAlt: "West African bogolan mud cloth — deep earthy blacks and creams in traditional geometric designs",
   },
   {
     id: "hindi-heartland",
@@ -154,6 +168,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#5a1a6b",
     creator: "@priya_delhi",
     featured: true,
+    coverImage: "https://images.unsplash.com/photo-1524504388940-b1c1722653e0?w=800&h=500&fit=crop&q=80",
+    coverAlt: "Explosion of red and yellow Holi powder against blue sky — pure colour and celebration",
   },
   {
     id: "nordic",
@@ -169,6 +185,8 @@ const SEED_ROOMS: CultureRoom[] = [
     color: "#1a2e4a",
     creator: "@sigrid_oslo",
     featured: false,
+    coverImage: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&h=500&fit=crop&q=80",
+    coverAlt: "Northern lights in green and purple above a snow-covered Norwegian fjord village",
   },
 ];
 
@@ -724,7 +742,13 @@ export function CultureView({
         </div>
 
         {/* Room header card */}
-        <div className="cv-room-header" style={{ "--room-color": activeRoom.color } as React.CSSProperties}>
+        <div
+          className={`cv-room-header${activeRoom.coverImage ? " cv-room-header--photo" : ""}`}
+          style={{
+            "--room-color": activeRoom.color,
+            ...(activeRoom.coverImage ? { backgroundImage: `url(${activeRoom.coverImage})` } : {}),
+          } as React.CSSProperties}
+        >
           <div className="cv-rh-top">
             <span className="cv-rh-flag">{activeRoom.flag}</span>
             <div className="cv-rh-meta">
@@ -868,22 +892,43 @@ function RoomCard({
 }) {
   return (
     <button
-      className={`cv-room-card${unlocked ? " cv-room-card--unlocked" : ""}`}
+      className={`cv-room-card${unlocked ? " cv-room-card--unlocked" : ""}${room.coverImage ? " cv-room-card--photo" : ""}`}
       style={{ "--room-color": room.color } as React.CSSProperties}
       onClick={onEnter}
       type="button"
     >
-      <div className="cvrc-head">
-        <span className="cvrc-flag">{room.flag}</span>
-        <div className="cvrc-info">
-          <strong>{room.name}</strong>
-          <span>{room.region}</span>
+      {room.coverImage ? (
+        <div className="cvrc-cover">
+          <img
+            alt={room.coverAlt ?? room.name}
+            loading="lazy"
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+            src={room.coverImage}
+          />
+          <div className="cvrc-cover-shade" />
+          <span className="cvrc-cover-flag">{room.flag}</span>
+          {unlocked
+            ? <span className="cvrc-joined cvrc-joined--onphoto">✓ Joined</span>
+            : <span className="cvrc-price cvrc-price--onphoto"><Lock size={11} />{room.entryFee}</span>
+          }
+          <div className="cvrc-cover-meta">
+            <strong>{room.name}</strong>
+            <span>{room.region}</span>
+          </div>
         </div>
-        {unlocked
-          ? <span className="cvrc-joined">✓ Joined</span>
-          : <span className="cvrc-price"><Lock size={11} />{room.entryFee}</span>
-        }
-      </div>
+      ) : (
+        <div className="cvrc-head">
+          <span className="cvrc-flag">{room.flag}</span>
+          <div className="cvrc-info">
+            <strong>{room.name}</strong>
+            <span>{room.region}</span>
+          </div>
+          {unlocked
+            ? <span className="cvrc-joined">✓ Joined</span>
+            : <span className="cvrc-price"><Lock size={11} />{room.entryFee}</span>
+          }
+        </div>
+      )}
       <p className="cvrc-tagline">{room.tagline}</p>
       <p className="cvrc-preview">{room.preview}</p>
       <div className="cvrc-topics">

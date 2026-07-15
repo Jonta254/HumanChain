@@ -21768,6 +21768,47 @@ html[data-world-mini-app="true"] .ai-guide-sheet {
   border-radius: 999px; padding: 4px 10px;
   flex-shrink: 0;
 }
+/* Room card — photo cover variant */
+.cv-room-card--photo { padding: 0 16px 14px; }
+.cvrc-cover {
+  position: relative;
+  margin: 0 -16px 12px;
+  height: 132px;
+  overflow: hidden;
+  border-radius: 22px 22px 14px 14px;
+}
+.cvrc-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cvrc-cover-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.72) 100%);
+}
+.cvrc-cover-flag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 1.3rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+.cvrc-price--onphoto,
+.cvrc-joined--onphoto {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.cvrc-price--onphoto { color: #fff; background: rgba(0,0,0,0.38); }
+.cvrc-joined--onphoto { color: #fff; background: rgba(19,122,87,0.55); }
+.cvrc-cover-meta {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+}
+.cvrc-cover-meta strong { display: block; font-size: 0.94rem; font-weight: 950; color: #fff; letter-spacing: -0.01em; }
+.cvrc-cover-meta span { font-size: 0.68rem; color: rgba(255,255,255,0.85); font-weight: 700; }
+
 .cvrc-tagline { font-size: 0.8rem; font-weight: 800; color: var(--ink); font-style: italic; margin: 0; }
 .cvrc-preview { font-size: 0.76rem; color: var(--muted); line-height: 1.48; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .cvrc-topics { display: flex; flex-wrap: wrap; gap: 5px; }
@@ -21855,6 +21896,7 @@ html[data-world-mini-app="true"] .ai-guide-sheet {
 
 /* Room header */
 .cv-room-header {
+  position: relative;
   margin: 0 16px 0;
   padding: 18px 18px 16px;
   border-radius: 24px;
@@ -21867,7 +21909,23 @@ html[data-world-mini-app="true"] .ai-guide-sheet {
   display: grid;
   gap: 10px;
   box-shadow: 0 16px 40px rgba(0,0,0,0.24);
+  overflow: hidden;
 }
+/* Photo cover variant — background-image set inline per room; this layer just
+   darkens it enough for the white text to stay readable over any photo. */
+.cv-room-header--photo {
+  background-color: color-mix(in srgb, var(--room-color, #137a57) 60%, #000);
+  background-size: cover;
+  background-position: center;
+}
+.cv-room-header--photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(178deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.82) 100%);
+}
+.cv-room-header--photo > * { position: relative; z-index: 1; }
 .cv-rh-top { display: flex; align-items: center; gap: 12px; }
 .cv-rh-flag { font-size: 2rem; flex-shrink: 0; }
 .cv-rh-meta strong { display: block; font-size: 1.02rem; font-weight: 950; color: #fff; }
