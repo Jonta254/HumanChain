@@ -380,10 +380,10 @@ export function HomeView({
           <span className="hc-mp-cta">See Market <ChevronRight size={13} /></span>
         </button>
         <div className="hc-more-links">
-          <button onClick={() => { selection(); setTab("stories"); }} type="button" aria-label="Human stories">
+          <button className="hc-quick-silver" onClick={() => { selection(); setTab("stories"); }} type="button" aria-label="Human stories">
             <BookOpen size={14} /><span>Stories</span>
           </button>
-          <button onClick={() => { selection(); setTab("culture"); }} type="button" aria-label="Culture rooms">
+          <button className="hc-quick-gold" onClick={() => { selection(); setTab("culture"); }} type="button" aria-label="Culture rooms">
             <Compass size={14} /><span>Culture</span>
           </button>
         </div>

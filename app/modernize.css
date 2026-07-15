@@ -668,6 +668,22 @@ button:active {
 .hc-more-links button svg { color: var(--green); flex-shrink: 0; }
 .hc-more-links button:active { transform: scale(0.96); opacity: 1; background: var(--surface-alt); border-color: rgba(19,122,87,0.4); }
 
+.hc-more-links button.hc-quick-silver {
+  border-color: rgba(122,143,166,0.5);
+  background: linear-gradient(155deg, #f6f8fa 0%, #e3e9ef 55%, #f0f3f6 100%);
+  color: #3c4a5c;
+}
+.hc-more-links button.hc-quick-silver svg { color: #64748b; }
+.hc-more-links button.hc-quick-silver:active { background: linear-gradient(155deg, #eceff3, #d9dfe6); border-color: rgba(122,143,166,0.75); }
+
+.hc-more-links button.hc-quick-gold {
+  border-color: rgba(184,138,31,0.45);
+  background: linear-gradient(155deg, #fdf6e2 0%, #f6e6ba 55%, #fbf0d5 100%);
+  color: #7a5a10;
+}
+.hc-more-links button.hc-quick-gold svg { color: var(--gold); }
+.hc-more-links button.hc-quick-gold:active { background: linear-gradient(155deg, #f9edc8, #f1dda2); border-color: rgba(184,138,31,0.65); }
+
 /* 3.6 Daily card */
 .hc-daily-card {
   display: grid;
