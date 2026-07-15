@@ -25,6 +25,72 @@ function waitForWorldConfirmation(delayMs: number) {
   return new Promise((resolve) => window.setTimeout(resolve, delayMs));
 }
 
+type ConfirmAttempt =
+  | { outcome: "confirmed"; confirmation: WorldPaymentConfirmation }
+  | { outcome: "pending"; confirmation: WorldPaymentConfirmation | null }
+  | { outcome: "failed"; confirmation: WorldPaymentConfirmation | null; error: string };
+
+async function attemptWorldConfirmation(input: {
+  amount: number;
+  feature: string;
+  payload: PayResult;
+  reference: string;
+  token: HumanChainPaymentToken;
+}): Promise<ConfirmAttempt> {
+  let confirmationResponse: Response;
+  let confirmation: WorldPaymentConfirmation;
+
+  try {
+    confirmationResponse = await fetchWithTimeout("/api/world/confirm-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+      timeoutMs: 12_000,
+    });
+    confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
+  } catch (error) {
+    return {
+      confirmation: {
+        message: error instanceof Error ? error.message : "World payment confirmation request failed.",
+        ok: false,
+      },
+      outcome: "pending",
+    };
+  }
+
+  // Hard client/portal error (4xx or the 502 that wraps a Dev Portal 4xx) —
+  // retrying will not help. Includes wrong recipient, wrong reference, wrong
+  // token — genuine reasons access should NOT be granted.
+  if (!confirmationResponse.ok && confirmationResponse.status < 500) {
+    return {
+      confirmation,
+      error: confirmation.message ?? "World payment could not be confirmed.",
+      outcome: "failed",
+    };
+  }
+
+  // Transient server error (5xx) — worth retrying, not a real failure.
+  if (!confirmationResponse.ok) {
+    return { confirmation, outcome: "pending" };
+  }
+
+  // Setup not complete — no point polling, and access should not be granted.
+  if (confirmation.code === "SETUP_INCOMPLETE") {
+    return {
+      confirmation,
+      error: confirmation.message ?? "World payment confirmation is not configured.",
+      outcome: "failed",
+    };
+  }
+
+  if (confirmation.ok) {
+    return { confirmation, outcome: "confirmed" };
+  }
+
+  // Transaction submitted but not yet mined — not a failure, just not final yet.
+  return { confirmation, outcome: "pending" };
+}
+
 async function confirmWorldPayment(input: {
   amount: number;
   feature: string;
@@ -39,55 +105,16 @@ async function confirmWorldPayment(input: {
       await waitForWorldConfirmation(delayMs);
     }
 
-    let confirmationResponse: Response;
-    let confirmation: WorldPaymentConfirmation;
+    const attempt = await attemptWorldConfirmation(input);
+    lastConfirmation = attempt.confirmation;
 
-    try {
-      confirmationResponse = await fetchWithTimeout("/api/world/confirm-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-        timeoutMs: 12_000,
-      });
-      confirmation = (await confirmationResponse.json()) as WorldPaymentConfirmation;
-    } catch (error) {
-      lastConfirmation = {
-        message: error instanceof Error ? error.message : "World payment confirmation request failed.",
-        ok: false,
-      };
-      continue;
+    if (attempt.outcome === "confirmed") {
+      return { confirmation: attempt.confirmation, ok: true };
     }
-
-    lastConfirmation = confirmation;
-
-    // Hard client/portal error (4xx or the 502 that wraps a Dev Portal 4xx) —
-    // retrying will not help; return immediately.
-    if (!confirmationResponse.ok && confirmationResponse.status < 500) {
-      return {
-        confirmation,
-        error: confirmation.message ?? "World payment could not be confirmed.",
-        ok: false,
-      };
+    if (attempt.outcome === "failed") {
+      return { confirmation: attempt.confirmation, error: attempt.error, ok: false };
     }
-
-    // Transient server error (5xx) — fall through and retry.
-    if (!confirmationResponse.ok) continue;
-
-    // Setup not complete — no point polling.
-    if (confirmation.code === "SETUP_INCOMPLETE") {
-      return {
-        confirmation,
-        error: confirmation.message ?? "World payment confirmation is not configured.",
-        ok: false,
-      };
-    }
-
-    // Confirmed.
-    if (confirmation.ok) {
-      return { confirmation, ok: true };
-    }
-
-    // Transaction pending (not yet mined) — keep polling.
+    // "pending" — keep polling.
   }
 
   return {
@@ -200,29 +227,48 @@ export async function payWithWorld({
     };
   }
 
-  // World App has already confirmed the user signed and submitted this payment.
-  // Unlock immediately instead of blocking on WorldChain mining — full backend
-  // verification (recipient/amount/reference checks) still runs, just in the
-  // background, so it can log/flag a mismatch without making the user wait.
-  void confirmWorldPayment({
+  // World App has already confirmed the user signed and submitted this payment
+  // (MiniKit only resolves here when the native payment sheet reports
+  // status: "success" — a rejected/failed payment throws instead and is
+  // caught above). Do ONE quick backend check now: if it comes back with a
+  // definitive failure (wrong recipient/reference/token, or setup broken),
+  // block access — that is a real reason not to unlock. If WorldChain simply
+  // hasn't mined it yet, don't make the user wait for that: unlock now and
+  // keep polling in the background purely to log a late mismatch.
+  const confirmInput = {
     amount,
     feature,
     payload: payment.data,
     reference: referenceStr,
     token,
-  }).then((confirmationResult) => {
-    if (!confirmationResult.ok) {
-      console.warn(
-        `[HumanChain] Background payment confirmation failed for "${feature}" (ref ${referenceStr}):`,
-        confirmationResult.error,
-      );
-    }
-  });
+  };
+  const firstAttempt = await attemptWorldConfirmation(confirmInput);
+
+  if (firstAttempt.outcome === "failed") {
+    return {
+      ok: false,
+      error: firstAttempt.error,
+      payment,
+      confirmation: firstAttempt.confirmation ?? undefined,
+    };
+  }
+
+  if (firstAttempt.outcome === "pending") {
+    void confirmWorldPayment(confirmInput).then((confirmationResult) => {
+      if (!confirmationResult.ok) {
+        console.warn(
+          `[HumanChain] Background payment confirmation failed for "${feature}" (ref ${referenceStr}):`,
+          confirmationResult.error,
+        );
+      }
+    });
+  }
 
   return {
     ok: true,
     payment,
-    pendingConfirmation: true,
+    pendingConfirmation: firstAttempt.outcome === "pending",
+    confirmation: firstAttempt.outcome === "confirmed" ? firstAttempt.confirmation : undefined,
     recipient: treasuryAddress,
   };
 }
