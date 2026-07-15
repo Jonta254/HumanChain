@@ -462,12 +462,14 @@ export function AskView({
                   {country}
                 </button>
               )) : (
-                <span>No country route unlocked yet</span>
+                <span>No country unlocked yet — unlock one above</span>
               )}
             </div>
-            <small className="ask-route-current">
-              Tracking: {selectedCountryRoute === "World" ? "country route not unlocked" : `${selectedCountryRoute} only`}
-            </small>
+            {selectedCountryRoute !== "World" ? (
+              <small className="ask-route-current">
+                Tracking: {selectedCountryRoute} only
+              </small>
+            ) : null}
           </div>
         ) : null}
 

@@ -3559,13 +3559,13 @@ button.danger {
 .ask-service-primary.active span,
 .ask-service-primary.active small { color: rgba(255,255,255,0.78); }
 
-/* Secondary — Country Route, demoted to a slim pill */
+/* Secondary — Country Route, demoted to a slim card-style bar */
 .ask-route-chip {
   display: flex;
   align-items: center;
   gap: 7px;
   padding: 9px 13px;
-  border-radius: var(--radius-pill, 999px);
+  border-radius: 14px;
   border: 1px solid rgba(184,138,31,0.22);
   background: rgba(184,138,31,0.06);
   color: var(--gold-text);
@@ -16137,8 +16137,8 @@ html[data-world-mini-app="true"] .top-bar-v2 {
 }
 .ask-route-status span {
   font-size: 0.74rem;
+  font-weight: 700;
   color: var(--muted);
-  font-style: italic;
 }
 .ask-route-current {
   font-size: 0.7rem;
