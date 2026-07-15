@@ -31,6 +31,16 @@ function formatError(error: unknown): LogContext["error"] {
       stack: error.stack,
     };
   }
+  if (error && typeof error === "object") {
+    // Supabase/PostgREST errors (and similar plain-object errors) are not
+    // Error instances — String(error) collapses them to "[object Object]"
+    // and throws away the actual code/details/hint. Serialize instead.
+    try {
+      return { name: "Unknown", message: JSON.stringify(error) };
+    } catch {
+      return { name: "Unknown", message: String(error) };
+    }
+  }
   return {
     name: "Unknown",
     message: String(error),

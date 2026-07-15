@@ -1,4 +1,4 @@
-import { get, put } from "@vercel/blob";
+import { BlobNotFoundError, get, put } from "@vercel/blob";
 import { createHash } from "node:crypto";
 import { NextRequest } from "next/server";
 import {
@@ -71,10 +71,21 @@ export async function POST(req: NextRequest) {
   }
 
   if (payload.action === "load") {
-    const result = await get(pathname, {
-      access: "public",
-      useCache: false,
-    });
+    // get() throws BlobNotFoundError (not a graceful 404 result) when this
+    // wallet has never saved a snapshot yet — the common case for any
+    // first-time sync. Treat that as "no snapshot" rather than a failure.
+    let result: Awaited<ReturnType<typeof get>>;
+    try {
+      result = await get(pathname, {
+        access: "public",
+        useCache: false,
+      });
+    } catch (error) {
+      if (error instanceof BlobNotFoundError) {
+        return noStoreJson({ ok: true, snapshot: null });
+      }
+      throw error;
+    }
 
     if (!result?.stream || result.statusCode !== 200) {
       return noStoreJson({ ok: true, snapshot: null });

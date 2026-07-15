@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
   const payload = await response.json();
 
   if (!response.ok) {
-    console.error("[send-notification] World API error:", response.status);
+    console.error("[send-notification] World API error:", response.status, payload);
     return noStoreJson(
       { ok: false, error: "World notification request failed." },
       { status: 502 },
