@@ -447,21 +447,26 @@ export function AskView({
               </button>
             </div>
             <div className="ask-route-status">
-              {paidCountryRoutes.length ? paidCountryRoutes.map((country) => (
-                <button
-                  aria-pressed={selectedCountryRoute === country}
-                  className={selectedCountryRoute === country ? "active" : ""}
-                  key={country}
-                  onClick={() => {
-                    setSelectedCountryRoute(country);
-                    setActiveAskService("country");
-                    act(`${country} selected`, "Your Ask question will track only this selected country route.");
-                  }}
-                  type="button"
-                >
-                  {country}
-                </button>
-              )) : (
+              {paidCountryRoutes.length ? (
+                <>
+                  <span className="ask-route-status-label">Your countries</span>
+                  {paidCountryRoutes.map((country) => (
+                    <button
+                      aria-pressed={selectedCountryRoute === country}
+                      className={selectedCountryRoute === country ? "active" : ""}
+                      key={country}
+                      onClick={() => {
+                        setSelectedCountryRoute(country);
+                        setActiveAskService("country");
+                        act(`${country} selected`, "Your Ask question will track only this selected country route.");
+                      }}
+                      type="button"
+                    >
+                      {country}
+                    </button>
+                  ))}
+                </>
+              ) : (
                 <span>No country unlocked yet — unlock one above</span>
               )}
             </div>

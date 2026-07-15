@@ -16140,6 +16140,15 @@ html[data-world-mini-app="true"] .top-bar-v2 {
   font-weight: 700;
   color: var(--muted);
 }
+.ask-route-status-label {
+  width: 100%;
+  margin-bottom: 2px;
+  font-size: 0.66rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gold-text) !important;
+}
 .ask-route-current {
   font-size: 0.7rem;
   color: var(--muted);
