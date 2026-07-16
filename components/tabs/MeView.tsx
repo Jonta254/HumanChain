@@ -115,23 +115,6 @@ const profileBadges = [
   "Market seller",
 ];
 
-const pointRules = [
-  ["Daily check-in", "+10 HP"],
-  ["Answer Daily Human", "+18 HP"],
-  ["Answer a human", "+15 HP"],
-  ["Ask a useful question", "+20 HP"],
-  ["Add a chain link", "+12 HP"],
-  ["Publish image post", "+16 HP"],
-  ["Store marketplace listing", "+10 HP"],
-  ["Enable nearby market", "+5 HP"],
-  ["React to image post", "+5 HP"],
-  ["Enter a field", "+6 HP"],
-  ["Copy field quote", "+3 HP"],
-  ["Read a story", "+8 HP"],
-  ["Give a trusted report", "+10 HP"],
-  ["Publish accepted story", "+120 HP"],
-];
-
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -864,16 +847,18 @@ export function MeView({
               <span>Point rules</span>
               <Star size={18} />
             </div>
-            {pointRules.map(([action, reward]) => (
-              <div className="point-rule" key={action}>
-                <span>{action}</span>
-                <strong>{reward}</strong>
-              </div>
-            ))}
-            <p>
-              Human Points are not withdrawable yet. They track early value so real
-              contributors can be recognized when HumanChain launches rewards.
+            <p className="points-ledger-hint">
+              See exactly how many HP each action earns — moved to Settings so
+              this reference stays out of your activity feed.
             </p>
+            <button
+              className="points-ledger-link"
+              onClick={() => setTab("settings")}
+              type="button"
+            >
+              <span>How Human Points work</span>
+              <ChevronRight size={15} />
+            </button>
           </section>
         </>
       )}

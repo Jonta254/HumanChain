@@ -1,0 +1,16 @@
+export const pointRules: Array<[string, string]> = [
+  ["Daily check-in", "+10 HP"],
+  ["Answer Daily Human", "+18 HP"],
+  ["Answer a human", "+15 HP"],
+  ["Ask a useful question", "+20 HP"],
+  ["Add a chain link", "+12 HP"],
+  ["Publish image post", "+16 HP"],
+  ["Store marketplace listing", "+10 HP"],
+  ["Enable nearby market", "+5 HP"],
+  ["React to image post", "+5 HP"],
+  ["Enter a field", "+6 HP"],
+  ["Copy field quote", "+3 HP"],
+  ["Read a story", "+8 HP"],
+  ["Give a trusted report", "+10 HP"],
+  ["Publish accepted story", "+120 HP"],
+];

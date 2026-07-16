@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import {
   BadgeCheck,
@@ -18,14 +18,16 @@ import {
   Shield,
   ShieldCheck,
   Sparkles,
+  Star,
   Trash2,
   Zap,
 } from "lucide-react";
-import { AppSettingsBar } from "@/components/layout/AppSettingsBar";
 import { LegalSheet } from "@/components/layout/LegalSheet";
 import { SafetyCenter } from "@/components/tabs/SafetyCenter";
 import { humanHaptic } from "@/lib/world/haptics";
-import type { AppLanguage } from "@/lib/data/languages";
+import { appLanguages, settingsEssentialsByLanguage, type AppLanguage } from "@/lib/data/languages";
+import { pointRules } from "@/lib/humanchain/pointRules";
+import { formatWorldLaunchLocation } from "@/lib/humanchain/utils";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 import type { Tab } from "@/types/ui";
 import type { VerifiedHuman } from "@/types/user";
@@ -68,6 +70,13 @@ export function SettingsView({
 }) {
   const [legalDoc, setLegalDoc] = useState<"terms" | "privacy" | null>(null);
   const [settingsTab, setSettingsTab] = useState<"account" | "support" | "about">("account");
+  // act() is an action-confirmation toast filtered to an "important terms"
+  // allowlist (payment, confirmed, deleted, etc.) — it silently drops any
+  // text that doesn't happen to contain one of those words, so it's the
+  // wrong mechanism for "tap this row to read reference info." These rows
+  // expand inline instead.
+  const [expandedInfoKey, setExpandedInfoKey] = useState<string | null>(null);
+  const toggleInfo = (key: string) => setExpandedInfoKey((current) => (current === key ? null : key));
 
   const settingsTabNav = (
     <nav className="stories-tab-nav">
@@ -122,6 +131,21 @@ export function SettingsView({
               <ChevronRight size={15} className="sv-chevron" />
             </button>
           </div>
+        </section>
+
+        {/* ── Human Points ──────────────────────────────────── */}
+        <section className="panel sv-panel points-ledger">
+          <div className="sv-section-head"><Star size={16} /><strong>How Human Points Work</strong></div>
+          {pointRules.map(([action, reward]) => (
+            <div className="point-rule" key={action}>
+              <span>{action}</span>
+              <strong>{reward}</strong>
+            </div>
+          ))}
+          <p>
+            Human Points are not withdrawable yet. They track early value so real
+            contributors can be recognized when HumanChain launches rewards.
+          </p>
         </section>
 
         {/* ── Safety ────────────────────────────────────────── */}
@@ -287,23 +311,69 @@ export function SettingsView({
     );
   }
 
+  const settingsCopy = activeLanguage.settings;
+  const essentials =
+    settingsEssentialsByLanguage[activeLanguage.code] ??
+    settingsEssentialsByLanguage.en;
+  const worldLaunchLabel = formatWorldLaunchLocation(worldContext.launchLocation);
+
   return (
     <div className="screen settings-screen">
       {legalDoc && <LegalSheet doc={legalDoc} onClose={() => setLegalDoc(null)} />}
       {settingsTabNav}
-      {/* ── App controls ──────────────────────────────────── */}
-      <AppSettingsBar
-        activeLanguage={activeLanguage}
-        clearMarketplaceData={clearMarketplaceData}
-        clearPostData={clearPostData}
-        defaultOpen
-        deleteLocalAccount={deleteLocalAccount}
-        notificationReady={notificationReady}
-        onEnableNotifications={onEnableNotifications}
-        onChange={onChangeLanguage}
-        resetHistory={resetHistory}
-        worldContext={worldContext}
-      />
+
+      {/* ── Language ──────────────────────────────────────── */}
+      <section className="panel sv-panel">
+        <div className="sv-section-head"><Globe2 size={16} /><strong>{settingsCopy.language}</strong></div>
+        <p className="sv-panel-hint">{essentials.languageHint}</p>
+        <div className="settings-language-row">
+          {appLanguages.map((language) => (
+            <button
+              className={activeLanguage.code === language.code ? "active" : ""}
+              key={language.code}
+              onClick={() => onChangeLanguage(language)}
+              type="button"
+            >
+              {language.name}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ── App guide ─────────────────────────────────────── */}
+      <section className="panel sv-panel">
+        <div className="sv-section-head"><Info size={16} /><strong>{settingsCopy.guide}</strong></div>
+        <div className="sv-rows">
+          {(
+            [
+              { key: "guide", label: "How HumanChain works", sub: "Trust, questions, and marketplace rules", points: activeLanguage.points },
+              { key: "data", label: essentials.dataTitle, sub: "Local-first storage, explained", points: essentials.dataPoints },
+              { key: "location", label: essentials.locationTitle, sub: "How nearby market location works", points: essentials.locationPoints },
+              { key: "account", label: essentials.accountTitle, sub: "Keep your account and trades safe", points: essentials.accountPoints },
+            ] as const
+          ).map((item) => (
+            <Fragment key={item.key}>
+              <button
+                aria-expanded={expandedInfoKey === item.key}
+                className="sv-row"
+                onClick={() => toggleInfo(item.key)}
+                type="button"
+              >
+                <div className="sv-row-left">
+                  <span className="sv-row-label">{item.label}</span>
+                  <span className="sv-row-sub">{item.sub}</span>
+                </div>
+                <ChevronRight size={15} className={`sv-chevron${expandedInfoKey === item.key ? " sv-chevron-open" : ""}`} />
+              </button>
+              {expandedInfoKey === item.key ? (
+                <div className="sv-info-expand">
+                  {item.points.map((point) => <p key={point}>{point}</p>)}
+                </div>
+              ) : null}
+            </Fragment>
+          ))}
+        </div>
+      </section>
 
       {/* ── Notifications ─────────────────────────────────── */}
       <section className="panel sv-panel">
@@ -331,7 +401,7 @@ export function SettingsView({
           </button>
           <button
             className="sv-row"
-            onClick={() => act("Push frequency", "Notifications batch into daily digests to respect your attention.")}
+            onClick={() => act("What triggers an alert", essentials.notificationsHint)}
             type="button"
           >
             <div className="sv-row-left">
@@ -383,12 +453,24 @@ export function SettingsView({
             </div>
             <Zap size={15} color="#b88a1f" />
           </button>
-          <div className="sv-row sv-info-row">
+          <button
+            aria-expanded={expandedInfoKey === "world-context"}
+            className="sv-row"
+            onClick={() => toggleInfo("world-context")}
+            type="button"
+          >
             <div className="sv-row-left">
               <span className="sv-row-label">Launch source</span>
-              <span className="sv-row-sub">{worldContext.launchLocation ?? "World App"}</span>
+              <span className="sv-row-sub">{worldLaunchLabel}</span>
             </div>
-          </div>
+            <ChevronRight size={15} className={`sv-chevron${expandedInfoKey === "world-context" ? " sv-chevron-open" : ""}`} />
+          </button>
+          {expandedInfoKey === "world-context" ? (
+            <div className="sv-info-expand">
+              <p>{settingsCopy.openedFrom} {worldLaunchLabel}. {worldContext.deviceOS ?? activeLanguage.gate.deviceFallback} {settingsCopy.deviceReady}.</p>
+              <p>World MiniKit provides launch and device context — nearby market only asks for location when you tap GPS, or uses your manual area.</p>
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -444,6 +526,28 @@ export function SettingsView({
             <div className="sv-row-left">
               <span className="sv-row-label">Clear marketplace data</span>
               <span className="sv-row-sub">Removes local listings and bids</span>
+            </div>
+            <Trash2 size={14} color="#d63a4a" />
+          </button>
+          <button
+            className="sv-row sv-danger-row"
+            onClick={clearPostData}
+            type="button"
+          >
+            <div className="sv-row-left">
+              <span className="sv-row-label">Clear posts</span>
+              <span className="sv-row-sub">Removes your local image posts</span>
+            </div>
+            <Trash2 size={14} color="#d63a4a" />
+          </button>
+          <button
+            className="sv-row sv-danger-row"
+            onClick={deleteLocalAccount}
+            type="button"
+          >
+            <div className="sv-row-left">
+              <span className="sv-row-label">Delete local account</span>
+              <span className="sv-row-sub">Wipes preview profile and all local data on this device</span>
             </div>
             <Trash2 size={14} color="#d63a4a" />
           </button>

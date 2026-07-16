@@ -6496,6 +6496,29 @@ button.danger {
   line-height: 1.4;
 }
 
+.points-ledger-hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.points-ledger-link {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper-strong);
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+.points-ledger-link svg { color: var(--muted); flex-shrink: 0; }
+
 .account-control-panel {
   display: grid;
   gap: 12px;
@@ -19481,6 +19504,22 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 .sv-toggle-badge.on { background:rgba(19,122,87,0.12); color:var(--green); }
 .sv-toggle-badge.off { background:rgba(47,111,237,0.1); color:#2f6fed; }
 .sv-danger-row .sv-row-label { color:#d63a4a; }
+.sv-panel-hint { margin: 0 0 10px; font-size: 0.74rem; color: var(--muted); line-height: 1.42; }
+.sv-chevron { transition: transform 0.15s ease; }
+.sv-chevron-open { transform: rotate(90deg); }
+.sv-info-expand {
+  display: grid;
+  gap: 6px;
+  padding: 2px 4px 14px;
+  margin-top: -2px;
+  border-bottom: 1px solid var(--line);
+}
+.sv-info-expand p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.48;
+}
 .sv-home-btn { width:100%; min-height:46px; border-radius:14px; background:var(--brand-grad); color:#fff; font-size:0.88rem; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px; border:0; }
 
 /* About brand block */
