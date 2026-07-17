@@ -763,6 +763,7 @@ export function ChainsView({
         id: Date.now(),
         owner: true,
         reactions: 0,
+        source: "live",
         text,
       },
       ...current,
@@ -864,6 +865,7 @@ export function ChainsView({
       comments: [],
       createdAt,
       owner: true,
+      source: "live",
       storageStatus,
       tipSplit: {
         creatorPercent: 80,

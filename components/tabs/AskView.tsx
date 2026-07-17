@@ -245,6 +245,7 @@ export function AskView({
         owner: true,
         topic: selectedTopic,
         mode: targetCountry === "World" ? selectedMode : `${targetCountry} route`,
+        source: "live",
         targetCountry,
         answers: [],
       },

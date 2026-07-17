@@ -919,6 +919,7 @@ export function MarketplaceView({
       photos: listingPhotos, ratings: 0, tips: 0, status: "active",
       createdAt: new Intl.DateTimeFormat("en", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "short" }).format(new Date()),
       dataStorageStatus: "local-safe",
+      source: "live",
     };
     setMarketplaceListings((c) => [listing, ...c]);
     // Persist to Supabase for cross-device discovery
