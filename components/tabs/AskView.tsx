@@ -26,7 +26,6 @@ import {
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { starterAskThreads } from "@/lib/data/chains";
-import { Meter } from "@/components/ui/Meter";
 import type { AskThread } from "@/types/chain";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HistoryRecord } from "@/types/reputation";
@@ -65,6 +64,7 @@ function loadStoredAskThreads(): AskThread[] {
 
 export function AskView({
   act,
+  aiAvailable,
   earnPoints,
   humanIdentity,
   keepStreak,
@@ -72,6 +72,7 @@ export function AskView({
   recordHistory,
 }: {
   act: (title: string, detail: string) => void;
+  aiAvailable: boolean;
   earnPoints: EarnPoints;
   humanIdentity: VerifiedHuman | null;
   keepStreak: (detail?: string) => void;
@@ -141,15 +142,27 @@ export function AskView({
       askFeedFilter === "All" ||
       thread.topic === askFeedFilter ||
       (askFeedFilter === "Country Route" && targetCountry !== "World") ||
-      (askFeedFilter === "Unanswered" && thread.answers.length === 0);
+      (askFeedFilter === "Unanswered" && thread.answers.length === 0) ||
+      (askFeedFilter === "Answered" && thread.answers.length > 0) ||
+      (askFeedFilter === "Yours" && thread.owner);
 
     return matchesQuery && matchesFilter;
   });
+  // Real counts from local thread state — segments the feed by what's
+  // actually true right now, not a fixed filter list.
+  const unansweredCount = threads.filter((t) => t.answers.length === 0).length;
+  const answeredCount = threads.filter((t) => t.answers.length > 0).length;
+  const yoursCount = threads.filter((t) => t.owner).length;
   const questionLength = question.trim().length;
+  // Coarse label, not a fake-precise percentage — this is a local heuristic
+  // (verification + question history), not a network-wide trust metric, so
+  // it must not read like one.
   const askerTrustScore = Math.min(
     99,
     24 + (isVerifiedWorldHuman(humanIdentity) ? 26 : 0) + threads.filter((thread) => thread.owner).length * 4,
   );
+  const askerTrustLabel =
+    askerTrustScore >= 70 ? "Highly trusted" : askerTrustScore >= 45 ? "Trusted asker" : "Building trust";
 
   useEffect(() => {
     saveJsonToStorage(storageKeys.askThreads, threads);
@@ -369,25 +382,22 @@ export function AskView({
 
   return (
     <div className="screen ask-screen">
-      <section className="ask-hero">
-        <div>
-          <span className="section-kicker">Verified answers</span>
-          <h2>Ask clearly. Let real humans answer.</h2>
-          <p>
-            Ask verified humans. Open paid routes only when you need them.
-          </p>
+      <section className="aske-composer">
+        <div className="aske-composer-head">
+          <div>
+            <span className="section-kicker">Verified answers</span>
+            <h2>Ask clearly. Let real humans answer.</h2>
+          </div>
+          <button
+            aria-pressed={voiceListening && voiceTarget === "question"}
+            className={`voice-orb${voiceListening && voiceTarget === "question" ? " listening" : ""}`}
+            onClick={() => startVoice("question")}
+            title={voiceListening && voiceTarget === "question" ? "Tap to stop recording" : "Tap to ask with your voice"}
+            type="button"
+          >
+            <Mic size={24} />
+          </button>
         </div>
-        <button
-          aria-pressed={voiceListening && voiceTarget === "question"}
-          className={`voice-orb${voiceListening && voiceTarget === "question" ? " listening" : ""}`}
-          onClick={() => startVoice("question")}
-          title={voiceListening && voiceTarget === "question" ? "Tap to stop recording" : "Tap to ask with your voice"}
-          type="button"
-        >
-          <Mic size={24} />
-        </button>
-      </section>
-      <section className="ask-box">
         <div className="ask-service-switch" aria-label="Ask service path">
           <button
             aria-pressed={activeAskService === "world"}
@@ -487,7 +497,7 @@ export function AskView({
         />
         <div className="field-helper-row">
           <span>{questionLength}/280 characters</span>
-          <span>Asker trust score: {askerTrustScore}</span>
+          <span>Asker trust: {askerTrustLabel}</span>
         </div>
         <button
           aria-expanded={showAskAdvanced}
@@ -606,8 +616,27 @@ export function AskView({
               value={askSearch}
             />
           </div>
+          <div className="aske-segments" role="tablist" aria-label="Filter by status">
+            {[
+              { key: "All", label: "All", count: threads.length },
+              { key: "Unanswered", label: "Unanswered", count: unansweredCount },
+              { key: "Answered", label: "Answered", count: answeredCount },
+              { key: "Yours", label: "Yours", count: yoursCount },
+            ].map((seg) => (
+              <button
+                aria-pressed={askFeedFilter === seg.key}
+                className={`aske-segment${askFeedFilter === seg.key ? " active" : ""}`}
+                key={seg.key}
+                onClick={() => { setAskFeedFilter(seg.key); setShowSavedOnly(false); }}
+                type="button"
+              >
+                {seg.label}
+                <span>{seg.count}</span>
+              </button>
+            ))}
+          </div>
           <div className="chip-row compact">
-            {["All", "Life", "Money", "Business", "Country Route", "Unanswered"].map((filter) => (
+            {["Life", "Money", "Business", "Family", "Love", "Culture", "Country Route"].map((filter) => (
               <button
                 aria-pressed={askFeedFilter === filter}
                 className={askFeedFilter === filter ? "active" : ""}
@@ -639,7 +668,10 @@ export function AskView({
           const alreadyAnswered = thread.answers.some((a) => a.user === (humanIdentity?.username ?? "@you") || a.user === "@anonymous");
 
           return (
-          <article className="ask-thread" key={`${thread.question}-${index}`}>
+          <article
+            className={`ask-thread${expandedAnswerQuestion === thread.question ? " ask-thread--expanded" : " ask-thread--dense"}`}
+            key={`${thread.question}-${index}`}
+          >
             <div className="ask-thread-top">
               <span>{thread.topic} · {thread.author}</span>
               <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
@@ -712,7 +744,8 @@ export function AskView({
                 <span>Only {targetCountry}-routed answers are tracked on this question.</span>
               </div>
             ) : null}
-            <Meter label={`${visibleAnswers.length} tracked answer${visibleAnswers.length === 1 ? "" : "s"}`} value={Math.min(92, 22 + visibleAnswers.length * 18)} />
+            {/* Real answer count, shown plainly — no synthetic "quality %" bar. */}
+            <p className="ask-answer-count">{visibleAnswers.length} tracked answer{visibleAnswers.length === 1 ? "" : "s"}</p>
             <button
               className="answer-reveal-button"
               onClick={() =>
@@ -914,7 +947,12 @@ export function AskView({
                 </button>
                 <button
                   className={unlockedVerdicts.has(thread.question) ? "active" : ""}
+                  disabled={!aiAvailable && !unlockedVerdicts.has(thread.question)}
                   onClick={() => {
+                    if (!aiAvailable && !unlockedVerdicts.has(thread.question)) {
+                      act("AI setup pending", "Deep Verdict needs the AI backend configured before it can be unlocked. Nothing was charged.");
+                      return;
+                    }
                     if (unlockedVerdicts.has(thread.question)) {
                       act("Verdict ready", "Your Deep Verdict is already unlocked for this question.");
                       return;
@@ -958,7 +996,11 @@ export function AskView({
                   }}
                   type="button"
                 >
-                  {unlockedVerdicts.has(thread.question) ? "✓ Verdict live" : <><LockKeyhole size={11} /> Verdict · 6 WLD</>}
+                  {unlockedVerdicts.has(thread.question)
+                    ? "✓ Verdict live"
+                    : aiAvailable
+                      ? <><LockKeyhole size={11} /> Verdict · 6 WLD</>
+                      : <><LockKeyhole size={11} /> AI setup pending</>}
                 </button>
               </div>
             ) : null}

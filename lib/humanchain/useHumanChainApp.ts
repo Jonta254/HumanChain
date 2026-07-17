@@ -119,6 +119,10 @@ export function useHumanChainApp() {
   const [paymentPrompt, setPaymentPrompt] = useState<PaymentRequest | null>(null);
   const [paymentToken] = useState<HumanChainPaymentToken>(defaultHumanChainPaymentToken);
   const [paymentBusy, setPaymentBusy] = useState(false);
+  // Whether /api/ai/verdict can actually run (ANTHROPIC_API_KEY configured).
+  // Gates Deep Human Mirror / Deep Story Reflection so a user can't pay for
+  // an AI feature that's guaranteed to fail — see /api/ai/status.
+  const [aiAvailable, setAiAvailable] = useState(false);
   const [accountSyncReady, setAccountSyncReady] = useState(verifiedHuman?.mode !== "world");
   const [accountSyncStatus, setAccountSyncStatus] = useState<"idle" | "loading" | "ready" | "saving" | "offline">(
     verifiedHuman?.mode === "world" ? "loading" : "idle",
@@ -568,6 +572,7 @@ export function useHumanChainApp() {
               answers: [],
               mode: "World",
               owner: t.author_wallet.toLowerCase() === wallet.toLowerCase(),
+              source: "live",
               targetCountry: "World",
               topic: "General",
             }));
@@ -589,6 +594,7 @@ export function useHumanChainApp() {
                 text: m.text,
                 owner: m.author_wallet.toLowerCase() === wallet.toLowerCase(),
                 reactions: 0,
+                source: "live",
                 createdAt: new Date(m.created_at).toLocaleString(),
               }));
             return incoming.length ? [...incoming, ...cur].slice(0, 90) : cur;
@@ -624,6 +630,7 @@ export function useHumanChainApp() {
                 status: l.status === "sold" ? "sold" : "active",
                 createdAt: new Date(l.created_at).toLocaleString(),
                 dataStorageStatus: "cloud-safe",
+                source: "live",
               }));
             return incoming.length ? [...cur, ...incoming].slice(0, 80) : cur;
           });
@@ -637,6 +644,19 @@ export function useHumanChainApp() {
     void hydrateFromSupabase();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verifiedHuman?.wallet, verifiedHuman?.mode]);
+
+  // ── AI backend availability ─────────────────────────────────────────────────
+  // One-shot check so paid AI features (Deep Human Mirror, Deep Story
+  // Reflection) can show an honest "setup pending" state instead of letting a
+  // user pay for something guaranteed to fail server-side.
+  useEffect(() => {
+    let cancelled = false;
+    fetchWithTimeout("/api/ai/status", { timeoutMs: 5_000 })
+      .then((r) => r.json())
+      .then((data: { available?: boolean }) => { if (!cancelled) setAiAvailable(Boolean(data.available)); })
+      .catch(() => { if (!cancelled) setAiAvailable(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   // ── Action callbacks ───────────────────────────────────────────────────────
   function shouldShowToast(title: string, detail: string) {
@@ -752,6 +772,15 @@ export function useHumanChainApp() {
     if (paymentBusy) return;
     if (!isVerifiedWorldHuman(verifiedHuman)) {
       setToast({ title: "Verify first", detail: "Continue with World App once, then every paid action and tip opens the World payment sheet." });
+      return;
+    }
+    // Wallet sign-in alone (mode "world", worldIdTier "none") proves wallet
+    // ownership, not proof-of-personhood — the app must not sell paid,
+    // "verified human" actions on that alone. Orb and Document tiers are the
+    // only ones that satisfy what HumanChain's own Settings/Passport copy
+    // claims. See types/user.ts's WorldIdVerificationTier doc comment.
+    if ((verifiedHuman?.worldIdTier ?? "none") === "none") {
+      setToast({ title: "World ID required", detail: "Wallet sign-in isn't enough for paid actions. Complete Orb or Document verification in World App first." });
       return;
     }
     const feature = getPaymentFeature(payment);
@@ -921,7 +950,7 @@ export function useHumanChainApp() {
 
   return {
     // state
-    accountSyncStatus, activeField, appLanguage, chainEntryNonce, dailyAnswered,
+    accountSyncStatus, activeField, aiAvailable, appLanguage, chainEntryNonce, dailyAnswered,
     dailyAnsweredAt, dailyAnsweredDate, dailyResponses, feedRefreshNonce, gateBusy,
     historyRecords, hpLedger, humanPosts, joinedAt, lastCheckInAt, lastCheckInDate, links,
     marketLocation, marketplaceListings, notificationCenterOpen, notificationPromptDismissed,

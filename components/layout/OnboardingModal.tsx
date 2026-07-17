@@ -8,7 +8,7 @@ const STEPS = [
     icon: Sparkles,
     color: "#137a57",
     title: "Welcome to HumanChain",
-    body: "The only verified-human network inside World App. 214k real people, 38 countries — no bots, no fakes. Every member proven by World ID.",
+    body: "A verified-human network inside World App. Every member proves they're a real person with World ID before they can ask, answer, or post.",
     cta: "Get started",
   },
   {

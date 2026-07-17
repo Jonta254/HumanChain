@@ -20,7 +20,10 @@ export function getChainLinkAuthor(link: ChainLink, fallback = "@verified_human"
   return chainLinkHandleBySource[link.country] ?? fallback;
 }
 
-export const initialLinks: ChainLink[] = [
+// Demo/reference chain links shown when no real network links exist yet for
+// today's chain. Tagged "demo" here (single source of truth) so isDemoItem()
+// keeps them non-payable and visually labeled everywhere they render.
+const RAW_INITIAL_LINKS: Array<Omit<ChainLink, "source">> = [
   { country: "Kenya",         text: "Start before life feels perfect." },
   { country: "Brazil",        text: "Joy is also a form of survival." },
   { country: "India",         text: "Discipline is love for your future self." },
@@ -45,7 +48,14 @@ export const initialLinks: ChainLink[] = [
   { country: "Jamaica",       text: "Laughter in a hard season is not denial. It is people refusing to be completely taken." },
 ];
 
-export const starterAskThreads: AskThread[] = [
+export const initialLinks: ChainLink[] = RAW_INITIAL_LINKS.map((link) => ({
+  ...link,
+  source: "demo" as const,
+}));
+
+// Demo/reference Q&A threads shown when no real network threads exist yet.
+// Same tagging convention as RAW_INITIAL_LINKS above.
+const RAW_STARTER_ASK_THREADS: Array<Omit<AskThread, "source">> = [
   {
     question: "How do I start again after losing confidence?",
     author: "@humanchain",
@@ -191,3 +201,8 @@ export const starterAskThreads: AskThread[] = [
     ],
   },
 ];
+
+export const starterAskThreads: AskThread[] = RAW_STARTER_ASK_THREADS.map((thread) => ({
+  ...thread,
+  source: "demo" as const,
+}));

@@ -27,19 +27,13 @@ import { SafetyCenter } from "@/components/tabs/SafetyCenter";
 import { humanHaptic } from "@/lib/world/haptics";
 import { appLanguages, settingsEssentialsByLanguage, type AppLanguage } from "@/lib/data/languages";
 import { pointRules } from "@/lib/humanchain/pointRules";
-import { formatWorldLaunchLocation } from "@/lib/humanchain/utils";
+import { formatWorldLaunchLocation, worldIdTierCopy } from "@/lib/humanchain/utils";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 import type { Tab } from "@/types/ui";
 import type { VerifiedHuman } from "@/types/user";
 
 const APP_VERSION = "1.0.0";
 const WORLD_MINIKIT_VERSION = "2.0.3";
-
-const worldIdTierCopy = {
-  orb: { label: "Orb verified · proof-of-personhood", detail: "Your World ID was verified at an Orb — the strongest uniqueness guarantee World ID offers. No personal data leaves World App." },
-  document: { label: "Document verified", detail: "Your World ID was verified by document scan. This confirms identity but not biometric uniqueness the way Orb verification does." },
-  none: { label: "Wallet sign-in only · not yet World ID verified", detail: "You're signed in with your World App wallet, which proves wallet ownership but is not a World ID proof-of-personhood. Complete Orb or Document verification in World App for the strongest trust tier." },
-} as const;
 
 export function SettingsView({
   act,

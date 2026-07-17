@@ -6,6 +6,8 @@ export type ChainLink = {
   pinned?: boolean;
   pinnedAt?: string;
   reactions?: number;
+  /** "live" = synced from Supabase; anything else (including unset) is treated as demo/seed content — see isDemoItem(). */
+  source?: "demo" | "live";
   tips?: number;
   text: string;
 };
@@ -28,6 +30,8 @@ export type AskThread = {
   mode: string;
   owner: boolean;
   question: string;
+  /** "live" = synced from Supabase; anything else (including unset) is treated as demo/seed content — see isDemoItem(). */
+  source?: "demo" | "live";
   targetCountry: string;
   topic: string;
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import {
   BadgeCheck,
@@ -11,6 +11,7 @@ import {
   Copy,
   Gift,
   Library,
+  Lock,
   LockKeyhole,
   Radio,
   Search,
@@ -29,6 +30,7 @@ import {
   referralMilestones,
 } from "@/lib/humanchain/referral";
 import { HumanVerifyButton } from "@/components/HumanVerifyButton";
+import { PaymentTrigger } from "@/components/ui/PaymentTrigger";
 import {
   Permission,
   requestWorldPermission,
@@ -41,7 +43,7 @@ import {
   getTrustPassportMetrics,
   getWorldDisplayUsername,
   isVerifiedWorldHuman,
-
+  worldIdTierCopy,
 } from "@/lib/humanchain/utils";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 import type { MarketplaceListing, MarketLocationState } from "@/types/market";
@@ -107,14 +109,6 @@ function isWorldPermissionGranted(result: unknown) {
   );
 }
 
-const profileBadges = [
-  "Verified human",
-  "Chain keeper",
-  "Story reader",
-  "Answer helper",
-  "Market seller",
-];
-
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -122,6 +116,7 @@ const profileBadges = [
 export function MeView({
   accountSyncStatus,
   act,
+  aiAvailable,
   copyReferralLink,
   earnPoints,
   historyRecords,
@@ -148,6 +143,7 @@ export function MeView({
 }: {
   accountSyncStatus: "idle" | "loading" | "ready" | "saving" | "offline";
   act: (title: string, detail: string) => void;
+  aiAvailable: boolean;
   copyReferralLink: () => Promise<void>;
   earnPoints: EarnPoints;
   historyRecords: HistoryRecord[];
@@ -172,8 +168,8 @@ export function MeView({
   verifiedHuman: VerifiedHuman | null;
   worldContext: WorldMiniAppContext;
 }) {
-  const [profileView, setProfileView] = useState<"overview" | "activity">("overview");
-  const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "mirror" | "voice" | null>(null);
+  const [profileView, setProfileView] = useState<"overview" | "trust" | "vault" | "history">("overview");
+  const [quickToolPanel, setQuickToolPanel] = useState<"connections" | "voice" | null>(null);
   const [deepMirrorUnlocked, setDeepMirrorUnlocked] = useState(() =>
     loadJsonFromStorage<boolean>(storageKeys.deepMirrorUnlocked, false),
   );
@@ -186,6 +182,37 @@ export function MeView({
   const [jobApplications] = useState<Array<{id: string; title: string; budget: string; poster: string; appliedAt: string}>>(() =>
     loadJsonFromStorage(storageKeys.jobApplications, []),
   );
+
+  const worldIdProofTier = verifiedHuman?.worldIdTier ?? "none";
+  const hasWorldIdAccountProof = worldIdProofTier === "orb" || worldIdProofTier === "document";
+
+  // World App already confirms proof-of-personhood at sign-in for Orb/Document
+  // tier accounts, so an already-verified human should never be asked to
+  // "Verify with World ID" again — that in-app IDKit action only stays needed
+  // for wallet-only (tier "none") accounts. Double-guarded (ref + localStorage)
+  // so this stays idempotent under React Strict Mode's double effect-invoke
+  // and rapid tab remounts — the `worldIdVerified` state closure can be stale
+  // across those, but a ref mutation and the synchronous storage flag can't.
+  const worldIdAutoSyncRef = useRef(false);
+  useEffect(() => {
+    if (worldIdAutoSyncRef.current || !hasWorldIdAccountProof) return;
+    let alreadySynced = true;
+    try { alreadySynced = Boolean(localStorage.getItem(storageKeys.worldIdVerified)); } catch {}
+    if (alreadySynced) {
+      worldIdAutoSyncRef.current = true;
+      return;
+    }
+    worldIdAutoSyncRef.current = true;
+    try { localStorage.setItem(storageKeys.worldIdVerified, "1"); } catch {}
+    setWorldIdVerified(true);
+    earnPoints(50, `World ID ${worldIdProofTier} verification confirmed from your World App account.`);
+    recordHistory({
+      title: "World ID verified",
+      detail: `Your World App account already carries ${worldIdProofTier} verification — unique humanity confirmed automatically.`,
+      kind: "profile",
+    });
+    act("World ID Verified", "Your unique humanity is confirmed. +50 HP awarded to your passport.");
+  }, [hasWorldIdAccountProof, worldIdProofTier]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Restore profile image from localStorage on first mount
   useEffect(() => {
@@ -262,8 +289,8 @@ export function MeView({
   }
 
   function openDeepHumanMirror() {
-    if (deepMirrorUnlocked) {
-      setQuickToolPanel("mirror");
+    if (!aiAvailable) {
+      act("AI setup pending", "Deep Human Mirror needs the AI backend configured before it can be unlocked. Nothing was charged.");
       return;
     }
     openPayment({
@@ -276,7 +303,6 @@ export function MeView({
       onConfirmed: async () => {
         setDeepMirrorUnlocked(true);
         saveJsonToStorage(storageKeys.deepMirrorUnlocked, true);
-        setQuickToolPanel("mirror");
         recordHistory({
           title: "Deep Human Mirror unlocked",
           detail: "Premium profile reflection unlocked and added to Human Vault.",
@@ -405,39 +431,41 @@ export function MeView({
           <span>{`${humanChainId.replace(/-/g, "")}<<<${chainScore.toString().padStart(6, "0")}`}</span>
         </div>
       </section>
-      <nav className="me-view-tabs" aria-label="Me sections">
-        <button
-          aria-pressed={profileView === "overview"}
-          className={profileView === "overview" ? "active" : ""}
-          onClick={() => setProfileView("overview")}
-          type="button"
-        >
-          Passport
-        </button>
-        <button
-          aria-pressed={profileView === "activity"}
-          className={profileView === "activity" ? "active" : ""}
-          onClick={() => setProfileView("activity")}
-          type="button"
-        >
-          Activity
-        </button>
+      <nav className="mep-pages-nav" aria-label="Passport pages">
+        {([
+          { key: "overview", label: "Overview" },
+          { key: "trust", label: "Trust" },
+          { key: "vault", label: "Vault" },
+          { key: "history", label: "History" },
+        ] as const).map((page, i) => (
+          <button
+            aria-pressed={profileView === page.key}
+            className={`mep-page-tab${profileView === page.key ? " active" : ""}`}
+            key={page.key}
+            onClick={() => setProfileView(page.key)}
+            type="button"
+          >
+            <span className="mep-page-tab-index">Page {i + 1}</span>
+            <span className="mep-page-tab-label">{page.label}</span>
+          </button>
+        ))}
       </nav>
       {profileView === "overview" ? (
-        <>
-      <section className={`passport-level-panel ${passportLevel.toLowerCase().replace(/\s+/g, "-")}`}>
-        <div>
+        <div className="mep-page">
+      <section className="mep-stamps-panel" aria-label="Passport level and stamps">
+        <div className="mep-stamps-head">
           <span>Passport level</span>
           <strong>{passportLevel}</strong>
           <p>{chainScore}/{nextPassportTarget} trust score toward the next level.</p>
         </div>
-        <i aria-hidden="true">
-          <b style={{ width: `${passportProgress}%` }} />
-        </i>
-        <div className="passport-badge-grid">
+        <div className="mep-stamps-track" role="progressbar" aria-valuenow={passportProgress} aria-valuemin={0} aria-valuemax={100}>
+          <i style={{ width: `${passportProgress}%` }} />
+        </div>
+        <div className="mep-stamps-grid" aria-label="Earned stamps">
           {earnedBadges.map((badge) => (
-            <span className={badge.active ? "active" : ""} key={badge.label}>
-              {badge.label}
+            <span className={`mep-stamp${badge.active ? " earned" : ""}`} key={badge.label}>
+              <BadgeCheck size={15} />
+              <span>{badge.label}</span>
             </span>
           ))}
         </div>
@@ -480,7 +508,10 @@ export function MeView({
         shareReferralLink={shareReferralLink}
         verifiedHuman={verifiedHuman}
       />
-
+        </div>
+      ) : null}
+      {profileView === "trust" ? (
+        <div className="mep-page">
       {/* ── World ID Verification ─────────────────────── */}
       <section className="panel world-id-verify-panel" aria-label="World ID verification">
         <div className="section-heading">
@@ -488,11 +519,15 @@ export function MeView({
           <BadgeCheck size={18} />
         </div>
         {worldIdVerified ? (
-          <div className="wiv-verified-row">
+          <div className={`wiv-verified-row${worldIdProofTier === "orb" ? " orb" : ""}`}>
             <BadgeCheck size={20} />
             <div>
-              <strong>World ID Verified</strong>
-              <span>Your unique humanity is confirmed via World ID. +50 HP awarded.</span>
+              <strong>{hasWorldIdAccountProof ? worldIdTierCopy[worldIdProofTier].label : "World ID Verified"}</strong>
+              <span>
+                {hasWorldIdAccountProof
+                  ? worldIdTierCopy[worldIdProofTier].detail
+                  : "Your unique humanity is confirmed via World ID. +50 HP awarded."}
+              </span>
             </div>
           </div>
         ) : (
@@ -547,6 +582,10 @@ export function MeView({
           <Share2 size={14} /> Share Passport
         </button>
       </section>
+        </div>
+      ) : null}
+      {profileView === "vault" ? (
+        <div className="mep-page">
       <section className="panel human-history-panel">
         <div className="section-heading">
           <span>My Activity</span>
@@ -671,11 +710,6 @@ export function MeView({
         ) : null}
       </section>
 
-      <section className="badge-cloud">
-        {profileBadges.map((badge) => (
-          <span key={badge}>{badge}</span>
-        ))}
-      </section>
       <section className="panel">
         <div className="section-heading">
           <span>Human vault</span>
@@ -727,10 +761,6 @@ export function MeView({
           <button onClick={openConnectionMap} type="button">
             <Compass size={17} />
             Find countries I connected with
-          </button>
-          <button onClick={openDeepHumanMirror} type="button">
-            <LockKeyhole size={17} />
-            {deepMirrorUnlocked ? "View Deep Human Mirror" : "Open Deep Human Mirror — 6 WLD"}
           </button>
           <button
             onClick={async () => {
@@ -784,27 +814,6 @@ export function MeView({
                 </div>
               </>
             ) : null}
-            {quickToolPanel === "mirror" ? (
-              <>
-                <strong>Deep Human Mirror</strong>
-                <p className="mirror-intro">Your private reflection based on your HumanChain activity and signals:</p>
-                <div className="mirror-insights">
-                  {[
-                    { label: "Chain strength", value: chainScore >= 200 ? "Growing — keep posting" : "Building — start with a check-in" },
-                    { label: "Consistency", value: streak >= 7 ? `Strong — ${streak}-day streak active` : streak >= 3 ? `Emerging — ${streak} days in a row` : "Needs nurturing — answer daily" },
-                    { label: "Community reach", value: `${links.length + ownedPosts.length} touchpoints across fields` },
-                    { label: "Trust trajectory", value: passportMetrics.helpfulScore },
-                    { label: "Next milestone", value: tier.next ? `${tier.toGo} pts to ${tier.next.label}` : "Founder — top of the chain" },
-                  ].map((insight) => (
-                    <div className="mirror-insight-row" key={insight.label}>
-                      <span>{insight.label}</span>
-                      <strong>{insight.value}</strong>
-                    </div>
-                  ))}
-                </div>
-                <p className="mirror-note">This reflection is private and stored in your Human Vault.</p>
-              </>
-            ) : null}
             {quickToolPanel === "voice" ? (
               <>
                 <strong>Voice access live</strong>
@@ -820,9 +829,50 @@ export function MeView({
           </div>
         ) : null}
       </section>
-        </>
-      ) : (
-        <>
+
+      <section className="panel" aria-label="Deep Human Mirror">
+        <div className="section-heading">
+          <span>Deep Human Mirror</span>
+          <LockKeyhole size={18} />
+        </div>
+        {deepMirrorUnlocked ? (
+          <>
+            <p className="mirror-intro">Your private reflection based on your HumanChain activity and signals:</p>
+            <div className="mirror-insights">
+              {[
+                { label: "Chain strength", value: chainScore >= 200 ? "Growing — keep posting" : "Building — start with a check-in" },
+                { label: "Consistency", value: streak >= 7 ? `Strong — ${streak}-day streak active` : streak >= 3 ? `Emerging — ${streak} days in a row` : "Needs nurturing — answer daily" },
+                { label: "Community reach", value: `${links.length + ownedPosts.length} touchpoints across fields` },
+                { label: "Trust trajectory", value: passportMetrics.helpfulScore },
+                { label: "Next milestone", value: tier.next ? `${tier.toGo} pts to ${tier.next.label}` : "Founder — top of the chain" },
+              ].map((insight) => (
+                <div className="mirror-insight-row" key={insight.label}>
+                  <span>{insight.label}</span>
+                  <strong>{insight.value}</strong>
+                </div>
+              ))}
+            </div>
+            <p className="mirror-note">This reflection is private and stored in your Human Vault.</p>
+          </>
+        ) : (
+          <div className="mep-locked-page">
+            <Lock size={24} />
+            <strong>Sealed page</strong>
+            <p>A private reflection on your real HumanChain activity — check-ins, streak, questions, and chain signals.</p>
+            <PaymentTrigger
+              available={aiAvailable}
+              blockedLabel="AI setup pending"
+              onClick={openDeepHumanMirror}
+            >
+              Unlock for 6 WLD
+            </PaymentTrigger>
+          </div>
+        )}
+      </section>
+        </div>
+      ) : null}
+      {profileView === "history" ? (
+        <div className="mep-page">
           <section className="panel human-history-panel activity-panel">
             <div className="section-heading">
               <span>Human activity record</span>
@@ -860,8 +910,8 @@ export function MeView({
               <ChevronRight size={15} />
             </button>
           </section>
-        </>
-      )}
+        </div>
+      ) : null}
     </div>
   );
 }

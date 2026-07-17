@@ -1,0 +1,138 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TRUST & INTEGRITY DESIGN SYSTEM
+   The shared primitive layer: Surface, DataBadge, MetricValue,
+   VerificationTierBadge, PaymentTrigger. Screens should reach for these
+   instead of hand-rolling another one-off card class.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Surface ─────────────────────────────────────────────────────────── */
+.hc-surface {
+  position: relative;
+  border-radius: var(--radius-lg, 20px);
+  padding: 16px;
+}
+
+.hc-surface--raised {
+  background: var(--card);
+  border: 1px solid var(--card-line);
+  box-shadow: var(--card-shadow);
+}
+
+.hc-surface--flat {
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.hc-surface--demo {
+  background: var(--demo-tint);
+  border: 1px dashed var(--demo-edge);
+}
+
+.hc-surface--locked {
+  background: var(--locked-tint);
+  border: 1px solid var(--locked-edge);
+}
+
+.hc-surface-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+/* ── DataBadge ───────────────────────────────────────────────────────── */
+.hc-data-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill, 999px);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.hc-data-badge--demo,
+.hc-data-badge--sample {
+  background: var(--demo-tint);
+  border: 1px solid var(--demo-edge);
+  color: var(--demo-text);
+}
+
+.hc-data-badge--curated {
+  background: var(--curated-tint);
+  border: 1px solid var(--curated-edge);
+  color: var(--curated-text);
+}
+
+.hc-data-badge--live {
+  background: var(--live-tint);
+  border: 1px solid var(--live-edge);
+  color: var(--live-text);
+}
+
+/* ── MetricValue ─────────────────────────────────────────────────────── */
+.hc-metric-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.hc-metric-suffix {
+  margin-left: 2px;
+  font-size: 0.78em;
+  font-weight: 500;
+  opacity: 0.72;
+}
+
+/* ── VerificationTierBadge ───────────────────────────────────────────── */
+.hc-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill, 999px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.hc-tier-badge--orb {
+  background: rgba(19, 122, 87, 0.1);
+  color: var(--tier-orb);
+}
+
+.hc-tier-badge--document {
+  background: rgba(47, 111, 237, 0.1);
+  color: var(--tier-document);
+}
+
+.hc-tier-badge--none,
+.hc-tier-badge--preview {
+  background: rgba(93, 107, 102, 0.1);
+  color: var(--tier-preview);
+}
+
+/* ── PaymentTrigger ──────────────────────────────────────────────────── */
+/* ── Light-touch adoption on un-redesigned screens ──────────────────── */
+.hcm-item-trust-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.hc-payment-trigger--locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--locked-text);
+  background: var(--locked-tint);
+  border: 1px solid var(--locked-edge);
+  border-radius: var(--radius-md, 16px);
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: not-allowed;
+  opacity: 0.85;
+}

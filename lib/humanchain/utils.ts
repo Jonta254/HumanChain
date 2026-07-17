@@ -17,6 +17,34 @@ export function isVerifiedWorldHuman(human: HumanIdentity | null) {
   return Boolean(human?.wallet && ("mode" in human ? human.mode === "world" : true));
 }
 
+// Data-honesty helper — single source of truth for AskView/ChainsView/
+// MarketplaceView/StoriesView so "is this real network content or seed
+// fallback" is never reimplemented per screen. Fail-safe default: anything
+// not explicitly tagged "live" (including items with no `source` field at
+// all) is treated as demo — a forgotten tag stays non-payable rather than
+// silently becoming payable.
+export function isDemoItem(item: { source?: "demo" | "live" }): boolean {
+  return item.source !== "live";
+}
+
+// Shared copy for the three World ID proof-of-personhood tiers World App
+// reports at sign-in. Single source of truth for Settings and the Passport
+// (Me) screen so the two never describe verification status differently.
+export const worldIdTierCopy = {
+  orb: {
+    label: "Orb verified · proof-of-personhood",
+    detail: "Your World ID was verified at an Orb — the strongest uniqueness guarantee World ID offers. No personal data leaves World App.",
+  },
+  document: {
+    label: "Document verified",
+    detail: "Your World ID was verified by document scan. This confirms identity but not biometric uniqueness the way Orb verification does.",
+  },
+  none: {
+    label: "Wallet sign-in only · not yet World ID verified",
+    detail: "You're signed in with your World App wallet, which proves wallet ownership but is not a World ID proof-of-personhood. Complete Orb or Document verification in World App for the strongest trust tier.",
+  },
+} as const;
+
 export function getTrustPassportMetrics({
   completedTrades,
   human,

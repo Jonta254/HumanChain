@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   HUMAN PASSPORT — first-principles redesign
+   The physical-credential card (.hc-passport-card / .hcp-*) is kept as-is —
+   it's the one part of the old screen that already earned its place.
+   Everything below the fold is restructured into passport-style pages
+   (Overview / Trust / Vault / History) instead of one long generic scroll.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.mep-pages-nav {
+  display: flex;
+  gap: 4px;
+  margin: 14px 16px 0;
+  padding: 4px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+.mep-page-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 8px 4px;
+  border-radius: var(--radius-md);
+  color: var(--muted);
+}
+.mep-page-tab-index {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.mep-page-tab-label { font-size: 11.5px; font-weight: 700; }
+.mep-page-tab.active {
+  background: var(--card-raised);
+  color: var(--green-deep);
+  box-shadow: var(--card-shadow);
+}
+.mep-page-tab.active .mep-page-tab-index { color: var(--gold-text); opacity: 1; }
+
+.mep-page { padding: 14px 16px 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Stamps (was a flat pill grid) ───────────────────────────────────── */
+.mep-stamps-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 15px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--card-line);
+  background: var(--card);
+  box-shadow: var(--card-shadow);
+}
+.mep-stamps-head span { color: var(--green); font-size: 0.74rem; font-weight: 900; }
+.mep-stamps-head strong { display: block; margin-top: 2px; color: var(--ink); font-size: 1.15rem; }
+.mep-stamps-head p { margin: 4px 0 0; color: var(--muted); font-size: 0.78rem; line-height: 1.34; }
+.mep-stamps-track { height: 8px; border-radius: 999px; background: rgba(36,107,85,0.1); overflow: hidden; }
+.mep-stamps-track i { display: block; height: 100%; background: linear-gradient(90deg, var(--green), var(--gold)); }
+.mep-stamps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mep-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed var(--line);
+  color: var(--muted);
+  text-align: center;
+}
+.mep-stamp span { font-size: 9.5px; font-weight: 700; line-height: 1.25; }
+.mep-stamp.earned {
+  border-style: solid;
+  border-color: var(--green);
+  color: var(--green-deep);
+  background: rgba(19,122,87,0.07);
+  transform: rotate(-2deg);
+}
+.mep-stamp.earned:nth-child(even) { transform: rotate(2deg); }
+
+/* ── Locked page (real content behind a real, unmet gate) ───────────── */
+.mep-locked-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 20px;
+  text-align: center;
+  border-radius: var(--radius-xl);
+  background: var(--locked-tint);
+  border: 1.5px dashed var(--locked-edge);
+}
+.mep-locked-page svg { color: var(--locked-text); }
+.mep-locked-page strong { font-size: 14px; color: var(--ink); }
+.mep-locked-page p { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 30ch; line-height: 1.5; }

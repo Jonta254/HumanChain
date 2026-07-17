@@ -18,6 +18,7 @@ import {
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { TopBar } from "@/components/layout/TopBar";
+import { DataBadge } from "@/components/ui/DataBadge";
 import type { StoryArtKind, StoryImage, UserStory } from "@/types/content";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HumanIdentity } from "@/types/user";
@@ -1048,7 +1049,6 @@ const storyShelf = [
     detail: "A woman, a child, and a blue door. A story about returning through small openings.",
     price: "Free",
     readTime: "12 min",
-    readers: "18.4k",
     category: "Life",
   },
   {
@@ -1059,7 +1059,6 @@ const storyShelf = [
     detail: "A carpenter. A box with dovetail joints. Twenty-two years of unsaid words.",
     price: "Read",
     readTime: "8 min",
-    readers: "11.2k",
     category: "Family",
   },
   {
@@ -1070,7 +1069,6 @@ const storyShelf = [
     detail: "Lagos to London. Eggs eleven ways. What lean months teach you about people.",
     price: "Read",
     readTime: "9 min",
-    readers: "14.7k",
     category: "Money",
   },
   {
@@ -1081,7 +1079,6 @@ const storyShelf = [
     detail: "One Seed, One World: Bitcoin, the Worldcoin ORB, and the Human Chain.",
     price: "Read",
     readTime: "10 min",
-    readers: "22.1k",
     category: "Builder",
   },
   {
@@ -1092,7 +1089,6 @@ const storyShelf = [
     detail: "A cinematic story about proof, uniqueness, and what it means to be seen.",
     price: "Read",
     readTime: "6 min",
-    readers: "16.8k",
     category: "World",
   },
   {
@@ -1103,7 +1099,6 @@ const storyShelf = [
     detail: "A notebook with one page left. A bus stop stranger. One act of kindness that changed a direction.",
     price: "Read",
     readTime: "5 min",
-    readers: "9.3k",
     category: "Life",
   },
 ];
@@ -1760,6 +1755,7 @@ function StoryArtScene({ kind }: { kind: StoryArtKind }) {
 export function StoriesView({
   act,
   addNotification,
+  aiAvailable,
   earnPoints,
   feedRefreshNonce,
   humanIdentity,
@@ -1770,6 +1766,7 @@ export function StoriesView({
 }: {
   act: (title: string, detail: string) => void;
   addNotification: (title: string, detail: string, sector?: "welcome" | "inbox" | "marketplace" | "daily" | "stories" | "payments" | "account") => void;
+  aiAvailable: boolean;
   earnPoints: EarnPoints;
   feedRefreshNonce: number;
   humanIdentity: HumanIdentity | null;
@@ -2301,7 +2298,7 @@ export function StoriesView({
   if (storiesTab === "voices") {
     return (
       <div className="screen stories-screen">
-        <TopBar title="Community Voices" subtitle="Short true stories from verified humans worldwide." />
+        <TopBar title="Community Voices" subtitle="Short vignettes curated and written by HumanChain." />
         <nav className="stories-tab-nav">
           <button onClick={() => setStoriesTab("browse")} type="button">Browse</button>
           <button className="active" onClick={() => setStoriesTab("voices")} type="button">Voices</button>
@@ -2314,13 +2311,15 @@ export function StoriesView({
               <div className="cv-voice-top">
                 <span className="cv-voice-flag">{voice.flag}</span>
                 <div className="cv-voice-author">
-                  <strong>{voice.author}</strong>
-                  <span>{voice.country} · {voice.time}</span>
+                  <strong>Curated by HumanChain</strong>
+                  <span>{voice.country} vignette</span>
                 </div>
-                <span className="cv-voice-cat">{voice.category}</span>
+                <DataBadge label="Curated" />
               </div>
               <p className="cv-voice-text">&quot;{voice.text}&quot;</p>
               <div className="cv-voice-actions">
+                {/* Real local like toggle — no fabricated baseline count,
+                    and no tip button: there is no real author to pay. */}
                 <button
                   className={likedVoices.has(voice.id) ? "cv-voice-liked" : ""}
                   onClick={() => {
@@ -2335,30 +2334,9 @@ export function StoriesView({
                   }}
                   type="button"
                 >
-                  {likedVoices.has(voice.id) ? "♥" : "♡"} {voice.likes + (likedVoices.has(voice.id) ? 1 : 0)}
+                  {likedVoices.has(voice.id) ? "♥ Liked" : "♡ Like"}
                 </button>
-                <span>🔖 {voice.saves}</span>
-                <button
-                  onClick={() => openPayment({
-                    title: `Tip ${voice.author}`,
-                    amount: "1 WLD",
-                    detail: `Send 1 WLD to support ${voice.author}'s writing. Your tip goes to HumanChain treasury and is credited to the creator.`,
-                    success: "Tip sent! The creator is notified.",
-                    feature: "storyteller-tip",
-                    allowCustomAmount: true,
-                    minAmount: 0.1,
-                    maxAmount: 10,
-                    points: 4,
-                    context: { tippedAuthor: voice.author },
-                    onConfirmed: async () => {
-                      earnPoints(4, `You tipped ${voice.author}.`);
-                      recordHistory({ title: `Tip · ${voice.author}`, detail: "Story tip confirmed.", kind: "tip" });
-                    },
-                  })}
-                  type="button"
-                >
-                  ⚡ Tip
-                </button>
+                <span className="cv-voice-category-tag">{voice.category}</span>
               </div>
             </article>
           ))}
@@ -2772,7 +2750,7 @@ export function StoriesView({
                 <p className="shelf-detail">{story.detail}</p>
                 <div className="shelf-meta-row">
                   <span>📖 {story.readTime}</span>
-                  <span>👥 {story.readers} readers</span>
+                  <span className="shelf-publisher">Published by {story.publisher}</span>
                 </div>
               </div>
               <button
@@ -2930,7 +2908,12 @@ export function StoriesView({
               <div className="compact-actions" style={{ marginTop: 12 }}>
                 <button
                   className={unlockedReflections.has(storyKey) ? "active" : ""}
+                  disabled={!aiAvailable && !unlockedReflections.has(storyKey)}
                   onClick={() => {
+                    if (!aiAvailable && !unlockedReflections.has(storyKey)) {
+                      act("AI setup pending", "Deep Story Reflection needs the AI backend configured before it can be unlocked. Nothing was charged.");
+                      return;
+                    }
                     if (unlockedReflections.has(storyKey)) {
                       const existing = reflectionTexts[storyKey];
                       if (existing && existing !== "loading") {
@@ -2985,7 +2968,11 @@ export function StoriesView({
                   }}
                   type="button"
                 >
-                  {unlockedReflections.has(storyKey) ? "✓ Reflection saved" : "Create Deep Reflection · 6 WLD"}
+                  {unlockedReflections.has(storyKey)
+                    ? "✓ Reflection saved"
+                    : aiAvailable
+                      ? "Create Deep Reflection · 6 WLD"
+                      : "Deep Reflection — AI setup pending"}
                 </button>
               </div>
               {unlockedReflections.has(storyKey) ? (() => {

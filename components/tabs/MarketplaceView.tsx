@@ -44,6 +44,7 @@ import {
 } from "@/lib/world";
 import { normalizePaymentFeature } from "@/lib/worldPayments";
 import { validateAnswerInput, validateListingInput } from "@/lib/humanchainPolicy";
+import { DataBadge } from "@/components/ui/DataBadge";
 import {
   compactStorageArray,
   loadJsonFromStorage,
@@ -686,6 +687,12 @@ export function MarketplaceView({
 
   function tipItem(item: SeedItem | MarketplaceListing) {
     const isStored = typeof (item as MarketplaceListing).id === "number";
+    if (!isStored) {
+      // MARKET_ITEMS are HumanChain's own demo listings — no real seller
+      // exists to receive this tip, so the WLD payment sheet must not open.
+      act("Demo listing", `"${item.title}" is a demo listing with no real seller — tips aren't available on it.`);
+      return;
+    }
     const k = itemKey(item);
     openPayment({
       title: `Tip ${item.seller}`,
@@ -696,11 +703,7 @@ export function MarketplaceView({
       feature: "tip-market-item",
       points: 4,
       onConfirmed: (amount) => {
-        if (isStored) {
-          setMarketplaceListings((c) => c.map((l) => l.id === (item as MarketplaceListing).id ? { ...l, tips: (l.tips ?? 0) + 1 } : l));
-        } else {
-          setMarketRatings((c) => ({ ...c, [k]: { rating: c[k]?.rating ?? 0, tips: (c[k]?.tips ?? 0) + 1 } }));
-        }
+        setMarketplaceListings((c) => c.map((l) => l.id === (item as MarketplaceListing).id ? { ...l, tips: (l.tips ?? 0) + 1 } : l));
         recordHistory({ title: "Tip confirmed", detail: `${amount} WLD tip to ${item.seller} for ${item.title}.`, kind: "tip" });
         void storeData("marketplace-listing", `tip-${k}-${Date.now()}`, { item: item.title, seller: item.seller, amount, split: { creatorPercent: 80, platformPercent: 20 } });
       },
@@ -1663,11 +1666,10 @@ export function MarketplaceView({
         )}
       </div>
 
-      {/* Social proof strip */}
+      {/* Status strip — no fabricated presence count. World App Pay escrow is
+          real infrastructure; "browsing nearby" had no real signal behind it. */}
       <div className="hcm-social-proof">
-        <span className="hcm-sp-dot" /><span>{(() => { const base = 34 + (new Date().getHours() % 12) * 3; return base; })()}&nbsp;verified humans browsing nearby</span>
-        <span className="hcm-sp-sep">·</span>
-        <span className="hcm-sp-live"><span className="hcm-sp-dot green" />Live escrow active</span>
+        <span className="hcm-sp-live"><span className="hcm-sp-dot green" />World App Pay escrow active</span>
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════
@@ -1830,7 +1832,10 @@ export function MarketplaceView({
                         <strong>{item.title}</strong>
                         <span className="hcm-item-price">{item.price}</span>
                       </div>
-                      <span className="hcm-item-trust"><BadgeCheck size={11} />{item.trust}</span>
+                      <div className="hcm-item-trust-row">
+                        <span className="hcm-item-trust"><BadgeCheck size={11} />{item.trust}</span>
+                        <DataBadge label="Demo" />
+                      </div>
                       <p className="hcm-item-sub">{item.condition} · {item.seller} · {item.location}</p>
                       <div className="hcm-item-meta-row">
                         <span><MapPin size={10} />{item.distance}</span>

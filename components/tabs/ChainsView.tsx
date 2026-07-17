@@ -19,8 +19,10 @@ import {
   formatCheckInTime,
   formatShortTime,
   getLocalDateKey,
+  isDemoItem,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
+import { DataBadge } from "@/components/ui/DataBadge";
 import { getChainLinkAuthor } from "@/lib/data/chains";
 import { humanHaptic } from "@/lib/world/haptics";
 import { TopBar } from "@/components/layout/TopBar";
@@ -34,11 +36,11 @@ import type { HumanIdentity } from "@/types/user";
 // Local helpers (only used by ChainsView)
 // ---------------------------------------------------------------------------
 
-function getChainLinkPulse(link: ChainLink, index: number) {
-  const reactions = link.reactions ?? 6 + ((index + 2) * 3) % 21;
-  const createdAt = link.createdAt ?? `${Math.max(2, index + 2)}m ago`;
-
-  return { createdAt, reactions };
+// No synthetic reactions/timestamps — a demo/curated link with no real
+// engagement yet shows honestly as 0, not a fabricated formula-generated
+// count that looked like real activity.
+function getChainLinkPulse(link: ChainLink) {
+  return { createdAt: link.createdAt ?? null, reactions: link.reactions ?? 0 };
 }
 
 const chainQuoteLibrary = [
@@ -1572,6 +1574,7 @@ export function ChainsView({
               <p>Share a moment with a photo to be the first one here.</p>
             </div>
           )}
+          <div className="dcv-moments-masonry">
           {visiblePosts.map((post, index) => {
             const selectedReaction = momentReactions[String(post.id)];
             const authorInitial = post.author.replace(/^@/, "").charAt(0).toUpperCase();
@@ -1590,6 +1593,7 @@ export function ChainsView({
                     </div>
                   </div>
                   <div className="post-head-right">
+                    {isDemoItem(post) && <DataBadge label="Demo" />}
                     {post.pinned ? <span className="pin-badge">Pinned</span> : null}
                     {post.owner ? (
                       <button
@@ -1717,6 +1721,7 @@ export function ChainsView({
             </article>
             );
           })}
+          </div>
           {activeCommentPost ? (
             <div className="comment-sheet-backdrop" role="presentation">
               <section
@@ -1797,20 +1802,22 @@ export function ChainsView({
       ) : chainView === "groups" ? (
         <section className="groups-stack">
           <div className="chain-section-note">
-            <span>Permanent quote rooms</span>
-            <p>These are stable HumanChain quote libraries. Enter a field to read and copy deeper wisdom for that part of life.</p>
+            <span>Curated editorial</span>
+            <p>Written and maintained by HumanChain — not user-submitted. Enter a field to read the full library for that part of life.</p>
           </div>
-          <div className="permanent-quote-grid">
+          <div className="dcv-editorial-grid">
             {chainQuoteLibrary.slice(0, 6).map((quote) => (
-              <article className="permanent-quote-card" key={`${quote.country}-${quote.text}`}>
-                <span>{quote.country}</span>
-                <p>{quote.text}</p>
-                <button
-                  onClick={() => copyQuote(quote.text, quote.country)}
-                  type="button"
-                >
-                  Copy
-                </button>
+              <article className="dcv-editorial-card" key={`${quote.country}-${quote.text}`}>
+                <p className="dcv-editorial-quote">&ldquo;{quote.text}&rdquo;</p>
+                <div className="dcv-editorial-foot">
+                  <span>{quote.country} · Curated by HumanChain</span>
+                  <button
+                    onClick={() => copyQuote(quote.text, quote.country)}
+                    type="button"
+                  >
+                    Copy
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -1818,14 +1825,11 @@ export function ChainsView({
             {chainFields.map((field) => (
               <article className="field-card" key={field.name}>
                 <div className="field-card-meta">
-                  <span className="field-live-dot" aria-hidden="true" />
-                  <span>{field.members} members</span>
-                  <span>·</span>
-                  <span>Active now</span>
+                  <DataBadge label="Curated" />
                 </div>
                 <div>
                   <strong>{field.name}</strong>
-                <span>Verified humans</span>
+                <span>HumanChain reference field</span>
                 </div>
                 <p>{field.detail}</p>
                 <button
@@ -1876,20 +1880,26 @@ export function ChainsView({
           </div>
           {visibleLinks.map((link, index) => {
             const author = getChainLinkAuthor(link, humanIdentity?.username ?? "@verified_human");
-            const pulse = getChainLinkPulse(link, index);
+            const pulse = getChainLinkPulse(link);
             const linkCommentKey = getChainCommentKey(link, index);
             const linkComments = chainComments[linkCommentKey] ?? [];
 
+            const linkIsDemo = isDemoItem(link);
             return (
-            <article className={`thread-item lively ${link.pinned ? "pinned" : ""}`} key={`${author}-${link.text}-${index}`}>
+            <article className={`thread-item lively thread-item--dense ${link.pinned ? "pinned" : ""}`} key={`${author}-${link.text}-${index}`}>
               <span className="thread-dot" aria-hidden="true" />
               <div className="thread-body">
                 <div className="thread-author-row">
                   <span className="thread-avatar">{author.slice(1, 3).toUpperCase()}</span>
                   <div>
                     <strong>{link.pinned ? "Pinned - " : ""}{author}</strong>
-                    <small>{pulse.createdAt} - {pulse.reactions} felt this - {link.pinned ? `top chain since ${link.pinnedAt}` : "live link"}</small>
+                    <small>
+                      {linkIsDemo
+                        ? "Curated reference link"
+                        : `${pulse.createdAt ?? "Just now"} · ${pulse.reactions} felt this${link.pinned ? ` · top chain since ${link.pinnedAt}` : ""}`}
+                    </small>
                   </div>
+                  {linkIsDemo && <DataBadge label="Demo" />}
                   {link.pinned ? <span className="pin-badge">Top</span> : null}
                 </div>
                 <p>{link.text}</p>

@@ -19,6 +19,8 @@ export type MarketplaceListing = {
   status: "draft" | "payment-ready" | "active" | "sold" | "archived";
   createdAt: string;
   boosted?: boolean;
+  /** "live" = synced from Supabase; anything else (including unset) is treated as demo/seed content — see isDemoItem(). */
+  source?: "demo" | "live";
 };
 
 export type MarketBid = {

@@ -20,18 +20,22 @@ import {
   type HumanChainPaymentToken,
 } from "@/lib/worldPayments";
 import { formatPaymentAmount, getPaymentFeature, parsePaymentAmount } from "@/lib/humanchain/utils";
+import { VerificationTierBadge } from "@/components/ui/VerificationTierBadge";
 import type { PaymentRequest } from "@/types/ui";
+import type { VerifiedHuman } from "@/types/user";
 
 export function PaymentSheet({
   busy,
   onCancel,
   onConfirm,
+  payerHuman,
   payment,
   selectedToken,
 }: {
   busy: boolean;
   onCancel: () => void;
   onConfirm: (amount?: number) => void | Promise<void>;
+  payerHuman: VerifiedHuman | null;
   payment: PaymentRequest;
   selectedToken: HumanChainPaymentToken;
 }) {
@@ -113,6 +117,7 @@ export function PaymentSheet({
 
           {/* Trust row */}
           <div className="ps-trust-row">
+            <VerificationTierBadge human={payerHuman} size={12} />
             <span><ShieldCheck size={12} />Backend verified</span>
             <span>WLD only</span>
             {payment.points ? (

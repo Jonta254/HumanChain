@@ -12,6 +12,8 @@ import {
   X,
 } from "lucide-react";
 import { loadJsonFromStorage, saveJsonToStorage, storageKeys } from "@/lib/humanchain/storage";
+import { isDemoItem } from "@/lib/humanchain/utils";
+import { DataBadge } from "@/components/ui/DataBadge";
 import type { OpenPayment, EarnPoints, Tab } from "@/types/ui";
 import type { VerifiedHuman } from "@/types/user";
 import { getWorldMiniAppContext } from "@/lib/worldMiniApp";
@@ -35,6 +37,10 @@ type CultureRoom = {
   featured: boolean;
   coverImage?: string;
   coverAlt?: string;
+  /** "live" = a real room a verified human paid to create; anything else
+   * (including unset) is HumanChain's own curated/demo reference content —
+   * see isDemoItem(). Free to browse, no fake byline or engagement count. */
+  source?: "demo" | "live";
 };
 
 type CulturePost = {
@@ -51,7 +57,9 @@ type CulturePost = {
 
 // ── Seed data ─────────────────────────────────────────────────────────────────
 
-const SEED_ROOMS: CultureRoom[] = [
+// HumanChain's own curated reference rooms — not user-submitted, so no fake
+// byline or engagement count. Tagged "demo" below (single source of truth).
+const RAW_SEED_ROOMS: Array<Omit<CultureRoom, "source">> = [
   {
     id: "yoruba",
     name: "Yoruba Heritage",
@@ -189,6 +197,11 @@ const SEED_ROOMS: CultureRoom[] = [
     coverAlt: "Northern lights in green and purple above a snow-covered Norwegian fjord village",
   },
 ];
+
+const SEED_ROOMS: CultureRoom[] = RAW_SEED_ROOMS.map((room) => ({
+  ...room,
+  source: "demo" as const,
+}));
 
 const SEED_POSTS: Record<string, CulturePost[]> = {
   yoruba: [
@@ -486,7 +499,9 @@ export function CultureView({
   const allRooms = [...createdRooms, ...SEED_ROOMS];
 
   function enterRoom(room: CultureRoom) {
-    if (unlockedRooms.has(room.id)) {
+    if (unlockedRooms.has(room.id) || isDemoItem(room)) {
+      // Curated/demo rooms are free to browse — there's no real human on the
+      // other end of a "creator" fee for reference content HumanChain wrote.
       setActiveRoom(room);
       setView("room");
       return;
@@ -539,6 +554,7 @@ export function CultureView({
           creator: handle,
           creatorWallet: verifiedHuman?.wallet,
           featured: false,
+          source: "live",
         };
         const nextCreated = [room, ...createdRooms];
         setCreatedRooms(nextCreated);
@@ -601,7 +617,7 @@ export function CultureView({
           <Globe2 size={26} />
           <div>
             <strong>Living Cultures</strong>
-            <span>Stories from verified humans, not textbooks. Pay to enter and learn.</span>
+            <span>Curated reference rooms, free to browse — or create your own for verified humans to enter.</span>
           </div>
         </div>
 
@@ -730,6 +746,10 @@ export function CultureView({
     const seedPosts = SEED_POSTS[activeRoom.id] ?? [];
     const myPosts = userPosts[activeRoom.id] ?? [];
     const allPosts = [...myPosts, ...seedPosts];
+    // Seed posts are HumanChain's own editorial writing, not real member
+    // submissions — their bylines and like counts must say so, not imply a
+    // platform member who doesn't exist.
+    const seedPostIds = new Set(seedPosts.map((p) => p.id));
 
     return (
       <div className="culture-view screen">
@@ -757,14 +777,22 @@ export function CultureView({
             </div>
           </div>
           <p className="cv-rh-tagline">&quot;{activeRoom.tagline}&quot;</p>
-          <div className="cv-rh-stats">
-            <span><Users size={12} />{(activeRoom.members / 1000).toFixed(1)}k members</span>
-            <span><Star size={12} />{activeRoom.stories + myPosts.length} stories</span>
-          </div>
+          {isDemoItem(activeRoom) ? (
+            <div className="cv-rh-stats">
+              <DataBadge label="Curated" />
+            </div>
+          ) : (
+            <div className="cv-rh-stats">
+              <span><Users size={12} />{(activeRoom.members / 1000).toFixed(1)}k members</span>
+              <span><Star size={12} />{activeRoom.stories + myPosts.length} stories</span>
+            </div>
+          )}
           <div className="cv-rh-topics">
             {activeRoom.topics.map((t) => <span key={t}>{t}</span>)}
           </div>
-          <span className="cv-rh-creator">Room by {activeRoom.creator}</span>
+          <span className="cv-rh-creator">
+            {isDemoItem(activeRoom) ? "Curated by HumanChain — reference content, not a platform member" : `Room by ${activeRoom.creator}`}
+          </span>
         </div>
 
         {/* Post composer */}
@@ -833,7 +861,9 @@ export function CultureView({
             <article key={post.id} className="cv-post">
               <div className="cv-post-head">
                 <span className="cv-post-flag">{post.flag}</span>
-                <span className="cv-post-author">{post.author}</span>
+                <span className="cv-post-author">
+                  {seedPostIds.has(post.id) ? "Editorial reference — not a platform member" : post.author}
+                </span>
                 <span className="cv-post-time">{post.createdAt}</span>
               </div>
               <strong className="cv-post-title">{post.title}</strong>
@@ -859,7 +889,9 @@ export function CultureView({
                   }}
                   type="button"
                 >
-                  {likedPosts.has(post.id) ? "♥" : "♡"} {post.likes + (likedPosts.has(post.id) ? 1 : 0)}
+                  {seedPostIds.has(post.id)
+                    ? (likedPosts.has(post.id) ? "♥ Liked" : "♡ Like")
+                    : `${likedPosts.has(post.id) ? "♥" : "♡"} ${post.likes + (likedPosts.has(post.id) ? 1 : 0)}`}
                 </button>
               </div>
             </article>
@@ -907,9 +939,11 @@ function RoomCard({
           />
           <div className="cvrc-cover-shade" />
           <span className="cvrc-cover-flag">{room.flag}</span>
-          {unlocked
-            ? <span className="cvrc-joined cvrc-joined--onphoto">✓ Joined</span>
-            : <span className="cvrc-price cvrc-price--onphoto"><Lock size={11} />{room.entryFee}</span>
+          {isDemoItem(room)
+            ? <DataBadge className="cvrc-price--onphoto" label="Curated" />
+            : unlocked
+              ? <span className="cvrc-joined cvrc-joined--onphoto">✓ Joined</span>
+              : <span className="cvrc-price cvrc-price--onphoto"><Lock size={11} />{room.entryFee}</span>
           }
           <div className="cvrc-cover-meta">
             <strong>{room.name}</strong>
@@ -923,9 +957,11 @@ function RoomCard({
             <strong>{room.name}</strong>
             <span>{room.region}</span>
           </div>
-          {unlocked
-            ? <span className="cvrc-joined">✓ Joined</span>
-            : <span className="cvrc-price"><Lock size={11} />{room.entryFee}</span>
+          {isDemoItem(room)
+            ? <DataBadge label="Curated" />
+            : unlocked
+              ? <span className="cvrc-joined">✓ Joined</span>
+              : <span className="cvrc-price"><Lock size={11} />{room.entryFee}</span>
           }
         </div>
       )}
@@ -935,9 +971,15 @@ function RoomCard({
         {room.topics.slice(0, 4).map((t) => <span key={t}>{t}</span>)}
       </div>
       <div className="cvrc-footer">
-        <span><Users size={11} />{(room.members / 1000).toFixed(1)}k</span>
-        <span><Star size={11} />{room.stories} stories</span>
-        <span className="cvrc-cta">{unlocked ? "Read stories →" : `Enter for ${room.entryFee}`}</span>
+        {isDemoItem(room) ? null : (
+          <>
+            <span><Users size={11} />{(room.members / 1000).toFixed(1)}k</span>
+            <span><Star size={11} />{room.stories} stories</span>
+          </>
+        )}
+        <span className="cvrc-cta">
+          {isDemoItem(room) ? "Browse — free →" : unlocked ? "Read stories →" : `Enter for ${room.entryFee}`}
+        </span>
       </div>
     </button>
   );

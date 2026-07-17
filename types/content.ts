@@ -83,6 +83,8 @@ export type HumanPost = {
   mediaType?: "image" | "video";
   pinned?: boolean;
   pinnedAt?: string;
+  /** "live" = synced from Supabase; anything else (including unset) is treated as demo/seed content — see isDemoItem(). */
+  source?: "demo" | "live";
   storageStatus?: "cloud-safe" | "local-safe";
   tipSplit?: {
     creatorPercent: number;

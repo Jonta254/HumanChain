@@ -1,0 +1,77 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   ASK THE WORLD — first-principles redesign
+   Composer becomes one full-bleed hero container instead of two stacked
+   generic cards. The feed segments by real status (All/Unanswered/
+   Answered/Yours with real counts) instead of a flat topic chip list, and
+   collapsed threads render as dense rows — full card chrome is reserved
+   for the one thread currently expanded.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.aske-composer {
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  border: 1px solid var(--card-line);
+  box-shadow: var(--card-shadow-lg);
+  padding: 16px;
+  margin: 14px 14px 0;
+}
+.aske-composer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.aske-composer-head h2 { margin: 2px 0 0; font-size: 1.15rem; }
+
+/* ── Segmented status rail (All / Unanswered / Answered / Yours) ────── */
+.aske-segments {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+}
+.aske-segment {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 4px;
+  border-radius: calc(var(--radius-md) - 3px);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.aske-segment span {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--line);
+  border-radius: 999px;
+  min-width: 16px;
+  padding: 1px 4px;
+}
+.aske-segment.active {
+  background: var(--paper-strong);
+  color: var(--green-deep);
+  box-shadow: var(--card-shadow);
+}
+.aske-segment.active span { background: rgba(19,122,87,0.14); color: var(--green-deep); }
+
+/* ── Dense-by-default thread rows, full card only when expanded ─────── */
+/* Note: this only tightens spacing/elevation. Content visibility (verdict
+   panel, WLD row) stays driven by its own state — an unlocked Deep Verdict
+   must stay visible on a dense row too, not be hidden by CSS. */
+.ask-thread--dense {
+  padding: 12px 14px;
+  box-shadow: none;
+}
+.ask-thread--expanded {
+  box-shadow: var(--card-shadow-lg);
+  border-color: var(--card-edge);
+}

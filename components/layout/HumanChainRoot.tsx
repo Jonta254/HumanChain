@@ -27,7 +27,7 @@ import type { HumanChainAppState } from "@/lib/humanchain/useHumanChainApp";
 
 export function HumanChainRoot(props: HumanChainAppState) {
   const {
-    accountSyncStatus, activeField, appLanguage, chainEntryNonce,
+    accountSyncStatus, activeField, aiAvailable, appLanguage, chainEntryNonce,
     dailyAnswered, earnPoints, feedRefreshNonce,
     gateBusy, historyRecords, hpLedger, humanPosts, lastCheckInDate,
     links, marketLocation, marketplaceListings, notificationCenterOpen,
@@ -145,6 +145,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
         return (
           <AskView
             act={act}
+            aiAvailable={aiAvailable}
             earnPoints={earnPoints}
             humanIdentity={verifiedHuman}
             keepStreak={keepStreak}
@@ -175,6 +176,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
           <StoriesView
             act={act}
             addNotification={addNotification}
+            aiAvailable={aiAvailable}
             earnPoints={earnPoints}
             feedRefreshNonce={feedRefreshNonce}
             humanIdentity={verifiedHuman}
@@ -205,6 +207,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
           <MeView
             accountSyncStatus={accountSyncStatus}
             act={act}
+            aiAvailable={aiAvailable}
             copyReferralLink={copyReferralLink}
             earnPoints={earnPoints}
             historyRecords={historyRecords}
@@ -388,6 +391,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             onCancel={() => setPaymentPrompt(null)}
             onConfirm={confirmPayment}
             busy={paymentBusy}
+            payerHuman={verifiedHuman}
             payment={paymentPrompt}
             selectedToken={paymentToken}
           />

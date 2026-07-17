@@ -1,6 +1,9 @@
 import type { HumanPost } from "@/types/content";
 
-export const initialHumanPosts: HumanPost[] = [
+// Demo/reference moments shown when no real network moments exist yet.
+// Tagged "demo" below (single source of truth) so isDemoItem() keeps them
+// non-payable and visually labeled everywhere they render.
+const RAW_INITIAL_HUMAN_POSTS: Array<Omit<HumanPost, "source">> = [
   {
     id: 101,
     author: "@mara_chain",
@@ -158,3 +161,8 @@ export const initialHumanPosts: HumanPost[] = [
     owner: false,
   },
 ];
+
+export const initialHumanPosts: HumanPost[] = RAW_INITIAL_HUMAN_POSTS.map((post) => ({
+  ...post,
+  source: "demo" as const,
+}));

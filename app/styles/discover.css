@@ -1,0 +1,76 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   DISCOVER — first-principles redesign
+   Moments, Links, and Quote Rooms are three different content types and
+   now get three different native treatments instead of one shared card
+   shape: a photo-forward masonry grid, a dense chronological ticker, and
+   curated editorial typography with honest "curated by HumanChain" sourcing.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Moments: masonry via CSS columns (no JS layout needed) ─────────── */
+.dcv-moments-masonry {
+  column-count: 2;
+  column-gap: 10px;
+}
+.dcv-moments-masonry .image-post {
+  display: inline-block;
+  width: 100%;
+  break-inside: avoid;
+  margin-bottom: 10px;
+}
+@media (max-width: 380px) {
+  .dcv-moments-masonry { column-count: 1; }
+}
+
+/* ── Links: dense chronological ticker ───────────────────────────────── */
+.thread-item--dense {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.thread-item--dense .thread-body > p {
+  margin: 2px 0 6px;
+}
+
+/* ── Quote Rooms: curated editorial ──────────────────────────────────── */
+.dcv-editorial-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dcv-editorial-card {
+  padding: 20px 18px;
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  border: 1px solid var(--card-line);
+  box-shadow: var(--card-shadow);
+}
+.dcv-editorial-quote {
+  margin: 0 0 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--ink);
+  font-style: italic;
+}
+.dcv-editorial-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.dcv-editorial-foot span {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.dcv-editorial-foot button {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  background: var(--paper-strong);
+  color: var(--green-deep);
+  font-size: 11.5px;
+  font-weight: 700;
+}
