@@ -464,6 +464,7 @@ export function MarketplaceView({
   marketLocation,
   marketplaceListings,
   openPayment,
+  openProfile,
   recordHistory,
   setMarketLocation,
   setMarketplaceListings,
@@ -477,6 +478,7 @@ export function MarketplaceView({
   marketLocation: MarketLocationState;
   marketplaceListings: MarketplaceListing[];
   openPayment: OpenPayment;
+  openProfile: (wallet: string) => void;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   setMarketLocation: React.Dispatch<React.SetStateAction<MarketLocationState>>;
   setMarketplaceListings: React.Dispatch<React.SetStateAction<MarketplaceListing[]>>;
@@ -1294,6 +1296,11 @@ export function MarketplaceView({
               <button onClick={() => rateItem(activeItem)} type="button"><Star size={14} />Rate</button>
               <button onClick={() => tipItem(activeItem)} type="button"><Zap size={14} />Tip</button>
               <button onClick={() => void shareItem(activeItem)} type="button"><Send size={14} />Share</button>
+              {!isOwner && (activeItem as MarketplaceListing).sellerWallet && (
+                <button onClick={() => openProfile((activeItem as MarketplaceListing).sellerWallet!)} type="button">
+                  <BadgeCheck size={14} />Seller profile
+                </button>
+              )}
               {!isOwner && (
                 <ReportAction
                   onReported={(reason) => act("Report submitted", `"${reason}" report sent to moderation.`)}

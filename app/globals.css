@@ -9301,6 +9301,29 @@ html[data-world-mini-app="true"] .bottom-nav {
 .ai-guide-back-btn { margin-bottom: 8px; }
 .ai-guide-steps { padding: 4px 0; }
 
+.profile-sheet-body { padding: 16px 20px 32px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.profile-sheet-state { display: flex; align-items: center; justify-content: center; padding: 40px 0; color: var(--muted); text-align: center; }
+.profile-sheet-identity { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding-bottom: 8px; }
+.profile-sheet-avatar {
+  width: 64px; height: 64px; border-radius: 50%; background: var(--brand-grad);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; font-weight: 800; margin-bottom: 6px;
+}
+.profile-sheet-identity strong { font-size: 1.05rem; font-weight: 800; color: var(--ink); }
+.profile-sheet-tier { display: flex; align-items: center; gap: 4px; font-size: 0.76rem; color: var(--green); font-weight: 700; }
+.profile-sheet-joined { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--muted); }
+.profile-sheet-bio { font-size: 0.86rem; color: var(--ink); line-height: 1.5; text-align: center; margin: 0; }
+.profile-sheet-follow-row { display: flex; justify-content: center; gap: 20px; font-size: 0.8rem; color: var(--muted); }
+.profile-sheet-follow-row strong { color: var(--ink); font-weight: 800; }
+.profile-sheet-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.profile-sheet-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted); }
+.profile-sheet-stat strong { font-size: 1rem; font-weight: 800; color: var(--ink); }
+.profile-sheet-stat span { font-size: 0.66rem; }
+.profile-sheet-section-label { font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.profile-sheet-activity { display: flex; flex-direction: column; gap: 6px; }
+.profile-sheet-activity-row { display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; color: var(--ink); padding: 8px 10px; border-radius: 10px; background: var(--card); }
+.profile-sheet-empty { font-size: 0.8rem; color: var(--muted); text-align: center; padding: 12px 0; }
+
 @media (max-width: 380px), (max-height: 700px) {
   .screen {
     padding:
@@ -17672,6 +17695,7 @@ html[data-world-mini-app="true"] .bottom-nav--hc .bn-create::after {
 
 /* Moment card avatar */
 .post-author-row { display:flex; align-items:center; gap:9px; }
+.post-author-link { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
 .post-avatar {
   width:34px; height:34px; flex-shrink:0;
   border-radius:50%;

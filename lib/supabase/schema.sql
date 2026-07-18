@@ -13,6 +13,17 @@ create table if not exists hc_users (
   last_seen_at  timestamptz not null default now()
 );
 
+-- Public profile fields, added to the existing per-wallet row rather than a
+-- separate table — one canonical row per verified human, no join needed to
+-- read a profile. Visibility flags gate what GET /api/db/profile/[wallet]
+-- returns to anyone other than the profile owner.
+alter table hc_users add column if not exists bio text;
+alter table hc_users add column if not exists avatar_url text;
+alter table hc_users add column if not exists profile_visibility text not null default 'public' check (profile_visibility in ('public', 'private'));
+alter table hc_users add column if not exists activity_visibility text not null default 'public' check (activity_visibility in ('public', 'private'));
+alter table hc_users add column if not exists marketplace_visibility text not null default 'public' check (marketplace_visibility in ('public', 'private'));
+alter table hc_users add column if not exists discoverable boolean not null default true;
+
 -- Ask threads
 create table if not exists hc_ask_threads (
   id              uuid primary key default gen_random_uuid(),
@@ -101,6 +112,17 @@ create table if not exists hc_blocks (
   unique (blocker_wallet, blocked_wallet)
 );
 
+-- Follow graph. One row per follow relationship; counts are derived by
+-- counting rows, never stored/cached, so they can never drift from reality.
+create table if not exists hc_follows (
+  id              uuid primary key default gen_random_uuid(),
+  follower_wallet text not null references hc_users(wallet) on delete cascade,
+  followed_wallet text not null references hc_users(wallet) on delete cascade,
+  created_at      timestamptz not null default now(),
+  unique (follower_wallet, followed_wallet),
+  check (follower_wallet <> followed_wallet)
+);
+
 -- Indexes
 create index if not exists hc_ask_threads_created  on hc_ask_threads(created_at desc);
 create index if not exists hc_ask_answers_thread   on hc_ask_answers(thread_id, created_at asc);
@@ -110,6 +132,8 @@ create index if not exists hc_hp_ledger_wallet     on hc_hp_ledger(wallet, creat
 create index if not exists hc_reports_target       on hc_reports(target_type, target_id, created_at desc);
 create index if not exists hc_applications_listing on hc_applications(listing_id, created_at desc);
 create index if not exists hc_blocks_blocker        on hc_blocks(blocker_wallet, created_at desc);
+create index if not exists hc_follows_follower      on hc_follows(follower_wallet, created_at desc);
+create index if not exists hc_follows_followed      on hc_follows(followed_wallet, created_at desc);
 
 -- RLS
 alter table hc_users        enable row level security;
@@ -121,6 +145,7 @@ alter table hc_hp_ledger    enable row level security;
 alter table hc_reports      enable row level security;
 alter table hc_applications enable row level security;
 alter table hc_blocks       enable row level security;
+alter table hc_follows      enable row level security;
 
 -- Public read on all tables (service role writes via API routes).
 -- Postgres has no "create policy if not exists", so drop-then-create to
@@ -130,12 +155,17 @@ drop policy if exists "public read threads"     on hc_ask_threads;
 drop policy if exists "public read answers"     on hc_ask_answers;
 drop policy if exists "public read moments"     on hc_moments;
 drop policy if exists "public read marketplace" on hc_marketplace;
+drop policy if exists "public read follows"     on hc_follows;
 
 create policy "public read users"       on hc_users       for select using (true);
 create policy "public read threads"     on hc_ask_threads for select using (true);
 create policy "public read answers"     on hc_ask_answers for select using (true);
 create policy "public read moments"     on hc_moments     for select using (true);
 create policy "public read marketplace" on hc_marketplace for select using (true);
+-- Follow relationships are public by design (who-follows-whom is visible on
+-- most social platforms); this is unrelated to the profile_visibility flag,
+-- which gates profile *content*, not the existence of the follow edge.
+create policy "public read follows"     on hc_follows     for select using (true);
 
 -- Increment answer count (called from API route)
 create or replace function increment_answer_count(thread_id uuid)

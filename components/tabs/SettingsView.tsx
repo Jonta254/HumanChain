@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import {
   BadgeCheck,
@@ -28,6 +28,8 @@ import { humanHaptic } from "@/lib/world/haptics";
 import { appLanguages, settingsEssentialsByLanguage, type AppLanguage } from "@/lib/data/languages";
 import { pointRules } from "@/lib/humanchain/pointRules";
 import { formatWorldLaunchLocation, worldIdTierCopy } from "@/lib/humanchain/utils";
+import { fetchProfile, updateProfile } from "@/lib/humanchain/profile";
+import type { ProfileVisibility } from "@/types/profile";
 import type { WorldMiniAppContext } from "@/lib/world/types";
 import type { Tab } from "@/types/ui";
 import type { VerifiedHuman } from "@/types/user";
@@ -75,6 +77,28 @@ export function SettingsView({
   // expand inline instead.
   const [expandedInfoKey, setExpandedInfoKey] = useState<string | null>(null);
   const toggleInfo = (key: string) => setExpandedInfoKey((current) => (current === key ? null : key));
+
+  // Privacy foundation — visibility flags live on hc_users and are read back
+  // once so toggles reflect real server state, not an assumed default.
+  const wallet = verifiedHuman?.wallet;
+  const [privacy, setPrivacy] = useState<{ profile: ProfileVisibility; activity: ProfileVisibility; marketplace: ProfileVisibility; discoverable: boolean } | null>(null);
+  useEffect(() => {
+    if (!wallet) return;
+    let cancelled = false;
+    void fetchProfile(wallet).then((result) => {
+      if (cancelled || !result.ok || !result.profile.settings) return;
+      const s = result.profile.settings;
+      setPrivacy({ profile: s.profileVisibility, activity: s.activityVisibility, marketplace: s.marketplaceVisibility, discoverable: s.discoverable });
+    });
+    return () => { cancelled = true; };
+  }, [wallet]);
+
+  async function setVisibility(field: "profile" | "activity" | "marketplace", value: ProfileVisibility) {
+    setPrivacy((cur) => cur ? { ...cur, [field]: value } : cur);
+    const patch = field === "profile" ? { profileVisibility: value } : field === "activity" ? { activityVisibility: value } : { marketplaceVisibility: value };
+    const result = await updateProfile(patch);
+    if (!result.ok) act("Couldn't update", result.pendingSetup ? "Privacy settings aren't available yet." : "Try again in a moment.");
+  }
 
   const settingsTabNav = (
     <nav className="stories-tab-nav">
@@ -487,6 +511,49 @@ export function SettingsView({
             </div>
             <ChevronRight size={15} className="sv-chevron" />
           </button>
+          {wallet && privacy && (
+            <>
+              <button
+                className="sv-row"
+                onClick={() => void setVisibility("profile", privacy.profile === "public" ? "private" : "public")}
+                type="button"
+              >
+                <div className="sv-row-left">
+                  <span className="sv-row-label">Profile visibility</span>
+                  <span className="sv-row-sub">Who can open your public profile</span>
+                </div>
+                <span className={`sv-toggle-badge ${privacy.profile === "public" ? "on" : "off"}`}>
+                  {privacy.profile === "public" ? "Public" : "Private"}
+                </span>
+              </button>
+              <button
+                className="sv-row"
+                onClick={() => void setVisibility("activity", privacy.activity === "public" ? "private" : "public")}
+                type="button"
+              >
+                <div className="sv-row-left">
+                  <span className="sv-row-label">Activity visibility</span>
+                  <span className="sv-row-sub">Recent moments, questions, and answers on your profile</span>
+                </div>
+                <span className={`sv-toggle-badge ${privacy.activity === "public" ? "on" : "off"}`}>
+                  {privacy.activity === "public" ? "Public" : "Private"}
+                </span>
+              </button>
+              <button
+                className="sv-row"
+                onClick={() => void setVisibility("marketplace", privacy.marketplace === "public" ? "private" : "public")}
+                type="button"
+              >
+                <div className="sv-row-left">
+                  <span className="sv-row-label">Marketplace visibility</span>
+                  <span className="sv-row-sub">Active and completed trades on your profile</span>
+                </div>
+                <span className={`sv-toggle-badge ${privacy.marketplace === "public" ? "on" : "off"}`}>
+                  {privacy.marketplace === "public" ? "Public" : "Private"}
+                </span>
+              </button>
+            </>
+          )}
           <button
             className="sv-row"
             onClick={() => act("Local data", "All posts, listings, and bids are stored locally on your device. Cloud sync is opt-in per item.")}

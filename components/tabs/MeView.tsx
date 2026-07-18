@@ -128,6 +128,7 @@ export function MeView({
   marketplaceListings,
   onCheckIn,
   openPayment,
+  openProfile,
   points,
   profileImage,
   recordHistory,
@@ -155,6 +156,7 @@ export function MeView({
   marketplaceListings: MarketplaceListing[];
   onCheckIn: () => void;
   openPayment: OpenPayment;
+  openProfile: (wallet: string) => void;
   points: number;
   profileImage: string | null;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
@@ -581,6 +583,15 @@ export function MeView({
         >
           <Share2 size={14} /> Share Passport
         </button>
+        {verifiedHuman?.wallet && (
+          <button
+            className="share-passport-btn"
+            onClick={() => openProfile(verifiedHuman.wallet!)}
+            type="button"
+          >
+            <BadgeCheck size={14} /> View Public Profile
+          </button>
+        )}
       </section>
         </div>
       ) : null}

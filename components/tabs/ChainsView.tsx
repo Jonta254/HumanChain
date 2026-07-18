@@ -661,6 +661,7 @@ export function ChainsView({
   keepStreak,
   links,
   openPayment,
+  openProfile,
   recordHistory,
   setActiveField,
   setHumanPosts,
@@ -675,6 +676,7 @@ export function ChainsView({
   keepStreak: (detail?: string) => void;
   links: ChainLink[];
   openPayment: OpenPayment;
+  openProfile: (wallet: string) => void;
   recordHistory: (record: Omit<HistoryRecord, "id" | "time">) => void;
   setActiveField: React.Dispatch<React.SetStateAction<ChainField | null>>;
   setHumanPosts: React.Dispatch<React.SetStateAction<HumanPost[]>>;
@@ -1593,7 +1595,13 @@ export function ChainsView({
                   <div className="post-author-row">
                     <div className="post-avatar" aria-hidden="true">{authorInitial}</div>
                     <div>
-                      <strong>{post.author}</strong>
+                      {!post.owner && post.authorWallet ? (
+                        <button className="post-author-link" onClick={() => openProfile(post.authorWallet!)} type="button">
+                          <strong>{post.author}</strong>
+                        </button>
+                      ) : (
+                        <strong>{post.author}</strong>
+                      )}
                       <small>{post.createdAt}{post.storageStatus === "cloud-safe" ? " · ☁" : ""}</small>
                     </div>
                   </div>

@@ -15,6 +15,7 @@ import { NotificationCenter } from "@/components/layout/NotificationCenter";
 import { NotificationPermissionPrompt } from "@/components/layout/NotificationPermissionPrompt";
 import { PaymentSheet } from "@/components/layout/PaymentSheet";
 import { AIGuideSheet } from "@/components/layout/AIGuideSheet";
+import { ProfileSheet } from "@/components/layout/ProfileSheet";
 import { AskView } from "@/components/tabs/AskView";
 import { ChainsView } from "@/components/tabs/ChainsView";
 import { CreateView } from "@/components/tabs/CreateView";
@@ -62,6 +63,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
   }, []);
 
   const [aiGuideOpen, setAiGuideOpen] = useState(false);
+  const [viewingProfileWallet, setViewingProfileWallet] = useState<string | null>(null);
 
   // Track previous tab so the back button always returns to the right place
   const prevTabRef = useRef<typeof tab>("home");
@@ -77,6 +79,10 @@ export function HumanChainRoot(props: HumanChainAppState) {
     const dest = prevTab === tab ? "home" : prevTab;
     if (dest === "chains") { setActiveField(null); setChainEntryNonce((n) => n + 1); }
     setTab(dest);
+  }
+
+  function openProfile(wallet: string) {
+    setViewingProfileWallet(wallet);
   }
 
   const TAB_LABELS: Record<typeof tab, string> = {
@@ -180,6 +186,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             keepStreak={keepStreak}
             links={links}
             openPayment={openPayment}
+            openProfile={openProfile}
             recordHistory={recordHistory}
             setActiveField={setActiveField}
             setHumanPosts={setHumanPosts}
@@ -212,6 +219,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             marketLocation={marketLocation}
             marketplaceListings={visibleMarketplaceListings}
             openPayment={openPayment}
+            openProfile={openProfile}
             recordHistory={recordHistory}
             setMarketLocation={props.setMarketLocation}
             setMarketplaceListings={props.setMarketplaceListings}
@@ -232,6 +240,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             links={links}
             marketplaceListings={marketplaceListings}
             marketLocation={marketLocation}
+            openProfile={openProfile}
             onCheckIn={() => {
               const now = new Date();
               const today = getLocalDateKey(now);
@@ -402,6 +411,15 @@ export function HumanChainRoot(props: HumanChainAppState) {
             onClose={() => setAiGuideOpen(false)}
             points={points}
             streak={streak}
+          />
+        ) : null}
+        {viewingProfileWallet ? (
+          <ProfileSheet
+            act={act}
+            humanIdentity={verifiedHuman}
+            key={viewingProfileWallet}
+            onClose={() => setViewingProfileWallet(null)}
+            wallet={viewingProfileWallet}
           />
         ) : null}
         {paymentPrompt ? (
