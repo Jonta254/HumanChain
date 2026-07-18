@@ -74,6 +74,11 @@ export async function POST(req: NextRequest) {
     // get() throws BlobNotFoundError (not a graceful 404 result) when this
     // wallet has never saved a snapshot yet — the common case for any
     // first-time sync. Treat that as "no snapshot" rather than a failure.
+    // Any other Blob error (seen in production as a bare "400 Bad Request",
+    // a different exception class than BlobNotFoundError) was previously
+    // rethrown uncaught, crashing this route for the user's whole session
+    // restore. Never let a storage read take down account load — log it
+    // server-side and degrade to "no snapshot" instead.
     let result: Awaited<ReturnType<typeof get>>;
     try {
       result = await get(pathname, {
@@ -84,7 +89,8 @@ export async function POST(req: NextRequest) {
       if (error instanceof BlobNotFoundError) {
         return noStoreJson({ ok: true, snapshot: null });
       }
-      throw error;
+      console.error("[data/account] blob load error:", error instanceof Error ? error.message : error);
+      return noStoreJson({ ok: true, snapshot: null, syncWarning: "Cloud snapshot temporarily unavailable." });
     }
 
     if (!result?.stream || result.statusCode !== 200) {
@@ -106,27 +112,32 @@ export async function POST(req: NextRequest) {
   }
 
   const savedAt = new Date().toISOString();
-  const blob = await put(
-    pathname,
-    JSON.stringify(
+  try {
+    const blob = await put(
+      pathname,
+      JSON.stringify(
+        {
+          savedAt,
+          snapshot: payload.snapshot,
+          wallet: payload.wallet.toLowerCase(),
+        },
+        null,
+        2,
+      ),
       {
-        savedAt,
-        snapshot: payload.snapshot,
-        wallet: payload.wallet.toLowerCase(),
+        access: "public",
+        allowOverwrite: true,
+        contentType: "application/json",
       },
-      null,
-      2,
-    ),
-    {
-      access: "public",
-      allowOverwrite: true,
-      contentType: "application/json",
-    },
-  );
+    );
 
-  return noStoreJson({
-    ok: true,
-    savedAt,
-    url: blob.url,
-  });
+    return noStoreJson({
+      ok: true,
+      savedAt,
+      url: blob.url,
+    });
+  } catch (error) {
+    console.error("[data/account] blob save error:", error instanceof Error ? error.message : error);
+    return noStoreJson({ ok: false, pendingSetup: true, message: "Cloud save temporarily unavailable — kept locally." });
+  }
 }

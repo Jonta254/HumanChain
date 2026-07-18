@@ -27,6 +27,8 @@ export type AskThread = {
     user: string;
   }>;
   author: string;
+  /** Supabase hc_ask_threads.id — set only for threads synced to/from the backend. Needed to post/fetch answers server-side. */
+  id?: string;
   mode: string;
   owner: boolean;
   question: string;

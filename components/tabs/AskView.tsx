@@ -54,9 +54,11 @@ function loadStoredAskThreads(): AskThread[] {
     (thread) => ({
       answers: thread.answers ?? [],
       author: thread.author ?? "@humanchain",
+      id: thread.id,
       mode: thread.mode ?? "Text",
       owner: Boolean(thread.owner),
       question: thread.question ?? "Untitled question",
+      source: thread.source,
       targetCountry: thread.targetCountry ?? "World",
       topic: thread.topic ?? "Life",
     }),
@@ -250,13 +252,22 @@ export function AskView({
       },
       ...current,
     ]);
-    // Persist to Supabase (non-blocking — local state is source of truth)
+    // Persist to Supabase (non-blocking — local state is source of truth).
+    // The real DB id (needed so answers can sync) replaces the local
+    // placeholder once the insert resolves; local-first behavior is
+    // unaffected either way.
     if (humanIdentity?.wallet && humanIdentity.mode === "world") {
       void fetch("/api/db/threads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: cleanQuestion, author_wallet: humanIdentity.wallet, author_username: humanIdentity.username ?? "Human" }),
-      }).catch(() => {/* non-critical */});
+      })
+        .then((res) => res.json())
+        .then((data: { thread?: { id?: string } }) => {
+          if (!data.thread?.id) return;
+          setThreads((current) => current.map((t) => (t.id === threadId ? { ...t, id: data.thread!.id } : t)));
+        })
+        .catch(() => {/* non-critical */});
     }
     setQuestion("");
     recordHistory({
@@ -309,6 +320,18 @@ export function AskView({
       ),
     );
     setAnswerDrafts((current) => ({ ...current, [questionText]: "" }));
+    // Persist to Supabase so this answer is visible to other users, not just
+    // this device — only possible once the parent thread has synced and
+    // carries a real DB id (not the local-* placeholder set before the
+    // thread's own insert resolves).
+    const syncTarget = threads.find((t) => t.question === questionText);
+    if (humanIdentity?.wallet && humanIdentity.mode === "world" && syncTarget?.id && !syncTarget.id.startsWith("local-")) {
+      void fetch(`/api/db/threads/${syncTarget.id}/answers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: draft, author_wallet: humanIdentity.wallet, author_username: answerUser }),
+      }).catch(() => {/* non-critical */});
+    }
     recordHistory({
       title: isAnon ? "Anonymous answer published" : "Ask answer published",
       detail: draft,

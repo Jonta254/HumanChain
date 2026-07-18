@@ -569,6 +569,7 @@ export function useHumanChainApp() {
             .map((t): AskThread => ({
               question: t.question,
               author: t.author_username,
+              id: t.id,
               answers: [],
               mode: "World",
               owner: t.author_wallet.toLowerCase() === wallet.toLowerCase(),
@@ -577,6 +578,25 @@ export function useHumanChainApp() {
               topic: "General",
             }));
           if (incoming.length) {
+            // Backfill answers for newly-synced threads only (repeat visits
+            // see 0 incoming threads, so this stays bounded) — hc_ask_answers
+            // has always had a table and API route, but nothing ever fetched
+            // it, so synced threads always showed zero answers regardless of
+            // how many real people had answered.
+            const capped = incoming.slice(0, 20);
+            const answerResults = await Promise.allSettled(
+              capped.map((t) => fetchWithTimeout(`/api/db/threads/${t.id}/answers`, { timeoutMs: 6_000 }).then((r) => r.json())),
+            );
+            capped.forEach((t, i) => {
+              const result = answerResults[i];
+              if (result.status !== "fulfilled" || !result.value.answers?.length) return;
+              type DbAnswer = { body: string; author_username: string };
+              t.answers = (result.value.answers as DbAnswer[]).map((a) => ({
+                user: a.author_username,
+                country: "Verified human",
+                text: a.body,
+              }));
+            });
             saveJsonToStorage(storageKeys.askThreads, [...incoming, ...stored].slice(0, 80));
             setFeedRefreshNonce((n) => n + 1);
           }
