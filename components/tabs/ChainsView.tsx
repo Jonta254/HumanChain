@@ -23,6 +23,7 @@ import {
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { DataBadge } from "@/components/ui/DataBadge";
+import { ReportAction } from "@/components/ui/ReportAction";
 import { getChainLinkAuthor } from "@/lib/data/chains";
 import { humanHaptic } from "@/lib/world/haptics";
 import { TopBar } from "@/components/layout/TopBar";
@@ -1686,6 +1687,14 @@ export function ChainsView({
                   >
                     Share
                   </button>
+                  {!post.owner && (
+                    <ReportAction
+                      onReported={(reason) => act("Report submitted", `"${reason}" report sent to moderation.`)}
+                      reporterWallet={humanIdentity?.wallet}
+                      targetId={String(post.id)}
+                      targetType="moment"
+                    />
+                  )}
                   {post.owner ? (
                     <button
                       onClick={() =>
@@ -1969,6 +1978,14 @@ export function ChainsView({
                   >
                     Comments {linkComments.length}
                   </button>
+                  {!link.owner && (
+                    <ReportAction
+                      onReported={(reason) => act("Report submitted", `"${reason}" report sent to moderation.`)}
+                      reporterWallet={humanIdentity?.wallet}
+                      targetId={linkCommentKey}
+                      targetType="chain-link"
+                    />
+                  )}
                   {link.owner ? (
                     <button
                       className="danger"

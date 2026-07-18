@@ -14,6 +14,7 @@ import {
 import { loadJsonFromStorage, saveJsonToStorage, storageKeys } from "@/lib/humanchain/storage";
 import { isDemoItem } from "@/lib/humanchain/utils";
 import { DataBadge } from "@/components/ui/DataBadge";
+import { ReportAction } from "@/components/ui/ReportAction";
 import type { OpenPayment, EarnPoints, Tab } from "@/types/ui";
 import type { VerifiedHuman } from "@/types/user";
 import { getWorldMiniAppContext } from "@/lib/worldMiniApp";
@@ -893,6 +894,14 @@ export function CultureView({
                     ? (likedPosts.has(post.id) ? "♥ Liked" : "♡ Like")
                     : `${likedPosts.has(post.id) ? "♥" : "♡"} ${post.likes + (likedPosts.has(post.id) ? 1 : 0)}`}
                 </button>
+                {!seedPostIds.has(post.id) && (
+                  <ReportAction
+                    onReported={(reason) => act("Report submitted", `"${reason}" report sent to moderation.`)}
+                    reporterWallet={verifiedHuman?.wallet}
+                    targetId={post.id}
+                    targetType="culture-post"
+                  />
+                )}
               </div>
             </article>
           ))}

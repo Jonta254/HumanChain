@@ -45,6 +45,7 @@ import {
 import { normalizePaymentFeature } from "@/lib/worldPayments";
 import { validateAnswerInput, validateListingInput } from "@/lib/humanchainPolicy";
 import { DataBadge } from "@/components/ui/DataBadge";
+import { ReportAction } from "@/components/ui/ReportAction";
 import {
   compactStorageArray,
   loadJsonFromStorage,
@@ -798,9 +799,10 @@ export function MarketplaceView({
       void storeData("marketplace-bid", `${item.id}-${bid.id}`, { ...bid, listing: item.title, seller: item.seller });
       setBidDrafts((c) => ({ ...c, [item.id]: "" }));
       recordHistory({ title: "Bid placed", detail: `${amount} WLD on ${item.title}.`, kind: "market" });
-      await chatWithWorld({ message: `I placed a ${amount} WLD bid on ${item.title}. Let me know if you can accept.`, to: [item.seller.replace(/^@/, "")] });
-      setMarketBids((c) => ({ ...c, [item.id]: (c[item.id] ?? []).map((b) => b.id === bid.id ? { ...b, status: "sent" } : b) }));
-      act("Bid sent!", "World Chat opened to confirm with seller.");
+      // SeedItem is HumanChain's own demo listing set — there is no real
+      // seller to receive a World Chat message, so the bid stays local
+      // instead of contacting a fake (or worse, colliding real) handle.
+      act("Bid saved", `Your ${amount} WLD offer on "${item.title}" is saved. This is a demo listing, so it won't reach a real seller.`);
     } catch {
       act("Bid saved", "Stored locally. Chat separately to confirm.");
     } finally {
@@ -812,6 +814,11 @@ export function MarketplaceView({
   async function holdItem(item: SeedItem | MarketplaceListing) {
     if (!requireVerifiedPublicAction(humanIdentity, act, "placing holds")) return;
     if (!locationReady) { act("Location required", "Connect GPS or manual area before holding."); return; }
+    const isStored = typeof (item as MarketplaceListing).id === "number";
+    if (!isStored) {
+      act("Demo listing", `"${item.title}" is a demo listing — there's no real seller to hold it from.`);
+      return;
+    }
     const k = itemKey(item);
     const bKey = `hold:${k}`;
     if (busyAction) return;
@@ -855,6 +862,11 @@ export function MarketplaceView({
 
   // ── Chat ──────────────────────────────────────────────────────────────────
   async function chatSeller(item: SeedItem | MarketplaceListing) {
+    const isStored = typeof (item as MarketplaceListing).id === "number";
+    if (!isStored) {
+      act("Demo listing", `"${item.title}" is a demo listing — there's no real seller to message.`);
+      return;
+    }
     const info = getInfo(item);
     const bKey = `chat:${itemKey(item)}`;
     if (busyAction) return;
@@ -1279,6 +1291,14 @@ export function MarketplaceView({
               <button onClick={() => rateItem(activeItem)} type="button"><Star size={14} />Rate</button>
               <button onClick={() => tipItem(activeItem)} type="button"><Zap size={14} />Tip</button>
               <button onClick={() => void shareItem(activeItem)} type="button"><Send size={14} />Share</button>
+              {!isOwner && (
+                <ReportAction
+                  onReported={(reason) => act("Report submitted", `"${reason}" report sent to moderation.`)}
+                  reporterWallet={humanIdentity?.wallet}
+                  targetId={String(itemKey(activeItem))}
+                  targetType="marketplace-listing"
+                />
+              )}
             </div>
           </div>
           )}
@@ -1627,6 +1647,15 @@ export function MarketplaceView({
     return matchFilter && (!q || `${item.title} ${item.seller} ${item.location} ${item.tag}`.toLowerCase().includes(q));
   });
 
+  // marketplaceListings holds both the current user's own submissions and
+  // real listings synced in from other verified humans (source: "live") —
+  // they must render in visually distinct sections, not one merged "Your
+  // Listings" list.
+  const myListings = marketplaceListings.filter(
+    (l) => (humanIdentity?.wallet && l.sellerWallet === humanIdentity.wallet) || l.seller === handle,
+  );
+  const othersListings = marketplaceListings.filter((l) => !myListings.includes(l));
+
   const allSvcListings: SvcListing[] = [...SEED_JOBS, ...localJobs, ...localServices];
   const filtSvc = allSvcListings.filter((item) => {
     const matchNiche = activeNiche === "all" || item.niche === activeNiche;
@@ -1750,15 +1779,17 @@ export function MarketplaceView({
             </button>
           </div>
 
-          {/* Your listings */}
-          {marketplaceListings.length > 0 && (
+          {/* Your listings — sellerWallet match only. marketplaceListings also
+              carries other real users' synced listings (source: "live"), so
+              this must not just render the whole array under "Your". */}
+          {myListings.length > 0 && (
             <section className="hcm-section">
               <div className="hcm-section-head">
                 <Library size={14} /><strong>Your Listings</strong>
-                <span className="hcm-listings-count">{marketplaceListings.filter((l) => l.status !== "archived").length} active</span>
+                <span className="hcm-listings-count">{myListings.filter((l) => l.status !== "archived").length} active</span>
               </div>
               <div className="hcm-stored-list">
-                {marketplaceListings
+                {myListings
                   .filter((l) => l.status !== "archived")
                   .slice()
                   .sort((a, b) => (b.boosted ? 1 : 0) - (a.boosted ? 1 : 0))
@@ -1793,12 +1824,46 @@ export function MarketplaceView({
             </section>
           )}
 
-          {/* Discover */}
+          {/* From verified humans — real listings synced from other real
+              users. Shows an encouraging empty state rather than hiding,
+              since browsing what's actually for sale is core marketplace
+              function, not a vanity metric. */}
           <section className="hcm-section">
             <div className="hcm-section-head">
-              <ShoppingBag size={14} /><strong>Discover Near You</strong>
-              <span className="hcm-live-pill"><span className="hcm-pulse" />Live</span>
+              <BadgeCheck size={14} /><strong>From Verified Humans</strong>
+              {othersListings.length > 0 && <span className="hcm-listings-count">{othersListings.length}</span>}
             </div>
+            {othersListings.length > 0 ? (
+              <div className="hcm-stored-list">
+                {othersListings.map((listing) => (
+                  <button key={listing.id} className="hcm-stored-row" onClick={() => setActiveItem(listing)} type="button">
+                    <span className="hcm-stored-thumb">
+                      {listing.photos[0] ? <img src={listing.photos[0].src} alt={listing.photos[0].name} /> : <Tag size={18} />}
+                    </span>
+                    <span className="hcm-stored-info">
+                      <strong>{listing.title || "Untitled item"}</strong>
+                      <span>{listing.price || "Price not set"} · {listing.seller}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="hcm-empty">
+                <Users size={28} />
+                <strong>No listings from other verified humans yet</strong>
+                <p>Be the first to sell something real, or invite verified humans to list here.</p>
+              </div>
+            )}
+          </section>
+
+          {/* Reference examples — HumanChain's own demo listings, not real
+              inventory. No "Live" claim on fabricated data. */}
+          <section className="hcm-section hcm-section--demo">
+            <div className="hcm-section-head">
+              <ShoppingBag size={14} /><strong>Reference Examples</strong>
+              <DataBadge label="Demo" />
+            </div>
+            <p className="hcm-demo-note">What a real listing looks like — not for sale, no real seller behind these.</p>
             <div className="hcm-items-list">
               {filteredItems.length ? filteredItems.map((item) => {
                 const rk = `seed:${item.id}`;

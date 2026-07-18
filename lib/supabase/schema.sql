@@ -89,6 +89,18 @@ create table if not exists hc_applications (
   created_at       timestamptz not null default now()
 );
 
+-- Blocked users. One-directional: blocker_wallet no longer sees content
+-- from blocked_wallet. Private table — no public read policy, same as
+-- hc_reports; only accessed server-side via the service role, scoped to
+-- the caller's own session wallet.
+create table if not exists hc_blocks (
+  id              uuid primary key default gen_random_uuid(),
+  blocker_wallet  text not null references hc_users(wallet) on delete cascade,
+  blocked_wallet  text not null,
+  created_at      timestamptz not null default now(),
+  unique (blocker_wallet, blocked_wallet)
+);
+
 -- Indexes
 create index if not exists hc_ask_threads_created  on hc_ask_threads(created_at desc);
 create index if not exists hc_ask_answers_thread   on hc_ask_answers(thread_id, created_at asc);
@@ -97,6 +109,7 @@ create index if not exists hc_marketplace_status   on hc_marketplace(status, cre
 create index if not exists hc_hp_ledger_wallet     on hc_hp_ledger(wallet, created_at desc);
 create index if not exists hc_reports_target       on hc_reports(target_type, target_id, created_at desc);
 create index if not exists hc_applications_listing on hc_applications(listing_id, created_at desc);
+create index if not exists hc_blocks_blocker        on hc_blocks(blocker_wallet, created_at desc);
 
 -- RLS
 alter table hc_users        enable row level security;
@@ -107,6 +120,7 @@ alter table hc_marketplace  enable row level security;
 alter table hc_hp_ledger    enable row level security;
 alter table hc_reports      enable row level security;
 alter table hc_applications enable row level security;
+alter table hc_blocks       enable row level security;
 
 -- Public read on all tables (service role writes via API routes)
 create policy "public read users"       on hc_users       for select using (true);

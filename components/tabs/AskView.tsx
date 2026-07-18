@@ -26,6 +26,7 @@ import {
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { starterAskThreads } from "@/lib/data/chains";
+import { ReportAction } from "@/components/ui/ReportAction";
 import type { AskThread } from "@/types/chain";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
 import type { HistoryRecord } from "@/types/reputation";
@@ -99,8 +100,6 @@ export function AskView({
   );
   const [verdictResults, setVerdictResults] = useState<Record<string, { mostSaid: string; bestAnswer: string; hardTruth: string; finalVerdict: string } | "loading">>({});
   const [helpfulAnswers, setHelpfulAnswers] = useState<Set<string>>(new Set());
-  const [reportingAnswer, setReportingAnswer] = useState<string | null>(null);
-  const [reportedAnswers, setReportedAnswers] = useState<Set<string>>(new Set());
   const [countryAnswerUnlocked, setCountryAnswerUnlocked] = useState(() =>
     loadJsonFromStorage<boolean>(storageKeys.countryAnswerUnlocked, false),
   );
@@ -796,8 +795,6 @@ export function AskView({
                     {(() => {
                       const ak = `${thread.question}|${answer.user}|${answer.text}`;
                       const isHelpful = helpfulAnswers.has(ak);
-                      const isReporting = reportingAnswer === ak;
-                      const isReported = reportedAnswers.has(ak);
                       return (
                         <>
                           <button
@@ -813,22 +810,13 @@ export function AskView({
                           >
                             {isHelpful ? "✓ Helpful" : "Helpful"}
                           </button>
-                          {isReported ? (
-                            <span className="answer-reported-tag">Reported</span>
-                          ) : isReporting ? (
-                            <div className="answer-report-picker">
-                              {["Spam", "Fake", "Harmful", "Off-topic"].map((reason) => (
-                                <button key={reason} onClick={() => {
-                                  setReportedAnswers((p) => new Set([...p, ak]));
-                                  setReportingAnswer(null);
-                                  act("Report submitted", `"${reason}" report queued for moderation.`);
-                                }} type="button">{reason}</button>
-                              ))}
-                              <button onClick={() => setReportingAnswer(null)} type="button">Cancel</button>
-                            </div>
-                          ) : (
-                            <button onClick={() => setReportingAnswer(ak)} type="button">Report</button>
-                          )}
+                          <ReportAction
+                            className="answer-report-action"
+                            onReported={(reason) => act("Report submitted", `"${reason}" report sent to moderation.`)}
+                            reporterWallet={humanIdentity?.wallet}
+                            targetId={ak}
+                            targetType="ask-answer"
+                          />
                         </>
                       );
                     })()}

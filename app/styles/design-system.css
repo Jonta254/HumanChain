@@ -114,6 +114,58 @@
 }
 
 /* ── PaymentTrigger ──────────────────────────────────────────────────── */
+/* ── ReportAction ────────────────────────────────────────────────────── */
+.report-action-btn {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill, 999px);
+  padding: 4px 10px;
+}
+.report-action-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.report-action-picker button {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill, 999px);
+  border: 1px solid rgba(239, 125, 105, 0.35);
+  background: rgba(239, 125, 105, 0.08);
+  color: #b5482f;
+}
+.report-action-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ── Marketplace: real vs. reference sections ───────────────────────── */
+.hcm-section--demo {
+  opacity: 0.88;
+  border-top: 1px dashed var(--demo-edge);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+.hcm-demo-note {
+  margin: -4px 0 8px;
+  font-size: 11.5px;
+  color: var(--demo-text);
+}
+button.hcm-stored-row {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
 /* ── Light-touch adoption on un-redesigned screens ──────────────────── */
 .hcm-item-trust-row {
   display: flex;
