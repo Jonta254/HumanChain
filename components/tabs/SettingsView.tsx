@@ -443,7 +443,7 @@ export function SettingsView({
           >
             <div className="sv-row-left">
               <span className="sv-row-label">WLD Payments</span>
-              <span className="sv-row-sub">World App native · treasury escrow</span>
+              <span className="sv-row-sub">World App native · direct payment</span>
             </div>
             <Zap size={15} color="#b88a1f" />
           </button>

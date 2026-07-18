@@ -3,7 +3,7 @@ export const humanChainErrorStates = {
   bid_too_low: "Increase your bid to beat the current best offer.",
   content_rejected_policy: "This cannot be published because it appears to break HumanChain policy.",
   content_under_review: "This is saved, but it needs review before becoming public.",
-  escrow_unavailable_region: "Hold-protected orders are not available in this region yet.",
+  escrow_unavailable_region: "Protected-order payments are not available in this region yet.",
   listing_blocked_category: "This category is blocked on HumanChain Market.",
   network_offline_retrying: "Network is unstable. HumanChain will retry without losing your draft.",
   not_in_world_app: "Continue with World App to use verified-human actions.",

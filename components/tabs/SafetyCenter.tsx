@@ -38,7 +38,7 @@ const SAFETY_TOPICS: SafetyTopic[] = [
       "No scams, fraud, or misrepresenting a service, good, or price.",
       "No harassment, hate, threats, or sharing someone's private information.",
       "No illegal or unsafe items — weapons, drugs, counterfeits, or stolen goods.",
-      "Keep money inside escrow. Moving a deal off-platform removes every protection.",
+      "Keep chat and payment inside HumanChain. Moving a deal off-platform removes every protection.",
       "Keep reputation honest — no fake reviews, bids, jobs, or inflated ratings.",
     ],
   },
@@ -76,9 +76,9 @@ const SAFETY_TOPICS: SafetyTopic[] = [
     summary: "If your account or a listing is actioned.",
     points: [
       "You always receive a notice naming the exact rule and reason.",
-      "Submit an appeal within 14 days with your side and any evidence.",
-      "A different reviewer re-examines the case — never the same person twice.",
-      "Decisions land within 7 days. Wrongful actions are reversed and your reputation restored.",
+      "Reply with your side and any evidence — the safety team reviews every appeal by hand.",
+      "HumanChain is early-stage, so this is currently a small team, not a rotating panel — we're honest about that.",
+      "Wrongful actions are reversed and your reputation restored once reviewed.",
     ],
   },
   {
@@ -88,11 +88,11 @@ const SAFETY_TOPICS: SafetyTopic[] = [
     title: "Safety Tips",
     summary: "Simple habits that keep you protected.",
     points: [
-      "Keep chat and payment on HumanChain — escrow only covers on-platform deals.",
+      "Keep chat and payment on HumanChain — off-platform deals lose reporting protection entirely.",
       "Check a provider's work samples, ratings, and completed jobs before hiring.",
       "For local market handoffs, meet in a public place during daytime.",
       "Never share your World wallet recovery phrase. Staff will never ask for it.",
-      "Release escrow milestones only after you've confirmed the work or item.",
+      "WLD payments here are direct and final, like handing over cash — only pay once you've confirmed the work or item.",
     ],
   },
   {
@@ -102,7 +102,7 @@ const SAFETY_TOPICS: SafetyTopic[] = [
     title: "Scam Prevention",
     summary: "Red flags — if you see these, stop.",
     points: [
-      "“Pay outside escrow for a discount” is the #1 scam. Always decline.",
+      "“Pay outside the app for a discount” is the #1 scam. Always decline — off-platform payments can't be reported or traced.",
       "Pressure to act fast, or a deal that's “today only” — slow down and verify.",
       "Requests for gift cards, upfront “fees”, or crypto to a personal wallet.",
       "Prices far below market on high-value goods are bait, not bargains.",
@@ -125,13 +125,13 @@ export function SafetyCenter({
           <span className="safety-hero-icon"><ShieldCheck size={22} /></span>
           <div>
             <strong>Safety Center</strong>
-            <span>Real protection for real humans — rules, reporting, appeals, and escrow, all in one place.</span>
+            <span>Real protection for real humans — rules, reporting, and appeals, all in one place.</span>
           </div>
         </div>
         <div className="safety-hero-stats">
           <div><strong>24h</strong><span>SAFETY TRIAGE</span></div>
           <div><strong>100%</strong><span>WORLD ID</span></div>
-          <div><strong>WLD</strong><span>ESCROW HELD</span></div>
+          <div><strong>Direct</strong><span>WLD PAYMENTS</span></div>
         </div>
       </div>
 
@@ -186,7 +186,7 @@ export function SafetyCenter({
         </button>
         <button
           className="safety-contact"
-          onClick={() => act("Safety team", "Reach the HumanChain safety team any time from Settings → Safety Center. Keep all chat and payments on-platform so escrow can protect you.")}
+          onClick={() => act("Safety team", "Reach the HumanChain safety team any time from Settings → Safety Center. Keep all chat and payments on-platform so reports and appeals can actually protect you.")}
           type="button"
         >
           <LifeBuoy size={16} />

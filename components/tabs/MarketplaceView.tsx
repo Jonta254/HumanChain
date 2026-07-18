@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   CircleDollarSign,
   Clock,
+  Flag,
   Flame,
   Gavel,
   Globe2,
@@ -1417,7 +1418,7 @@ export function MarketplaceView({
               openPayment({
                 title: "Publish Listing — 2 WLD",
                 amount: "2 WLD",
-                detail: "Your item goes live to verified buyers nearby. WLD escrow protects every trade.",
+                detail: "Your item goes live to verified buyers nearby. Payment is a direct WLD transfer — meet, verify, and inspect before you pay.",
                 success: "Listing published! Verified buyers can now find and bid.",
                 feature: "marketplace-quick-listing",
                 points: 12,
@@ -1468,7 +1469,7 @@ export function MarketplaceView({
           </div>
           <label className="hcm-field"><span>Region</span>
             <input className="hcm-input" placeholder="e.g. West Africa, Worldwide" value={jobForm.region} onChange={(e) => setJob("region", e.target.value)} /></label>
-          <div className="hcm-form-trust"><ShieldCheck size={13} /><span>2 WLD fee · Escrow on hire · Milestone payments</span></div>
+          <div className="hcm-form-trust"><ShieldCheck size={13} /><span>2 WLD fee · Direct WLD payment · Agree terms before you pay</span></div>
           <button className="hcm-publish-btn" disabled={!jobForm.title.trim() || !jobForm.detail.trim() || !jobForm.budget.trim()} onClick={submitJob} type="button">Post Job — 2 WLD</button>
         </div>
       </div>
@@ -1485,7 +1486,7 @@ export function MarketplaceView({
         <div className="hcm-sell-header">
           <button className="hcm-back-text" onClick={() => setSvcMode("browse")} type="button"><ArrowLeft size={15} /> Services</button>
           <h1>List Your Service</h1>
-          <p>Clients find and hire you. Get paid in WLD via escrow.</p>
+          <p>Clients find and hire you. Get paid directly in WLD via World App.</p>
         </div>
         <div className="hcm-sell-body">
           <label className="hcm-field"><span>What do you offer? <em>*</em></span>
@@ -1545,7 +1546,7 @@ export function MarketplaceView({
         <div className="hcm-svc-body">
           <div className="hcm-svc-budget-row">
             <div><span>{isJob ? "Budget" : "Starting rate"}</span><strong>{budget}</strong></div>
-            <span className="hcm-escrow-badge"><ShieldCheck size={12} />WLD Escrow</span>
+            <span className="hcm-escrow-badge"><ShieldCheck size={12} />Direct WLD Payment</span>
           </div>
 
           <section className="hcm-detail-section"><strong>Description</strong><p>{activeSvc.detail}</p></section>
@@ -1557,19 +1558,20 @@ export function MarketplaceView({
             </section>
           )}
 
-          {/* Milestone payment explainer */}
+          {/* Direct-payment explainer — no escrow or milestone-release system exists;
+              claiming one would misrepresent how the money actually moves. */}
           <div className="hcm-milestone-row">
             <div className="hcm-milestone-step"><span>1</span><p>Apply via World Chat</p></div>
             <div className="hcm-milestone-arrow">→</div>
-            <div className="hcm-milestone-step"><span>2</span><p>Agree on milestones</p></div>
+            <div className="hcm-milestone-step"><span>2</span><p>Agree on price and terms</p></div>
             <div className="hcm-milestone-arrow">→</div>
-            <div className="hcm-milestone-step"><span>3</span><p>WLD escrow releases on completion</p></div>
+            <div className="hcm-milestone-step"><span>3</span><p>Pay directly in WLD via World App</p></div>
           </div>
 
           <div className="hcm-detail-trust">
             <span><BadgeCheck size={12} />World ID verified</span>
-            <span><ShieldCheck size={12} />WLD escrow on hire</span>
-            <span><Zap size={12} />Milestone payments</span>
+            <span><ShieldCheck size={12} />Direct WLD payment</span>
+            <span><Flag size={12} />Report a bad actor anytime</span>
           </div>
 
           <div className="hcm-seller-card">
@@ -1696,10 +1698,10 @@ export function MarketplaceView({
         )}
       </div>
 
-      {/* Status strip — no fabricated presence count. World App Pay escrow is
-          real infrastructure; "browsing nearby" had no real signal behind it. */}
+      {/* Status strip — no fabricated presence count, and no escrow claim: World App
+          Pay is a direct one-time transfer, not a hold-and-release system. */}
       <div className="hcm-social-proof">
-        <span className="hcm-sp-live"><span className="hcm-sp-dot green" />World App Pay escrow active</span>
+        <span className="hcm-sp-live"><span className="hcm-sp-dot green" />World App Pay active</span>
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════
@@ -2052,7 +2054,7 @@ export function MarketplaceView({
             <button className="hcm-svc-cta-post" onClick={() => setSvcMode("post-job")} type="button">
               <PlusCircle size={18} />
               <span>Post a Job</span>
-              <small>2 WLD · WLD escrow</small>
+              <small>2 WLD · Direct WLD payment</small>
             </button>
             <button className="hcm-svc-cta-offer" onClick={() => setSvcMode("offer-service")} type="button">
               <Star size={18} />

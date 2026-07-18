@@ -364,7 +364,7 @@ export function HomeView({
                 ))}
               </div>
             ) : (
-              <p className="hme-rail-card-empty">World ID sellers, WLD escrow. Be the first to list something nearby.</p>
+              <p className="hme-rail-card-empty">World ID sellers, direct WLD payments. Be the first to list something nearby.</p>
             )}
             <span className="hme-rail-card-cta">See Market <ChevronRight size={12} /></span>
           </button>
