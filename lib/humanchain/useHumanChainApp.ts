@@ -53,6 +53,7 @@ import {
 } from "@/lib/humanchain/utils";
 import { defaultHumanChainPaymentToken, isValidHumanChainPaymentAmount } from "@/lib/worldPayments";
 import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
+import { blockWallet as blockWalletApi, loadBlockedWallets, unblockWallet as unblockWalletApi } from "@/lib/humanchain/blocklist";
 import {
   authenticateHumanWallet,
   getWorldMiniAppContext,
@@ -123,6 +124,10 @@ export function useHumanChainApp() {
   // Gates Deep Human Mirror / Deep Story Reflection so a user can't pay for
   // an AI feature that's guaranteed to fail — see /api/ai/status.
   const [aiAvailable, setAiAvailable] = useState(false);
+  // Wallets this user has blocked. Loaded once for signed-in World users;
+  // filters other users' content out of Moments/Marketplace feeds — see
+  // excludeBlocked() usages below.
+  const [blockedWallets, setBlockedWallets] = useState<Set<string>>(new Set());
   const [accountSyncReady, setAccountSyncReady] = useState(verifiedHuman?.mode !== "world");
   const [accountSyncStatus, setAccountSyncStatus] = useState<"idle" | "loading" | "ready" | "saving" | "offline">(
     verifiedHuman?.mode === "world" ? "loading" : "idle",
@@ -678,6 +683,38 @@ export function useHumanChainApp() {
     return () => { cancelled = true; };
   }, []);
 
+  // ── Blocked wallets ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!verifiedHuman?.wallet || verifiedHuman.mode !== "world") return;
+    let cancelled = false;
+    void loadBlockedWallets().then((wallets) => {
+      if (!cancelled) setBlockedWallets(new Set(wallets.map((w) => w.toLowerCase())));
+    });
+    return () => { cancelled = true; };
+  }, [verifiedHuman?.wallet, verifiedHuman?.mode]);
+
+  async function blockHuman(wallet: string, label: string) {
+    setBlockedWallets((cur) => new Set(cur).add(wallet.toLowerCase()));
+    const result = await blockWalletApi(wallet);
+    if (!result.ok) {
+      // Revert optimistic update — the block did not actually take effect server-side.
+      setBlockedWallets((cur) => { const next = new Set(cur); next.delete(wallet.toLowerCase()); return next; });
+      act("Couldn't block", result.pendingSetup ? "Blocking isn't available yet." : "Try again in a moment.");
+      return;
+    }
+    act(`${label} blocked`, "Their moments, listings, and links are hidden from your feeds.");
+  }
+
+  async function unblockHuman(wallet: string, label: string) {
+    setBlockedWallets((cur) => { const next = new Set(cur); next.delete(wallet.toLowerCase()); return next; });
+    const result = await unblockWalletApi(wallet);
+    if (!result.ok) {
+      act("Couldn't unblock", "Try again in a moment.");
+      return;
+    }
+    act(`${label} unblocked`, "Their content will reappear in your feeds.");
+  }
+
   // ── Action callbacks ───────────────────────────────────────────────────────
   function shouldShowToast(title: string, detail: string) {
     return importantToastTerms.some((term) => `${title} ${detail}`.toLowerCase().includes(term));
@@ -970,7 +1007,7 @@ export function useHumanChainApp() {
 
   return {
     // state
-    accountSyncStatus, activeField, aiAvailable, appLanguage, chainEntryNonce, dailyAnswered,
+    accountSyncStatus, activeField, aiAvailable, appLanguage, blockedWallets, chainEntryNonce, dailyAnswered,
     dailyAnsweredAt, dailyAnsweredDate, dailyResponses, feedRefreshNonce, gateBusy,
     historyRecords, hpLedger, humanPosts, joinedAt, lastCheckInAt, lastCheckInDate, links,
     marketLocation, marketplaceListings, notificationCenterOpen, notificationPromptDismissed,
@@ -984,10 +1021,10 @@ export function useHumanChainApp() {
     setNotificationPromptDismissed, setNotifications, setPaymentPrompt, setProfileImage,
     setSavedItems, setTab, setToast,
     // callbacks
-    act, addNotification, clearMarketplaceData, clearPostData, confirmPayment,
+    act, addNotification, blockHuman, clearMarketplaceData, clearPostData, confirmPayment,
     copyReferralLink, deleteLocalAccount, earnPoints, enableHumanChainNotifications,
     enterPreview, enterWithWorld, keepStreak, openPayment, recordHistory, resetHistory,
-    shareReferralLink,
+    shareReferralLink, unblockHuman,
   };
 }
 

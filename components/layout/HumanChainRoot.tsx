@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { MiniKit } from "@worldcoin/minikit-js";
 import { Haptic, SafeAreaView, TopBar, VerificationBadge, useHaptics } from "@worldcoin/mini-apps-ui-kit-react";
 import { isWorldMiniAppReady } from "@/lib/worldMiniApp";
 import { formatCheckInTime, getChainScore, getLocalDateKey, getPrimaryProfileImage, getWorldDisplayUsername } from "@/lib/humanchain/utils";
+import { excludeBlocked } from "@/lib/humanchain/blocklist";
 import { storageKeys } from "@/lib/humanchain/storage";
 import { BottomNavigation as BottomNav } from "@/components/layout/BottomNavigation";
 import { LoginGate } from "@/components/layout/LoginGate";
@@ -27,7 +28,7 @@ import type { HumanChainAppState } from "@/lib/humanchain/useHumanChainApp";
 
 export function HumanChainRoot(props: HumanChainAppState) {
   const {
-    accountSyncStatus, activeField, aiAvailable, appLanguage, chainEntryNonce,
+    accountSyncStatus, activeField, aiAvailable, appLanguage, blockedWallets, blockHuman, chainEntryNonce,
     dailyAnswered, earnPoints, feedRefreshNonce,
     gateBusy, historyRecords, hpLedger, humanPosts, lastCheckInDate,
     links, marketLocation, marketplaceListings, notificationCenterOpen,
@@ -42,7 +43,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
     setProfileImage, setSavedItems, setTab, setToast,
     act, addNotification, clearMarketplaceData, clearPostData, confirmPayment, copyReferralLink,
     deleteLocalAccount, enableHumanChainNotifications, enterPreview, enterWithWorld,
-    keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink,
+    keepStreak, openPayment, recordHistory, resetHistory, shareReferralLink, unblockHuman,
   } = props;
 
   const { selection, notification } = useHaptics();
@@ -132,6 +133,19 @@ export function HumanChainRoot(props: HumanChainAppState) {
     worldContext.pendingNotifications ?? 0,
   );
 
+  // Feeds a user actually sees exclude anyone they've blocked. Chain Links
+  // has no author-wallet field yet, so it can't be filtered this way —
+  // Moments and Marketplace both carry a wallet and can be. This never
+  // affects a user's own content (self-blocking is rejected server-side).
+  const visibleHumanPosts = useMemo(
+    () => excludeBlocked(humanPosts, (p) => p.authorWallet, blockedWallets),
+    [humanPosts, blockedWallets],
+  );
+  const visibleMarketplaceListings = useMemo(
+    () => excludeBlocked(marketplaceListings, (l) => l.sellerWallet, blockedWallets),
+    [marketplaceListings, blockedWallets],
+  );
+
   const activeView = (() => {
     switch (tab) {
       case "create":
@@ -158,9 +172,10 @@ export function HumanChainRoot(props: HumanChainAppState) {
           <ChainsView
             activeField={activeField}
             act={act}
+            blockHuman={blockHuman}
             earnPoints={earnPoints}
             humanIdentity={verifiedHuman}
-            humanPosts={humanPosts}
+            humanPosts={visibleHumanPosts}
             key={`chains-${chainEntryNonce}`}
             keepStreak={keepStreak}
             links={links}
@@ -191,10 +206,11 @@ export function HumanChainRoot(props: HumanChainAppState) {
           <MarketplaceView
             act={act}
             addNotification={addNotification}
+            blockHuman={blockHuman}
             earnPoints={earnPoints}
             humanIdentity={verifiedHuman}
             marketLocation={marketLocation}
-            marketplaceListings={marketplaceListings}
+            marketplaceListings={visibleMarketplaceListings}
             openPayment={openPayment}
             recordHistory={recordHistory}
             setMarketLocation={props.setMarketLocation}
@@ -261,6 +277,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
           <SettingsView
             act={act}
             activeLanguage={appLanguage}
+            blockedWallets={blockedWallets}
             clearMarketplaceData={clearMarketplaceData}
             clearPostData={clearPostData}
             deleteLocalAccount={deleteLocalAccount}
@@ -269,6 +286,7 @@ export function HumanChainRoot(props: HumanChainAppState) {
             onEnableNotifications={() => enableHumanChainNotifications("settings")}
             resetHistory={resetHistory}
             setTab={setTab}
+            unblockHuman={unblockHuman}
             verifiedHuman={verifiedHuman}
             worldContext={worldContext}
           />
@@ -280,8 +298,8 @@ export function HumanChainRoot(props: HumanChainAppState) {
             appLanguage={appLanguage}
             dailyAnswered={dailyAnswered}
             earnPoints={earnPoints}
-            humanPosts={humanPosts}
-            marketplaceListings={marketplaceListings}
+            humanPosts={visibleHumanPosts}
+            marketplaceListings={visibleMarketplaceListings}
             notificationReady={notificationReady}
             notificationUnreadCount={unreadNotificationCount}
             onEnableNotifications={() => enableHumanChainNotifications("settings")}

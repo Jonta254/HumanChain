@@ -458,6 +458,7 @@ function getInitialBids() {
 export function MarketplaceView({
   act,
   addNotification,
+  blockHuman,
   earnPoints,
   humanIdentity,
   marketLocation,
@@ -470,6 +471,7 @@ export function MarketplaceView({
 }: {
   act: (title: string, detail: string) => void;
   addNotification: (title: string, detail: string, sector?: "welcome" | "inbox" | "marketplace" | "daily" | "stories" | "payments" | "account") => void;
+  blockHuman: (wallet: string, label: string) => void;
   earnPoints: EarnPoints;
   humanIdentity: HumanIdentity | null;
   marketLocation: MarketLocationState;
@@ -1299,6 +1301,17 @@ export function MarketplaceView({
                   targetId={String(itemKey(activeItem))}
                   targetType="marketplace-listing"
                 />
+              )}
+              {!isOwner && (activeItem as MarketplaceListing).sellerWallet && (
+                // Blocked sellers' listings are already filtered out of this
+                // list upstream, so reaching this modal means the seller
+                // isn't currently blocked — only "Block" is ever relevant here.
+                <button
+                  onClick={() => blockHuman((activeItem as MarketplaceListing).sellerWallet!, activeItem.seller)}
+                  type="button"
+                >
+                  Block seller
+                </button>
               )}
             </div>
           </div>

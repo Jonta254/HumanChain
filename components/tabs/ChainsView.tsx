@@ -654,6 +654,7 @@ async function prepareMomentImage(file: File) {
 export function ChainsView({
   activeField,
   act,
+  blockHuman,
   earnPoints,
   humanIdentity,
   humanPosts,
@@ -667,6 +668,7 @@ export function ChainsView({
 }: {
   activeField: ChainField | null;
   act: (title: string, detail: string) => void;
+  blockHuman: (wallet: string, label: string) => void;
   earnPoints: EarnPoints;
   humanIdentity: HumanIdentity | null;
   humanPosts: HumanPost[];
@@ -1694,6 +1696,17 @@ export function ChainsView({
                       targetId={String(post.id)}
                       targetType="moment"
                     />
+                  )}
+                  {!post.owner && post.authorWallet && (
+                    // Blocked authors' posts are already filtered out of this
+                    // feed upstream, so a rendered post here is never from a
+                    // blocked wallet — no "already blocked" state to show.
+                    <button
+                      onClick={() => blockHuman(post.authorWallet!, post.author)}
+                      type="button"
+                    >
+                      Block
+                    </button>
                   )}
                   {post.owner ? (
                     <button

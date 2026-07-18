@@ -38,6 +38,7 @@ const WORLD_MINIKIT_VERSION = "2.0.3";
 export function SettingsView({
   act,
   activeLanguage,
+  blockedWallets,
   clearMarketplaceData,
   clearPostData,
   deleteLocalAccount,
@@ -46,11 +47,13 @@ export function SettingsView({
   onEnableNotifications,
   resetHistory,
   setTab,
+  unblockHuman,
   verifiedHuman,
   worldContext,
 }: {
   act: (title: string, detail: string) => void;
   activeLanguage: AppLanguage;
+  blockedWallets: Set<string>;
   clearMarketplaceData: () => void;
   clearPostData: () => void;
   deleteLocalAccount: () => void;
@@ -59,6 +62,7 @@ export function SettingsView({
   onEnableNotifications: () => void | Promise<void>;
   resetHistory: () => void;
   setTab: Dispatch<SetStateAction<Tab>>;
+  unblockHuman: (wallet: string, label: string) => void;
   verifiedHuman: VerifiedHuman | null;
   worldContext: WorldMiniAppContext;
 }) {
@@ -494,6 +498,36 @@ export function SettingsView({
             </div>
             <ChevronRight size={15} className="sv-chevron" />
           </button>
+          <button
+            aria-expanded={expandedInfoKey === "blocked-users"}
+            className="sv-row"
+            onClick={() => toggleInfo("blocked-users")}
+            type="button"
+          >
+            <div className="sv-row-left">
+              <span className="sv-row-label">Blocked users</span>
+              <span className="sv-row-sub">{blockedWallets.size === 0 ? "None blocked" : `${blockedWallets.size} blocked`}</span>
+            </div>
+            <ChevronRight size={15} className={`sv-chevron${expandedInfoKey === "blocked-users" ? " sv-chevron-open" : ""}`} />
+          </button>
+          {expandedInfoKey === "blocked-users" ? (
+            <div className="sv-info-expand">
+              {blockedWallets.size === 0 ? (
+                <p>You haven&apos;t blocked anyone. Blocking hides someone&apos;s Moments and Marketplace listings from your feeds.</p>
+              ) : (
+                <div className="sv-blocked-list">
+                  {Array.from(blockedWallets).map((wallet) => (
+                    <div className="sv-blocked-row" key={wallet}>
+                      <span>{wallet.slice(0, 6)}…{wallet.slice(-4)}</span>
+                      <button onClick={() => unblockHuman(wallet, `${wallet.slice(0, 6)}…${wallet.slice(-4)}`)} type="button">
+                        Unblock
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
         </div>
       </section>
 
