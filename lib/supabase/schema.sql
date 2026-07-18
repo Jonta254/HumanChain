@@ -122,7 +122,15 @@ alter table hc_reports      enable row level security;
 alter table hc_applications enable row level security;
 alter table hc_blocks       enable row level security;
 
--- Public read on all tables (service role writes via API routes)
+-- Public read on all tables (service role writes via API routes).
+-- Postgres has no "create policy if not exists", so drop-then-create to
+-- keep this script safely re-runnable.
+drop policy if exists "public read users"       on hc_users;
+drop policy if exists "public read threads"     on hc_ask_threads;
+drop policy if exists "public read answers"     on hc_ask_answers;
+drop policy if exists "public read moments"     on hc_moments;
+drop policy if exists "public read marketplace" on hc_marketplace;
+
 create policy "public read users"       on hc_users       for select using (true);
 create policy "public read threads"     on hc_ask_threads for select using (true);
 create policy "public read answers"     on hc_ask_answers for select using (true);
