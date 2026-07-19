@@ -243,6 +243,13 @@ type UserBusinessAd = {
   postedAt: string;
 };
 
+// Illustrative examples only — not real advertisers, no real engagement
+// behind them. signal previously held fabricated numbers ("18 saved this
+// week") and an unearned verification claim ("Portfolio verified"); found
+// during rendered UI review showing with zero visual distinction from real
+// user-submitted ads (userBusinessAds, below). Replaced with honest framing
+// and a Demo badge, matching the pattern already used for reference listings
+// elsewhere in Marketplace.
 const BUSINESS_ADS = [
   {
     title: "Taste 254 Lunch Launch",
@@ -251,7 +258,7 @@ const BUSINESS_ADS = [
     offer: "Fresh lunch bowls, office delivery 11:30–14:30. WLD 2 booking.",
     image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=700&q=82",
     tag: "Food",
-    signal: "18 saved this week",
+    signal: "Example ad",
   },
   {
     title: "GlowBarber Weekend Slots",
@@ -260,7 +267,7 @@ const BUSINESS_ADS = [
     offer: "Haircuts, beard lineups, clean chair photos before booking.",
     image: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=700&q=82",
     tag: "Service",
-    signal: "Open slots today",
+    signal: "Example ad",
   },
   {
     title: "Studio Kitenge Portraits",
@@ -269,7 +276,7 @@ const BUSINESS_ADS = [
     offer: "Portrait sessions for founders, families, products, and events.",
     image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=700&q=82",
     tag: "Creative",
-    signal: "Portfolio verified",
+    signal: "Example ad",
   },
 ];
 
@@ -1998,6 +2005,7 @@ export function MarketplaceView({
                   <img src={ad.image} alt={ad.title} className="hcm-ad-img" />
                   <div className="hcm-ad-body">
                     <span className="hcm-ad-tag">{ad.tag} · {ad.area}</span>
+                    <DataBadge label="Demo" />
                     <strong>{ad.title}</strong>
                     <p>{ad.offer}</p>
                     <small>{ad.owner} · {ad.signal}</small>
