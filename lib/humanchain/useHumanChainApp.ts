@@ -102,6 +102,15 @@ export function useHumanChainApp() {
   const [links, setLinks] = useState(loadStoredChainLinks);
   const [savedItems, setSavedItems] = useState(storedAppMemory.savedItems);
   const [points, setPoints] = useState(storedAppMemory.points);
+  // earnPoints() needs the *current* points value synchronously (to compute
+  // balanceAfter and check milestone crossings) even across rapid successive
+  // calls in the same tick, where `points` from closure could be stale.
+  // Mirrored via ref instead of reading inside a setPoints() functional
+  // updater — that pattern previously nested setHpLedger()/milestone side
+  // effects inside the updater itself, which React Strict Mode's dev-mode
+  // double-invoke of updater functions turned into a real, observed bug:
+  // duplicate HP ledger entries for a single earnPoints() call.
+  const pointsRef = useRef(storedAppMemory.points);
   const [hpLedger, setHpLedger] = useState<HpLedgerRecord[]>(() =>
     loadJsonFromStorage<HpLedgerRecord[]>(storageKeys.hpLedger, []),
   );
@@ -351,7 +360,7 @@ export function useHumanChainApp() {
       setLastCheckInAt(memory.lastCheckInAt); setLastCheckInDate(memory.lastCheckInDate);
       setMarketLocation(memory.marketLocation); setNotificationReady(memory.notificationReady);
       setNotificationWelcomeSent(memory.notificationWelcomeSent);
-      setPoints(memory.points); setSavedItems(memory.savedItems); setStreak(memory.streak);
+      setPoints(memory.points); pointsRef.current = memory.points; setSavedItems(memory.savedItems); setStreak(memory.streak);
       setVerifiedHuman((cur) => cur
         ? { ...cur, launchLocation: cur.launchLocation ?? memory.verifiedHuman?.launchLocation, profilePictureUrl: cur.profilePictureUrl ?? memory.verifiedHuman?.profilePictureUrl, username: isWorldUsernamePlaceholder(cur.username) && !isWorldUsernamePlaceholder(memory.verifiedHuman?.username) ? memory.verifiedHuman?.username ?? cur.username : cur.username }
         : memory.verifiedHuman,
@@ -777,7 +786,7 @@ export function useHumanChainApp() {
     lastStreakDateRef.current = null;
     setMarketLocation({ label: "Location not shared", source: "not-requested", status: "idle" });
     setNotificationReady(false); setNotificationWelcomeSent(false);
-    setNotifications(loadStoredNotifications()); setPoints(0); setSavedItems(0); setStreak(0);
+    setNotifications(loadStoredNotifications()); setPoints(0); pointsRef.current = 0; setSavedItems(0); setStreak(0);
     setToast({ title: "Local account deleted", detail: "Preview profile, stored marketplace data, posts, and history were removed from this device." });
   }
 
@@ -803,26 +812,28 @@ export function useHumanChainApp() {
 
   function earnPoints(amount: number, reason: string) {
     void humanHaptic("light");
-    setPoints((cur) => {
-      const balanceAfter = cur + amount;
-      const now = new Date();
-      setHpLedger((ledger) => [{ amount, balanceAfter, date: getLocalDateKey(now), id: Date.now(), reason, time: formatCheckInTime(now), wallet: verifiedHuman?.wallet }, ...ledger].slice(0, 120));
-      // Milestone check — fire once per tier crossing
-      const seenRaw = typeof window !== "undefined" ? localStorage.getItem(storageKeys.milestonesSeen) : null;
-      const seen: number[] = seenRaw ? (JSON.parse(seenRaw) as number[]) : [];
-      for (const m of SCORE_MILESTONES) {
-        if (cur < m.score && balanceAfter >= m.score && !seen.includes(m.score)) {
-          seen.push(m.score);
-          if (typeof window !== "undefined") localStorage.setItem(storageKeys.milestonesSeen, JSON.stringify(seen));
-          const title = `${m.emoji} ${m.label} tier reached!`;
-          setToast({ title, detail: m.detail });
-          setNotifications((ns) => [{ id: Date.now(), title, detail: m.detail, sector: "account" as const, time: formatShortTime(), read: false }, ...ns].slice(0, 60));
-          void sendWorldUserNotification({ title, detail: m.detail, sector: "account", path: "/?tab=me" });
-          break;
-        }
+    const cur = pointsRef.current;
+    const balanceAfter = cur + amount;
+    pointsRef.current = balanceAfter;
+    setPoints(balanceAfter);
+
+    const now = new Date();
+    setHpLedger((ledger) => [{ amount, balanceAfter, date: getLocalDateKey(now), id: Date.now(), reason, time: formatCheckInTime(now), wallet: verifiedHuman?.wallet }, ...ledger].slice(0, 120));
+
+    // Milestone check — fire once per tier crossing
+    const seenRaw = typeof window !== "undefined" ? localStorage.getItem(storageKeys.milestonesSeen) : null;
+    const seen: number[] = seenRaw ? (JSON.parse(seenRaw) as number[]) : [];
+    for (const m of SCORE_MILESTONES) {
+      if (cur < m.score && balanceAfter >= m.score && !seen.includes(m.score)) {
+        seen.push(m.score);
+        if (typeof window !== "undefined") localStorage.setItem(storageKeys.milestonesSeen, JSON.stringify(seen));
+        const title = `${m.emoji} ${m.label} tier reached!`;
+        setToast({ title, detail: m.detail });
+        setNotifications((ns) => [{ id: Date.now(), title, detail: m.detail, sector: "account" as const, time: formatShortTime(), read: false }, ...ns].slice(0, 60));
+        void sendWorldUserNotification({ title, detail: m.detail, sector: "account", path: "/?tab=me" });
+        break;
       }
-      return balanceAfter;
-    });
+    }
   }
 
   function openPayment(payment: PaymentRequest) {
