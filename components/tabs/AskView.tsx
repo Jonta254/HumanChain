@@ -22,10 +22,12 @@ import {
   storageKeys,
 } from "@/lib/humanchain/storage";
 import {
+  isDemoItem,
   isVerifiedWorldHuman,
   requireVerifiedPublicAction,
 } from "@/lib/humanchain/utils";
 import { starterAskThreads } from "@/lib/data/chains";
+import { DataBadge } from "@/components/ui/DataBadge";
 import { ReportAction } from "@/components/ui/ReportAction";
 import type { AskThread } from "@/types/chain";
 import type { EarnPoints, OpenPayment } from "@/types/ui";
@@ -698,6 +700,7 @@ export function AskView({
             <div className="ask-thread-top">
               <span>{thread.topic} · {thread.author}</span>
               <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                {isDemoItem(thread) && <DataBadge label="Demo" />}
                 <small>{targetCountry === "World" ? thread.mode : `${targetCountry} route`}{boostedQuestions.has(thread.question) ? " · 🔥" : ""}{verdictUnlocked ? " · ✓ Verdict" : ""}</small>
                 {alreadyAnswered && <span className="ask-answered-badge">✓ Answered</span>}
                 <button

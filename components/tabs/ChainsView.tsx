@@ -1561,7 +1561,7 @@ export function ChainsView({
             <summary>
               <ShieldCheck size={13} aria-hidden="true" />
               <span>Community standards</span>
-              <small>every image is moderated before it appears</small>
+              <small>reportable — flagged posts go to human review</small>
             </summary>
             <p className="mrc-desc">Allowed: travel, projects, achievements, learning, community events, and daily life.</p>
             <div className="mrc-chips">
