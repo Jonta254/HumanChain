@@ -81,7 +81,7 @@ export function ProfileSheet({
           {status === "ready" && profile && (
             <>
               <div className="profile-sheet-identity">
-                <div className="profile-sheet-avatar">{profile.username.replace(/^@/, "").charAt(0).toUpperCase()}</div>
+                <div aria-hidden="true" className="profile-sheet-avatar">{profile.username.replace(/^@/, "").charAt(0).toUpperCase()}</div>
                 <strong>{profile.username}</strong>
                 <span className="profile-sheet-tier"><BadgeCheck size={13} />{profile.tier} tier</span>
                 <span className="profile-sheet-joined"><Calendar size={12} />Joined {new Date(profile.joinedAt).toLocaleDateString(undefined, { month: "long", year: "numeric" })}</span>
