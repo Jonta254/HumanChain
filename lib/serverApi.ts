@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { kvGet, kvSet } from "./kv";
+import { verifySessionCookie } from "./session";
 
 type RateLimitBucket = {
   count: number;
@@ -96,13 +97,12 @@ export function isSafeMiniAppPath(path: string): boolean {
   return ALLOWED_MINI_APP_PATHS.has(base);
 }
 
-export function isWalletAddress(address: string) {
-  return /^0x[a-fA-F0-9]{40}$/.test(address);
-}
+export { isWalletAddress } from "./session";
 
-/** Returns the verified wallet from the session cookie, or null if unauthenticated. */
+/** Returns the verified wallet from the session cookie, or null if unauthenticated.
+ * See lib/session.ts — this now requires a valid HMAC signature, not just a
+ * correctly-formatted address, to close a session-forgery gap found in
+ * production testing. */
 export function getSessionWallet(req: NextRequest): string | null {
-  const wallet = req.cookies.get("humanchain_wallet")?.value ?? null;
-  if (!wallet || !isWalletAddress(wallet)) return null;
-  return wallet.toLowerCase();
+  return verifySessionCookie(req.cookies.get("humanchain_wallet")?.value);
 }

@@ -4,6 +4,7 @@
  */
 
 import { NextResponse, type NextRequest } from "next/server";
+import { verifySessionCookie } from "@/lib/session";
 
 // Standard error codes for client-side handling
 export const ErrorCode = {
@@ -127,11 +128,15 @@ export function getClientIp(req: NextRequest): string {
 }
 
 /**
- * Extract wallet from session cookie
+ * Extract wallet from session cookie. Verifies the HMAC signature set at
+ * SIWE completion (see lib/session.ts) — a prior version of this function
+ * trusted the raw cookie value with no signature check at all, which meant
+ * anyone could authenticate as any wallet by sending
+ * `Cookie: humanchain_wallet=<any address>` directly to the API. Confirmed
+ * exploitable against production before this fix.
  */
 export function getSessionWallet(req: NextRequest): string | null {
-  const wallet = req.cookies.get("humanchain_wallet")?.value;
-  return wallet ? wallet.toLowerCase() : null;
+  return verifySessionCookie(req.cookies.get("humanchain_wallet")?.value);
 }
 
 /**
