@@ -23,14 +23,24 @@ export function BottomNavigation({
   onCreate: () => void;
 }) {
   return (
-    <nav className="bottom-nav--hc" aria-label="Primary navigation">
+    <nav className="bottom-nav--hc" aria-label="Primary navigation" role="navigation">
       <Tabs
         value={active}
         onValueChange={(v) => onChange(v as Tab)}
         className="bn-tabs-left"
       >
-        <TabItem value="home"   icon={<Home    size={22} />} label={appLanguage.nav.home} />
-        <TabItem value="chains" icon={<Compass size={22} />} label="Discover" />
+        <TabItem
+          value="home"
+          icon={<Home size={22} />}
+          label={appLanguage.nav.home}
+          aria-current={active === "home" ? "page" : undefined}
+        />
+        <TabItem
+          value="chains"
+          icon={<Compass size={22} />}
+          label="Discover"
+          aria-current={active === "chains" ? "page" : undefined}
+        />
       </Tabs>
 
       <Haptic variant="impact" type="medium" asChild>
@@ -49,8 +59,18 @@ export function BottomNavigation({
         onValueChange={(v) => onChange(v as Tab)}
         className="bn-tabs-right"
       >
-        <TabItem value="stories" icon={<BookOpen size={22} />} label="Stories" />
-        <TabItem value="market"  icon={<Store    size={22} />} label={appLanguage.nav.market} />
+        <TabItem
+          value="stories"
+          icon={<BookOpen size={22} />}
+          label="Stories"
+          aria-current={active === "stories" ? "page" : undefined}
+        />
+        <TabItem
+          value="market"
+          icon={<Store size={22} />}
+          label={appLanguage.nav.market}
+          aria-current={active === "market" ? "page" : undefined}
+        />
       </Tabs>
     </nav>
   );
