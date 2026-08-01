@@ -10,7 +10,7 @@ Tagline:
 
 Core promise:
 
-> Ask real humans. Get the world's verdict.
+> Ask real humans. Get the world's perspective.
 
 ## Design Style
 
@@ -19,7 +19,7 @@ HumanChain uses an `Atlas Paper + Living Threads` style:
 - Warm paper base.
 - Deep ink typography.
 - Blue for Ask The World.
-- Gold for WLD value and Human Verdicts.
+- Gold for WLD value and Human Reports.
 - Coral for Daily Chain participation.
 - Green for Human Story and growth.
 - Thin connected thread visuals for chains and answers.
@@ -38,7 +38,7 @@ Includes:
 - Join Today's Chain quick action.
 - Read Human Story quick action.
 - Human Streak card.
-- Trending Human Verdict.
+- Trending Human Report.
 - Human Pulse.
 
 ### Ask
@@ -52,7 +52,7 @@ Flow:
 3. Chooses free or WLD-powered reach.
 4. Publishes.
 5. Verified humans answer.
-6. Human Verdict forms.
+6. Community Report forms (human-reviewed for deeper insights).
 
 Question categories:
 
@@ -64,7 +64,6 @@ Question categories:
 - Faith
 - Loneliness
 - Moving abroad
-- AI vs Human
 - Life decisions
 
 ### Chains
@@ -115,7 +114,7 @@ Includes:
 - answers given
 - links added
 - countries connected
-- saved verdicts
+- saved reports
 - saved stories
 - WLD activity
 
@@ -130,7 +129,7 @@ The app uses small WLD payments for value, visibility, and deeper perspective.
 | 3 WLD | Ask One Country, Memory Capsule | Get country-specific answers or save a special link |
 | 4 WLD | Private Verified Ask | Ask anonymously while proving humanity |
 | 5 WLD | Voice Answers | Receive short voice replies from verified humans |
-| 6 WLD | Deep Human Verdict or Deep Human Mirror | Unlock country differences, best answers, and a full summary |
+| 6 WLD | Human Report or Deep Human Mirror | Unlock country differences, best answers, and a full summary |
 
 ## World-Native Tools
 
@@ -143,7 +142,7 @@ Use for sign-in and account creation.
 Use for proof-of-human actions:
 
 - one Daily Chain link per day
-- one vote per Human Verdict
+- one vote per Human Report
 - one answer per question when needed
 - anonymous but verified posts
 
@@ -155,7 +154,7 @@ Use for all WLD purchases. Always verify payments on the backend.
 
 Use for:
 
-- Human Verdict ready
+- Human Report ready
 - new answers
 - tip received
 - streak ending today
@@ -185,7 +184,7 @@ Use for:
 - answer posted
 - link added
 - streak kept
-- verdict unlocked
+- report unlocked
 
 ## MVP Launch Order
 
