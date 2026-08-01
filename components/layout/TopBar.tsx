@@ -8,12 +8,15 @@ export function TopBar({
   action?: React.ReactNode;
 }) {
   return (
-    <header className="top-bar-v2">
+    <header className="top-bar-v2" role="banner" aria-label={title}>
       <div className="top-bar-v2-text">
-        <span className="top-bar-v2-kicker">{subtitle}</span>
+        <span className="top-bar-v2-kicker" aria-hidden={subtitle ? "false" : "true"}>
+          {subtitle}
+        </span>
         <h1 className="top-bar-v2-title">{title}</h1>
       </div>
-      {action ? <div className="top-bar-v2-action">{action}</div> : null}
+
+      {action ? <div className="top-bar-v2-action" role="group">{action}</div> : null}
     </header>
   );
 }
