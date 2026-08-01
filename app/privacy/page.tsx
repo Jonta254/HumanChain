@@ -45,7 +45,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 28 }}>
         <h2 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: 8 }}>4. Data storage</h2>
         <p style={{ margin: 0 }}>
-          Your content is stored in Supabase (PostgreSQL, EU region) and Vercel Blob (global edge). Session tokens are stored as short-lived httpOnly cookies, never in client storage. Payment references are stored in Upstash Redis with a 15-minute TTL.
+          Your content is stored in Supabase (PostgreSQL, EU region) and Vercel Blob (global edge). Session tokens are stored as short-lived httpOnly cookies, never in client storage. Payment references and receipts are kept only as required to verify transactions.
         </p>
       </section>
 
@@ -56,14 +56,14 @@ export default function PrivacyPage() {
           <li><strong>Vercel</strong> — hosting, serverless compute, Blob storage, and analytics.</li>
           <li><strong>Supabase</strong> — relational database for social and marketplace data.</li>
           <li><strong>Upstash</strong> — ephemeral Redis for rate limiting and payment idempotency.</li>
-          <li><strong>Anthropic Claude</strong> — AI-generated verdicts on community questions (no personal data sent).</li>
+          <li><strong>Human reviewers / trusted partners</strong> — community reports and summaries are prepared by trained human reviewers or trusted partners; no personal data is shared without consent.</li>
         </ul>
       </section>
 
       <section style={{ marginBottom: 28 }}>
         <h2 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: 8 }}>6. Your rights</h2>
         <p style={{ margin: 0 }}>
-          You may request deletion of your content and account at any time by contacting us. Because your account is identified by wallet address only, deletion removes all content linked to that address from our systems.
+          You may request deletion of your content and account at any time by contacting us. Because your account is identified by wallet address only, deletion removes all content linked to that address; we will also remove associated personal metadata where feasible.
         </p>
       </section>
 
