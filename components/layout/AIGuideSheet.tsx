@@ -1,26 +1,12 @@
-"use client";
-
 import { useState } from "react";
-import { BookOpen, ChevronLeft, ShieldCheck, Sparkles, Store, Users } from "lucide-react";
-import {
-  BottomBar,
-  BulletList,
-  BulletListItem,
-  Button,
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  Haptic,
-  ListItem,
-  Typography,
-} from "@worldcoin/mini-apps-ui-kit-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@worldcoin/mini-apps-ui-kit-react";
+import { Sparkles, Store, ShieldCheck, Users, BookOpen } from "lucide-react";
 
 const guides = [
   {
-    id: "reputation",
+    id: "daily",
     icon: <Sparkles size={20} />,
-    title: "Reputation Coach",
+    title: "Daily Guide",
     steps: [
       "Answer the daily question every day — each answer adds +18 HP",
       "Post one real photo moment each day — adds +16 HP and builds trust",
@@ -80,15 +66,9 @@ const guides = [
 ];
 
 export function AIGuideSheet({
-  chainScore,
   onClose,
-  points,
-  streak,
 }: {
-  chainScore: number;
   onClose: () => void;
-  points: number;
-  streak: number;
 }) {
   const [active, setActive] = useState<string | null>(null);
   const activeGuide = guides.find((g) => g.id === active);
@@ -104,60 +84,27 @@ export function AIGuideSheet({
 
         <div className="ai-guide-body">
           {!activeGuide ? (
-            <>
-              <div className="ai-guide-stats-row">
-                <span className="ai-guide-stat"><strong>{points}</strong><span>HP</span></span>
-                <span className="ai-guide-stat"><strong>{streak}d</strong><span>streak</span></span>
-                <span className="ai-guide-stat"><strong>{chainScore}</strong><span>score</span></span>
-              </div>
-              <Typography variant="body" level={2} className="ai-guide-intro">
-                Your personal guide for HumanChain. Tap any topic for real, actionable steps.
-              </Typography>
-              <div className="ai-guide-topics">
-                {guides.map((guide) => (
-                  <Haptic key={guide.id} variant="selection" asChild>
-                    <ListItem
-                      label={guide.title}
-                      description={`${guide.steps.length} steps`}
-                      startAdornment={<span className="ai-guide-topic-icon">{guide.icon}</span>}
-                      onClick={() => setActive(guide.id)}
-                    />
-                  </Haptic>
-                ))}
-              </div>
-            </>
+            <div className="guide-list">
+              {guides.map((g) => (
+                <button key={g.id} type="button" className="guide-item" onClick={() => setActive(g.id)}>
+                  <div className="guide-icon">{g.icon}</div>
+                  <div>
+                    <strong>{g.title}</strong>
+                    <div className="guide-note">Tap to read tips and best practices.</div>
+                  </div>
+                </button>
+              ))}
+            </div>
           ) : (
-            <>
-              <Haptic variant="selection" asChild>
-                <Button
-                  variant="tertiary"
-                  size="sm"
-                  onClick={() => setActive(null)}
-                  type="button"
-                  className="ai-guide-back-btn"
-                >
-                  <ChevronLeft size={16} />
-                  Back to topics
-                </Button>
-              </Haptic>
-              <BulletList className="ai-guide-steps">
-                {activeGuide.steps.map((step, i) => (
-                  <BulletListItem key={i} bulletPoint={String(i + 1)}>
-                    <Typography variant="body" level={2}>{step}</Typography>
-                  </BulletListItem>
-                ))}
-              </BulletList>
-            </>
+            <div className="guide-detail">
+              <button className="guide-back" onClick={() => setActive(null)} type="button">Back</button>
+              <h3>{activeGuide.title}</h3>
+              <ol>
+                {activeGuide.steps.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+            </div>
           )}
         </div>
-
-        <BottomBar>
-          <Haptic variant="selection" asChild>
-            <Button variant="secondary" fullWidth onClick={onClose} type="button">
-              Close
-            </Button>
-          </Haptic>
-        </BottomBar>
       </DrawerContent>
     </Drawer>
   );
