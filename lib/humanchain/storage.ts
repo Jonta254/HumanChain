@@ -41,6 +41,8 @@ export const storageKeys = {
   likedCulturePosts: "humanchain_liked_culture_posts",
   worldIdVerified: "hc_world_id_verified",
   unlockedVerdicts: "humanchain_unlocked_verdicts",
+  // Backwards-compatible key retained for older installs; new code uses unlockedReports
+  unlockedReports: "humanchain_unlocked_reports",
   unlockedBonusStories: "humanchain_unlocked_bonus_stories",
   unlockedReflections: "humanchain_unlocked_reflections",
   bookmarkedStories: "humanchain_bookmarked_stories",
