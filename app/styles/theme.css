@@ -1,0 +1,142 @@
+/* app/styles/theme.css — Design tokens and lightweight UI overrides for TopBar & BottomNavigation */
+
+:root {
+  /* HumanChain Premium — near-white clarity + emerald brand + silver/diamond cards */
+  --paper: #f4f8f6;
+  --paper-strong: #ffffff;
+  --ink: #15201c;
+  --muted: #5d6b66;
+  --line: #e4ebe8;
+  --blue: #2f6fed;
+  --coral: #ef7d69;
+  --gold: #b88a1f;
+  --gold-text: #8a6415;
+  --gold-text-on-dark: #e0b95e;
+  --green: #137a57;
+  --green-deep: #0c5b41;
+  --violet: #6657d9;
+  --shadow: 0 18px 55px rgba(20, 55, 42, 0.12);
+
+  --card: linear-gradient(158deg, #ffffff 0%, #f1f6f4 100%);
+  --card-raised: linear-gradient(158deg, #ffffff 0%, #eef4f1 100%);
+  --card-edge: rgba(19, 122, 87, 0.14);
+  --card-line: #e6edea;
+  --card-shadow: 0 8px 22px rgba(20, 55, 42, 0.07), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  --card-shadow-lg: 0 14px 36px rgba(20, 55, 42, 0.1), 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+  --diamond-sheen: linear-gradient(120deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 45%);
+  --brand-grad: linear-gradient(135deg, #137a57 0%, #1c9b6f 55%, #2f6fed 130%);
+  --brand-grad-soft: linear-gradient(135deg, rgba(19, 122, 87, 0.1), rgba(47, 111, 237, 0.06));
+  --premium-bg:
+    radial-gradient(125% 62% at 50% -12%, rgba(19, 122, 87, 0.12), transparent 62%),
+    radial-gradient(85% 45% at 100% 0%, rgba(47, 111, 237, 0.06), transparent 58%),
+    linear-gradient(180deg, #f7fbf9 0%, #eef4f1 100%);
+  --world-safe-top: env(safe-area-inset-top, 0px);
+  --world-safe-right: env(safe-area-inset-right, 0px);
+  --world-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --world-safe-left: env(safe-area-inset-left, 0px);
+  --app-height: 100dvh;
+
+  /* Trust & Integrity tokens */
+  --demo-tint: rgba(184, 138, 31, 0.07);
+  --demo-edge: rgba(184, 138, 31, 0.32);
+  --demo-text: var(--gold-text);
+  --locked-tint: rgba(47, 111, 237, 0.05);
+  --locked-edge: rgba(47, 111, 237, 0.22);
+  --locked-text: #2f5aa8;
+  --curated-tint: rgba(102, 87, 217, 0.07);
+  --curated-edge: rgba(102, 87, 217, 0.28);
+  --curated-text: #4c3fb0;
+  --live-tint: rgba(19, 122, 87, 0.08);
+  --live-edge: rgba(19, 122, 87, 0.3);
+  --live-text: var(--green-deep);
+  --tier-orb: var(--green);
+  --tier-document: var(--blue);
+  --tier-preview: var(--muted);
+}
+
+/* Lightweight component-specific overrides to improve spacing, safe-area handling, and tap targets */
+
+.top-bar-v2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(var(--world-safe-top) + 12px) 16px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-strong);
+}
+
+.top-bar-v2-text {
+  display: grid;
+  gap: 2px;
+}
+
+.top-bar-v2-kicker {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.top-bar-v2-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.top-bar-v2-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bottom-nav--hc {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px calc(18px + var(--world-safe-right)) calc(12px + var(--world-safe-bottom));
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.98));
+  border-top: 1px solid var(--line);
+  z-index: 20;
+}
+
+.bn-tabs-left, .bn-tabs-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.bn-fab {
+  min-height: 56px;
+  min-width: 56px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-grad);
+  color: #fffdf8;
+  box-shadow: var(--card-shadow-lg);
+  border: 0;
+}
+
+.bn-fab.active {
+  transform: translateY(-2px);
+}
+
+/* Increase hit targets for tab items coming from the UI kit */
+.bn-tabs-left [role="tab"],
+.bn-tabs-right [role="tab"] {
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+/* Respect safe area when used inside World App WebView */
+html[data-world-mini-app="true"] .bottom-nav--hc {
+  padding-bottom: calc(12px + var(--world-safe-bottom));
+}
